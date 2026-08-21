@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#e6e6e6">
+<meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -35,15 +35,16 @@
 </style>
 <style>
   :root{
-    /* Minimalist: high-contrast monochrome, and the shipped default. Every other palette is a
-       preset that overrides these at runtime. --on-accent is whatever text must sit on top of
+    /* Zen: sage and lavender, and the shipped default since 3.7. Every other palette is a preset
+       that overrides these at runtime, so whichever palette lives here is the one that needs no
+       overrides and cannot flash on launch. --on-accent is whatever text must sit on top of
        --gold or --orange; without it a dark palette puts light text on a light highlight. */
-    --bg:#e6e6e6; --panel:#ffffff; --panel-2:#f4f4f4;
-    --line:#000000; --line-soft:#c9c9c9;
-    --ink:#000000; --ink-dim:#3d3d3d; --ink-faint:#767676;
-    --brass:#000000; --brass-bright:#2b2b2b; --sage:#2e2e2e; --rust:#000000;
-    --good:#2e2e2e; --warn:#8a8a8a;
-    --orange:#000000; --gold:#cfcfcf; --on-accent:#000000; --on-bg:#000000;
+    --bg:#dde6da; --panel:#fbfaf7; --panel-2:#f0edf4;
+    --line:#6b7a68; --line-soft:#cfd6ca;
+    --ink:#39403a; --ink-dim:#646e60; --ink-faint:#95a08e;
+    --brass:#8a7fb0; --brass-bright:#a396c9; --sage:#7fa87f; --rust:#c47b7b;
+    --good:#7fa87f; --warn:#cfa25e;
+    --orange:#b96b80; --gold:#e8d5dd; --on-accent:#39403a; --on-bg:#39403a;
     /* Typography is swapped as a set by the font presets; every rule below reads these, never a
        family name directly, so a preset is three assignments rather than a hundred. */
     --font-body:'Archivo',system-ui,sans-serif;
@@ -158,7 +159,7 @@
   .metric .val{font-family:var(--font-mono);font-size:15px;font-weight:500}
   .pill{display:inline-block;min-width:62px;text-align:right}
   .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-left:9px;vertical-align:middle;border:2px solid var(--line)}
-  .dot.ok{background:var(--good)}.dot.mid{background:var(--warn)}.dot.no{background:#c3cee6}
+  .dot.ok{background:var(--good)}.dot.mid{background:var(--warn)}.dot.no{background:var(--line-soft)}
 
   .chartwrap{margin-top:6px}
   svg{display:block;width:100%;height:auto}
@@ -426,7 +427,7 @@
   /* methods + disclaimer */
   .methods{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
   .method{border-left:2px solid var(--line);padding-left:14px}
-  .m-h{font-family:var(--font-mono);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--brass);margin-bottom:7px}
+  .m-h{font-family:var(--font-mono);font-weight:700;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--brass);margin-bottom:7px}
   .m-b{font-size:12.5px;color:var(--ink-dim);line-height:1.6}
   .m-b b{color:var(--ink);font-weight:600}
   .disclaimer{margin-top:18px;padding:14px 16px;border:2px solid var(--line);border-radius:10px;background:var(--panel-2);
@@ -1083,42 +1084,45 @@ const FONTS = [
 /* Every colour in the interface, in one place. The label is what the user sees; nothing here is
    named after where it happens to be used, because a user recolouring the app does not know or care
    what "brass" was. */
+/* These must track :root exactly — the swatch grid shows `def` as the current value for any
+   colour the user has not overridden, so a stale one lies about what is on screen. */
 const THEME_VARS = [
-  {v:'--bg',          def:'#e6e6e6'},
-  {v:'--panel',       def:'#ffffff'},
-  {v:'--panel-2',     def:'#f4f4f4'},
-  {v:'--line',        def:'#000000'},
-  {v:'--line-soft',   def:'#c9c9c9'},
-  {v:'--ink',         def:'#000000'},
-  {v:'--ink-dim',     def:'#3d3d3d'},
-  {v:'--ink-faint',   def:'#767676'},
-  {v:'--brass',       def:'#000000'},
-  {v:'--brass-bright',def:'#2b2b2b'},
-  {v:'--orange',      def:'#000000'},
-  {v:'--gold',        def:'#cfcfcf'},
-  {v:'--on-accent',   def:'#000000'},
-  {v:'--good',        def:'#2e2e2e'},
-  {v:'--warn',        def:'#8a8a8a'},
-  {v:'--rust',        def:'#000000'},
-  {v:'--sage',        def:'#2e2e2e'},
-  {v:'--on-bg',       def:'#000000'}
+  {v:'--bg',          def:'#dde6da'},
+  {v:'--panel',       def:'#fbfaf7'},
+  {v:'--panel-2',     def:'#f0edf4'},
+  {v:'--line',        def:'#6b7a68'},
+  {v:'--line-soft',   def:'#cfd6ca'},
+  {v:'--ink',         def:'#39403a'},
+  {v:'--ink-dim',     def:'#646e60'},
+  {v:'--ink-faint',   def:'#95a08e'},
+  {v:'--brass',       def:'#8a7fb0'},
+  {v:'--brass-bright',def:'#a396c9'},
+  {v:'--orange',      def:'#b96b80'},
+  {v:'--gold',        def:'#e8d5dd'},
+  {v:'--on-accent',   def:'#39403a'},
+  {v:'--good',        def:'#7fa87f'},
+  {v:'--warn',        def:'#cfa25e'},
+  {v:'--rust',        def:'#c47b7b'},
+  {v:'--sage',        def:'#7fa87f'},
+  {v:'--on-bg',       def:'#39403a'}
 ];
 // the swatch label, keyed by the variable with its leading dashes stripped
 const colName = v => t('col.'+String(v).replace(/^--/,''));
-/* Five palettes, named to match the font styles. Minimalist is the shipped default, so it carries
-   no overrides at all. Each dark palette sets --on-accent to something that reads on its highlight. */
+/* Five palettes, named to match the font styles. Zen is the shipped default, so it is the one that
+   carries no overrides at all — its colours are the :root block, and the two must stay in step.
+   Each dark palette sets --on-accent to something that reads on its highlight. */
 const THEME_PRESETS = [
-  {key:'min',  colors:{}},
+  {key:'min',  colors:{
+    '--bg':'#e6e6e6','--panel':'#ffffff','--panel-2':'#f4f4f4','--line':'#000000','--line-soft':'#c9c9c9',
+    '--ink':'#000000','--ink-dim':'#3d3d3d','--ink-faint':'#767676',
+    '--brass':'#000000','--brass-bright':'#2b2b2b','--orange':'#000000','--gold':'#cfcfcf','--on-accent':'#000000',
+    '--good':'#2e2e2e','--warn':'#8a8a8a','--rust':'#000000','--sage':'#2e2e2e','--on-bg':'#000000'}},
   {key:'bold', colors:{
     '--bg':'#0d0f14','--panel':'#171a21','--panel-2':'#1f242e','--line':'#333a48','--line-soft':'#262b36',
     '--ink':'#f0f3f8','--ink-dim':'#a8b2c4','--ink-faint':'#6f7a8d',
     '--brass':'#00a2ff','--brass-bright':'#4cc3ff','--orange':'#ff2d2d','--gold':'#ff2d2d','--on-accent':'#ffffff',
     '--good':'#00e676','--warn':'#ffb300','--rust':'#ff1744','--sage':'#00e676','--on-bg':'#f0f3f8'}},
-  {key:'zen',  colors:{
-    '--bg':'#dde6da','--panel':'#fbfaf7','--panel-2':'#f0edf4','--line':'#6b7a68','--line-soft':'#cfd6ca',
-    '--ink':'#39403a','--ink-dim':'#646e60','--ink-faint':'#95a08e',
-    '--brass':'#8a7fb0','--brass-bright':'#a396c9','--orange':'#b96b80','--gold':'#e8d5dd','--on-accent':'#39403a',
-    '--good':'#7fa87f','--warn':'#cfa25e','--rust':'#c47b7b','--sage':'#7fa87f','--on-bg':'#39403a'}},
+  {key:'zen',  colors:{}},                     // the shipped default: :root already is Zen
   {key:'cyber',colors:{
     '--bg':'#000000','--panel':'#08080d','--panel-2':'#101018','--line':'#2a3340','--line-soft':'#181c24',
     '--ink':'#e6faff','--ink-dim':'#8fb8c4','--ink-faint':'#5a7681',
@@ -1694,15 +1698,20 @@ async function setThemeColor(v,c){
   if(!THEME_VARS.some(x=>x.v===v) || !HEXRE.test(c)) return;
   theme.colors[v]=c.toLowerCase(); await persistTheme(); drawTheme();
 }
+// the charts hold their colours in markup, so a palette change has to redraw them
+function repaintCharts(){
+  drawWeight(entries.filter(e=>e.weight!=null));
+  drawStrength(); drawBody();
+}
 async function applyPreset(k){
   const p=THEME_PRESETS.find(x=>x.key===k); if(!p) return;
   theme.colors={};
   Object.keys(p.colors).forEach(v=>{ if(THEME_VARS.some(x=>x.v===v)) theme.colors[v]=p.colors[v]; });
-  await persistTheme(); drawTheme();
+  await persistTheme(); drawTheme(); repaintCharts();
   flash(tf('msg.preset',{name:t('pre.'+p.key)}));
 }
 async function resetTheme(){
-  theme.colors={}; await persistTheme(); drawTheme();
+  theme.colors={}; await persistTheme(); drawTheme(); repaintCharts();
   flash(t('msg.colreset'));
 }
 function drawTheme(){
@@ -1729,6 +1738,7 @@ function drawTheme(){
       +`<span class="colname">${esc(colName(v.v))}<i>${cur(v.v)}</i></span></label>`).join('');
     grid.querySelectorAll('input[type=color]').forEach(i=>{
       i.oninput=()=>setThemeColor(i.dataset.v, i.value);
+      i.onchange=()=>repaintCharts();
     });
   }
 }
@@ -3019,12 +3029,23 @@ function drawSched(){
   });
 }
 
+/* Chart chrome follows the palette like every other surface. An SVG presentation attribute cannot
+   take var(), so the values are read out of the computed style at draw time instead — read once per
+   draw rather than per element, and re-read on every draw so a palette change repaints correctly. */
+function chartColors(){
+  const cs=getComputedStyle(document.documentElement);
+  const v=n=>cs.getPropertyValue(n).trim()||'#888';
+  return {grid:v('--line-soft'), faint:v('--ink-faint'), avg:v('--brass'),
+          line:v('--orange'), dot:v('--panel'), ink:v('--ink')};
+}
+
 /* ---------- weight chart (date-scaled, auto-range, maintenance avg line) ---------- */
 function drawWeight(weighed){
   weighed=weighed.filter(e=>inChartWin(e.date));
   const svg=$("wChart"), W=760,H=300,padL=46,padR=22,padT=16,padB=34;
+  const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
-  if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="#74839f" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; return; }
+  if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; return; }
   const ws=weighed.map(e=>e.weight);
   let yMin=Math.min(...ws), yMax=Math.max(...ws);
   if(yMin===yMax){ yMin-=1; yMax+=1; }
@@ -3035,7 +3056,7 @@ function drawWeight(weighed){
   const xTo=dn=>dMin===dMax?(x0+x1)/2:x0+(dn-dMin)/(dMax-dMin)*(x1-x0);
   let g='';
   for(let i=0;i<=4;i++){ const v=yMin+(yMax-yMin)*i/4, y=yTo(v);
-    g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#c3cee6"/>`;
+    g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.grid}"/>`;
     g+=`<text class="axis" x="${x0-7}" y="${y+3}" text-anchor="end">${v.toFixed(1)}</text>`; }
   // up to 5 date ticks across the span
   if(dMax>dMin){ const nT=Math.min(5,dMax-dMin+1);
@@ -3043,16 +3064,16 @@ function drawWeight(weighed){
       g+=`<text class="axis" x="${x.toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtMD(dn)}</text>`; } }
   else { g+=`<text class="axis" x="${((x0+x1)/2).toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtMD(dMin)}</text>`; }
   const avg=ws.reduce((a,b)=>a+b,0)/ws.length, ay=yTo(avg);
-  g+=`<line x1="${x0}" y1="${ay}" x2="${x1}" y2="${ay}" stroke="#0d59d1" stroke-width="1.3" stroke-dasharray="5 5" opacity="0.55"/>`;
-  g+=`<text class="axis" x="${x1}" y="${ay-6}" text-anchor="end" fill="#0d59d1">avg ${avg.toFixed(1)}</text>`;
+  g+=`<line x1="${x0}" y1="${ay}" x2="${x1}" y2="${ay}" stroke="${C.avg}" stroke-width="1.3" stroke-dasharray="5 5" opacity="0.55"/>`;
+  g+=`<text class="axis" x="${x1}" y="${ay-6}" text-anchor="end" fill="${C.avg}">${esc(t('chart.avg'))} ${avg.toFixed(1)}</text>`;
   const n=weighed.length;
   const pts=weighed.map(e=>`${xTo(dnum(e.date)).toFixed(1)},${yTo(e.weight).toFixed(1)}`);
   if(n>1) g+=`<polygon points="${x0},${y1} ${pts.join(' ')} ${x1},${y1}" fill="url(#ag)" opacity="0.16"/>`;
-  g+=`<polyline points="${pts.join(' ')}" fill="none" stroke="#f7801e" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
-  weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="3.2" fill="#ffffff" stroke="#f7801e" stroke-width="2"/>`);
+  g+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${C.line}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
+  weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="3.2" fill="${C.dot}" stroke="${C.line}" stroke-width="2"/>`);
   const le=weighed[n-1];
-  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(le.weight)-9}" text-anchor="end" fill="#141430" font-size="13">${le.weight.toFixed(1)}</text>`;
-  svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f7801e"/><stop offset="1" stop-color="#f7801e" stop-opacity="0"/></linearGradient></defs>`+g;
+  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(le.weight)-9}" text-anchor="end" fill="${C.ink}" font-size="13">${le.weight.toFixed(1)}</text>`;
+  svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient></defs>`+g;
 }
 
 /* ---------- generic multi-line chart ---------- */
@@ -3062,9 +3083,10 @@ function drawMultiLine(svgId, series, opts){
   // have held it goes back to the plot — about 11% of the width, which matters on a phone
   const legend = opts.legend!==false;
   const svg=$(svgId), W=760,H=260,padL=44,padR=legend?108:22,padT=16,padB=26;
+  const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   series=series.filter(s=>s.points.length);
-  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="#74839f" font-family="JetBrains Mono" font-size="14">${opts.empty||'no data yet'}</text>`; return; }
+  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${opts.empty||'no data yet'}</text>`; return; }
   let allD=[]; series.forEach(s=>s.points.forEach(p=>allD.push(dnum(p.date))));
   const dMin=Math.min(...allD), dMax=Math.max(...allD);
   const xTo=d=>dMin===dMax?(x0+x1)/2:x0+(dnum(d)-dMin)/(dMax-dMin)*(x1-x0);
@@ -3077,15 +3099,15 @@ function drawMultiLine(svgId, series, opts){
   const fmt=opts.fmt||(v=>v.toFixed(0));
   let g='';
   for(let i=0;i<=4;i++){ const v=yMin+(yMax-yMin)*i/4, y=yTo(v);
-    g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#c3cee6"/>`;
+    g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.grid}"/>`;
     g+=`<text class="axis" x="${x0-7}" y="${y+3}" text-anchor="end">${fmt(v)}</text>`; }
-  if(opts.refLine!=null){ const y=yTo(opts.refLine); g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="#0d59d1" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.5"/>`; }
+  if(opts.refLine!=null){ const y=yTo(opts.refLine); g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.avg}" stroke-width="1.2" stroke-dasharray="5 5" opacity="0.5"/>`; }
   series.forEach((s,si)=>{
     const col=s.color||LINE_COLORS[si%LINE_COLORS.length];
     const ps=s.points.slice().sort((a,b)=>a.date.localeCompare(b.date));
     const coords=ps.map(p=>`${xTo(p.date).toFixed(1)},${yTo(p.val).toFixed(1)}`);
     if(coords.length>1) g+=`<polyline points="${coords.join(' ')}" fill="none" stroke="${col}" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/>`;
-    ps.forEach(p=>g+=`<circle cx="${xTo(p.date).toFixed(1)}" cy="${yTo(p.val).toFixed(1)}" r="3" fill="#ffffff" stroke="${col}" stroke-width="2"/>`);
+    ps.forEach(p=>g+=`<circle cx="${xTo(p.date).toFixed(1)}" cy="${yTo(p.val).toFixed(1)}" r="3" fill="${C.dot}" stroke="${col}" stroke-width="2"/>`);
     if(legend){
       const ly=y0+12+si*17;
       g+=`<line x1="${x1+12}" y1="${ly-4}" x2="${x1+28}" y2="${ly-4}" stroke="${col}" stroke-width="2.6"/>`;
@@ -3846,6 +3868,7 @@ const LANG = {
     'cdx.ph.name':           'Run',
     'chart.7day':            '7-day {n}',
     'chart.abs':             'absolute {unit}, not indexed',
+    'chart.avg':             'avg',
     'chart.best':            'best {n}',
     'chart.chips':           'Every movement you log turns up here as a chip.',
     'chart.empty.nosess':    'no sessions for that movement',
@@ -4285,6 +4308,7 @@ const LANG = {
     'cdx.ph.name':           'วิ่ง',
     'chart.7day':            '7 วัน {n}',
     'chart.abs':             'ค่า {unit} จริง ไม่ได้เทียบดัชนี',
+    'chart.avg':             'เฉลี่ย',
     'chart.best':            'ดีที่สุด {n}',
     'chart.chips':           'ทุกท่าที่บันทึกจะขึ้นมาเป็นปุ่มตรงนี้',
     'chart.empty.nosess':    'ยังไม่มีการเล่นท่านี้',
