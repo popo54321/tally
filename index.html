@@ -80,6 +80,47 @@
   /* Thai runs taller and its vowel and tone marks stack above and below the line, so the tight
      line-heights that suit Latin clip them. */
   html[lang="th"] body{line-height:1.7}
+
+  /* The interface leans on 9-10px labels. That works in Latin because they are uppercase with
+     letter-spacing — neither of which applies to Thai, and Thai carries its meaning in tone marks
+     and loops that are simply gone at that size. Real users could not read them. So every small
+     label gets a floor of about 12px in Thai, and the notes go to 13px. Latin is untouched. */
+  html[lang="th"] .qnav button{font-size:12.5px}
+  html[lang="th"] .daybar-lbl{font-size:12px}
+  html[lang="th"] .ctl-lbl{font-size:12.5px}
+  html[lang="th"] .field label,html[lang="th"] label{font-size:12.5px}
+  html[lang="th"] .day{font-size:12px}
+  html[lang="th"] .day b{font-size:12px}
+  html[lang="th"] .segwrap button{font-size:13px}
+  html[lang="th"] .segwrap button i{font-size:11.5px}
+  html[lang="th"] .seg button{font-size:13px}
+  html[lang="th"] .metric .name span{font-size:12px}
+  html[lang="th"] th{font-size:12.5px}
+  html[lang="th"] .sub-note{font-size:12px}
+  html[lang="th"] .picknote,html[lang="th"] .chartnote,html[lang="th"] .sxnote,
+  html[lang="th"] .calib-meta,html[lang="th"] .calib-note,html[lang="th"] .calib-need,
+  html[lang="th"] .calib-sub,html[lang="th"] .cs-sub,html[lang="th"] .mobhint,
+  html[lang="th"] .helprow,html[lang="th"] .collempty,html[lang="th"] .mobempty,
+  html[lang="th"] .sh-empty,html[lang="th"] .restnote,html[lang="th"] .synctip,
+  html[lang="th"] .empty,html[lang="th"] .saved,html[lang="th"] .syncmsg,
+  html[lang="th"] .sh-msg,html[lang="th"] .delta{font-size:13px}
+  html[lang="th"] .cs-lbl{font-size:12px}
+  html[lang="th"] .collgrp,html[lang="th"] .sh-grp{font-size:12px}
+  html[lang="th"] .collname span,html[lang="th"] .sh-row .nm span,
+  html[lang="th"] .mobname span,html[lang="th"] .pd,html[lang="th"] .p7,
+  html[lang="th"] .ptarget{font-size:12px}
+  html[lang="th"] .xtag,html[lang="th"] .rtag,html[lang="th"] .mobu{font-size:11.5px}
+  html[lang="th"] .m-b,html[lang="th"] .disclaimer{font-size:14px}
+  html[lang="th"] .colname{font-size:12px}
+  html[lang="th"] .langseg button{font-size:12px}
+  /* the taller type needs the two-line buttons and the day tiles to grow with it */
+  html[lang="th"] .helprow b,html[lang="th"] .m-h{font-size:13px}
+  html[lang="th"] .restsnd,html[lang="th"] .ghostbtn,html[lang="th"] .addmove,
+  html[lang="th"] .daynav,html[lang="th"] .loadbtn,html[lang="th"] .mt-set,
+  html[lang="th"] .collbtn,html[lang="th"] .sh-add,html[lang="th"] .sh-pin{font-size:12.5px}
+  html[lang="th"] .title .sub{font-size:12.5px}
+  html[lang="th"] .mt-current,html[lang="th"] .segwrap button i{font-size:12px}
+  html[lang="th"] .day{min-height:64px}
   html[lang="th"] .segwrap button{min-height:52px;line-height:1.45}
   html[lang="th"] .day{line-height:1.6}
   html[lang="th"] .m-b,html[lang="th"] .disclaimer,html[lang="th"] .synctip,html[lang="th"] .helprow{line-height:1.85}
@@ -533,6 +574,12 @@
         <div class="field"><label data-i18n="m.calf">Calf</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fCalf" placeholder="cm"></div>
       </div>
 
+      <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n-html="body.bf">Body fat <span class="sub-note">· leave empty to work it out from the girths above · type one to use your own</span></div>
+      <div class="meas-grid">
+        <div class="field"><label for="fBf" data-i18n="body.bfpct">Body fat (%)</label><input type="number" min="1" max="70" step="0.1" inputmode="decimal" id="fBf" placeholder="%"></div>
+      </div>
+      <div class="sxnote" id="bfSrcNote"></div>
+
       <button class="save" id="saveBtn" data-i18n="btn.save">Save entry</button>
       <div class="saved" id="savedMsg" data-i18n="msg.saved">Saved</div>
     </div>
@@ -544,7 +591,7 @@
       <div class="delta" id="wDelta" data-i18n="stat.none">No entries yet</div>
     </div>
 
-    <div class="card col-4">
+    <div class="card col-4" id="bfCard">
       <div class="lbl" data-i18n-html="stat.bf">Body Fat <span class="sub-note">· estimate · US Navy girth method</span></div>
       <div class="big" id="bfNow">—<small>%</small></div>
       <div class="delta" id="bfDelta" data-i18n="stat.none">No entries yet</div>
@@ -1366,6 +1413,10 @@ function normEntry(e){
   o.weight=e.weight!=null?pos(e.weight):null;
   o.height=e.height!=null?pos(e.height):null;
   o.bf=e.bf!=null?pos(e.bf):null;
+  /* Where that figure came from. null = derived from the girths by bfNavy, which is what every
+     entry stored before this carries, so nothing needs migrating. 'manual' = the user typed it,
+     from a scale, a DEXA scan or a caliper, and nothing may overwrite it. */
+  o.bfSrc=(e.bfSrc==='manual' && o.bf!=null)?'manual':null;
   o.kcal=e.kcal!=null?nn(e.kcal):null;
   o.prot=e.prot!=null?nn(e.prot):null;
   /* Mobility is per stretch: { <stretchKey>: secondsHeld }. Presence means it was done; 0 means
@@ -2513,6 +2564,7 @@ async function setSex(sx){
   let n=0;
   entries.forEach(e=>{
     if(!e.meas) return;
+    if(e.bfSrc==='manual') return;        // typed by hand: the formula has no business rewriting it
     const h=e.height!=null?e.height:lastNumOf(x=>x.height);
     const v=bfNavy(e.meas, h, settings.sex);
     if(v!=null && (e.bf==null || Math.abs(v-e.bf)>0.05)){ e.bf=v; n++; }
@@ -2881,6 +2933,17 @@ function fillForm(date){
   $("fHeight").value=(cur && cur.height!=null)?cur.height:(hCarry!=null?hCarry:'');
   $("fKcal").value=(cur && cur.kcal!=null)?cur.kcal:'';
   $("fProt").value=(cur && cur.prot!=null)?cur.prot:'';
+  /* Only a manual figure goes in the box. A derived one shows as the placeholder, so the field
+     reads the same way the girths do: what is there is what you typed. */
+  const bfIn=$("fBf");
+  if(bfIn){
+    bfIn.value = (cur && cur.bfSrc==='manual' && cur.bf!=null) ? cur.bf : '';
+    const calc = cur ? bfNavy(cur.meas, (cur.height!=null?cur.height:lastNumOf(e=>e.height)), settings.sex) : null;
+    bfIn.placeholder = calc!=null ? calc.toFixed(1) : '%';
+    const note=$("bfSrcNote");
+    if(note) note.textContent = (cur && cur.bfSrc==='manual') ? t('body.bf.manual')
+                              : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1)}) : t('body.bf.none'));
+  }
   MEAS.forEach(x=>{
     const inp=$('f'+cap(x.key));
     const hint=lastNumOf(e=>e.meas?e.meas[x.key]:null);
@@ -2901,6 +2964,9 @@ function render(){
     $("wDelta").innerHTML = fmtDelta('7-day',d7,'kg') + fmtDelta('30-day',d30,'kg');
   }
   const bfE=entries.filter(e=>e.bf!=null), lbf=bfE.length?bfE[bfE.length-1]:null;
+  // the sub-note names the method, so it has to follow whichever one produced the figure on show
+  const bfSub=document.querySelector('#bfCard .sub-note');
+  if(bfSub) bfSub.textContent=t(lbf && lbf.bfSrc==='manual' ? 'stat.bf.manual' : 'stat.bf.calc');
   if(lbf){
     $("bfNow").innerHTML=lbf.bf.toFixed(1)+'<small>%</small>';
     const d7=deltaOf(e=>e.bf,7), d30=deltaOf(e=>e.bf,30);
@@ -3432,7 +3498,9 @@ function buildClaudeReport(){
   L.push('');
   L.push('--- HOW THESE NUMBERS WERE DERIVED ---');
   L.push('All figures below are estimates from population formulas, not measurements. Not medical advice.');
-  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+settings.sex+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.');
+  const bfMan=entries.filter(e=>e.bfSrc==='manual').length;
+  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+settings.sex+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.'
+    + (bfMan?(' NOTE: '+bfMan+' entr'+(bfMan===1?'y was':'ies were')+' entered by hand instead (scale, DEXA or calipers) and are not girth estimates.'):''));
   const pt=profileTDEE();
   if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+settings.sex+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
   L.push('Adaptive maintenance: least-squares weight trend over the window x 7700 kcal/kg, subtracted from mean logged intake. Short windows are distorted by water and glycogen.');
@@ -3624,9 +3692,15 @@ async function saveEntry(){
   let meas=Object.assign({}, prev.meas||{}, readMeas()||{});
   if(!Object.keys(meas).length) meas=null;
   const height=fHeight!=null?fHeight:(prev.height ?? lastNumOf(e=>e.height));   // null if never given
-  // body fat only when this entry genuinely has waist + neck, so it isn't fabricated on non-measure days
+  /* Body fat: a figure typed into the field wins outright — it came off a scale or a scan and is
+     better than any girth estimate. Leave the field empty and it is derived from waist + neck as
+     before, and only when those are genuinely present, so it is not fabricated on a non-measure
+     day. Clearing a manual figure therefore hands the day back to the calculation. */
+  const fBf=num($("fBf").value);
   const bfNow=bfNavy(meas, height, settings.sex);
-  const bf = bfNow!=null ? bfNow : (prev.bf ?? null);
+  const manualBf = (fBf!=null && fBf>0 && fBf<70) ? fBf : null;
+  const bf = manualBf!=null ? manualBf : (bfNow!=null ? bfNow : (prev.bf ?? null));
+  const bfSrc = manualBf!=null ? 'manual' : null;
   const pick=(v,p)=>v!=null?v:(p ?? null);
   const lifts=readExForm();
   // Sets logged under a movement this device no longer knows (imported from a device that had it,
@@ -3635,7 +3709,7 @@ async function saveEntry(){
   Object.keys(prev.lifts||{}).forEach(k=>{ if(!exByKey(k) && !(k in lifts)) lifts[k]=prev.lifts[k]; });
   const entry={
     date, day:$("fDay").value,
-    weight:pick(fWeight,prev.weight), height, bf,
+    weight:pick(fWeight,prev.weight), height, bf, bfSrc,
     kcal:pick(fkcal,prev.kcal), prot:pick(fprot,prev.prot),
     // mobility is written straight through by its own card, so take whatever is already recorded
     mob: prev.mob || null,
@@ -3712,6 +3786,11 @@ const LANG = {
     'bmr.need.height':       'your height',
     'bmr.need.weight':       'a bodyweight',
     'bmr.sub':               'resting {bmr} kcal × {mult} ({act}) · age {age}',
+    'body.bf':               'Body fat <span class="sub-note">· leave empty to work it out from the girths above · type one to use your own</span>',
+    'body.bf.calc':          'Calculated {n}% from the girths. Type a figure to use your own instead.',
+    'body.bf.manual':        'Your own figure. Clear the box to go back to the girth calculation.',
+    'body.bf.none':          'No girths logged for this day yet, so nothing to calculate from. You can type a figure.',
+    'body.bfpct':            'Body fat (%)',
     'body.meas':             'Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span>',
     'body.title':            'Body & food',
     'btn.add':               'Add',
@@ -4052,6 +4131,8 @@ const LANG = {
     'sh.title.new':          'New movement',
     'sh.yours':              'Your movements',
     'stat.bf':               'Body Fat <span class="sub-note">· estimate · US Navy girth method</span>',
+    'stat.bf.calc':          '· estimate · US Navy girth method',
+    'stat.bf.manual':        '· your own figure',
     'stat.bw':               'Bodyweight',
     'stat.energy':           'Energy',
     'stat.last':             'Last logged',
@@ -4144,6 +4225,11 @@ const LANG = {
     'bmr.need.height':       'ส่วนสูง',
     'bmr.need.weight':       'น้ำหนักตัว',
     'bmr.sub':               'ขณะพัก {bmr} kcal × {mult} ({act}) · อายุ {age}',
+    'body.bf':               'ไขมันในร่างกาย <span class="sub-note">· เว้นว่างไว้เพื่อคำนวณจากรอบวัดด้านบน · กรอกเองถ้าอยากใช้ค่าของคุณ</span>',
+    'body.bf.calc':          'คำนวณได้ {n}% จากรอบวัด กรอกตัวเลขเองถ้าอยากใช้ค่าของคุณแทน',
+    'body.bf.manual':        'ค่าที่คุณกรอกเอง ลบออกจากช่องเพื่อกลับไปใช้ค่าที่คำนวณจากรอบวัด',
+    'body.bf.none':          'วันนี้ยังไม่ได้บันทึกรอบวัด จึงยังคำนวณไม่ได้ กรอกตัวเลขเองได้',
+    'body.bfpct':            'ไขมันในร่างกาย (%)',
     'body.meas':             'วัดสัดส่วน · cm <span class="sub-note">· ไม่บังคับทั้งหมด · ค่าล่าสุดแสดงเป็นตัวจาง บันทึกเฉพาะที่พิมพ์เอง</span>',
     'body.title':            'ร่างกาย & อาหาร',
     'btn.add':               'เพิ่ม',
@@ -4484,6 +4570,8 @@ const LANG = {
     'sh.title.new':          'ท่าใหม่',
     'sh.yours':              'ท่าของคุณ',
     'stat.bf':               'ไขมันในร่างกาย <span class="sub-note">· ค่าประมาณ · ใช้วิธีวัดของ US Navy</span>',
+    'stat.bf.calc':          '· ค่าประมาณ · วิธีวัดรอบตัวของ US Navy',
+    'stat.bf.manual':        '· ค่าที่คุณกรอกเอง',
     'stat.bw':               'น้ำหนักตัว',
     'stat.energy':           'พลังงาน',
     'stat.last':             'บันทึกล่าสุด',
