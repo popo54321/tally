@@ -749,6 +749,40 @@
   </div>
 
   <div class="grid page" id="pg-settings">
+    <!-- DATA / SYNC -->
+    <div class="card col-12">
+      <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
+      <div class="syncrow">
+        <button class="ghostbtn" id="fileBtn" data-i18n="sync.fromfile">Import from file</button>
+        <button class="ghostbtn" id="backupBtn" data-i18n="sync.backup">Save backup file</button>
+        <button class="ghostbtn" id="exportBtn" data-i18n="sync.export">Export data</button>
+        <button class="ghostbtn" id="importBtn" data-i18n="sync.import">Import data</button>
+      </div>
+      <input type="file" id="importFile" accept="application/json,.json,text/plain" style="display:none">
+      <div class="syncmsg" id="syncMsg"></div>
+      <textarea id="exportBox" class="databox" readonly></textarea>
+      <textarea id="importBox" class="databox" data-i18n-ph="sync.pastehere" placeholder="Paste exported data here, then press Load."></textarea>
+      <button class="loadbtn" id="loadBtn" data-i18n="sync.load">Load imported data</button>
+      <div class="syncrow" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)">
+        <button class="ghostbtn" id="claudeBtn" data-i18n="sync.claude">Copy for Claude analysis</button>
+      </div>
+      <textarea id="claudeBox" class="claudebox" readonly></textarea>
+      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
+    </div>
+
+    <!-- APPEARANCE -->
+    <div class="card col-12" id="cardTheme">
+      <div class="lbl" data-i18n-html="theme.title">Appearance <span class="sub-note">· font and colours, saved on this device</span></div>
+      <div class="ctl-lbl" data-i18n="theme.font">Font style</div>
+      <div class="seg segwrap" id="segFont"></div>
+      <div class="picknote" id="fontNote"></div>
+      <div class="ctl-lbl" style="margin-top:14px" data-i18n="theme.presets">Colour presets</div>
+      <div class="seg segwrap" id="segPreset"></div>
+      <div class="ctl-lbl" style="margin-top:16px" data-i18n="theme.every">Every colour · tap a swatch to change it</div>
+      <div class="colgrid" id="colGrid"></div>
+      <button type="button" class="ghostbtn" id="resetThemeBtn" style="margin-top:14px" data-i18n="theme.reset">Reset colours to default</button>
+    </div>
+
     <!-- METHODS -->
     <div class="card col-12" id="cardMethods">
       <div class="lbl" data-i18n="meth.title">Where these numbers come from</div>
@@ -827,41 +861,6 @@
         qualified professional before acting on any number here. You are responsible for what you
         do with it.
       </div>
-    </div>
-
-    <!-- LOG -->
-    <!-- APPEARANCE -->
-    <div class="card col-12" id="cardTheme">
-      <div class="lbl" data-i18n-html="theme.title">Appearance <span class="sub-note">· font and colours, saved on this device</span></div>
-      <div class="ctl-lbl" data-i18n="theme.font">Font style</div>
-      <div class="seg segwrap" id="segFont"></div>
-      <div class="picknote" id="fontNote"></div>
-      <div class="ctl-lbl" style="margin-top:14px" data-i18n="theme.presets">Colour presets</div>
-      <div class="seg segwrap" id="segPreset"></div>
-      <div class="ctl-lbl" style="margin-top:16px" data-i18n="theme.every">Every colour · tap a swatch to change it</div>
-      <div class="colgrid" id="colGrid"></div>
-      <button type="button" class="ghostbtn" id="resetThemeBtn" style="margin-top:14px" data-i18n="theme.reset">Reset colours to default</button>
-    </div>
-
-    <!-- DATA / SYNC -->
-    <div class="card col-12">
-      <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
-      <div class="syncrow">
-        <button class="ghostbtn" id="fileBtn" data-i18n="sync.fromfile">Import from file</button>
-        <button class="ghostbtn" id="backupBtn" data-i18n="sync.backup">Save backup file</button>
-        <button class="ghostbtn" id="exportBtn" data-i18n="sync.export">Export data</button>
-        <button class="ghostbtn" id="importBtn" data-i18n="sync.import">Import data</button>
-      </div>
-      <input type="file" id="importFile" accept="application/json,.json,text/plain" style="display:none">
-      <div class="syncmsg" id="syncMsg"></div>
-      <textarea id="exportBox" class="databox" readonly></textarea>
-      <textarea id="importBox" class="databox" data-i18n-ph="sync.pastehere" placeholder="Paste exported data here, then press Load."></textarea>
-      <button class="loadbtn" id="loadBtn" data-i18n="sync.load">Load imported data</button>
-      <div class="syncrow" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)">
-        <button class="ghostbtn" id="claudeBtn" data-i18n="sync.claude">Copy for Claude analysis</button>
-      </div>
-      <textarea id="claudeBox" class="claudebox" readonly></textarea>
-      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
     </div>
 
   </div>
