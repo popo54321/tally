@@ -575,8 +575,11 @@
         <div class="field"><label data-i18n="m.calf">Calf</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fCalf" placeholder="cm"></div>
       </div>
 
-      <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n-html="body.bf">Body fat <span class="sub-note">· leave empty to work it out from the girths above · type one to use your own</span></div>
-      <div class="meas-grid">
+      <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n="body.bf">Body fat</div>
+      <div class="seg segwrap" id="segBf">
+        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I'll enter it</button>
+      </div>
+      <div class="meas-grid" id="bfManualRow" style="display:none">
         <div class="field"><label for="fBf" data-i18n="body.bfpct">Body fat (%)</label><input type="number" min="1" max="70" step="0.1" inputmode="decimal" id="fBf" placeholder="%"></div>
       </div>
       <div class="sxnote" id="bfSrcNote"></div>
@@ -2942,17 +2945,8 @@ function fillForm(date){
   $("fHeight").value=(cur && cur.height!=null)?cur.height:(hCarry!=null?hCarry:'');
   $("fKcal").value=(cur && cur.kcal!=null)?cur.kcal:'';
   $("fProt").value=(cur && cur.prot!=null)?cur.prot:'';
-  /* Only a manual figure goes in the box. A derived one shows as the placeholder, so the field
-     reads the same way the girths do: what is there is what you typed. */
-  const bfIn=$("fBf");
-  if(bfIn){
-    bfIn.value = (cur && cur.bfSrc==='manual' && cur.bf!=null) ? cur.bf : '';
-    const calc = cur ? bfNavy(cur.meas, (cur.height!=null?cur.height:lastNumOf(e=>e.height)), settings.sex) : null;
-    bfIn.placeholder = calc!=null ? calc.toFixed(1) : '%';
-    const note=$("bfSrcNote");
-    if(note) note.textContent = (cur && cur.bfSrc==='manual') ? t('body.bf.manual')
-                              : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1)}) : t('body.bf.none'));
-  }
+  // the toggle follows the day being shown, and seeds the box from what that day already holds
+  bfModeSet((cur && cur.bfSrc==='manual') ? 'manual' : 'calc');
   MEAS.forEach(x=>{
     const inp=$('f'+cap(x.key));
     const hint=lastNumOf(e=>e.meas?e.meas[x.key]:null);
@@ -3396,6 +3390,32 @@ function readMeas(){
   MEAS.forEach(x=>{ const v=num($('f'+cap(x.key)).value); if(v!=null) m[x.key]=v; });
   return Object.keys(m).length?m:null;
 }
+/* Which way this day's body fat is arrived at. The toggle is the whole explanation — the old
+   design left the box empty to mean "calculate it", which is a convention nobody guesses.
+   Switching to manual seeds the box with the calculated figure, so it is something to adjust
+   rather than a blank to fill; switching back leaves that number behind and recalculates. */
+function bfMode(){ const b=document.querySelector('#segBf button.on'); return b?b.dataset.b:'calc'; }
+function bfCalcFor(cur){
+  const h=(cur&&cur.height!=null)?cur.height:lastNumOf(e=>e.height);
+  return bfNavy(cur?cur.meas:null, h, settings.sex);
+}
+function bfModeSet(m, seed){
+  const manual = m==='manual';
+  document.querySelectorAll('#segBf button').forEach(b=>b.classList.toggle('on', b.dataset.b===m));
+  const row=$("bfManualRow"); if(row) row.style.display = manual ? '' : 'none';
+  const cur=entries.find(e=>e.date===$("fDate").value);
+  const calc=bfCalcFor(cur);
+  const inp=$("fBf");
+  if(inp && seed!==false){
+    if(manual) inp.value = (cur && cur.bfSrc==='manual' && cur.bf!=null) ? cur.bf
+                         : (calc!=null ? calc.toFixed(1) : '');
+    else inp.value='';
+  }
+  const note=$("bfSrcNote");
+  if(note) note.textContent = manual ? ''
+    : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1)}) : t('body.bf.none'));
+}
+
 /* US Navy girth method. The two sexes use different equations and different girths: the male form
    needs waist and neck, the female form also needs hips. Returns null rather than a wrong number
    whenever the measurements it needs are missing. */
@@ -3716,10 +3736,12 @@ async function saveEntry(){
   /* Body fat: a figure typed into the field wins outright — it came off a scale or a scan and is
      better than any girth estimate. Leave the field empty and it is derived from waist + neck as
      before, and only when those are genuinely present, so it is not fabricated on a non-measure
-     day. Clearing a manual figure therefore hands the day back to the calculation. */
+     day. Switching the toggle back to "work it out" hands the day to the calculation again. */
   const fBf=num($("fBf").value);
   const bfNow=bfNavy(meas, height, settings.sex);
-  const manualBf = (fBf!=null && fBf>0 && fBf<70) ? fBf : null;
+  // manual only counts when the toggle says so AND the figure is usable; an empty box in manual
+  // mode falls back to the calculation rather than storing nothing
+  const manualBf = (bfMode()==='manual' && fBf!=null && fBf>0 && fBf<70) ? fBf : null;
   const bf = manualBf!=null ? manualBf : (bfNow!=null ? bfNow : (prev.bf ?? null));
   const bfSrc = manualBf!=null ? 'manual' : null;
   const pick=(v,p)=>v!=null?v:(p ?? null);
@@ -3807,10 +3829,11 @@ const LANG = {
     'bmr.need.height':       'your height',
     'bmr.need.weight':       'a bodyweight',
     'bmr.sub':               'resting {bmr} kcal × {mult} ({act}) · age {age}',
-    'body.bf':               'Body fat <span class="sub-note">· leave empty to work it out from the girths above · type one to use your own</span>',
-    'body.bf.calc':          'Calculated {n}% from the girths. Type a figure to use your own instead.',
-    'body.bf.manual':        'Your own figure. Clear the box to go back to the girth calculation.',
-    'body.bf.none':          'No girths logged for this day yet, so nothing to calculate from. You can type a figure.',
+    'body.bf':               'Body fat',
+    'body.bf.calc':          '{n}% from your waist and neck',
+    'body.bf.mode.calc':     'Work it out for me',
+    'body.bf.mode.manual':   'I\'ll enter it',
+    'body.bf.none':          'Log waist and neck and this fills itself in.',
     'body.bfpct':            'Body fat (%)',
     'body.meas':             'Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span>',
     'body.title':            'Body & food',
@@ -4247,10 +4270,11 @@ const LANG = {
     'bmr.need.height':       'ส่วนสูง',
     'bmr.need.weight':       'น้ำหนักตัว',
     'bmr.sub':               'ขณะพัก {bmr} kcal × {mult} ({act}) · อายุ {age}',
-    'body.bf':               'ไขมันในร่างกาย <span class="sub-note">· เว้นว่างไว้เพื่อคำนวณจากรอบวัดด้านบน · กรอกเองถ้าอยากใช้ค่าของคุณ</span>',
-    'body.bf.calc':          'คำนวณได้ {n}% จากรอบวัด กรอกตัวเลขเองถ้าอยากใช้ค่าของคุณแทน',
-    'body.bf.manual':        'ค่าที่คุณกรอกเอง ลบออกจากช่องเพื่อกลับไปใช้ค่าที่คำนวณจากรอบวัด',
-    'body.bf.none':          'วันนี้ยังไม่ได้บันทึกรอบวัด จึงยังคำนวณไม่ได้ กรอกตัวเลขเองได้',
+    'body.bf':               'ไขมันในร่างกาย',
+    'body.bf.calc':          '{n}% จากรอบเอวและรอบคอ',
+    'body.bf.mode.calc':     'คำนวณให้',
+    'body.bf.mode.manual':   'กรอกเอง',
+    'body.bf.none':          'บันทึกรอบเอวและรอบคอแล้วค่านี้จะขึ้นเอง',
     'body.bfpct':            'ไขมันในร่างกาย (%)',
     'body.meas':             'วัดสัดส่วน · cm <span class="sub-note">· ไม่บังคับทั้งหมด · ค่าล่าสุดแสดงเป็นตัวจาง บันทึกเฉพาะที่พิมพ์เอง</span>',
     'body.title':            'ร่างกาย & อาหาร',
@@ -4681,6 +4705,7 @@ const LANG = {
   $("setManualBtn").onclick=setManualTarget;
   $("setProtBtn").onclick=setProtManual;
   document.querySelectorAll('#segSex button').forEach(b=>b.onclick=()=>setSex(b.dataset.s));
+  document.querySelectorAll('#segBf button').forEach(b=>b.onclick=()=>bfModeSet(b.dataset.b));
   $("fAge").onchange=setAge;
   $("resetThemeBtn").onclick=resetTheme;
   document.querySelectorAll('.chartseg button').forEach(b=>b.onclick=()=>setChartPeriod(b.dataset.p));
