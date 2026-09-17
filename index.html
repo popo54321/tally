@@ -76,7 +76,8 @@
   html[lang="th"] .title .sub,html[lang="th"] .empty,html[lang="th"] .day b,html[lang="th"] .collgrp,
   html[lang="th"] .sh-grp,html[lang="th"] .apply,html[lang="th"] .save,html[lang="th"] .loadbtn,
   html[lang="th"] .ghostbtn,html[lang="th"] .addmove,html[lang="th"] .reststart,html[lang="th"] .dp-foot button,
-  html[lang="th"] .cs-lbl,html[lang="th"] .m-h,html[lang="th"] .pname,html[lang="th"] .restwho{
+  html[lang="th"] .cs-lbl,html[lang="th"] .m-h,html[lang="th"] .pname,html[lang="th"] .restwho,
+  html[lang="th"] .adph{
     text-transform:none;letter-spacing:0}
   /* Thai runs taller and its vowel and tone marks stack above and below the line, so the tight
      line-heights that suit Latin clip them. */
@@ -98,6 +99,7 @@
   html[lang="th"] .metric .name span{font-size:12px}
   html[lang="th"] th{font-size:12.5px}
   html[lang="th"] .sub-note{font-size:12px}
+  html[lang="th"] .adph{font-size:12px}
   html[lang="th"] .picknote,html[lang="th"] .chartnote,html[lang="th"] .sxnote,
   html[lang="th"] .calib-meta,html[lang="th"] .calib-note,html[lang="th"] .calib-need,
   html[lang="th"] .calib-sub,html[lang="th"] .cs-sub,html[lang="th"] .mobhint,
@@ -174,6 +176,16 @@
   .daysel{cursor:pointer;margin-bottom:14px}
   .meas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .meas-grid .field input{width:100%}
+  /* Energy and protein are logged meal by meal, so their boxes take a sum rather than a total.
+     The + button is here because a numeric keypad has no + key on it; the line underneath shows
+     what the sum currently comes to, so nobody has to save to find out. */
+  .calcfield{display:flex;gap:6px;align-items:stretch}
+  .calcfield input{flex:1 1 auto;width:auto;min-width:0}
+  .addbtn{flex:0 0 auto;width:42px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);font-family:var(--font-mono);font-size:18px;line-height:1;cursor:pointer}
+  .addbtn:active{background:var(--line-soft);color:var(--ink)}
+  /* line-height and min-height are the same number on purpose: the line is empty most of the
+     time, and without that the grid jumps 5px the moment a sum appears under one field. */
+  .calcsum{font-family:var(--font-mono);font-size:11px;line-height:13px;color:var(--brass);margin-top:5px;min-height:13px}
   .toggles{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
   .tog{flex:1;min-width:120px;cursor:pointer;user-select:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:9px;transition:.18s}
   .tog .box{width:16px;height:16px;border-radius:4px;border:1px solid var(--ink-faint);flex:none;position:relative}
@@ -470,6 +482,30 @@
   .restbar.done .restnum,.restbar.done .restwho{color:var(--on-accent)}
   .restbar.done .restbtns button{color:var(--on-accent);background:transparent}
   .restbar.lead{background:var(--panel-2)}            /* get-into-position phase reads as not-yet-started */
+
+  /* ---- ad banner ---- */
+  /* Anchored to the foot of the viewport, and the one bar that yields to everything else: the
+     sheets and the date picker cover it (z-index 50 and 60), and the rest timer stacks above it
+     rather than over it. A countdown you are standing there waiting on outranks a banner, and
+     covering an impression you are being paid for is the wrong way round commercially as well.
+     --adh is the only number in play. It drives the bar's own height, the offset the rest timer
+     sits at, and the room the document leaves at its foot, so those three cannot drift apart.
+     The `ads` class on the body tag switches all three on, and only the free APK build adds it:
+     the web and laptop copies ship straight off this page and neither will ever carry a banner,
+     so the placeholder must not live here. tools/flavour.js is the one place it goes on. */
+  body{--adh:0px}
+  body.ads{--adh:calc(53px + env(safe-area-inset-bottom,0px));padding-bottom:var(--adh)}
+  body.ads .restbar{bottom:var(--adh)}
+  .adbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:40;box-sizing:border-box;
+         height:var(--adh);padding-bottom:env(safe-area-inset-bottom,0px);
+         background:var(--panel);border-top:3px solid var(--line)}
+  body.ads .adbar{display:block}
+  .adslot{display:flex;align-items:center;justify-content:center;height:50px;overflow:hidden}
+  .adslot img{max-width:100%;max-height:100%;display:block}
+  /* The placeholder, and the seam. A real banner replaces the contents of .adslot and nothing
+     around it moves — which is the whole reason for building this before choosing a network. */
+  .adph{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);
+        border:1px dashed var(--line-soft);border-radius:4px;padding:7px 16px}
   .restrow{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
   .restnum{font-family:var(--font-mono);font-size:29px;font-weight:700;color:var(--ink);letter-spacing:.5px;line-height:1;min-width:88px}
   .restwho{font-family:var(--font-mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-faint);flex:1;min-width:70px;line-height:1.45}
@@ -557,8 +593,12 @@
       <div class="form-grid">
         <div class="field"><label data-i18n="f.weight">Weight (kg)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fWeight" placeholder="kg"></div>
         <div class="field"><label data-i18n="f.height">Height (cm)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fHeight" placeholder="cm"></div>
-        <div class="field"><label data-i18n="f.kcal">Energy (kcal)</label><input type="number" min="0" inputmode="numeric" id="fKcal" placeholder="kcal"></div>
-        <div class="field"><label data-i18n="f.prot">Protein (g)</label><input type="number" min="0" inputmode="numeric" id="fProt" placeholder="g"></div>
+        <div class="field"><label data-i18n="f.kcal">Energy (kcal)</label>
+          <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fKcal" placeholder="kcal"><button type="button" class="addbtn" id="fKcalAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
+          <div class="calcsum" id="fKcalSum"></div></div>
+        <div class="field"><label data-i18n="f.prot">Protein (g)</label>
+          <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fProt" placeholder="g"><button type="button" class="addbtn" id="fProtAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
+          <div class="calcsum" id="fProtSum"></div></div>
       </div>
       <div class="mobhint" id="mobHint"></div>
 
@@ -999,6 +1039,13 @@
   <div class="restprog"><i id="restFill"></i></div>
 </div>
 
+<!-- Ad banner. A bundled placeholder for now: no network request, works offline, and every
+     invariant the app claims still holds. Swapping in a real banner is a change to the contents
+     of .adslot alone. -->
+<div class="adbar" id="adBar">
+  <div class="adslot" id="adSlot"><span class="adph" data-i18n="ads.slot">Ad space</span></div>
+</div>
+
 <script>
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
@@ -1384,6 +1431,60 @@ function syncChartSegs(){ document.querySelectorAll('.chartseg button').forEach(
 
 const $ = id => document.getElementById(id);
 const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
+/* Energy and protein are logged meal by meal, so both boxes take a sum rather than a running
+   total: after lunch you append "+700" to what is already there instead of working 500+700 out
+   first. The four operators are evaluated by hand here — never eval() or new Function(), because
+   an imported backup or a stray paste would then be running arbitrary code inside the page.
+   Anything that is not arithmetic returns null and is treated exactly as an empty box always was,
+   which is why this can stand in for num() at the two call sites without changing any other rule. */
+function calcVal(v){
+  const s=String(v==null?'':v).replace(/\s+/g,'');
+  if(!s) return null;
+  const tok=s.match(/\d+\.?\d*|\.\d+|[+\-*\/]/g);
+  if(!tok || tok.join('')!==s) return null;      // a stray character means this is not a sum at all
+  // multiply and divide bind tighter, so fold those first and leave only + and - to walk through
+  const flat=[];
+  for(let i=0;i<tok.length;i++){
+    const x=tok[i];
+    if(x==='*'||x==='/'){
+      const a=flat.pop(), b=parseFloat(tok[++i]);
+      if(typeof a!=='number'||isNaN(a)||isNaN(b)||(x==='/'&&b===0)) return null;
+      flat.push(x==='*'?a*b:a/b);
+    } else if(x==='+'||x==='-') flat.push(x);
+    else flat.push(parseFloat(x));
+  }
+  let acc=null, op='+';
+  for(const x of flat){
+    if(x==='+'||x==='-'){ op=x; continue; }
+    if(typeof x!=='number'||isNaN(x)) return null;
+    acc = (acc==null) ? (op==='-'?-x:x) : (op==='+'?acc+x:acc-x);
+  }
+  return (acc==null||!isFinite(acc)) ? null : Math.round(acc*10)/10;
+}
+/* Shown only while the box actually holds a sum — echoing a plain number back at the user is
+   noise. The first character is skipped so a negative figure does not read as arithmetic. */
+function calcHint(id){
+  const el=$(id), out=$(id+'Sum'); if(!el||!out) return;
+  const raw=el.value.trim(), v=calcVal(raw);
+  out.textContent = (v!=null && /[+*\/-]/.test(raw.slice(1))) ? '= '+v : '';
+}
+/* Settle the box to its total. Runs on blur and again on save, so what is stored and what is on
+   screen are never left disagreeing. */
+function calcSettle(id){
+  const el=$(id); if(!el) return;
+  const v=calcVal(el.value);
+  if(v!=null && /[+*\/-]/.test(el.value.trim().slice(1))) el.value=v;
+  calcHint(id);
+}
+/* The + button exists because the numeric keypad has no + on it. Appending the operator from a
+   button keeps the keypad up and the thumb where it already is. */
+function calcAdd(id){
+  const el=$(id); if(!el) return;
+  el.value = el.value.trim().replace(/[+*\/-]$/,'') + '+';
+  el.focus();
+  try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){}
+  calcHint(id);
+}
 const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 // movement names are user-supplied now, and they land in innerHTML and in SVG <text>
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -2953,6 +3054,7 @@ function fillForm(date){
   $("fHeight").value=(cur && cur.height!=null)?cur.height:(hCarry!=null?hCarry:'');
   $("fKcal").value=(cur && cur.kcal!=null)?cur.kcal:'';
   $("fProt").value=(cur && cur.prot!=null)?cur.prot:'';
+  calcHint("fKcal"); calcHint("fProt");   // a sum left over from the previous day is not this one's
   // the toggle follows the day being shown, and seeds the box from what that day already holds
   bfModeSet((cur && cur.bfSrc==='manual') ? 'manual' : 'calc');
   MEAS.forEach(x=>{
@@ -3737,7 +3839,9 @@ async function saveEntry(){
   if(loadFailed){ flash(t('msg.loadfail.save'),true); return; }
   const prev=entries.find(e=>e.date===date)||{};
   const fWeight=num($("fWeight").value), fHeight=num($("fHeight").value);
-  const fkcal=num($("fKcal").value), fprot=num($("fProt").value);
+  // settle first, so the box shows the figure that is about to be stored rather than the sum
+  calcSettle("fKcal"); calcSettle("fProt");
+  const fkcal=calcVal($("fKcal").value), fprot=calcVal($("fProt").value);
   let meas=Object.assign({}, prev.meas||{}, readMeas()||{});
   if(!Object.keys(meas).length) meas=null;
   const height=fHeight!=null?fHeight:(prev.height ?? lastNumOf(e=>e.height));   // null if never given
@@ -3823,6 +3927,7 @@ const LANG = {
     'acth.lower.h':          'Torn between two? Take the lower',
     'acth.week.b':           'Your job and daily life matter more than the gym does. Someone on their feet all day who never trains burns more than a desk worker who lifts three times a week.',
     'acth.week.h':           'Count your whole week',
+    'ads.slot':              'Ad space',
     'and':                   ' and ',
     'app.sub':               'Training & Body Log',
     'basis.bw':              'bodyweight',
@@ -3973,6 +4078,7 @@ const LANG = {
     'ex.resttip':            'Start rest timer',
     'ex.set':                'set',
     'ex.unpintip':           'Pinned to this session — tap to unpin',
+    'f.addtip':              'Add the next meal to the total',
     'f.height':              'Height (cm)',
     'f.kcal':                'Energy (kcal)',
     'f.prot':                'Protein (g)',
@@ -4264,6 +4370,7 @@ const LANG = {
     'acth.lower.h':          'ลังเลระหว่างสองข้อ? เลือกข้อต่ำกว่า',
     'acth.week.b':           'งานและชีวิตประจำวันสำคัญกว่าเวลาในยิม คนที่ยืนและเดินทั้งวันแต่ไม่เคยฝึกเลยก็ยังเผา Kcal มากกว่าคนนั่งโต๊ะทั้งวันที่ยกเวทสัปดาห์ละสามครั้ง',
     'acth.week.h':           'นับพฤติกรรมทั้งสัปดาห์ของคุณ',
+    'ads.slot':              'พื้นที่โฆษณา',
     'and':                   'และ',
     'app.sub':               'บันทึกการฝึกและร่างกาย',
     'basis.bw':              'น้ำหนักตัว',
@@ -4414,6 +4521,7 @@ const LANG = {
     'ex.resttip':            'เริ่มจับเวลาพัก',
     'ex.set':                'เซ็ต',
     'ex.unpintip':           'ปักไว้กับวันนี้แล้ว — กดเพื่อเอาออก',
+    'f.addtip':              'บวกมื้อถัดไปเข้ากับยอดรวม',
     'f.height':              'ส่วนสูง (cm)',
     'f.kcal':                'พลังงาน (kcal)',
     'f.prot':                'โปรตีน (g)',
@@ -4715,6 +4823,11 @@ const LANG = {
   document.querySelectorAll('#segSex button').forEach(b=>b.onclick=()=>setSex(b.dataset.s));
   document.querySelectorAll('#segBf button').forEach(b=>b.onclick=()=>bfModeSet(b.dataset.b));
   $("fAge").onchange=setAge;
+  ['fKcal','fProt'].forEach(id=>{
+    $(id+'Add').onclick=()=>calcAdd(id);
+    $(id).addEventListener('input',()=>calcHint(id));
+    $(id).addEventListener('blur',()=>calcSettle(id));
+  });
   $("resetThemeBtn").onclick=resetTheme;
   document.querySelectorAll('.chartseg button').forEach(b=>b.onclick=()=>setChartPeriod(b.dataset.p));
   $("dateBtn").onclick=dpOpen;
