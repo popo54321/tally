@@ -1,4 +1,4 @@
-/* Tally service worker — build 66f2ae65f5f1
+/* Tally service worker — build 17bdf93b24ee
    The whole app is one HTML file plus four fonts, so everything is precached on install and the
    app runs with no network at all afterwards. That is the point: a training log you cannot open
    on a bad connection is worse than useless in a gym basement.
@@ -6,7 +6,7 @@
    The page is served cache-first and refreshed in the background, so a launch is instant and the
    next launch picks up a new build. skipWaiting + clients.claim mean an update lands without the
    user having to close every tab. */
-const CACHE='tally-66f2ae65f5f1';
+const CACHE='tally-17bdf93b24ee';
 const ASSETS=[
   "./",
   "./index.html",

@@ -987,7 +987,7 @@
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
-          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load.</b> At the same weight it suggests one more rep on each set than last time, never past the top of the range. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the reps start again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 9, 8, 9 means at least 9 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>
@@ -2307,7 +2307,13 @@ function coachNext(ex, sessions){
   if(!hist.length) return {kind:'first', load:ex.def||0, targets:[mn], last:null};
   const last=hist[hist.length-1];
   const clean = w => w.reps.every(r=>r>=mx);
-  const climb = w => w.reps.map(r=>Math.min(mx, Math.max(mn, r+inc)));
+  /* One target for every set: one more than the weakest set managed, held within the range. Straight sets
+     at one weight are prescribed as one number. Adding a rep to each set separately copied last time's
+     pattern into the targets, so 9, 8, 9 came back as 10, 9, 10 — a dip on set 2 written back as a lower
+     target for set 2, which no coach would ever prescribe (5.0 and 5.1; fixed in 5.2). The weakest set is
+     also exactly what stands between you and the next weight, since that needs every set at the top.
+     The target is a floor: a set that beat it last time is ahead of it, not asked for less. */
+  const climb = w => { const aim=Math.min(mx, Math.max(mn, Math.min(...w.reps)+inc)); return w.reps.map(()=>aim); };
   if(last.reps.some(r=>r<mn)) return {kind:'floor', load:last.load, targets:climb(last), last:last};
   if(!clean(last)) return {kind:'reps', load:last.load, targets:climb(last), last:last};
   let run=0;
@@ -2327,7 +2333,7 @@ function fmtLoad(ex, kg){
 function coachLine(ex, plan){
   const sec=ex.unit==='sec';
   const v={min:ex.repMin, max:ex.repMax, unit:t(sec?'sh.coach.secs':'sh.coach.reps'), step:ex.step, n:CLEAN_TO_STEP,
-           inc:repInc(ex), left:Math.max(1, CLEAN_TO_STEP-(plan.run||0)),
+           inc:repInc(ex), left:Math.max(1, CLEAN_TO_STEP-(plan.run||0)), aim:plan.targets[0],
            last:plan.last ? plan.last.reps.map(r=>sec?r+'s':r).join(', ') : ''};
   const msg = plan.kind==='reps' && sec ? tf('coach.secs', v) : tf('coach.'+plan.kind, v);
   const L = plan.kind==='first' ? '' : fmtLoad(ex, plan.load);
@@ -4683,10 +4689,10 @@ const LANG = {
     'chart.weight':          'Weight Trend',
     'coach.confirm':         'same weight, every set reached {max}; {left} more like that and it goes up',
     'coach.first':           'first session: find a weight you can do for {min}–{max} {unit}',
-    'coach.floor':           'same weight, get every set to {min} first',
+    'coach.floor':           'same weight, get every set to at least {aim} first (last time {last})',
     'coach.next':            'Next',
-    'coach.reps':            'same weight, one more rep per set (last time {last})',
-    'coach.secs':            '{inc} s longer per hold (last time {last})',
+    'coach.reps':            'same weight, at least {aim} on every set (last time {last})',
+    'coach.secs':            'at least {aim} s on every hold (last time {last})',
     'coach.top':             'every set reached {max} in {n} sessions running; raise the range or give it a weight step',
     'coach.up':              'up {step} kg, every set reached {max} in {n} sessions running',
     'col.bg':                'Page background',
@@ -4936,7 +4942,7 @@ const LANG = {
     'meth.bf.h':             'Body fat · US Navy girth method',
     'meth.bmr.b':            'Resting rate = 10 × weight(kg) + 6.25 × height(cm) − 5 × age, then <b>+5</b> for men or <b>−161</b> for women. Multiplied by an activity factor of 1.2 to 1.9 depending on how much you train. Mifflin-St Jeor (1990) is the equation most dietetic practice uses, and is a population average: individual resting rates vary by roughly ±10% around it, more if you are very lean, very heavy, or older.',
     'meth.bmr.h':            'Starting energy estimate · Mifflin-St Jeor',
-    'meth.coach.b':          'Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load.</b> At the same weight it suggests one more rep on each set than last time, never past the top of the range. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the reps start again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
+    'meth.coach.b':          'Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 9, 8, 9 means at least 9 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
     'meth.coach.h':          'Next-session suggestions · patient double progression',
     'meth.prot.b':           'Around <b>1.6–2.2 g per kg of bodyweight</b> is what the research supports for people training regularly, the higher end while losing weight. <br><br><b>Lean mass is the better basis, and the app uses it whenever it can.</b> Fat tissue carries no protein requirement, so scaling by total bodyweight overstates the need for anyone carrying more of it — at 120 kg and 33% fat, bodyweight × 2.2 asks for 260 g while lean mass × 2.6 asks for 210 g, and 210 g is the honest number. Lean mass is worked back from your weight and body-fat estimate: lean = weight × (1 − fat%). <br><br>The catch is that the body-fat figure is itself an estimate, so lean mass inherits its ±3–4 point error — about ±8 g of protein, which is smaller than the difference between the two bases. So: <b>lean mass when body fat is known, bodyweight when it is not</b>, and the app always shows which one it used. The two converge as you get leaner; the choice matters most at higher body fat.',
     'meth.prot.h':           'Protein floor · bodyweight or lean mass',
@@ -5306,10 +5312,10 @@ const LANG = {
     'chart.weight':          'แนวโน้มน้ำหนัก',
     'coach.confirm':         'น้ำหนักเดิม ทุกเซ็ตถึง {max} แล้ว ทำได้แบบนี้อีก {left} วันฝึกจะเพิ่มน้ำหนัก',
     'coach.first':           'ครั้งแรก: หาน้ำหนักที่ทำได้ {min}–{max} {unit}',
-    'coach.floor':           'น้ำหนักเดิม ทำทุกเซ็ตให้ถึง {min} ก่อน',
+    'coach.floor':           'น้ำหนักเดิม ทำทุกเซ็ตให้ได้อย่างน้อย {aim} ก่อน (ครั้งก่อน {last})',
     'coach.next':            'ครั้งถัดไป',
-    'coach.reps':            'น้ำหนักเดิม เพิ่มเซ็ตละ 1 ครั้ง (ครั้งก่อน {last})',
-    'coach.secs':            'ค้างนานขึ้นเซ็ตละ {inc} วินาที (ครั้งก่อน {last})',
+    'coach.reps':            'น้ำหนักเดิม ทุกเซ็ตอย่างน้อย {aim} ครั้ง (ครั้งก่อน {last})',
+    'coach.secs':            'ค้างทุกเซ็ตอย่างน้อย {aim} วินาที (ครั้งก่อน {last})',
     'coach.top':             'ทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว ขยับช่วงขึ้นหรือกำหนดการเพิ่มน้ำหนัก',
     'coach.up':              'เพิ่ม {step} kg เพราะทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว',
     'col.bg':                'พื้นหลังหน้า',
@@ -5559,7 +5565,7 @@ const LANG = {
     'meth.bf.h':             'ไขมันในร่างกาย · วิธีวัดรอบตัวของ US Navy',
     'meth.bmr.b':            'อัตราขณะพัก = 10 × น้ำหนัก(kg) + 6.25 × ส่วนสูง(cm) − 5 × อายุ แล้ว <b>+5</b> สำหรับชาย หรือ <b>−161</b> สำหรับหญิง จากนั้นคูณด้วยตัวคูณกิจกรรม 1.2 ถึง 1.9 ตามปริมาณการฝึก Mifflin-St Jeor (1990) เป็นสมการที่วงการโภชนาการใช้มากที่สุด และเป็นค่าเฉลี่ยของประชากร อัตราขณะพักของแต่ละคนต่างจากค่านี้ราว ±10% และมากกว่านั้นถ้าผอมมาก หนักมาก หรืออายุมาก',
     'meth.bmr.h':            'ค่าประมาณพลังงานเริ่มต้น · Mifflin-St Jeor',
-    'meth.coach.b':          'แต่ละท่ากำหนดช่วงจำนวนครั้งได้ เลือก เน้นแรง เน้นกล้าม หรือ เน้นอึด เพื่อใช้ช่วงมาตรฐาน หรือตั้งเอง ระบบจะดูการเล่นท่านั้นครั้งล่าสุด ที่น้ำหนักหนักที่สุดของวันนั้น เซ็ตวอร์มอัพจึงไม่ถูกนับ <br><br><b>เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก</b> ที่น้ำหนักเดิม ระบบจะแนะนำให้ทำเพิ่มเซ็ตละ 1 ครั้งจากครั้งก่อน แต่ไม่เกินค่าสูงสุดของช่วง เมื่อทุกเซ็ตหลักทำได้ถึงค่าสูงสุด<b>ติดกันสองวันฝึก</b> จึงเพิ่มน้ำหนักตามที่ตั้งไว้ แล้วเริ่มนับจำนวนครั้งใหม่จากค่าต่ำสุด ทำได้ครบเพียงวันเดียวจะได้ลองซ้ำที่น้ำหนักเดิมก่อน เพราะวันที่ดีวันเดียวอาจมาจากการนอนหลับดี มากกว่าความแข็งแรงที่เพิ่มขึ้นจริง <br><br>ถ้ามีเซ็ตที่ทำได้ต่ำกว่าค่าต่ำสุดของช่วง น้ำหนักจะคงเดิมและเป้าหมายคือค่าต่ำสุด ท่าค้างนิ่งจะเพิ่มทีละ 5 วินาที ถ้าตั้งการเพิ่มน้ำหนักเป็นศูนย์ จะเพิ่มแค่จำนวนครั้ง และเมื่อถึงค่าสูงสุดจะแนะนำให้ขยับช่วงขึ้น <br><br>ตัวเลขที่แนะนำเป็นแค่ตัวจางในช่อง สิ่งที่คุณพิมพ์คือสิ่งที่ถูกบันทึก และคำแนะนำไม่ถูกเก็บไว้ ระบบคำนวณจากประวัติใหม่ทุกครั้ง การแก้ไขวันฝึกที่ผ่านมาจึงเปลี่ยนคำแนะนำไปด้วย',
+    'meth.coach.b':          'แต่ละท่ากำหนดช่วงจำนวนครั้งได้ เลือก เน้นแรง เน้นกล้าม หรือ เน้นอึด เพื่อใช้ช่วงมาตรฐาน หรือตั้งเอง ระบบจะดูการเล่นท่านั้นครั้งล่าสุด ที่น้ำหนักหนักที่สุดของวันนั้น เซ็ตวอร์มอัพจึงไม่ถูกนับ <br><br><b>เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก โดยใช้เป้าเดียวกันทุกเซ็ต</b> ที่น้ำหนักเดิม ระบบจะขอให้ทุกเซ็ตทำได้มากกว่าเซ็ตที่ทำได้น้อยที่สุดครั้งก่อนอีก 1 ครั้ง และอยู่ในช่วงที่ตั้งไว้ เช่น ครั้งก่อนได้ 9, 8, 9 ครั้งหน้าคือทุกเซ็ตอย่างน้อย 9 การเล่นหลายเซ็ตที่น้ำหนักเดียวกันควรมีเป้าเป็นตัวเลขเดียว และเซ็ตที่อ่อนที่สุดคือสิ่งที่กั้นคุณไว้จากน้ำหนักถัดไป เซ็ตที่ทำได้เกินเป้าถือว่านำหน้าอยู่แล้ว ไม่ได้ถูกขอให้ทำน้อยลง เมื่อทุกเซ็ตหลักทำได้ถึงค่าสูงสุด<b>ติดกันสองวันฝึก</b> จึงเพิ่มน้ำหนักตามที่ตั้งไว้ แล้วเป้าจะเริ่มใหม่จากค่าต่ำสุด ทำได้ครบเพียงวันเดียวจะได้ลองซ้ำที่น้ำหนักเดิมก่อน เพราะวันที่ดีวันเดียวอาจมาจากการนอนหลับดี มากกว่าความแข็งแรงที่เพิ่มขึ้นจริง <br><br>ถ้ามีเซ็ตที่ทำได้ต่ำกว่าค่าต่ำสุดของช่วง น้ำหนักจะคงเดิมและเป้าหมายคือค่าต่ำสุด ท่าค้างนิ่งจะเพิ่มทีละ 5 วินาที ถ้าตั้งการเพิ่มน้ำหนักเป็นศูนย์ จะเพิ่มแค่จำนวนครั้ง และเมื่อถึงค่าสูงสุดจะแนะนำให้ขยับช่วงขึ้น <br><br>ตัวเลขที่แนะนำเป็นแค่ตัวจางในช่อง สิ่งที่คุณพิมพ์คือสิ่งที่ถูกบันทึก และคำแนะนำไม่ถูกเก็บไว้ ระบบคำนวณจากประวัติใหม่ทุกครั้ง การแก้ไขวันฝึกที่ผ่านมาจึงเปลี่ยนคำแนะนำไปด้วย',
     'meth.coach.h':          'คำแนะนำครั้งถัดไป · เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก',
     'meth.prot.b':           'งานวิจัยสนับสนุนราว <b>1.6–2.2 g ต่อน้ำหนักตัว 1 kg</b> สำหรับคนที่ฝึกสม่ำเสมอ โดยใช้ค่าสูงกว่าเมื่อกำลังลดน้ำหนัก <br><br><b>มวลไร้ไขมันเป็นฐานที่ดีกว่า และแอปจะใช้ทุกครั้งที่ทำได้</b> เนื้อเยื่อไขมันไม่ต้องการโปรตีน การคิดจากน้ำหนักตัวทั้งหมดจึงประเมินความต้องการสูงเกินไปสำหรับคนที่มีไขมันมาก — ที่ 120 kg และไขมัน 33% น้ำหนักตัว × 2.2 ได้ 260 g ขณะที่มวลไร้ไขมัน × 2.6 ได้ 210 g และ 210 g คือตัวเลขที่ตรงความจริง มวลไร้ไขมันคำนวณย้อนจากน้ำหนักและค่าประมาณไขมัน: มวลไร้ไขมัน = น้ำหนัก × (1 − %ไขมัน) <br><br>ข้อติดขัดคือค่าไขมันเองก็เป็นค่าประมาณ มวลไร้ไขมันจึงรับความคลาดเคลื่อน ±3–4 จุดมาด้วย — คิดเป็นโปรตีนราว ±8 g ซึ่งน้อยกว่าส่วนต่างระหว่างสองฐาน สรุปคือ <b>ใช้มวลไร้ไขมันเมื่อรู้เปอร์เซ็นต์ไขมัน และใช้น้ำหนักตัวเมื่อไม่รู้</b> โดยแอปจะแสดงเสมอว่าใช้ฐานไหน ทั้งสองค่าจะเข้าใกล้กันเมื่อคุณผอมลง ความต่างสำคัญที่สุดเมื่อไขมันสูง',
     'meth.prot.h':           'โปรตีนขั้นต่ำ · น้ำหนักตัวหรือมวลไร้ไขมัน',
