@@ -100,6 +100,7 @@
   html[lang="th"] th{font-size:12.5px}
   html[lang="th"] .sub-note{font-size:12px}
   html[lang="th"] .adph{font-size:12px}
+  html[lang="th"] .coachline,html[lang="th"] .prec,html[lang="th"] .pnext{font-size:12.5px}
   html[lang="th"] .picknote,html[lang="th"] .chartnote,html[lang="th"] .sxnote,
   html[lang="th"] .calib-meta,html[lang="th"] .calib-note,html[lang="th"] .calib-need,
   html[lang="th"] .calib-sub,html[lang="th"] .cs-sub,html[lang="th"] .mobhint,
@@ -206,6 +207,15 @@
   .setrow input:focus{outline:none;border-color:var(--brass)}
   .setrow .u{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint)}
   .setrow .x{color:var(--ink-faint)}
+  /* The coach. A target is a placeholder, tinted so it reads as advice rather than as an empty box,
+     and never a value: a set left blank is dropped on save exactly as it always was. */
+  .setrow input.aim::placeholder{color:var(--brass);opacity:.85}
+  .coachline{font-family:var(--font-mono);font-size:11px;line-height:1.5;color:var(--ink-dim);margin:-2px 0 8px}
+  .coachline b{color:var(--brass-bright);font-weight:600}
+  .coachgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .prec,.pnext{font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--ink-dim);margin-top:5px}
+  .prec b{color:var(--ink);font-weight:600}
+  .pnext b{color:var(--brass-bright);font-weight:600}
   .vseg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
   .vbtn{background:var(--panel-2);border:none;border-right:1px solid var(--line);color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:8px 11px;cursor:pointer;transition:.12s;line-height:1}
   .vbtn:last-child{border-right:none}
@@ -657,15 +667,6 @@
       <div class="chartwrap"><svg id="wChart" viewBox="0 0 760 300"></svg></div>
     </div>
 
-    <!-- STRENGTH TREND -->
-    <div class="card col-12" id="cardStr">
-      <div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span></div>
-      <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
-      <div class="exchips" id="strPick"></div>
-      <div class="chartwrap"><svg id="strChart" viewBox="0 0 760 260"></svg></div>
-      <div class="chartnote" id="strNote"></div>
-    </div>
-
     <!-- BODY SIZE -->
     <div class="card col-12">
       <div class="lbl" data-i18n-html="chart.size">Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend</span></div>
@@ -789,6 +790,15 @@
       <div class="prog" id="progWrap"></div>
     </div>
 
+    <!-- STRENGTH TREND -->
+    <div class="card col-12" id="cardStr">
+      <div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="strPick"></div>
+      <div class="chartwrap"><svg id="strChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartnote" id="strNote"></div>
+    </div>
+
   </div>
 
   <div class="grid page" id="pg-settings">
@@ -883,6 +893,14 @@
             get leaner; the choice matters most at higher body fat.</div>
         </div>
         <div class="method">
+          <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load.</b> At the same weight it suggests one more rep on each set than last time, never past the top of the range. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the reps start again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>
+          <div class="m-b" data-i18n-html="meth.rec.b">Records are read off your history every time and never stored, so a corrected or deleted day cannot leave a stale best behind. Loaded lifts keep the heaviest set and the best estimated one-rep max; bodyweight lifts keep the most reps and the heaviest added weight; holds keep the longest. <br><br>Estimated one-rep max uses <b>Epley: weight × (1 + reps ÷ 30)</b>, and only for sets of 1 to 12 reps. Past about twelve the formula drifts badly, so a set of twenty says little about a single: endurance-range sets still count towards the heaviest set, just not towards the estimate. A single counts as its own weight. <br><br>A first session sets no records, because there is nothing yet to beat.</div>
+        </div>
+        <div class="method">
           <div class="m-h" data-i18n="meth.age.h">Age and activity</div>
           <div class="m-b" data-i18n-html="meth.age.b">Age is entered directly rather than as a year of birth, so there is no
             guessing whether a birthday has passed. It is stored with the date you set it and
@@ -967,6 +985,17 @@
           </div>
         </div>
         <div class="field" id="shDefRow"><label for="shDef" data-i18n="sh.startload">Starting load · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shDef" placeholder="0"></div>
+        <div class="field" id="shCoachRow"><label data-i18n="sh.coach">Coaching · what the next session suggests</label>
+          <div class="seg segwrap" id="shGoal">
+            <button type="button" data-g="off" data-i18n="goal.off">Off</button><button type="button" data-g="strength" data-i18n="goal.strength">Strength</button><button type="button" data-g="size" data-i18n="goal.size">Size</button><button type="button" data-g="endurance" data-i18n="goal.endurance">Endurance</button><button type="button" data-g="custom" data-i18n="goal.custom">Custom</button>
+          </div>
+          <div class="coachgrid" id="shRangeRow">
+            <div class="field"><label for="shMin" data-i18n="sh.coach.from">From</label><input type="number" min="1" inputmode="numeric" id="shMin"></div>
+            <div class="field"><label for="shMax" data-i18n="sh.coach.to">To</label><input type="number" min="1" inputmode="numeric" id="shMax"></div>
+            <div class="field"><label for="shStep" data-i18n="sh.coach.step">Step · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shStep"></div>
+          </div>
+          <div class="sxnote" id="shCoachNote"></div>
+        </div>
         <div class="field"><label for="shNote" data-i18n="sh.note">Note · shown under the name</label><input type="text" id="shNote" data-i18n-ph="sh.ph.note" placeholder="12–20 · per arm" autocomplete="off"></div>
       </div>
       <div class="sh-foot">
@@ -1230,6 +1259,24 @@ const exByKey = k => CAT_BY_KEY.get(k);
    written before the collection was emptied references keys like `bench`, and the recovery pass has
    to be able to rebuild a definition under that exact key or the history stops resolving. */
 const CX_KEY = /^(cx_)?[a-z][a-z0-9_]{0,31}$/;
+/* Training goals are presets for a movement's rep range and nothing more: picking one fills the
+   range, and the range is what the coach reads. The goal is worked back from the range rather than
+   stored beside it — a stored label could only ever drift away from the numbers it names. The bands
+   are the conventional ones; size in particular responds across a far wider range than 8–12, which
+   is why every preset is a starting point and the boxes stay editable. */
+const GOALS = [
+  {key:'strength',  min:3,  max:6},
+  {key:'size',      min:8,  max:12},
+  {key:'endurance', min:15, max:20}
+];
+const goalOfRange = (mn,mx) => {
+  if(mn==null || mx==null) return 'off';
+  const g=GOALS.find(x=>x.min===mn && x.max===mx);
+  return g ? g.key : 'custom';
+};
+const STEP_DEF = unit => unit==='sec' ? 0 : 2.5;          // a hold progresses by time, a loaded lift by a plate
+const CLEAN_TO_STEP = 2;                                   // sessions running at the top before the load goes up
+const repInc = ex => (ex && ex.unit==='sec') ? 5 : 1;     // a second at a time would take a month to move a plank
 function normCustomEx(x){
   if(!x || typeof x!=='object') return null;
   const key = (typeof x.key==='string') ? x.key : '';
@@ -1237,13 +1284,22 @@ function normCustomEx(x){
   const name = String(x.name==null?'':x.name).trim().slice(0,40);
   if(!name) return null;                                    // an unnamed movement can't be rendered
   const d = parseFloat(x.def);
+  const unit = (x.unit==='sec') ? 'sec' : null;
+  // The coach's range: both ends or neither, because half a range cannot drive a suggestion. A movement
+  // with no range behaves exactly as every movement did before 5.0.
+  const rMin=parseInt(x.repMin,10), rMax=parseInt(x.repMax,10);
+  const ranged = !isNaN(rMin) && !isNaN(rMax) && rMin>=1 && rMax>=rMin && rMax<=(unit==='sec'?3600:100);
+  const st=parseFloat(x.step);
   return { key, name,
     short: (String(x.short==null?'':x.short).trim().slice(0,16) || name.toLowerCase().slice(0,16)),
     note:  String(x.note==null?'':x.note).trim().slice(0,60),   // may be empty; exNote() supplies the fallback
     def:   (isNaN(d)||d<0) ? 0 : d,
     added: !!x.added,
-    unit:  (x.unit==='sec') ? 'sec' : null,
+    unit:  unit,
     group: (GROUP_KEYS.indexOf(x.group)>=0) ? x.group : 'other',
+    repMin: ranged ? rMin : null,
+    repMax: ranged ? rMax : null,
+    step:   ranged ? ((isNaN(st)||st<0||st>50) ? STEP_DEF(unit) : Math.round(st*100)/100) : null,
     retired: !!x.retired, custom:true };
 }
 function cxKeyFor(name){
@@ -1964,6 +2020,114 @@ function deltaOf(get, days){
   return {delta:get(latest)-get(best)};
 }
 
+/* ---------- coach ---------- */
+/* Double progression, made deliberately patient. The load stays put while the reps climb one at a time
+   to the top of the range; only once every working set has reached the top in CLEAN_TO_STEP sessions
+   running does the load go up, and then the reps start again from the bottom. One good day is not
+   proof — it is as often a good night's sleep as real progress — so one clean session earns a second
+   try at the same load, not a heavier bar.
+   Working sets are the ones at the session's heaviest load, so warm-ups never count against you. Every
+   session of the movement counts, whichever day it was logged on: a lift trained twice a week would
+   otherwise progress at half speed. Nothing is stored; the advice is read off the history each time,
+   so editing a past session changes it the way it should. */
+function workSets(sets){
+  const ws=(sets||[]).filter(s=>s && s.reps>0 && typeof s.kg==='number');
+  if(!ws.length) return null;
+  const top=Math.max(...ws.map(s=>s.kg));
+  return {load:top, reps:ws.filter(s=>s.kg===top).map(s=>s.reps)};
+}
+function coachNext(ex, sessions){
+  if(!ex || ex.repMin==null || ex.repMax==null) return null;
+  const mn=ex.repMin, mx=ex.repMax, step=ex.step||0, inc=repInc(ex);
+  const hist=(sessions||[]).map(workSets).filter(Boolean);
+  if(!hist.length) return {kind:'first', load:ex.def||0, targets:[mn], last:null};
+  const last=hist[hist.length-1];
+  const clean = w => w.reps.every(r=>r>=mx);
+  const climb = w => w.reps.map(r=>Math.min(mx, Math.max(mn, r+inc)));
+  if(last.reps.some(r=>r<mn)) return {kind:'floor', load:last.load, targets:climb(last), last:last};
+  if(!clean(last)) return {kind:'reps', load:last.load, targets:climb(last), last:last};
+  let run=0;
+  for(let i=hist.length-1; i>=0 && hist[i].load===last.load && clean(hist[i]); i--) run++;
+  if(run<CLEAN_TO_STEP) return {kind:'confirm', load:last.load, targets:last.reps.map(()=>mx), last:last, run:run};
+  if(step>0) return {kind:'up', load:Math.round((last.load+step)*100)/100, targets:last.reps.map(()=>mn), last:last, run:run};
+  return {kind:'top', load:last.load, targets:last.reps.map(()=>mx), last:last, run:run};
+}
+// every logged session of a movement strictly before a date, oldest first
+const sessionsBefore = (key, date) => entries.filter(e=>e.date<date).map(e=>liftsOf(e,key)).filter(s=>s.length);
+// a load the way the set rows show it: kilograms, or bodyweight plus whatever was added
+function fmtLoad(ex, kg){
+  if(ex.added) return kg>0 ? 'BW+'+kg : 'BW';
+  if(ex.unit==='sec' && !kg) return '';
+  return kg+' kg';
+}
+function coachLine(ex, plan){
+  const sec=ex.unit==='sec';
+  const v={min:ex.repMin, max:ex.repMax, unit:t(sec?'sh.coach.secs':'sh.coach.reps'), step:ex.step, n:CLEAN_TO_STEP,
+           inc:repInc(ex), left:Math.max(1, CLEAN_TO_STEP-(plan.run||0)),
+           last:plan.last ? plan.last.reps.map(r=>sec?r+'s':r).join(', ') : ''};
+  const msg = plan.kind==='reps' && sec ? tf('coach.secs', v) : tf('coach.'+plan.kind, v);
+  const L = plan.kind==='first' ? '' : fmtLoad(ex, plan.load);
+  return `<b>${esc(t('coach.next'))}</b> · ${L?`<b>${esc(L)}</b> · `:''}${esc(msg)}`;
+}
+
+/* Records are read off the history every time and never stored, so an edited or deleted day can never
+   leave a stale best behind. Estimated one-rep max is Epley — weight × (1 + reps ÷ 30) — and only for
+   sets of 1 to E1RM_MAX_REPS: beyond about twelve the formula drifts badly, so a set of twenty says
+   nothing reliable about a single. A single counts as its own weight, not 3% above it. */
+const E1RM_MAX_REPS = 12;
+const e1rm = (kg, reps) => (kg>0 && reps>=1 && reps<=E1RM_MAX_REPS) ? (reps===1 ? kg : kg*(1+reps/30)) : null;
+function recordsOf(ex, sessions){
+  const r={};
+  const better=(o,kg,reps)=>!o || kg>o.kg || (kg===o.kg && reps>o.reps);
+  (sessions||[]).forEach(s=>(s.sets||[]).forEach(x=>{
+    if(!(x && x.reps>0)) return;
+    const kg=typeof x.kg==='number' ? x.kg : 0;
+    if(ex.unit==='sec'){
+      if(!r.hold || x.reps>r.hold.reps) r.hold={kg:kg, reps:x.reps, date:s.date};
+    } else if(ex.added){
+      if(kg===0){ if(!r.bwReps || x.reps>r.bwReps.reps) r.bwReps={kg:0, reps:x.reps, date:s.date}; }
+      else if(better(r.heavy,kg,x.reps)) r.heavy={kg:kg, reps:x.reps, date:s.date};
+    } else {
+      if(better(r.heavy,kg,x.reps)) r.heavy={kg:kg, reps:x.reps, date:s.date};
+      const e=e1rm(kg, x.reps);
+      if(e!=null && (!r.e1rm || e>r.e1rm.e)) r.e1rm={kg:kg, reps:x.reps, e:e, date:s.date};
+    }
+  }));
+  return r;
+}
+function recordsLine(ex, r){
+  const b=[];
+  if(r.bwReps) b.push(`${esc(t('rec.bwreps'))} <b>BW × ${r.bwReps.reps}</b>`);
+  if(r.heavy)  b.push(`${esc(t(ex.added?'rec.heavy':'rec.best'))} <b>${esc(fmtLoad(ex,r.heavy.kg))} × ${r.heavy.reps}</b>`);
+  if(r.e1rm)   b.push(`${esc(t('rec.e1rm'))} <b>${r.e1rm.e.toFixed(1)} kg</b>`);
+  if(r.hold)   b.push(`${esc(t('rec.hold'))} <b>${r.hold.reps}s</b>`);
+  return b.join(' · ');
+}
+// what the sets on one date beat, against every other date - so editing an old day cannot claim a
+// record a later session already holds
+function recordsBeaten(ex, was, now){
+  const b=[];
+  if(now.heavy && was.heavy && (now.heavy.kg>was.heavy.kg || (now.heavy.kg===was.heavy.kg && now.heavy.reps>was.heavy.reps)))
+    b.push(fmtLoad(ex, now.heavy.kg)+' × '+now.heavy.reps);
+  if(now.e1rm && was.e1rm && now.e1rm.e>was.e1rm.e+0.05) b.push(t('rec.e1rm')+' '+now.e1rm.e.toFixed(1)+' kg');
+  if(now.bwReps && was.bwReps && now.bwReps.reps>was.bwReps.reps) b.push('BW × '+now.bwReps.reps);
+  if(now.hold && was.hold && now.hold.reps>was.hold.reps) b.push(now.hold.reps+'s');
+  return b;
+}
+function recordsNewOn(date){
+  const day=entries.find(e=>e.date===date); if(!day || !day.lifts) return '';
+  const out=[];
+  Object.keys(day.lifts).forEach(key=>{
+    const ex=exByKey(key); if(!ex) return;
+    const all=entries.map(e=>({date:e.date, sets:liftsOf(e,key)})).filter(s=>s.sets.length);
+    const others=all.filter(s=>s.date!==date), mine=all.filter(s=>s.date===date);
+    if(!others.length || !mine.length) return;          // a first session has nothing yet to beat
+    const bits=recordsBeaten(ex, recordsOf(ex, others), recordsOf(ex, mine));
+    if(bits.length) out.push((ex.short||ex.name)+' '+bits.join(', '));
+  });
+  return out.length ? tf('rec.new',{list:out.join(' · ')}) : '';
+}
+
 /* ---------- set formatting ---------- */
 function fmtSets(key, sets){
   if(!sets || !sets.length) return '—';
@@ -1991,17 +2155,21 @@ function appendExBlock(wrap, ex, dayKey){
   const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
   const tgt=targetFor(dayKey,ex.key);
   const chip=tgt?`<span class="rtag">${tgt.n} ${tgt.n===1?tgt.unit:tgt.unit+'s'}</span>`:'';
+  // the coach speaks before a movement is logged for the day; once there are sets, they speak for themselves
+  const onDate=$("fDate").value, curE=entries.find(e=>e.date===onDate);
+  const plan=(curE && liftsOf(curE,ex.key).length) ? null : coachNext(ex, sessionsBefore(ex.key, onDate));
+  const rchip=(ex.repMin!=null && ex.repMax!=null) ? `<span class="rtag">${ex.repMin}–${ex.repMax}${ex.unit==='sec'?'s':''}</span>` : '';
   const mark=extra?`<button type="button" class="xtag${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`:'';
   const addLbl=tgt?('+ '+tgt.unit):'+ '+t('ex.set');
   const desc=tgt?`${tgt.reps} · ${tgt.load}`:exNote(ex);
   const block=document.createElement('div'); block.className='ex';
   block.innerHTML=`<div class="ex-head">
-      <div class="ex-name">${esc(ex.name)} ${chip}${mark}<span> · ${esc(desc)}</span></div>
+      <div class="ex-name">${esc(ex.name)} ${chip}${rchip}${mark}<span> · ${esc(desc)}</span></div>
       <div class="ex-ctl">
         <button class="addset" data-ex="${ex.key}">${addLbl}</button>
         ${extra?`<button class="exdrop" data-ex="${ex.key}" title="${esc(t('ex.droptip'))}">✕</button>`:''}
       </div>
-    </div><div class="sets" id="sets-${ex.key}" data-unit="${tgt?tgt.unit:'set'}"></div>`;
+    </div>${plan?`<div class="coachline">${coachLine(ex,plan)}</div>`:''}<div class="sets" id="sets-${ex.key}" data-unit="${tgt?tgt.unit:'set'}"></div>`;
   block.querySelector('.addset').onclick=()=>{
     const rows=$("sets-"+ex.key).querySelectorAll('.setrow');
     let lastLoad=ex.def;
@@ -2042,6 +2210,9 @@ function prefillEx(ex, dayKey, cur){
   const loadOf = s => ex.variants ? s.variant : s.kg;
   const sameDay = cur && cur.lifts && cur.lifts[ex.key];
   if(sameDay && sameDay.length){ sameDay.forEach(s=>addSetRow(ex, loadOf(s), s.reps)); return; }
+  // a coached movement starts from the coach's load, each set's target in its placeholder
+  const plan=coachNext(ex, sessionsBefore(ex.key, $("fDate").value));
+  if(plan){ plan.targets.forEach(r=>addSetRow(ex, plan.load, '', r)); return; }
   const last=lastSessionOf(ex.key, dayKey);
   if(last && last.length) last.forEach(s=>addSetRow(ex, loadOf(s), ''));
   else { const n=tgt?tgt.n:1; for(let i=0;i<n;i++) addSetRow(ex, ex.def, ''); }
@@ -2080,7 +2251,7 @@ async function dropMovement(key, dayKey){
   if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; await persistPlan(); }
   if(!$("exWrap").children.length) buildExForm(entries.find(e=>e.date===$("fDate").value), dayKey);
 }
-function addSetRow(ex, loadVal, reps){
+function addSetRow(ex, loadVal, reps, aim){
   const box=$("sets-"+ex.key); if(!box) return;
   const row=document.createElement('div'); row.className='setrow';
   let loadHtml;
@@ -2091,11 +2262,12 @@ function addSetRow(ex, loadVal, reps){
     const unit = ex.added ? '+kg' : 'kg';
     loadHtml=`<input class="kg" type="number" min="0" step="0.5" inputmode="decimal" value="${loadVal}"><span class="u">${unit}</span>`;
   }
-  const repPh = ex.unit==='sec' ? 'sec' : 'reps';
+  // aim is the coach's target for this set: shown as the placeholder, never written as a value
+  const repPh = aim!=null ? String(aim) : (ex.unit==='sec' ? 'sec' : 'reps');
   row.innerHTML=`<span class="setn"></span>
     ${loadHtml}
     <span class="x">×</span>
-    <input class="rp" type="number" min="0" inputmode="numeric" placeholder="${repPh}" value="${reps}">
+    <input class="rp${aim!=null?' aim':''}" type="number" min="0" inputmode="numeric" placeholder="${repPh}" value="${reps}">
     <button class="rmrest" title="${esc(t('ex.resttip'))}">⏱</button>
     <button class="rmset" title="${esc(t('btn.remove').toLowerCase())}">✕</button>`;
   // the set you just finished typing is where your thumb already is, so start rest from here
@@ -2283,12 +2455,62 @@ function shGroupSet(k){
   document.querySelectorAll('#shGroup button').forEach(b=>b.classList.toggle('on', b.dataset.g===k));
 }
 const shGroupGet = () => { const b=document.querySelector('#shGroup button.on'); return b?b.dataset.g:'other'; };
+/* ---------- the coach's range, on the movement sheet ---------- */
+const shModeGet = () => { const b=document.querySelector('#shMode button.on'); return b?b.dataset.m:'kg'; };
+const shGoalGet = () => { const b=document.querySelector('#shGoal button.on'); return b?b.dataset.g:'off'; };
+function shGoalSet(g){ document.querySelectorAll('#shGoal button').forEach(b=>b.classList.toggle('on', b.dataset.g===g)); }
+// the boxes are the truth; the highlighted goal is only ever read back off them
+function shRangeTyped(){
+  const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10);
+  const g=goalOfRange(isNaN(mn)?null:mn, isNaN(mx)?null:mx);
+  shGoalSet(g==='off' ? 'custom' : g);
+  shCoachSync();
+}
+function shGoalPick(g){
+  const p=GOALS.find(x=>x.key===g);
+  if(p){ $("shMin").value=p.min; $("shMax").value=p.max; }
+  if(g!=='off' && $("shStep").value==='') $("shStep").value=STEP_DEF(shModeGet()==='sec'?'sec':null);
+  shGoalSet(g); shCoachSync();
+}
+// A hold has no strength-or-size bands, because its range is a time, so it is offered Off and Custom only.
+// The note under the boxes says in words exactly what the coach will do with them.
+function shCoachSync(){
+  const sec=shModeGet()==='sec';
+  if(sec && GOALS.some(x=>x.key===shGoalGet())) shGoalSet('custom');
+  document.querySelectorAll('#shGoal button').forEach(b=>{ b.style.display=(sec && GOALS.some(x=>x.key===b.dataset.g))?'none':''; });
+  const g=shGoalGet();
+  $("shRangeRow").style.display = g==='off' ? 'none' : '';
+  const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10), st=parseFloat($("shStep").value);
+  const unit=t(sec?'sh.coach.secs':'sh.coach.reps');
+  let note;
+  if(g==='off') note=t('sh.coach.off');
+  else if(isNaN(mn) || isNaN(mx) || mn<1 || mx<mn) note=t('sh.coach.bad');
+  else if(!(st>0)) note=tf('sh.coach.repsonly',{min:mn, max:mx, unit:unit, n:CLEAN_TO_STEP});
+  else note=tf('sh.coach.on',{min:mn, max:mx, unit:unit, step:st, n:CLEAN_TO_STEP});
+  $("shCoachNote").textContent=note;
+}
+function shCoachFill(ex){
+  const has = !!ex && ex.repMin!=null && ex.repMax!=null;
+  $("shMin").value = has ? ex.repMin : '';
+  $("shMax").value = has ? ex.repMax : '';
+  $("shStep").value = (has && ex.step!=null) ? ex.step : '';
+  shGoalSet(has ? goalOfRange(ex.repMin, ex.repMax) : 'off');
+  shCoachSync();
+}
+// what the boxes say: nulls for Off, undefined when they do not make a usable range
+function shCoachRead(){
+  if(shGoalGet()==='off') return {repMin:null, repMax:null, step:null};
+  const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10);
+  if(isNaN(mn) || isNaN(mx) || mn<1 || mx<mn) return undefined;
+  return {repMin:mn, repMax:mx, step:$("shStep").value};
+}
 function shNew(){
   shEditing=null; shResetDel();
   $("shName").value=''; $("shShort").value=''; $("shNote").value=''; $("shDef").value='';
   shGroupSet('other');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m==='kg'));
-  $("shLoadRow").style.display=''; $("shDefRow").style.display='';
+  $("shLoadRow").style.display=''; $("shDefRow").style.display=''; $("shCoachRow").style.display='';
+  shCoachFill(null);
   $("shDelete").style.display='none';
   $("shCreate").textContent=t(shAddToDay?'sh.createadd':'sh.addcoll');
   shMsg(''); shShow('form');
@@ -2307,6 +2529,8 @@ function shEdit(key){
   const editable = !EX.some(e=>e.key===key) && !ex.variants;
   $("shLoadRow").style.display=editable?'':'none';
   $("shDefRow").style.display=editable?'':'none';
+  $("shCoachRow").style.display=editable?'':'none';
+  shCoachFill(ex);
   $("shDelete").style.display='';
   $("shCreate").textContent=t('btn.saveshort');
   shMsg(''); shShow('form');
@@ -2315,6 +2539,9 @@ async function shCreate(){
   const name=$("shName").value.trim();
   if(!name){ shMsg(t('msg.needname'),true); $("shName").focus(); return; }
   const short=$("shShort").value.trim(), note=$("shNote").value.trim();
+  // a range that cannot drive a suggestion is refused here, rather than silently dropped by the gatekeeper
+  const coach=shCoachRead();
+  if(coach===undefined){ shMsg(t('sh.coach.bad'),true); $("shMin").focus(); return; }
 
   if(shEditing){                                  // rename in place: the key is untouched, so logs follow
     const ex=exByKey(shEditing);
@@ -2329,6 +2556,9 @@ async function shCreate(){
       const d=parseFloat($("shDef").value);
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
       own.def = (isNaN(d)||d<0) ? 0 : d;
+      // through the gatekeeper, so an edited range is held to exactly the rules a new one is
+      const chk=normCustomEx(Object.assign({}, own, coach));
+      if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; }
       await persistCatalogue();
     }
     await persistExEdits();
@@ -2352,7 +2582,8 @@ async function shCreate(){
   const mode=on?on.dataset.m:'kg';
   const def=normCustomEx({
     key: cxKeyFor(name), name, short:short, note:note, group: shGroupGet(),
-    def: $("shDef").value, added: mode==='bw', unit: mode==='sec' ? 'sec' : null
+    def: $("shDef").value, added: mode==='bw', unit: mode==='sec' ? 'sec' : null,
+    repMin: coach.repMin, repMax: coach.repMax, step: coach.step
   });
   if(!def){ shMsg(t('msg.badname'),true); return; }
   customEx.push(def);
@@ -3428,12 +3659,18 @@ function drawProg(){
     const sess=entries.filter(e=>liftsOf(e,ex.key).length).map(e=>({date:e.date,sets:e.lifts[ex.key]}));
     const col=document.createElement('div'); col.className='pcol';
     let html=`<div class="pname">${esc(ex.name)}</div><div class="ptarget">${esc(exNote(ex))}</div>`;
+    // the session after everything logged so far - so the card always looks forward
+    const plan=coachNext(ex, sess.map(s=>s.sets));
+    const next=plan ? `<div class="pnext">${coachLine(ex,plan)}</div>` : '';
     if(!sess.length){
-      html+=`<div class="plast" style="color:var(--ink-faint)">—<span class="pd">${esc(t('prog.notlogged'))}</span></div>`;
+      html+=`<div class="plast" style="color:var(--ink-faint)">—<span class="pd">${esc(t('prog.notlogged'))}</span></div>`+next;
       col.innerHTML=html; wrap.appendChild(col); return;
     }
     const last=sess[sess.length-1];
     html+=`<div class="plast">${fmtSets(ex.key,last.sets)}<span class="pd">${esc(t('prog.last'))} · ${last.date.slice(5)}</span></div>`;
+    const recs=recordsLine(ex, recordsOf(ex, sess));
+    if(recs) html+=`<div class="prec">${recs}</div>`;
+    html+=next;
     const prior=sess.slice(0,-1).reverse().slice(0,3);
     if(prior.length) html+=`<div class="phist">`+prior.map(s=>`<div><span class="pdate">${s.date.slice(5)}</span>${fmtSets(ex.key,s.sets)}</div>`).join('')+`</div>`;
     const wk=entries.filter(e=>within7(e.date));
@@ -3876,7 +4113,11 @@ async function saveEntry(){
   if(i>=0) entries[i]=entry; else entries.push(entry);
   entries.sort((a,b)=>a.date.localeCompare(b.date));
   const ok=await persist(); render();
-  if(ok) flash(t('msg.saved')+' · '+date+(bf!=null?(' · BF '+bf.toFixed(1)+'%'):''));
+  if(ok){
+    // a record outranks the date for the one line of feedback a save gets
+    const rec=recordsNewOn(date);
+    flash(t('msg.saved')+' · '+(rec || (date+(bf!=null?(' · BF '+bf.toFixed(1)+'%'):''))));
+  }
   fillForm(date);
   if($("exportBox").classList.contains('show')) $("exportBox").value=exportPayload();
 }
@@ -4018,6 +4259,14 @@ const LANG = {
     'chart.size':            'Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend</span>',
     'chart.str':             'Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span>',
     'chart.weight':          'Weight Trend',
+    'coach.confirm':         'same weight, every set reached {max}; {left} more like that and it goes up',
+    'coach.first':           'first session: find a weight you can do for {min}–{max} {unit}',
+    'coach.floor':           'same weight, get every set to {min} first',
+    'coach.next':            'Next',
+    'coach.reps':            'same weight, one more rep per set (last time {last})',
+    'coach.secs':            '{inc} s longer per hold (last time {last})',
+    'coach.top':             'every set reached {max} in {n} sessions running; raise the range or give it a weight step',
+    'coach.up':              'up {step} kg, every set reached {max} in {n} sessions running',
     'col.bg':                'Page background',
     'col.brass':             'Accent',
     'col.brass-bright':      'Accent bright',
@@ -4092,6 +4341,11 @@ const LANG = {
     'font.min.note':         'Clean sans throughout. Quietest of the four.',
     'font.zen.name':         'Zen',
     'font.zen.note':         'Serif headings, softer and calmer. Suits mobility and steady work.',
+    'goal.custom':           'Custom',
+    'goal.endurance':        'Endurance',
+    'goal.off':              'Off',
+    'goal.size':             'Size',
+    'goal.strength':         'Strength',
     'grp.core':              'Core',
     'grp.legs':              'Legs',
     'grp.other':             'Other',
@@ -4131,8 +4385,12 @@ const LANG = {
     'meth.bf.h':             'Body fat · US Navy girth method',
     'meth.bmr.b':            'Resting rate = 10 × weight(kg) + 6.25 × height(cm) − 5 × age, then <b>+5</b> for men or <b>−161</b> for women. Multiplied by an activity factor of 1.2 to 1.9 depending on how much you train. Mifflin-St Jeor (1990) is the equation most dietetic practice uses, and is a population average: individual resting rates vary by roughly ±10% around it, more if you are very lean, very heavy, or older.',
     'meth.bmr.h':            'Starting energy estimate · Mifflin-St Jeor',
+    'meth.coach.b':          'Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load.</b> At the same weight it suggests one more rep on each set than last time, never past the top of the range. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the reps start again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
+    'meth.coach.h':          'Next-session suggestions · patient double progression',
     'meth.prot.b':           'Around <b>1.6–2.2 g per kg of bodyweight</b> is what the research supports for people training regularly, the higher end while losing weight. <br><br><b>Lean mass is the better basis, and the app uses it whenever it can.</b> Fat tissue carries no protein requirement, so scaling by total bodyweight overstates the need for anyone carrying more of it — at 120 kg and 33% fat, bodyweight × 2.2 asks for 260 g while lean mass × 2.6 asks for 210 g, and 210 g is the honest number. Lean mass is worked back from your weight and body-fat estimate: lean = weight × (1 − fat%). <br><br>The catch is that the body-fat figure is itself an estimate, so lean mass inherits its ±3–4 point error — about ±8 g of protein, which is smaller than the difference between the two bases. So: <b>lean mass when body fat is known, bodyweight when it is not</b>, and the app always shows which one it used. The two converge as you get leaner; the choice matters most at higher body fat.',
     'meth.prot.h':           'Protein floor · bodyweight or lean mass',
+    'meth.rec.b':            'Records are read off your history every time and never stored, so a corrected or deleted day cannot leave a stale best behind. Loaded lifts keep the heaviest set and the best estimated one-rep max; bodyweight lifts keep the most reps and the heaviest added weight; holds keep the longest. <br><br>Estimated one-rep max uses <b>Epley: weight × (1 + reps ÷ 30)</b>, and only for sets of 1 to 12 reps. Past about twelve the formula drifts badly, so a set of twenty says little about a single: endurance-range sets still count towards the heaviest set, just not towards the estimate. A single counts as its own weight. <br><br>A first session sets no records, because there is nothing yet to beat.',
+    'meth.rec.h':            'Records · estimated one-rep max',
     'meth.target.b':         'Target = maintenance + (goal kg per week × 7,700 ÷ 7). A goal of −0.5 kg per week is a deficit of about 550 kcal a day. The app will not suggest below 1,500 kcal for men or 1,200 for women, whatever the arithmetic produces, because eating adequately below that is difficult without supervision.',
     'meth.target.h':         'Daily target · your goal rate',
     'meth.title':            'Where these numbers come from',
@@ -4250,6 +4508,12 @@ const LANG = {
     'prot.shown':            '{kg} kg {basis} × {perkg} g/kg',
     'prot.suggest':          'Suggested floor {g} a day',
     'prot.usefloor':         'Use {g} g as my floor',
+    'rec.best':              'Best',
+    'rec.bwreps':            'Most',
+    'rec.e1rm':              'est. 1RM',
+    'rec.heavy':             'Heaviest',
+    'rec.hold':              'Longest',
+    'rec.new':               'New record: {list}',
     'removed':               'removed',
     'rest.alarm.cardio':     'Cardio done · {name}',
     'rest.alarm.rest':       'Rest done — next set',
@@ -4265,6 +4529,16 @@ const LANG = {
     'sh.addcoll':            'Add to collection',
     'sh.bw':                 'Bodyweight +kg',
     'sh.catalogue':          'Catalogue',
+    'sh.coach':              'Coaching · what the next session suggests',
+    'sh.coach.bad':          'Fill in both ends of the range, the smaller number first.',
+    'sh.coach.from':         'From',
+    'sh.coach.off':          'Off. Each session starts from last time\'s weights, as before.',
+    'sh.coach.on':           '{min}–{max} {unit}. Once every set reaches {max} in {n} sessions running, the weight goes up {step} kg and you start again from the bottom.',
+    'sh.coach.reps':         'reps',
+    'sh.coach.repsonly':     '{min}–{max} {unit}, no weight step. Once every set reaches {max} in {n} sessions running, it suggests raising the range.',
+    'sh.coach.secs':         'seconds',
+    'sh.coach.step':         'Step · kg',
+    'sh.coach.to':           'To',
     'sh.countsas':           'Counts as',
     'sh.createadd':          'Create & add',
     'sh.del.builtin':        'hides it from the picker. A built-in movement cannot be deleted outright.',
@@ -4461,6 +4735,14 @@ const LANG = {
     'chart.size':            'แนวโน้มขนาดร่างกาย <span class="sub-note">· เทียบครั้งแรก = 100 · ค่า cm ล่าสุดในคำอธิบาย</span>',
     'chart.str':             'แนวโน้มความแข็งแรง <span class="sub-note">· แตะท่าเพื่อแสดงกราฟ · ได้สูงสุด 8 ท่า</span>',
     'chart.weight':          'แนวโน้มน้ำหนัก',
+    'coach.confirm':         'น้ำหนักเดิม ทุกเซ็ตถึง {max} แล้ว ทำได้แบบนี้อีก {left} วันฝึกจะเพิ่มน้ำหนัก',
+    'coach.first':           'ครั้งแรก: หาน้ำหนักที่ทำได้ {min}–{max} {unit}',
+    'coach.floor':           'น้ำหนักเดิม ทำทุกเซ็ตให้ถึง {min} ก่อน',
+    'coach.next':            'ครั้งถัดไป',
+    'coach.reps':            'น้ำหนักเดิม เพิ่มเซ็ตละ 1 ครั้ง (ครั้งก่อน {last})',
+    'coach.secs':            'ค้างนานขึ้นเซ็ตละ {inc} วินาที (ครั้งก่อน {last})',
+    'coach.top':             'ทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว ขยับช่วงขึ้นหรือกำหนดการเพิ่มน้ำหนัก',
+    'coach.up':              'เพิ่ม {step} kg เพราะทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว',
     'col.bg':                'พื้นหลังหน้า',
     'col.brass':             'สีเน้น',
     'col.brass-bright':      'สีเน้นสว่าง',
@@ -4535,6 +4817,11 @@ const LANG = {
     'font.min.note':         'ภาษาไทยมีฟอนต์เดียว',
     'font.zen.name':         'ภาษาไทยมีฟอนต์เดียว',
     'font.zen.note':         'ภาษาไทยมีฟอนต์เดียว',
+    'goal.custom':           'กำหนดเอง',
+    'goal.endurance':        'เน้นอึด',
+    'goal.off':              'ปิด',
+    'goal.size':             'เน้นกล้าม',
+    'goal.strength':         'เน้นแรง',
     'grp.core':              'กลางลำตัว',
     'grp.legs':              'ขา',
     'grp.other':             'อื่น ๆ',
@@ -4574,8 +4861,12 @@ const LANG = {
     'meth.bf.h':             'ไขมันในร่างกาย · วิธีวัดรอบตัวของ US Navy',
     'meth.bmr.b':            'อัตราขณะพัก = 10 × น้ำหนัก(kg) + 6.25 × ส่วนสูง(cm) − 5 × อายุ แล้ว <b>+5</b> สำหรับชาย หรือ <b>−161</b> สำหรับหญิง จากนั้นคูณด้วยตัวคูณกิจกรรม 1.2 ถึง 1.9 ตามปริมาณการฝึก Mifflin-St Jeor (1990) เป็นสมการที่วงการโภชนาการใช้มากที่สุด และเป็นค่าเฉลี่ยของประชากร อัตราขณะพักของแต่ละคนต่างจากค่านี้ราว ±10% และมากกว่านั้นถ้าผอมมาก หนักมาก หรืออายุมาก',
     'meth.bmr.h':            'ค่าประมาณพลังงานเริ่มต้น · Mifflin-St Jeor',
+    'meth.coach.b':          'แต่ละท่ากำหนดช่วงจำนวนครั้งได้ เลือก เน้นแรง เน้นกล้าม หรือ เน้นอึด เพื่อใช้ช่วงมาตรฐาน หรือตั้งเอง ระบบจะดูการเล่นท่านั้นครั้งล่าสุด ที่น้ำหนักหนักที่สุดของวันนั้น เซ็ตวอร์มอัพจึงไม่ถูกนับ <br><br><b>เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก</b> ที่น้ำหนักเดิม ระบบจะแนะนำให้ทำเพิ่มเซ็ตละ 1 ครั้งจากครั้งก่อน แต่ไม่เกินค่าสูงสุดของช่วง เมื่อทุกเซ็ตหลักทำได้ถึงค่าสูงสุด<b>ติดกันสองวันฝึก</b> จึงเพิ่มน้ำหนักตามที่ตั้งไว้ แล้วเริ่มนับจำนวนครั้งใหม่จากค่าต่ำสุด ทำได้ครบเพียงวันเดียวจะได้ลองซ้ำที่น้ำหนักเดิมก่อน เพราะวันที่ดีวันเดียวอาจมาจากการนอนหลับดี มากกว่าความแข็งแรงที่เพิ่มขึ้นจริง <br><br>ถ้ามีเซ็ตที่ทำได้ต่ำกว่าค่าต่ำสุดของช่วง น้ำหนักจะคงเดิมและเป้าหมายคือค่าต่ำสุด ท่าค้างนิ่งจะเพิ่มทีละ 5 วินาที ถ้าตั้งการเพิ่มน้ำหนักเป็นศูนย์ จะเพิ่มแค่จำนวนครั้ง และเมื่อถึงค่าสูงสุดจะแนะนำให้ขยับช่วงขึ้น <br><br>ตัวเลขที่แนะนำเป็นแค่ตัวจางในช่อง สิ่งที่คุณพิมพ์คือสิ่งที่ถูกบันทึก และคำแนะนำไม่ถูกเก็บไว้ ระบบคำนวณจากประวัติใหม่ทุกครั้ง การแก้ไขวันฝึกที่ผ่านมาจึงเปลี่ยนคำแนะนำไปด้วย',
+    'meth.coach.h':          'คำแนะนำครั้งถัดไป · เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก',
     'meth.prot.b':           'งานวิจัยสนับสนุนราว <b>1.6–2.2 g ต่อน้ำหนักตัว 1 kg</b> สำหรับคนที่ฝึกสม่ำเสมอ โดยใช้ค่าสูงกว่าเมื่อกำลังลดน้ำหนัก <br><br><b>มวลไร้ไขมันเป็นฐานที่ดีกว่า และแอปจะใช้ทุกครั้งที่ทำได้</b> เนื้อเยื่อไขมันไม่ต้องการโปรตีน การคิดจากน้ำหนักตัวทั้งหมดจึงประเมินความต้องการสูงเกินไปสำหรับคนที่มีไขมันมาก — ที่ 120 kg และไขมัน 33% น้ำหนักตัว × 2.2 ได้ 260 g ขณะที่มวลไร้ไขมัน × 2.6 ได้ 210 g และ 210 g คือตัวเลขที่ตรงความจริง มวลไร้ไขมันคำนวณย้อนจากน้ำหนักและค่าประมาณไขมัน: มวลไร้ไขมัน = น้ำหนัก × (1 − %ไขมัน) <br><br>ข้อติดขัดคือค่าไขมันเองก็เป็นค่าประมาณ มวลไร้ไขมันจึงรับความคลาดเคลื่อน ±3–4 จุดมาด้วย — คิดเป็นโปรตีนราว ±8 g ซึ่งน้อยกว่าส่วนต่างระหว่างสองฐาน สรุปคือ <b>ใช้มวลไร้ไขมันเมื่อรู้เปอร์เซ็นต์ไขมัน และใช้น้ำหนักตัวเมื่อไม่รู้</b> โดยแอปจะแสดงเสมอว่าใช้ฐานไหน ทั้งสองค่าจะเข้าใกล้กันเมื่อคุณผอมลง ความต่างสำคัญที่สุดเมื่อไขมันสูง',
     'meth.prot.h':           'โปรตีนขั้นต่ำ · น้ำหนักตัวหรือมวลไร้ไขมัน',
+    'meth.rec.b':            'สถิติคำนวณจากประวัติใหม่ทุกครั้งและไม่ถูกเก็บไว้ วันที่แก้ไขหรือลบไปแล้วจึงไม่ทิ้งสถิติที่ล้าสมัยไว้ ท่าที่ใช้น้ำหนักจะเก็บเซ็ตที่หนักที่สุดและ 1RM โดยประมาณที่ดีที่สุด ท่าบอดี้เวทจะเก็บจำนวนครั้งมากที่สุดและน้ำหนักที่เพิ่มมากที่สุด ท่าค้างนิ่งจะเก็บเวลาที่นานที่สุด <br><br>1RM โดยประมาณใช้<b>สูตร Epley: น้ำหนัก × (1 + จำนวนครั้ง ÷ 30)</b> และใช้กับเซ็ต 1 ถึง 12 ครั้งเท่านั้น เกินราวสิบสองครั้งสูตรจะคลาดเคลื่อนมาก เซ็ตยี่สิบครั้งจึงบอกอะไรเกี่ยวกับการยกครั้งเดียวได้น้อย เซ็ตในช่วงเน้นอึดยังนับเป็นเซ็ตที่หนักที่สุดได้ แต่ไม่นำมาประมาณ 1RM การยกครั้งเดียวนับเป็นน้ำหนักนั้นเลย <br><br>การเล่นท่านั้นครั้งแรกยังไม่นับเป็นสถิติ เพราะยังไม่มีสถิติเดิมให้ทำลาย',
+    'meth.rec.h':            'สถิติ · 1RM โดยประมาณ',
     'meth.target.b':         'เป้าหมาย = ค่าคงน้ำหนัก + (เป้า kg ต่อสัปดาห์ × 7,700 ÷ 7) เป้าหมาย −0.5 kg ต่อสัปดาห์เท่ากับขาดดุลราว 550 kcal ต่อวัน แอปจะไม่แนะนำต่ำกว่า 1,500 kcal สำหรับชาย หรือ 1,200 สำหรับหญิง ไม่ว่าการคำนวณจะออกมาเท่าไร เพราะการกินให้ได้สารอาหารครบต่ำกว่านั้นทำได้ยากหากไม่มีผู้ดูแล',
     'meth.target.h':         'เป้าหมายต่อวัน · ตามอัตราที่คุณเลือก',
     'meth.title':            'ตัวเลขเหล่านี้มาจากไหน',
@@ -4693,6 +4984,12 @@ const LANG = {
     'prot.shown':            '{basis} {kg} kg × {perkg} g/kg',
     'prot.suggest':          'แนะนำขั้นต่ำ {g} ต่อวัน',
     'prot.usefloor':         'ใช้ {g} g เป็นขั้นต่ำ',
+    'rec.best':              'ดีสุด',
+    'rec.bwreps':            'มากสุด',
+    'rec.e1rm':              '1RM ประมาณ',
+    'rec.heavy':             'หนักสุด',
+    'rec.hold':              'นานสุด',
+    'rec.new':               'สถิติใหม่: {list}',
     'removed':               'ถูกลบแล้ว',
     'rest.alarm.cardio':     'คาร์ดิโอครบแล้ว · {name}',
     'rest.alarm.rest':       'พักครบแล้ว — เซ็ตต่อไป',
@@ -4708,6 +5005,16 @@ const LANG = {
     'sh.addcoll':            'เพิ่มเข้าคลัง',
     'sh.bw':                 'น้ำหนักตัว +kg',
     'sh.catalogue':          'คลังท่ามาตรฐาน',
+    'sh.coach':              'โค้ช · คำแนะนำสำหรับครั้งถัดไป',
+    'sh.coach.bad':          'ใส่ช่วงให้ครบทั้งสองค่า ค่าน้อยก่อน',
+    'sh.coach.from':         'ตั้งแต่',
+    'sh.coach.off':          'ปิดอยู่ แต่ละครั้งเริ่มจากน้ำหนักของครั้งก่อนเหมือนเดิม',
+    'sh.coach.on':           '{min}–{max} {unit} เมื่อทุกเซ็ตถึง {max} ติดกัน {n} วันฝึก น้ำหนักจะเพิ่ม {step} kg แล้วเริ่มใหม่จากค่าต่ำสุด',
+    'sh.coach.reps':         'ครั้ง',
+    'sh.coach.repsonly':     '{min}–{max} {unit} ไม่เพิ่มน้ำหนัก เมื่อทุกเซ็ตถึง {max} ติดกัน {n} วันฝึก จะแนะนำให้ขยับช่วงขึ้น',
+    'sh.coach.secs':         'วินาที',
+    'sh.coach.step':         'เพิ่มทีละ · kg',
+    'sh.coach.to':           'ถึง',
     'sh.countsas':           'นับเป็น',
     'sh.createadd':          'สร้างและเพิ่ม',
     'sh.del.builtin':        'ซ่อนออกจากรายการเลือก ท่ามาตรฐานลบทิ้งถาวรไม่ได้',
@@ -4862,7 +5169,11 @@ const LANG = {
   $("shWrap").onclick=ev=>{ if(ev.target===$("shWrap")) shClose(); };
   document.querySelectorAll('#shMode button').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('#shMode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    shCoachSync();          // a hold drops the strength-and-size presets: its range is a time
   });
+  document.querySelectorAll('#shGoal button').forEach(b=>b.onclick=()=>shGoalPick(b.dataset.g));
+  ['shMin','shMax'].forEach(id=>$(id).addEventListener('input', shRangeTyped));
+  $("shStep").addEventListener('input', shCoachSync);
   // rest timer
   document.querySelectorAll('#segRest button').forEach(b=>b.onclick=()=>setRestPreset(+b.dataset.s));
   document.querySelectorAll('#segLead button').forEach(b=>b.onclick=()=>setLeadPreset(+b.dataset.l));
