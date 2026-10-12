@@ -101,6 +101,10 @@
   html[lang="th"] .sub-note{font-size:12px}
   html[lang="th"] .adph{font-size:12px}
   html[lang="th"] .coachline,html[lang="th"] .prec,html[lang="th"] .pnext{font-size:12.5px}
+  html[lang="th"] .mchip{font-size:12.5px}
+  html[lang="th"] .volgrp,html[lang="th"] .volstate{text-transform:none;letter-spacing:0}
+  html[lang="th"] .volgrp,html[lang="th"] .volstate,html[lang="th"] .volmute,html[lang="th"] .reclbl,html[lang="th"] .browsehead,
+  html[lang="th"] .librow .libname .sub,html[lang="th"] .libin,html[lang="th"] .gymitem .sub,html[lang="th"] .volband,html[lang="th"] .volname{font-size:12px}
   html[lang="th"] .picknote,html[lang="th"] .chartnote,html[lang="th"] .sxnote,
   html[lang="th"] .calib-meta,html[lang="th"] .calib-note,html[lang="th"] .calib-need,
   html[lang="th"] .calib-sub,html[lang="th"] .cs-sub,html[lang="th"] .mobhint,
@@ -216,6 +220,55 @@
   .prec,.pnext{font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--ink-dim);margin-top:5px}
   .prec b{color:var(--ink);font-weight:600}
   .pnext b{color:var(--brass-bright);font-weight:600}
+  /* muscles on the movement sheet: filled is primary, dashed is secondary */
+  .muschips{display:flex;flex-wrap:wrap;gap:6px}
+  .mchip{background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:7px;color:var(--ink-faint);
+    font-family:var(--font-mono);font-size:11px;padding:7px 9px;cursor:pointer;min-height:34px}
+  .mchip.p{background:var(--brass);border-color:var(--brass);color:#fff}
+  .mchip.s{border-color:var(--brass);border-style:dashed;color:var(--ink)}
+  .mchip.on{background:var(--brass);border-color:var(--brass);color:#fff}
+  /* the Guide: one row per muscle, the bar coloured by where it sits against the band */
+  .volband{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:2px 0 12px}
+  .volband input{width:56px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:7px 6px;font-family:var(--font-mono);font-size:13px;text-align:center}
+  .volgrp{font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-faint);margin:14px 0 2px}
+  .volrow{display:grid;grid-template-columns:minmax(0,7.2em) minmax(30px,1fr) 2.6em 4.6em 4.4em;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft)}
+  .volname{background:none;border:none;padding:0;text-align:left;font-family:var(--font-mono);font-size:12px;color:var(--ink);cursor:pointer;
+    text-decoration:underline;text-decoration-color:var(--line-soft);text-underline-offset:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .voltrack{height:7px;border-radius:4px;background:var(--panel-2);overflow:hidden}
+  .voltrack i{display:block;height:100%;background:var(--good)}
+  .volrow.low .voltrack i{background:var(--warn)}
+  .volrow.high .voltrack i{background:var(--rust)}
+  .volrow.muted .voltrack i{background:var(--ink-faint)}
+  .volnum{font-family:var(--font-mono);font-size:12px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .volstate{font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--good)}
+  .volrow.low .volstate{color:var(--warn)}
+  .volrow.high .volstate{color:var(--rust)}
+  .volrow.muted .volstate,.volrow.muted .volname{color:var(--ink-faint)}
+  .volmute{background:none;border:1px solid var(--line-soft);border-radius:6px;color:var(--ink-faint);font-family:var(--font-mono);font-size:10px;padding:6px 4px;min-height:34px;cursor:pointer}
+  /* On a phone the bar gets its own line under the name: five columns in 310 px squeezed it to a stub
+     and cut the longer muscle names off. */
+  @media(max-width:560px){
+    .volrow{grid-template-columns:minmax(0,1fr) auto auto 4.4em;grid-template-areas:"n c s m" "t t t t";row-gap:7px}
+    .volrow .volname{grid-area:n} .volrow .voltrack{grid-area:t} .volrow .volnum{grid-area:c}
+    .volrow .volstate{grid-area:s} .volrow > :last-child{grid-area:m}
+  }
+  .reclbl{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:14px 0 2px}
+  .librow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+  .librow .libname{flex:1;min-width:0;font-size:14px;color:var(--ink)}
+  .librow .libname .sub{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--ink-faint);margin-top:3px;line-height:1.5}
+  .librow.off .libname{color:var(--ink-faint)}
+  .libin{font-family:var(--font-mono);font-size:10.5px;color:var(--good);white-space:nowrap}
+  .browsehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 2px;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim)}
+  /* My Gym */
+  .gymgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0 4px}
+  .gymitem{display:flex;align-items:center;gap:9px;text-align:left;background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:8px;
+    padding:10px;cursor:pointer;color:var(--ink-dim);font-size:13px;font-family:var(--font-body)}
+  .gymitem .box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--line);flex:none}
+  .gymitem.on{border-color:var(--brass);color:var(--ink)}
+  .gymitem.on .box{background:var(--brass);border-color:var(--brass)}
+  .gymitem .sub{display:block;font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);margin-top:2px}
+  .gymadd{display:flex;gap:8px;margin-top:10px}
+  .gymadd input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px 12px;font-family:var(--font-mono);font-size:14px}
   .vseg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
   .vbtn{background:var(--panel-2);border:none;border-right:1px solid var(--line);color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:8px 11px;cursor:pointer;transition:.12s;line-height:1}
   .vbtn:last-child{border-right:none}
@@ -325,6 +378,8 @@
   .qnav button:hover{color:var(--ink);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--line)}
   .qnav button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
   .qnav button.on{background:var(--gold);color:var(--on-accent)}
+  /* six tabs: one row on a wide screen, three and three on a phone rather than four and a ragged two */
+  @media(max-width:560px){ .qnav button{flex:1 1 calc(33.333% - 6px);min-width:0} }
 
   /* Pages are hidden, not unmounted: saveEntry and readExForm read fields by id wherever they sit,
      so keeping every input in the DOM means the page split needed no change to the save path. */
@@ -555,7 +610,7 @@
     .meas-grid{grid-template-columns:1fr 1fr}
     .calib-grid{grid-template-columns:1fr}
     .day{min-width:0;flex:1 1 28%}
-    .qnav button{min-width:0;flex:1 1 22%;font-size:9px;letter-spacing:.5px}
+    .qnav button{min-width:0;flex:1 1 calc(33.333% - 6px);font-size:9px;letter-spacing:.5px}   /* six tabs: three and three */
     /* thumb-sized targets while logging: the set row is the one control used mid-workout */
     .setrow input{width:62px;padding:11px 6px}
     .setrow .rmset,.setrow .rmrest{padding:9px 8px;font-size:15px}
@@ -584,6 +639,8 @@
   <div class="qnav" id="tabs">
     <button type="button" data-pg="body" data-i18n="nav.body">Body</button>
     <button type="button" data-pg="workout" data-i18n="nav.workout">Workout</button>
+    <button type="button" data-pg="guide" data-i18n="nav.guide">Guide</button>
+    <button type="button" data-pg="gym" data-i18n="nav.gym">My Gym</button>
     <button type="button" data-pg="settings" data-i18n="nav.settings">Settings</button>
     <button type="button" data-pg="history" data-i18n="nav.history">History</button>
   </div>
@@ -801,6 +858,42 @@
 
   </div>
 
+  <div class="grid page" id="pg-guide">
+    <!-- SETS PER MUSCLE -->
+    <div class="card col-12" id="cardVol">
+      <div class="lbl" data-i18n-html="guide.vol.title">Sets per Muscle <span class="sub-note">· last 7 days · a primary muscle counts the set, a secondary counts half</span></div>
+      <div class="volband"><span data-i18n="guide.band">Aim for</span><input type="number" id="volLo" min="0" max="99" inputmode="numeric"><span>–</span><input type="number" id="volHi" min="1" max="100" inputmode="numeric"><span data-i18n="guide.band.unit">sets a week per muscle</span></div>
+      <div id="volWrap"></div>
+      <div class="sxnote" id="volNote"></div>
+    </div>
+    <!-- RECOMMENDED -->
+    <div class="card col-12" id="cardRec">
+      <div class="lbl" data-i18n-html="guide.rec.title">Recommended <span class="sub-note">· for muscles under your range, with what your gym has</span></div>
+      <div id="recWrap"></div>
+    </div>
+    <!-- BROWSE -->
+    <div class="card col-12" id="cardBrowse">
+      <div class="lbl" data-i18n-html="guide.browse.title">Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span></div>
+      <div class="muschips" id="browseMus"></div>
+      <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll">Show everything</button></div>
+      <div id="browseWrap"></div>
+    </div>
+  </div>
+
+  <div class="grid page" id="pg-gym">
+    <!-- MY GYM -->
+    <div class="card col-12" id="cardGym">
+      <div class="lbl" data-i18n-html="gym.title">My Gym <span class="sub-note">· what you can train with</span></div>
+      <div class="sxnote" data-i18n="gym.intro">Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.</div>
+      <div class="gymgrid" id="gymWrap"></div>
+      <div class="sxnote" id="gymCount"></div>
+      <div class="lbl" style="margin-top:24px" data-i18n="gym.own">Your own equipment</div>
+      <div class="sxnote" data-i18n="gym.own.note">A record of what else you have. The Guide only matches the list above.</div>
+      <div id="gymOwn"></div>
+      <div class="gymadd"><input type="text" id="gymName" data-i18n-ph="gym.ph" placeholder="Sled, battle ropes…" autocomplete="off"><button type="button" class="ghostbtn" id="gymAdd" data-i18n="btn.add">Add</button></div>
+    </div>
+  </div>
+
   <div class="grid page" id="pg-settings">
     <!-- DATA / SYNC -->
     <div class="card col-12">
@@ -979,6 +1072,9 @@
         <div class="field"><label data-i18n="sh.countsas">Counts as</label>
           <div class="seg" id="shGroup"></div>
         </div>
+        <div class="field"><label data-i18n="sh.muscles">Muscles · tap once for primary, twice for secondary</label>
+          <div class="muschips" id="shMus"></div>
+        </div>
         <div class="field" id="shLoadRow"><label data-i18n="sh.loading">Loading</label>
           <div class="seg" id="shMode">
             <button type="button" data-m="kg">kg</button><button type="button" data-m="bw" data-i18n="sh.bw">Bodyweight +kg</button><button type="button" data-m="sec" data-i18n="sh.secs">Seconds</button>
@@ -1085,6 +1181,7 @@ const EKEY = "tally:exedits:v1";     // renames and hides, including for built-i
 const TKEY = "tally:theme:v1";       // colours and font choice
 const CDKEY = "tally:cardio:v2";     // the cardio list
 const LKEY = "tally:lang:v1";        // display language, its own key - settings is rebuilt from a fixed set
+const GKEY = "tally:gym:v1";         // My Gym: equipment ticked, and anything the user added
 const KCAL_PER_KG = 7700;       // approx energy per kg of body mass change
 /* Lowest intake the app will ever recommend. The commonly cited minimums for unsupervised dieting
    are ~1500 kcal/day for men and ~1200 for women; below that it is hard to meet micronutrient needs
@@ -1259,6 +1356,139 @@ const exByKey = k => CAT_BY_KEY.get(k);
    written before the collection was emptied references keys like `bench`, and the recovery pass has
    to be able to rebuild a definition under that exact key or the history stops resolving. */
 const CX_KEY = /^(cx_)?[a-z][a-z0-9_]{0,31}$/;
+/* Muscles, for the Guide and the weekly count of sets. Structure only: names are 'mus.<key>' in LANG.
+   Shoulders are three, not one. Side and rear delts are the classic undertrained muscles, and a single
+   "shoulders" row would hide exactly what the count exists to show. `grp` only orders the Guide. */
+const MUSCLES = [
+  {key:'chest',grp:'push'}, {key:'delt_front',grp:'push'}, {key:'delt_side',grp:'push'}, {key:'triceps',grp:'push'},
+  {key:'back',grp:'pull'}, {key:'traps',grp:'pull'}, {key:'delt_rear',grp:'pull'}, {key:'biceps',grp:'pull'}, {key:'forearms',grp:'pull'},
+  {key:'quads',grp:'legs'}, {key:'hamstrings',grp:'legs'}, {key:'glutes',grp:'legs'}, {key:'calves',grp:'legs'},
+  {key:'abs',grp:'core'}, {key:'lower_back',grp:'core'}
+];
+const MUSCLE_KEYS = MUSCLES.map(m=>m.key);
+// known muscles only, each once, at most `cap` of them
+const muscleList = (a, cap) => Array.isArray(a) ? [...new Set(a.filter(k=>MUSCLE_KEYS.indexOf(k)>=0))].slice(0,cap) : [];
+const muscleGrp = k => { const m=MUSCLES.find(x=>x.key===k); return m ? m.grp : 'other'; };
+/* The weekly band of working sets per muscle. 10–20 is the usual range for building muscle. It is a
+   setting, because a three-day plan sits under it on purpose — which is also what muting is for. */
+const VOL_LO = 10, VOL_HI = 20;
+function volBand(s){
+  const lo=parseInt(s && s.volLo,10), hi=parseInt(s && s.volHi,10);
+  return (isNaN(lo) || isNaN(hi) || lo<0 || hi>100 || lo>=hi) ? {lo:VOL_LO, hi:VOL_HI} : {lo:lo, hi:hi};
+}
+const volState = (n, lo, hi) => n<lo ? 'low' : (n>hi ? 'high' : 'ok');
+
+/* Equipment, for My Gym. Structure only: names are 'eq.<key>' in LANG. */
+const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullup_bar','dip_bars','rings',
+               'cable','leg_press','leg_curl','leg_ext','back_ext','bands'];
+
+/* The Guide's library: a menu to pick from, never part of anyone's collection or week until they choose
+   it, so "nothing ships pre-filled" still holds exactly as written. Names are 'lib.<key>' in LANG and
+   deliberately English in both languages — that is how Thai gyms name these movements, and it means a
+   picked exercise simply keeps its name, like anything the user creates.
+   p primary muscles, s secondary, eq everything it needs (none: bodyweight, always available),
+   ld loading — kg, bw (bodyweight plus kg) or sec. */
+const LIB = [
+  {key:'bb_bench',        p:['chest'],                          s:['delt_front','triceps'],               eq:['barbell','bench','rack'], ld:'kg'},
+  {key:'bb_incline',      p:['chest'],                          s:['delt_front','triceps'],               eq:['barbell','bench','rack'], ld:'kg'},
+  {key:'db_bench',        p:['chest'],                          s:['delt_front','triceps'],               eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'db_incline',      p:['chest'],                          s:['delt_front','triceps'],               eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'db_fly',          p:['chest'],                          s:['delt_front'],                         eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'cable_fly',       p:['chest'],                          s:['delt_front'],                         eq:['cable'],                  ld:'kg'},
+  {key:'pushup',          p:['chest'],                          s:['delt_front','triceps','abs'],         eq:[],                         ld:'bw'},
+  {key:'ring_pushup',     p:['chest'],                          s:['delt_front','triceps','abs'],         eq:['rings'],                  ld:'bw'},
+  {key:'dip',             p:['chest','triceps'],                s:['delt_front'],                         eq:['dip_bars'],               ld:'bw'},
+  {key:'ring_dip',        p:['chest','triceps'],                s:['delt_front'],                         eq:['rings'],                  ld:'bw'},
+  {key:'ohp',             p:['delt_front'],                     s:['delt_side','triceps'],                eq:['barbell','rack'],         ld:'kg'},
+  {key:'db_ohp',          p:['delt_front'],                     s:['delt_side','triceps'],                eq:['dumbbells'],              ld:'kg'},
+  {key:'kb_press',        p:['delt_front'],                     s:['delt_side','triceps'],                eq:['kettlebell'],             ld:'kg'},
+  {key:'pike_pushup',     p:['delt_front'],                     s:['delt_side','triceps'],                eq:[],                         ld:'bw'},
+  {key:'front_raise',     p:['delt_front'],                     s:[],                                     eq:['dumbbells'],              ld:'kg'},
+  {key:'lat_raise',       p:['delt_side'],                      s:['traps'],                              eq:['dumbbells'],              ld:'kg'},
+  {key:'cable_lat_raise', p:['delt_side'],                      s:[],                                     eq:['cable'],                  ld:'kg'},
+  {key:'band_lat_raise',  p:['delt_side'],                      s:[],                                     eq:['bands'],                  ld:'bw'},
+  {key:'upright_row',     p:['delt_side','traps'],              s:['biceps'],                             eq:['barbell'],                ld:'kg'},
+  {key:'pushdown',        p:['triceps'],                        s:[],                                     eq:['cable'],                  ld:'kg'},
+  {key:'skull_crusher',   p:['triceps'],                        s:[],                                     eq:['ez_bar','bench'],         ld:'kg'},
+  {key:'db_oh_ext',       p:['triceps'],                        s:[],                                     eq:['dumbbells'],              ld:'kg'},
+  {key:'cg_bench',        p:['triceps'],                        s:['chest','delt_front'],                 eq:['barbell','bench','rack'], ld:'kg'},
+  {key:'diamond_pushup',  p:['triceps'],                        s:['chest','delt_front'],                 eq:[],                         ld:'bw'},
+  {key:'bench_dip',       p:['triceps'],                        s:['delt_front'],                         eq:['bench'],                  ld:'bw'},
+  {key:'pullup',          p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['pullup_bar'],             ld:'bw'},
+  {key:'chinup',          p:['back','biceps'],                  s:['forearms'],                           eq:['pullup_bar'],             ld:'bw'},
+  {key:'ring_pullup',     p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['rings'],                  ld:'bw'},
+  {key:'lat_pulldown',    p:['back'],                           s:['biceps','delt_rear'],                 eq:['cable'],                  ld:'kg'},
+  {key:'bb_row',          p:['back'],                           s:['delt_rear','biceps','lower_back'],    eq:['barbell'],                ld:'kg'},
+  {key:'db_row',          p:['back'],                           s:['delt_rear','biceps'],                 eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'cable_row',       p:['back'],                           s:['delt_rear','biceps'],                 eq:['cable'],                  ld:'kg'},
+  {key:'ring_row',        p:['back'],                           s:['delt_rear','biceps'],                 eq:['rings'],                  ld:'bw'},
+  {key:'bb_shrug',        p:['traps'],                          s:['forearms'],                           eq:['barbell'],                ld:'kg'},
+  {key:'db_shrug',        p:['traps'],                          s:['forearms'],                           eq:['dumbbells'],              ld:'kg'},
+  {key:'face_pull',       p:['delt_rear'],                      s:['traps'],                              eq:['cable'],                  ld:'kg'},
+  {key:'rear_fly',        p:['delt_rear'],                      s:['traps','back'],                       eq:['dumbbells'],              ld:'kg'},
+  {key:'band_pull_apart', p:['delt_rear'],                      s:['traps'],                              eq:['bands'],                  ld:'bw'},
+  {key:'bb_curl',         p:['biceps'],                         s:['forearms'],                           eq:['barbell'],                ld:'kg'},
+  {key:'db_curl',         p:['biceps'],                         s:['forearms'],                           eq:['dumbbells'],              ld:'kg'},
+  {key:'hammer_curl',     p:['biceps','forearms'],              s:[],                                     eq:['dumbbells'],              ld:'kg'},
+  {key:'ez_curl',         p:['biceps'],                         s:['forearms'],                           eq:['ez_bar'],                 ld:'kg'},
+  {key:'cable_curl',      p:['biceps'],                         s:['forearms'],                           eq:['cable'],                  ld:'kg'},
+  {key:'band_curl',       p:['biceps'],                         s:['forearms'],                           eq:['bands'],                  ld:'bw'},
+  {key:'wrist_curl',      p:['forearms'],                       s:[],                                     eq:['dumbbells'],              ld:'kg'},
+  {key:'farmer_carry',    p:['forearms','traps'],               s:['abs'],                                eq:['dumbbells'],              ld:'sec'},
+  {key:'dead_hang',       p:['forearms'],                       s:['back'],                               eq:['pullup_bar'],             ld:'sec'},
+  {key:'back_squat',      p:['quads','glutes'],                 s:['hamstrings','lower_back','abs'],      eq:['barbell','rack'],         ld:'kg'},
+  {key:'front_squat',     p:['quads'],                          s:['glutes','abs','lower_back'],          eq:['barbell','rack'],         ld:'kg'},
+  {key:'goblet_squat',    p:['quads','glutes'],                 s:['abs'],                                eq:['dumbbells'],              ld:'kg'},
+  {key:'leg_press',       p:['quads','glutes'],                 s:['hamstrings'],                         eq:['leg_press'],              ld:'kg'},
+  {key:'split_squat',     p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'lunge',           p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells'],              ld:'kg'},
+  {key:'pistol',          p:['quads','glutes'],                 s:['hamstrings','abs'],                   eq:[],                         ld:'bw'},
+  {key:'leg_ext',         p:['quads'],                          s:[],                                     eq:['leg_ext'],                ld:'kg'},
+  {key:'step_up',         p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'air_squat',       p:['quads','glutes'],                 s:[],                                     eq:[],                         ld:'bw'},
+  {key:'rdl',             p:['hamstrings','glutes'],            s:['lower_back','forearms'],              eq:['barbell'],                ld:'kg'},
+  {key:'db_rdl',          p:['hamstrings','glutes'],            s:['lower_back','forearms'],              eq:['dumbbells'],              ld:'kg'},
+  {key:'leg_curl',        p:['hamstrings'],                     s:['calves'],                             eq:['leg_curl'],               ld:'kg'},
+  {key:'nordic',          p:['hamstrings'],                     s:[],                                     eq:[],                         ld:'bw'},
+  {key:'deadlift',        p:['hamstrings','glutes','lower_back'], s:['back','traps','forearms','quads'],  eq:['barbell'],                ld:'kg'},
+  {key:'hip_thrust',      p:['glutes'],                         s:['hamstrings','quads'],                 eq:['barbell','bench'],        ld:'kg'},
+  {key:'glute_bridge',    p:['glutes'],                         s:['hamstrings'],                         eq:[],                         ld:'bw'},
+  {key:'kb_swing',        p:['glutes','hamstrings'],            s:['lower_back','abs'],                   eq:['kettlebell'],             ld:'kg'},
+  {key:'calf_raise',      p:['calves'],                         s:[],                                     eq:[],                         ld:'bw'},
+  {key:'db_calf_raise',   p:['calves'],                         s:[],                                     eq:['dumbbells'],              ld:'kg'},
+  {key:'seated_calf',     p:['calves'],                         s:[],                                     eq:['dumbbells','bench'],      ld:'kg'},
+  {key:'plank',           p:['abs'],                            s:['delt_front'],                         eq:[],                         ld:'sec'},
+  {key:'side_plank',      p:['abs'],                            s:[],                                     eq:[],                         ld:'sec'},
+  {key:'hanging_leg_raise', p:['abs'],                          s:['forearms'],                           eq:['pullup_bar'],             ld:'bw'},
+  {key:'crunch',          p:['abs'],                            s:[],                                     eq:[],                         ld:'bw'},
+  {key:'cable_crunch',    p:['abs'],                            s:[],                                     eq:['cable'],                  ld:'kg'},
+  {key:'dead_bug',        p:['abs'],                            s:[],                                     eq:[],                         ld:'bw'},
+  {key:'hollow_hold',     p:['abs'],                            s:[],                                     eq:[],                         ld:'sec'},
+  {key:'back_ext',        p:['lower_back'],                     s:['glutes','hamstrings'],                eq:['back_ext'],               ld:'bw'},
+  {key:'superman',        p:['lower_back'],                     s:['glutes'],                             eq:[],                         ld:'sec'},
+  {key:'good_morning',    p:['lower_back','hamstrings'],        s:['glutes'],                             eq:['barbell','rack'],         ld:'kg'}
+];
+const libByKey = k => LIB.find(l=>l.key===k);
+// available when every item it needs is ticked; an exercise that needs nothing always is
+const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
+/* Working sets per muscle over a set of days. A set counts in full towards each primary muscle and half
+   towards each secondary — the usual convention, because a press works the triceps but nothing like a
+   pushdown does. Read off the history every time and never stored, so tagging a movement counts its
+   past sets at once. A movement with no muscles counts towards nothing, and is reported, so the Guide
+   can say so rather than quietly under-count. */
+function muscleVolume(days, exOf){
+  const vol={}; MUSCLE_KEYS.forEach(k=>vol[k]=0);
+  const untagged=new Set();
+  (days||[]).forEach(e=>Object.keys((e && e.lifts)||{}).forEach(key=>{
+    const n=(e.lifts[key]||[]).filter(s=>s && s.reps>0).length; if(!n) return;
+    const ex=exOf(key), p=(ex && ex.prim)||[], s=(ex && ex.sec)||[];
+    if(!p.length && !s.length){ untagged.add(key); return; }
+    p.forEach(m=>{ if(m in vol) vol[m]+=n; });
+    s.forEach(m=>{ if(m in vol) vol[m]+=n/2; });
+  }));
+  return {vol:vol, untagged:[...untagged]};
+}
+
 /* Training goals are presets for a movement's rep range and nothing more: picking one fills the
    range, and the range is what the coach reads. The goal is worked back from the range rather than
    stored beside it — a stored label could only ever drift away from the numbers it names. The bands
@@ -1290,6 +1520,8 @@ function normCustomEx(x){
   const rMin=parseInt(x.repMin,10), rMax=parseInt(x.repMax,10);
   const ranged = !isNaN(rMin) && !isNaN(rMax) && rMin>=1 && rMax>=rMin && rMax<=(unit==='sec'?3600:100);
   const st=parseFloat(x.step);
+  // muscles are optional and structural; a muscle cannot be both what a movement is for and a side effect
+  const prim=muscleList(x.prim,3), sec=muscleList(x.sec,4).filter(k=>prim.indexOf(k)<0);
   return { key, name,
     short: (String(x.short==null?'':x.short).trim().slice(0,16) || name.toLowerCase().slice(0,16)),
     note:  String(x.note==null?'':x.note).trim().slice(0,60),   // may be empty; exNote() supplies the fallback
@@ -1300,6 +1532,8 @@ function normCustomEx(x){
     repMin: ranged ? rMin : null,
     repMax: ranged ? rMax : null,
     step:   ranged ? ((isNaN(st)||st<0||st>50) ? STEP_DEF(unit) : Math.round(st*100)/100) : null,
+    prim: prim, sec: sec,
+    lib: (typeof x.lib==='string' && libByKey(x.lib)) ? x.lib : null,    // which Guide exercise it came from
     retired: !!x.retired, custom:true };
 }
 function cxKeyFor(name){
@@ -1427,7 +1661,7 @@ const LINE_COLORS = ['#0d59d1','#f7801e','#ffc21a','#e11d2a','#8b2fc9','#1b9fd8'
 let entries = [];
 let settings = {kcalTarget:DEF_TARGET, chartEx:null, restSec:DEF_REST, restSound:true, mobLead:5,
                 sex:'male', protFloor:DEF_PROT, protPerKg:null, activity:'mod',
-                age:null, ageSet:null};
+                age:null, ageSet:null, volLo:VOL_LO, volHi:VOL_HI, volMute:[]};
 /* Age is entered directly rather than as a year of birth: a year leaves it ambiguous whether the
    birthday has happened yet, and the app would have to guess. A stored age would instead go stale,
    so the date it was entered is stored with it and the age advances on its own. Both errors are
@@ -1461,7 +1695,11 @@ function normSettings(s){
     protPerKg: (function(){ const p=parseFloat(s.protPerKg); return (isNaN(p)||p<0.5||p>4)?null:p; })(),
     age: (function(){ const a=parseInt(s.age,10); return (isNaN(a)||a<10||a>120)?null:a; })(),
     ageSet: (typeof s.ageSet==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s.ageSet)) ? s.ageSet : null,
-    activity: (ACTIVITY.some(a=>a.key===s.activity)) ? s.activity : 'mod'
+    activity: (ACTIVITY.some(a=>a.key===s.activity)) ? s.activity : 'mod',
+    // the weekly band of sets per muscle, and the muscles whose "too little" is muted on purpose
+    volLo: volBand(s).lo,
+    volHi: volBand(s).hi,
+    volMute: muscleList(s.volMute, MUSCLE_KEYS.length)
   };
 }
 let calPeriod = 14;
@@ -1666,7 +1904,7 @@ async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
   catch(e){ console.error('save failed',e); flash('Save failed — data may not have persisted',true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','protPerKg','age','ageSet','activity'];
+const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','protPerKg','age','ageSet','activity','volLo','volHi','volMute'];
 async function loadSettings(){
   // rebuilt from known keys only, so retired settings can't accumulate
   try{
@@ -1730,14 +1968,15 @@ async function recoverMovements(){
 /* ---------- pages ---------- */
 /* Four pages, switched by hiding rather than rebuilding. The day bar rides above them and is only
    relevant where a day is being logged, so it hides on Settings and History. */
-const PAGES=['body','workout','settings','history'];
+const PAGES=['body','workout','guide','gym','settings','history'];
 let curPage='body';
 function showPage(k){
   if(PAGES.indexOf(k)<0) k='body';
   curPage=k;
   PAGES.forEach(p=>{ const el=$('pg-'+p); if(el) el.classList.toggle('on', p===k); });
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on', b.dataset.pg===k));
-  const bar=$("dayBar"); if(bar) bar.classList.toggle('off', k==='settings'||k==='history');
+  // the Guide reads the last seven days and My Gym no day at all, so neither offers a day to pick
+  const bar=$("dayBar"); if(bar) bar.classList.toggle('off', ['settings','history','guide','gym'].indexOf(k)>=0);
   window.scrollTo(0,0);
 }
 // step the logged day without opening the picker
@@ -1960,6 +2199,31 @@ async function loadCardio(){
 async function persistCardio(){
   try{ await STORE.set(CDKEY, JSON.stringify(cardios)); return true; }
   catch(e){ console.error('cardio list save failed',e); return false; }
+}
+/* My Gym, all in one key: what is ticked, what the user added, and whether they have set it up at all.
+   Until they have, the Guide shows the whole library — hiding everything because nothing is ticked would
+   read as an empty app. Items they add are a record of what they own; the library matches its own list. */
+let gym = {set:false, have:[], own:[]};
+function normGym(g){
+  g=(g && typeof g==='object') ? g : {};
+  const have=Array.isArray(g.have) ? [...new Set(g.have.filter(k=>EQUIP.indexOf(k)>=0))] : [];
+  const own=[], seen=new Set();
+  (Array.isArray(g.own) ? g.own : []).forEach(x=>{
+    const name=String((x && x.name)||'').trim().slice(0,40); if(!name) return;
+    let k=(x && /^ge_[a-z0-9]{1,30}$/.test(x.key)) ? x.key : 'ge_'+(name.toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,24)||'item');
+    const base=k; let n=1;
+    while(seen.has(k)) k=base+(++n);
+    seen.add(k); own.push({key:k, name:name});
+  });
+  return {set:!!g.set, have:have, own:own};
+}
+async function loadGym(){
+  try{ const v=await STORE.get(GKEY); gym=normGym(v!=null ? JSON.parse(v) : null); }
+  catch(e){ console.error('gym read failed',e); gym=normGym(null); }
+}
+async function persistGym(){
+  try{ await STORE.set(GKEY, JSON.stringify(gym)); return true; }
+  catch(e){ console.error('gym save failed',e); return false; }
 }
 async function recoverCardio(){
   const seen=new Set();
@@ -2455,6 +2719,27 @@ function shGroupSet(k){
   document.querySelectorAll('#shGroup button').forEach(b=>b.classList.toggle('on', b.dataset.g===k));
 }
 const shGroupGet = () => { const b=document.querySelector('#shGroup button.on'); return b?b.dataset.g:'other'; };
+/* ---------- muscles, on the movement sheet ---------- */
+/* One chip per muscle, cycling off, primary, secondary, off: one tap for what the movement is for, two
+   for what it also works. A fourth primary is not allowed, so it lands as secondary instead. */
+function shMusDraw(prim, sec){
+  const box=$("shMus"); if(!box) return;
+  box.innerHTML=MUSCLES.map(m=>{
+    const st=prim.indexOf(m.key)>=0 ? ' p' : (sec.indexOf(m.key)>=0 ? ' s' : '');
+    return `<button type="button" class="mchip${st}" data-m="${m.key}">${esc(t('mus.'+m.key))}</button>`;
+  }).join('');
+  box.querySelectorAll('.mchip').forEach(b=>b.onclick=()=>{
+    const was=b.classList.contains('p') ? 'p' : (b.classList.contains('s') ? 's' : '');
+    b.classList.remove('p','s');
+    if(was==='') b.classList.add(box.querySelectorAll('.mchip.p').length<3 ? 'p' : 's');
+    else if(was==='p') b.classList.add('s');
+  });
+}
+function shMusRead(){
+  const box=$("shMus"), pick=c=>box ? [...box.querySelectorAll('.mchip.'+c)].map(b=>b.dataset.m) : [];
+  return {prim:pick('p'), sec:pick('s')};
+}
+
 /* ---------- the coach's range, on the movement sheet ---------- */
 const shModeGet = () => { const b=document.querySelector('#shMode button.on'); return b?b.dataset.m:'kg'; };
 const shGoalGet = () => { const b=document.querySelector('#shGoal button.on'); return b?b.dataset.g:'off'; };
@@ -2510,7 +2795,7 @@ function shNew(){
   shGroupSet('other');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m==='kg'));
   $("shLoadRow").style.display=''; $("shDefRow").style.display=''; $("shCoachRow").style.display='';
-  shCoachFill(null);
+  shCoachFill(null); shMusDraw([],[]);
   $("shDelete").style.display='none';
   $("shCreate").textContent=t(shAddToDay?'sh.createadd':'sh.addcoll');
   shMsg(''); shShow('form');
@@ -2530,7 +2815,7 @@ function shEdit(key){
   $("shLoadRow").style.display=editable?'':'none';
   $("shDefRow").style.display=editable?'':'none';
   $("shCoachRow").style.display=editable?'':'none';
-  shCoachFill(ex);
+  shCoachFill(ex); shMusDraw(ex.prim||[], ex.sec||[]);
   $("shDelete").style.display='';
   $("shCreate").textContent=t('btn.saveshort');
   shMsg(''); shShow('form');
@@ -2557,8 +2842,8 @@ async function shCreate(){
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
       own.def = (isNaN(d)||d<0) ? 0 : d;
       // through the gatekeeper, so an edited range is held to exactly the rules a new one is
-      const chk=normCustomEx(Object.assign({}, own, coach));
-      if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; }
+      const chk=normCustomEx(Object.assign({}, own, coach, shMusRead()));
+      if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; own.prim=chk.prim; own.sec=chk.sec; }
       await persistCatalogue();
     }
     await persistExEdits();
@@ -2583,7 +2868,8 @@ async function shCreate(){
   const def=normCustomEx({
     key: cxKeyFor(name), name, short:short, note:note, group: shGroupGet(),
     def: $("shDef").value, added: mode==='bw', unit: mode==='sec' ? 'sec' : null,
-    repMin: coach.repMin, repMax: coach.repMax, step: coach.step
+    repMin: coach.repMin, repMax: coach.repMax, step: coach.step,
+    prim: shMusRead().prim, sec: shMusRead().sec
   });
   if(!def){ shMsg(t('msg.badname'),true); return; }
   customEx.push(def);
@@ -2939,6 +3225,8 @@ function drawColl(){
     const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
     const inDays=DAYS.filter(d=>sessionEx(d.key).indexOf(ex.key)>=0).map(d=>dayShort(d.key));
     const bits=[loadDesc(ex)];
+    // the muscles it trains first, or a nudge: an untagged movement counts towards nothing in the Guide
+    bits.push((ex.prim && ex.prim.length) ? ex.prim.map(m=>t('mus.'+m)).join(', ') : t('coll.nomus'));
     bits.push(days?tf('coll.sessions',{n:days}):t('coll.never'));
     if(inDays.length) bits.push(tf('coll.indays',{days:inDays.join(', ')}));
     return `<div class="collrow${ex.retired?' off':''}" data-k="${ex.key}">
@@ -2956,6 +3244,138 @@ function drawColl(){
   wrap.querySelectorAll('[data-cedit]').forEach(b=>b.onclick=()=>{ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); });
   wrap.querySelectorAll('[data-cret]').forEach(b=>b.onclick=()=>shRetire(b.dataset.cret));
 }
+
+/* ---------- the Guide ---------- */
+/* Three views of one question, what to train next: sets per muscle over the last seven days, a
+   recommendation for each muscle under the band using what the gym has, and the library by muscle.
+   Nothing here ever schedules anything. Adding an exercise puts it in the collection, and which day it
+   goes on stays the user's choice, made the usual way. */
+let guideMus=null, guideAll=false;
+const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
+// already in the collection, by its library link or by name — it may well have been made by hand
+function libOwned(l){
+  const nm=t('lib.'+l.key,'en').toLowerCase();
+  return CATALOGUE.find(x=>x.lib===l.key || x.name.toLowerCase()===nm) || null;
+}
+const libLive = l => { const o=libOwned(l); return !!o && !o.retired; };
+// until My Gym is set up, everything counts as available; hiding the library would read as an empty app
+const libUsable = l => !gym.set || libAvailable(l, gym.have);
+function libRow(l){
+  const ok=libUsable(l);
+  const mus=l.p.map(k=>t('mus.'+k)).join(', ') + (l.s.length ? ' · '+tf('guide.also',{list:l.s.map(k=>t('mus.'+k)).join(', ')}) : '');
+  const eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.bodyweight');
+  const act=libLive(l) ? `<span class="libin">${esc(t('guide.in'))}</span>`
+                       : `<button type="button" class="collbtn" data-add="${l.key}">${esc(t('guide.add'))}</button>`;
+  return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('lib.'+l.key))}`
+    + `<span class="sub">${esc(mus)}<br>${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>${act}</div>`;
+}
+function drawGuide(){
+  const wrap=$("volWrap"); if(!wrap) return;
+  const lo=settings.volLo, hi=settings.volHi, mute=settings.volMute||[];
+  const r=muscleVolume(entries.filter(e=>within7(e.date)), exByKey), vol=r.vol;
+  // muting silences "too little" only; too much is always worth saying
+  const stOf=k=>(vol[k]<lo && mute.indexOf(k)>=0) ? 'muted' : volState(vol[k],lo,hi);
+  [["volLo",lo],["volHi",hi]].forEach(([id,v])=>{ const el=$(id); if(el && document.activeElement!==el) el.value=v; });
+
+  wrap.innerHTML=['push','pull','legs','core'].map(g=>`<div class="volgrp">${esc(groupName(g))}</div>`
+    + MUSCLES.filter(m=>m.grp===g).map(m=>{
+        const k=m.key, st=stOf(k), pct=Math.min(100, vol[k]/hi*100);
+        const mb=(st==='low' || st==='muted') ? `<button type="button" class="volmute" data-mute="${k}">${esc(t(st==='muted'?'guide.unmute':'guide.mute'))}</button>` : '<span></span>';
+        return `<div class="volrow ${st}"><button type="button" class="volname" data-pick="${k}">${esc(t('mus.'+k))}</button>`
+          + `<div class="voltrack"><i style="width:${pct}%"></i></div><div class="volnum">${fmtSetsN(vol[k])}</div>`
+          + `<div class="volstate">${esc(t('guide.st.'+st))}</div>${mb}</div>`;
+      }).join('')).join('');
+  const names=r.untagged.map(k=>{ const ex=exByKey(k); return ex ? ex.name : k; });
+  $("volNote").textContent = names.length ? tf('guide.untagged',{list:names.join(', ')})
+    : (entries.some(e=>within7(e.date) && Object.keys(e.lifts||{}).length) ? '' : t('guide.novol'));
+
+  // Recommended: the four muscles furthest under the band, each with the first two things the gym can
+  // do for it — ones not yet in the collection first, though an owned one still counts. Four, not all:
+  // on a three-day plan nearly every muscle is under ten, and a list of fifteen is not a recommendation.
+  const low=MUSCLES.filter(m=>stOf(m.key)==='low').sort((a,b)=>vol[a.key]-vol[b.key]);
+  const focus=low.slice(0,4);
+  $("recWrap").innerHTML = !low.length ? `<div class="restnote">${esc(t('guide.rec.none'))}</div>`
+    : focus.map(m=>{
+        const picks=LIB.filter(l=>l.p.indexOf(m.key)>=0 && libUsable(l)).sort((a,b)=>(libLive(a)?1:0)-(libLive(b)?1:0)).slice(0,2);
+        return `<div class="reclbl">${esc(tf('guide.rec.of',{name:t('mus.'+m.key), n:fmtSetsN(vol[m.key]), lo:lo}))}</div>`
+          + (picks.length ? picks.map(libRow).join('') : `<div class="restnote">${esc(t('guide.rec.nothing'))}</div>`);
+      }).join('')
+      + (low.length>focus.length ? `<div class="sxnote">${esc(tf('guide.rec.more',{n:low.length-focus.length}))}</div>` : '');
+
+  if(!guideMus || MUSCLE_KEYS.indexOf(guideMus)<0) guideMus = low.length ? low[0].key : 'chest';
+  $("browseMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${m.key===guideMus?' on':''}" data-pick="${m.key}">${esc(t('mus.'+m.key))}</button>`).join('');
+  const show=l=>guideAll || libUsable(l);
+  const first=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), also=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
+  const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
+  const mn=t('mus.'+guideMus);
+  $("browseCount").textContent=tf('guide.count',{n:first.length+also.length, name:mn});
+  $("browseWrap").innerHTML = (first.length || also.length)
+    ? first.map(libRow).join('') + (also.length ? `<div class="reclbl">${esc(tf('guide.alsoworks',{name:mn}))}</div>`+also.map(libRow).join('') : '')
+    : `<div class="restnote">${esc(tf('guide.none',{name:mn}))}</div>`;
+
+  const pg=$("pg-guide");
+  pg.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>guideAdd(b.dataset.add));
+  pg.querySelectorAll('[data-mute]').forEach(b=>b.onclick=()=>volMuteToggle(b.dataset.mute));
+  pg.querySelectorAll('[data-pick]').forEach(b=>b.onclick=()=>{
+    guideMus=b.dataset.pick; drawGuide();
+    if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); }
+  });
+}
+async function guideAdd(k){
+  const l=libByKey(k); if(!l) return;
+  const have=libOwned(l);
+  if(have){
+    // defined already, perhaps hidden: bring it back rather than make a second one with its own history
+    if(have.retired){ const ed=exEdits[have.key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete exEdits[have.key]; } await persistExEdits(); }
+    render(); return;
+  }
+  const name=t('lib.'+k,'en');
+  const def=normCustomEx({key:cxKeyFor(name), name:name, group:muscleGrp(l.p[0]), def:0,
+    added:l.ld==='bw', unit:l.ld==='sec' ? 'sec' : null, prim:l.p, sec:l.s, lib:k});
+  if(!def) return;
+  customEx.push(def);
+  if(!await persistCatalogue()){ customEx.pop(); rebuildCatalogue(); return; }
+  render();
+}
+async function volMuteToggle(k){
+  const m=settings.volMute||(settings.volMute=[]), i=m.indexOf(k);
+  if(i>=0) m.splice(i,1); else m.push(k);
+  await persistSettings(); drawGuide();
+}
+// a band has to be a band: an impossible pair is ignored and the boxes go back to the last good one
+async function volBandSet(){
+  const lo=parseInt($("volLo").value,10), hi=parseInt($("volHi").value,10);
+  if(!isNaN(lo) && !isNaN(hi) && lo>=0 && hi<=100 && lo<hi){ settings.volLo=lo; settings.volHi=hi; await persistSettings(); }
+  drawGuide();
+}
+
+/* ---------- My Gym ---------- */
+function drawGym(){
+  const wrap=$("gymWrap"); if(!wrap) return;
+  wrap.innerHTML=EQUIP.map(q=>{
+    const on=gym.have.indexOf(q)>=0, n=LIB.filter(l=>l.eq.indexOf(q)>=0).length;
+    return `<button type="button" class="gymitem${on?' on':''}" data-eq="${q}"><span class="box"></span>`
+      + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tf('gym.uses',{n:n}))}</span></span></button>`;
+  }).join('');
+  $("gymCount").textContent = gym.set ? tf('gym.count',{n:LIB.filter(l=>libAvailable(l, gym.have)).length, total:LIB.length}) : t('gym.unset');
+  $("gymOwn").innerHTML = gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
+    + `<button type="button" class="collbtn" data-gdel="${o.key}">✕</button></div>`).join('');
+  wrap.querySelectorAll('[data-eq]').forEach(b=>b.onclick=()=>gymToggle(b.dataset.eq));
+  $("gymOwn").querySelectorAll('[data-gdel]').forEach(b=>b.onclick=()=>gymDelOwn(b.dataset.gdel));
+}
+// the first tick is what switches the Guide from showing everything to showing what you have
+async function gymToggle(q){
+  const i=gym.have.indexOf(q);
+  if(i>=0) gym.have.splice(i,1); else gym.have.push(q);
+  gym.set=true; await persistGym(); drawGym(); drawGuide();
+}
+// your own items are a record only, so adding one does not switch the Guide over to filtering
+async function gymAddOwn(){
+  const el=$("gymName"), name=el.value.trim(); if(!name) return;
+  gym=normGym({set:gym.set, have:gym.have, own:gym.own.concat([{name:name}])});
+  el.value=''; await persistGym(); drawGym();
+}
+async function gymDelOwn(k){ gym.own=gym.own.filter(o=>o.key!==k); await persistGym(); drawGym(); }
 
 /* ---------- mobility ---------- */
 /* The card writes straight through to the entry rather than waiting for Save. A stretch finished
@@ -3330,7 +3750,7 @@ function render(){
   setDot("dProt",protHit,7,5);
   $("mToday").textContent=entries.length?entries[entries.length-1].date.slice(5):'—';
 
-  drawSched(); drawWeight(weighed); drawStrength(); drawBody(); drawProg(); drawColl(); drawHistory(); drawCalibration();
+  drawSched(); drawWeight(weighed); drawStrength(); drawBody(); drawProg(); drawColl(); drawHistory(); drawCalibration(); drawGuide(); drawGym();
   syncChartSegs(); refreshManualTarget(); drawProtein(); drawBMR(); drawTheme();
 }
 function fmtDelta(lbl, d, unit){
@@ -3792,7 +4212,7 @@ function exportObject(extra){
   // renamed from 'body-and-iron' at 2.2; import never checked this field, so older backups still load
   return Object.assign({app:'tally', version:4, exportedAt:new Date().toISOString(),
     entries, settings, exercises:customEx, plan:planExtras, stretches:stretches, exEdits:exEdits, cardio:cardios,
-    theme:theme, lang:lang}, extra||{});
+    theme:theme, lang:lang, gym:gym}, extra||{});
 }
 function exportPayload(){ return JSON.stringify(exportObject()); }
 function doExport(){
@@ -4010,7 +4430,7 @@ function resetImportBtn(){ importArmed=false; if(importTimer) clearTimeout(impor
 async function loadImport(){
   const raw=$("importBox").value.trim();
   if(!raw){ smsg(t('sync.noload'),true); return; }
-  let data, impEntries, impSettings=null, impEx=null, impPlan=null, impSx=null, impEd=null, impCd=null, impTh=null, impLg=null;
+  let data, impEntries, impSettings=null, impEx=null, impPlan=null, impSx=null, impEd=null, impCd=null, impTh=null, impLg=null, impGym=null;
   try{ data=JSON.parse(raw); }
   catch(e){ resetImportBtn(); smsg(t('sync.notvalid'),true); return; }
   if(Array.isArray(data)){ impEntries=data; }                                   // legacy bare-array export
@@ -4024,6 +4444,7 @@ async function loadImport(){
     if(data.theme && typeof data.theme==='object') impTh=data.theme;
     if(typeof data.lang==='string' && LANG[data.lang]) impLg=data.lang;
     if(data.exEdits && typeof data.exEdits==='object') impEd=data.exEdits;
+    if(data.gym && typeof data.gym==='object') impGym=data.gym;          // 5.1 and up
   }
   else { resetImportBtn(); smsg(t('sync.noentries'),true); return; }
   const seen=impEntries.length;
@@ -4059,6 +4480,7 @@ async function loadImport(){
   if(impEd){ exEdits=Object.assign(exEdits, normExEdits(impEd)); await persistExEdits(); }
   if(impCd){ const bk=new Map(cardios.map(c=>[c.key,c])); impCd.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
   if(impTh){ theme=normTheme(impTh); await persistTheme(); }
+  if(impGym){ gym=normGym(impGym); await persistGym(); }
   if(impLg){ lang=impLg; try{ await STORE.set(LKEY, lang); }catch(e){} applyLang(); }
   if(impPlan){ planExtras=normPlan(impPlan); await persistPlan(); }
   if(impSettings && typeof impSettings==='object'){ settings=normSettings(impSettings); await persistSettings(); }
@@ -4292,6 +4714,7 @@ const LANG = {
     'coll.hidden':           'hidden',
     'coll.indays':           'in {days}',
     'coll.never':            'never logged',
+    'coll.nomus':            'no muscles set',
     'coll.search':           'Search the collection',
     'coll.sessions':         '{n} sessions logged',
     'coll.title':            'Workout Collection <span class="sub-note">· the library every session picks from · adding here does not add it to today</span>',
@@ -4318,6 +4741,21 @@ const LANG = {
     'day.wed':               'Wednesday',
     'disc':                  '<b>These are estimates for tracking your own training, not medical or dietary advice.</b> Every formula here is a population average applied to one person, and every one of them can be wrong for you. Nothing in this app is a diagnosis, a treatment, or a substitute for a doctor or a registered dietitian. If you are pregnant, under 18, managing a medical condition or an eating disorder, or taking medication affected by diet, speak to a qualified professional before acting on any number here. You are responsible for what you do with it.',
     'done.n':                '{n} done',
+    'eq.back_ext':           'Back extension bench',
+    'eq.bands':              'Resistance bands',
+    'eq.barbell':            'Barbell',
+    'eq.bench':              'Bench',
+    'eq.cable':              'Cable machine',
+    'eq.dip_bars':           'Dip bars',
+    'eq.dumbbells':          'Dumbbells',
+    'eq.ez_bar':             'EZ bar',
+    'eq.kettlebell':         'Kettlebell',
+    'eq.leg_curl':           'Leg curl machine',
+    'eq.leg_ext':            'Leg extension machine',
+    'eq.leg_press':          'Leg press',
+    'eq.pullup_bar':         'Pull-up bar',
+    'eq.rack':               'Squat rack',
+    'eq.rings':              'Gymnastic rings',
     'ex.added':              'added',
     'ex.defaultnote':        'added movement',
     'ex.droptip':            'Remove from this day',
@@ -4351,11 +4789,124 @@ const LANG = {
     'grp.other':             'Other',
     'grp.pull':              'Pull',
     'grp.push':              'Push',
+    'guide.add':             '+ Add',
+    'guide.all.off':         'Only what my gym has',
+    'guide.all.on':          'Show everything',
+    'guide.also':            'also {list}',
+    'guide.alsoworks':       'Also works {name}',
+    'guide.band':            'Aim for',
+    'guide.band.unit':       'sets a week per muscle',
+    'guide.bodyweight':      'Bodyweight',
+    'guide.browse.title':    'Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span>',
+    'guide.count':           '{n} for {name}',
+    'guide.in':              'In collection',
+    'guide.mute':            'Mute',
+    'guide.needs':           'needs {list}',
+    'guide.none':            'Nothing in your gym trains {name}. Turn on Show everything to see what would.',
+    'guide.novol':           'Nothing logged in the last 7 days yet.',
+    'guide.rec.more':        '{n} more under your range; every muscle is listed in Sets per Muscle above.',
+    'guide.rec.none':        'Every muscle you have not muted is in range this week.',
+    'guide.rec.nothing':     'Nothing your gym has trains this first. Browse it with Show everything on.',
+    'guide.rec.of':          '{name} · {n} of {lo} sets',
+    'guide.rec.title':       'Recommended <span class="sub-note">· for muscles under your range, with what your gym has</span>',
+    'guide.st.high':         'Over',
+    'guide.st.low':          'Under',
+    'guide.st.muted':        'Muted',
+    'guide.st.ok':           'In range',
+    'guide.unmute':          'Unmute',
+    'guide.untagged':        'Not counted, because no muscles are set: {list}. Set them in Workout → Workout Collection.',
+    'guide.vol.title':       'Sets per Muscle <span class="sub-note">· last 7 days · a primary muscle counts the set, a secondary counts half</span>',
+    'gym.count':             'With this you can do {n} of the {total} exercises in the Guide.',
+    'gym.intro':             'Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.',
+    'gym.own':               'Your own equipment',
+    'gym.own.note':          'A record of what else you have. The Guide only matches the list above.',
+    'gym.ph':                'Sled, battle ropes…',
+    'gym.title':             'My Gym <span class="sub-note">· what you can train with</span>',
+    'gym.unset':             'Nothing ticked yet, so the Guide shows every exercise.',
+    'gym.uses':              '{n} exercises',
     'hist.date':             'Date',
     'hist.day':              'Day',
     'hist.empty':            'No entries logged yet. Log your first day on the Body or Workout page.',
     'hist.mob':              'Mobility',
     'hist.title':            'History',
+    'lib.air_squat':         'Bodyweight squat',
+    'lib.back_ext':          'Back extension',
+    'lib.back_squat':        'Back squat',
+    'lib.band_curl':         'Band curl',
+    'lib.band_lat_raise':    'Band lateral raise',
+    'lib.band_pull_apart':   'Band pull-apart',
+    'lib.bb_bench':          'Barbell bench press',
+    'lib.bb_curl':           'Barbell curl',
+    'lib.bb_incline':        'Incline barbell press',
+    'lib.bb_row':            'Barbell row',
+    'lib.bb_shrug':          'Barbell shrug',
+    'lib.bench_dip':         'Bench dip',
+    'lib.cable_crunch':      'Cable crunch',
+    'lib.cable_curl':        'Cable curl',
+    'lib.cable_fly':         'Cable fly',
+    'lib.cable_lat_raise':   'Cable lateral raise',
+    'lib.cable_row':         'Seated cable row',
+    'lib.calf_raise':        'Standing calf raise',
+    'lib.cg_bench':          'Close-grip bench press',
+    'lib.chinup':            'Chin-up',
+    'lib.crunch':            'Crunch',
+    'lib.db_bench':          'Dumbbell bench press',
+    'lib.db_calf_raise':     'Dumbbell calf raise',
+    'lib.db_curl':           'Dumbbell curl',
+    'lib.db_fly':            'Dumbbell fly',
+    'lib.db_incline':        'Incline dumbbell press',
+    'lib.db_oh_ext':         'Overhead dumbbell extension',
+    'lib.db_ohp':            'Dumbbell shoulder press',
+    'lib.db_rdl':            'Dumbbell Romanian deadlift',
+    'lib.db_row':            'One-arm dumbbell row',
+    'lib.db_shrug':          'Dumbbell shrug',
+    'lib.dead_bug':          'Dead bug',
+    'lib.dead_hang':         'Dead hang',
+    'lib.deadlift':          'Deadlift',
+    'lib.diamond_pushup':    'Diamond push-up',
+    'lib.dip':               'Bar dip',
+    'lib.ez_curl':           'EZ-bar curl',
+    'lib.face_pull':         'Face pull',
+    'lib.farmer_carry':      'Farmer\'s carry',
+    'lib.front_raise':       'Dumbbell front raise',
+    'lib.front_squat':       'Front squat',
+    'lib.glute_bridge':      'Glute bridge',
+    'lib.goblet_squat':      'Goblet squat',
+    'lib.good_morning':      'Good morning',
+    'lib.hammer_curl':       'Hammer curl',
+    'lib.hanging_leg_raise': 'Hanging leg raise',
+    'lib.hip_thrust':        'Barbell hip thrust',
+    'lib.hollow_hold':       'Hollow hold',
+    'lib.kb_press':          'Kettlebell press',
+    'lib.kb_swing':          'Kettlebell swing',
+    'lib.lat_pulldown':      'Lat pulldown',
+    'lib.lat_raise':         'Dumbbell lateral raise',
+    'lib.leg_curl':          'Leg curl',
+    'lib.leg_ext':           'Leg extension',
+    'lib.leg_press':         'Leg press',
+    'lib.lunge':             'Dumbbell lunge',
+    'lib.nordic':            'Nordic curl',
+    'lib.ohp':               'Overhead press',
+    'lib.pike_pushup':       'Pike push-up',
+    'lib.pistol':            'Pistol squat',
+    'lib.plank':             'Plank',
+    'lib.pullup':            'Pull-up',
+    'lib.pushdown':          'Triceps pushdown',
+    'lib.pushup':            'Push-up',
+    'lib.rdl':               'Romanian deadlift',
+    'lib.rear_fly':          'Reverse dumbbell fly',
+    'lib.ring_dip':          'Ring dip',
+    'lib.ring_pullup':       'Ring pull-up',
+    'lib.ring_pushup':       'Ring push-up',
+    'lib.ring_row':          'Ring row',
+    'lib.seated_calf':       'Seated calf raise',
+    'lib.side_plank':        'Side plank',
+    'lib.skull_crusher':     'Skull crusher',
+    'lib.split_squat':       'Bulgarian split squat',
+    'lib.step_up':           'Dumbbell step-up',
+    'lib.superman':          'Superman hold',
+    'lib.upright_row':       'Upright row',
+    'lib.wrist_curl':        'Wrist curl',
     'load.bwkg':             'bodyweight +kg',
     'load.seconds':          'seconds',
     'load.stages':           '{n} stages',
@@ -4461,7 +5012,24 @@ const LANG = {
     'msg.shown':             '{name} back in the picker',
     'msg.shown.short':       '{name} shown again',
     'msg.targetset':         'Target set · {n} kcal',
+    'mus.abs':               'Abs',
+    'mus.back':              'Back',
+    'mus.biceps':            'Biceps',
+    'mus.calves':            'Calves',
+    'mus.chest':             'Chest',
+    'mus.delt_front':        'Front delts',
+    'mus.delt_rear':         'Rear delts',
+    'mus.delt_side':         'Side delts',
+    'mus.forearms':          'Forearms',
+    'mus.glutes':            'Glutes',
+    'mus.hamstrings':        'Hamstrings',
+    'mus.lower_back':        'Lower back',
+    'mus.quads':             'Quads',
+    'mus.traps':             'Traps',
+    'mus.triceps':           'Triceps',
     'nav.body':              'Body',
+    'nav.guide':             'Guide',
+    'nav.gym':               'My Gym',
     'nav.history':           'History',
     'nav.settings':          'Settings',
     'nav.workout':           'Workout',
@@ -4547,6 +5115,7 @@ const LANG = {
     'sh.del.removes':        'Removes {name} — nothing is logged against it — and',
     'sh.loading':            'Loading',
     'sh.manage':             'Manage',
+    'sh.muscles':            'Muscles · tap once for primary, twice for secondary',
     'sh.new':                'New movement',
     'sh.note':               'Note · shown under the name',
     'sh.ph.name':            'DB lateral raise',
@@ -4768,6 +5337,7 @@ const LANG = {
     'coll.hidden':           'ซ่อนอยู่',
     'coll.indays':           'อยู่ในวัน {days}',
     'coll.never':            'ยังไม่เคยบันทึก',
+    'coll.nomus':            'ยังไม่ได้ระบุกล้ามเนื้อ',
     'coll.search':           'ค้นหาในคลัง',
     'coll.sessions':         'บันทึกแล้ว {n} ครั้ง',
     'coll.title':            'คลังท่าฝึก <span class="sub-note">· คลังที่ทุกวันหยิบไปใช้ · เพิ่มตรงนี้ไม่ได้แปลว่าเพิ่มเข้าวันนี้</span>',
@@ -4794,6 +5364,21 @@ const LANG = {
     'day.wed':               'วันพุธ',
     'disc':                  '<b>ตัวเลขทั้งหมดนี้เป็นค่าประมาณสำหรับติดตามการฝึกของคุณเอง ไม่ใช่คำแนะนำทางการแพทย์หรือโภชนาการ</b> ทุกสูตรในนี้คือค่าเฉลี่ยของประชากรที่นำมาใช้กับคนคนเดียว และทุกสูตรอาจไม่ถูกต้องสำหรับคุณ ไม่มีสิ่งใดในแอปนี้เป็นการวินิจฉัย การรักษา หรือใช้แทนแพทย์หรือนักกำหนดอาหารวิชาชีพได้ หากคุณตั้งครรภ์ อายุต่ำกว่า 18 ปี มีโรคประจำตัวหรือภาวะการกินผิดปกติ หรือใช้ยาที่ได้รับผลจากอาหาร ให้ปรึกษาผู้เชี่ยวชาญที่มีคุณวุฒิก่อนทำตามตัวเลขใด ๆ ในนี้ คุณเป็นผู้รับผิดชอบต่อการเอามันไปใช้เองD265:D268',
     'done.n':                'ทำแล้ว {n}',
+    'eq.back_ext':           'เบาะแบ็คเอ็กซ์เทนชัน',
+    'eq.bands':              'ยางยืดออกกำลังกาย',
+    'eq.barbell':            'บาร์เบล',
+    'eq.bench':              'ม้านั่ง',
+    'eq.cable':              'เครื่องเคเบิล',
+    'eq.dip_bars':           'บาร์ดิป',
+    'eq.dumbbells':          'ดัมเบล',
+    'eq.ez_bar':             'บาร์ EZ',
+    'eq.kettlebell':         'เคตเทิลเบล',
+    'eq.leg_curl':           'เครื่องเลกเคิร์ล',
+    'eq.leg_ext':            'เครื่องเลกเอ็กซ์เทนชัน',
+    'eq.leg_press':          'เครื่องเลกเพรส',
+    'eq.pullup_bar':         'บาร์โหน',
+    'eq.rack':               'แร็คสควอท',
+    'eq.rings':              'ห่วงยิมนาสติก',
     'ex.added':              'เพิ่มแล้ว',
     'ex.defaultnote':        'ท่าที่เพิ่มเอง',
     'ex.droptip':            'เอาออกจากวันนี้',
@@ -4827,11 +5412,124 @@ const LANG = {
     'grp.other':             'อื่น ๆ',
     'grp.pull':              'ดึง',
     'grp.push':              'ผลัก',
+    'guide.add':             '+ เพิ่ม',
+    'guide.all.off':         'เฉพาะที่ยิมมี',
+    'guide.all.on':          'แสดงทั้งหมด',
+    'guide.also':            'และ {list}',
+    'guide.alsoworks':       'ช่วยฝึก{name}ด้วย',
+    'guide.band':            'เป้าหมาย',
+    'guide.band.unit':       'เซ็ตต่อสัปดาห์ต่อกล้ามเนื้อ',
+    'guide.bodyweight':      'บอดี้เวท',
+    'guide.browse.title':    'เลือกตามกล้ามเนื้อ <span class="sub-note">· เพิ่มท่าที่ชอบ · คุณเลือกวันเอง</span>',
+    'guide.count':           '{n} ท่าสำหรับ{name}',
+    'guide.in':              'อยู่ในคลังแล้ว',
+    'guide.mute':            'ปิดเตือน',
+    'guide.needs':           'ต้องใช้ {list}',
+    'guide.none':            'ยังไม่มีท่าสำหรับ{name}จากอุปกรณ์ที่ยิมคุณมี เปิด แสดงทั้งหมด เพื่อดูว่าต้องใช้อะไร',
+    'guide.novol':           'ยังไม่มีการบันทึกใน 7 วันที่ผ่านมา',
+    'guide.rec.more':        'ยังมีอีก {n} กล้ามเนื้อที่น้อยกว่าเป้า ดูครบทุกกล้ามได้ใน เซ็ตต่อกล้ามเนื้อ ด้านบน',
+    'guide.rec.none':        'ทุกกล้ามเนื้อที่ไม่ได้ปิดเตือนอยู่ในเป้าแล้วสัปดาห์นี้',
+    'guide.rec.nothing':     'ยังไม่มีท่าที่ฝึกกล้ามนี้เป็นหลักจากอุปกรณ์ที่ยิมคุณมี ลองเปิด แสดงทั้งหมด ในส่วนเลือกตามกล้ามเนื้อ',
+    'guide.rec.of':          '{name} · {n} จาก {lo} เซ็ต',
+    'guide.rec.title':       'แนะนำ <span class="sub-note">· สำหรับกล้ามเนื้อที่ยังน้อยกว่าเป้า จากอุปกรณ์ที่ยิมคุณมี</span>',
+    'guide.st.high':         'มากไป',
+    'guide.st.low':          'น้อยไป',
+    'guide.st.muted':        'ปิดเตือน',
+    'guide.st.ok':           'พอดี',
+    'guide.unmute':          'เปิดเตือน',
+    'guide.untagged':        'ยังไม่ถูกนับ เพราะยังไม่ได้ระบุกล้ามเนื้อ: {list} ระบุได้ที่ ออกกำลัง → คลังท่าฝึก',
+    'guide.vol.title':       'เซ็ตต่อกล้ามเนื้อ <span class="sub-note">· 7 วันที่ผ่านมา · กล้ามหลักนับเต็มเซ็ต กล้ามรองนับครึ่ง</span>',
+    'gym.count':             'อุปกรณ์เท่านี้ทำได้ {n} จาก {total} ท่าในคู่มือ',
+    'gym.intro':             'ติ๊กอุปกรณ์ที่คุณมี แล้วคู่มือจะแนะนำเฉพาะท่าที่ทำได้จริง ท่าบอดี้เวทแสดงเสมอ',
+    'gym.own':               'อุปกรณ์อื่นของคุณ',
+    'gym.own.note':          'บันทึกไว้ว่ามีอะไรอีก คู่มือจับคู่ได้เฉพาะรายการด้านบน',
+    'gym.ph':                'สเลด, เชือกแบทเทิล…',
+    'gym.title':             'ยิมของฉัน <span class="sub-note">· อุปกรณ์ที่คุณใช้ได้</span>',
+    'gym.unset':             'ยังไม่ได้ติ๊กอะไร คู่มือจึงแสดงทุกท่า',
+    'gym.uses':              '{n} ท่า',
     'hist.date':             'วันที่',
     'hist.day':              'วัน',
     'hist.empty':            'ยังไม่มีข้อมูลที่บันทึกไว้ บันทึกวันแรกได้ที่หน้าร่างกายหรือหน้าฝึก',
     'hist.mob':              'ยืดเส้น',
     'hist.title':            'ประวัติ',
+    'lib.air_squat':         'Bodyweight squat',
+    'lib.back_ext':          'Back extension',
+    'lib.back_squat':        'Back squat',
+    'lib.band_curl':         'Band curl',
+    'lib.band_lat_raise':    'Band lateral raise',
+    'lib.band_pull_apart':   'Band pull-apart',
+    'lib.bb_bench':          'Barbell bench press',
+    'lib.bb_curl':           'Barbell curl',
+    'lib.bb_incline':        'Incline barbell press',
+    'lib.bb_row':            'Barbell row',
+    'lib.bb_shrug':          'Barbell shrug',
+    'lib.bench_dip':         'Bench dip',
+    'lib.cable_crunch':      'Cable crunch',
+    'lib.cable_curl':        'Cable curl',
+    'lib.cable_fly':         'Cable fly',
+    'lib.cable_lat_raise':   'Cable lateral raise',
+    'lib.cable_row':         'Seated cable row',
+    'lib.calf_raise':        'Standing calf raise',
+    'lib.cg_bench':          'Close-grip bench press',
+    'lib.chinup':            'Chin-up',
+    'lib.crunch':            'Crunch',
+    'lib.db_bench':          'Dumbbell bench press',
+    'lib.db_calf_raise':     'Dumbbell calf raise',
+    'lib.db_curl':           'Dumbbell curl',
+    'lib.db_fly':            'Dumbbell fly',
+    'lib.db_incline':        'Incline dumbbell press',
+    'lib.db_oh_ext':         'Overhead dumbbell extension',
+    'lib.db_ohp':            'Dumbbell shoulder press',
+    'lib.db_rdl':            'Dumbbell Romanian deadlift',
+    'lib.db_row':            'One-arm dumbbell row',
+    'lib.db_shrug':          'Dumbbell shrug',
+    'lib.dead_bug':          'Dead bug',
+    'lib.dead_hang':         'Dead hang',
+    'lib.deadlift':          'Deadlift',
+    'lib.diamond_pushup':    'Diamond push-up',
+    'lib.dip':               'Bar dip',
+    'lib.ez_curl':           'EZ-bar curl',
+    'lib.face_pull':         'Face pull',
+    'lib.farmer_carry':      'Farmer\'s carry',
+    'lib.front_raise':       'Dumbbell front raise',
+    'lib.front_squat':       'Front squat',
+    'lib.glute_bridge':      'Glute bridge',
+    'lib.goblet_squat':      'Goblet squat',
+    'lib.good_morning':      'Good morning',
+    'lib.hammer_curl':       'Hammer curl',
+    'lib.hanging_leg_raise': 'Hanging leg raise',
+    'lib.hip_thrust':        'Barbell hip thrust',
+    'lib.hollow_hold':       'Hollow hold',
+    'lib.kb_press':          'Kettlebell press',
+    'lib.kb_swing':          'Kettlebell swing',
+    'lib.lat_pulldown':      'Lat pulldown',
+    'lib.lat_raise':         'Dumbbell lateral raise',
+    'lib.leg_curl':          'Leg curl',
+    'lib.leg_ext':           'Leg extension',
+    'lib.leg_press':         'Leg press',
+    'lib.lunge':             'Dumbbell lunge',
+    'lib.nordic':            'Nordic curl',
+    'lib.ohp':               'Overhead press',
+    'lib.pike_pushup':       'Pike push-up',
+    'lib.pistol':            'Pistol squat',
+    'lib.plank':             'Plank',
+    'lib.pullup':            'Pull-up',
+    'lib.pushdown':          'Triceps pushdown',
+    'lib.pushup':            'Push-up',
+    'lib.rdl':               'Romanian deadlift',
+    'lib.rear_fly':          'Reverse dumbbell fly',
+    'lib.ring_dip':          'Ring dip',
+    'lib.ring_pullup':       'Ring pull-up',
+    'lib.ring_pushup':       'Ring push-up',
+    'lib.ring_row':          'Ring row',
+    'lib.seated_calf':       'Seated calf raise',
+    'lib.side_plank':        'Side plank',
+    'lib.skull_crusher':     'Skull crusher',
+    'lib.split_squat':       'Bulgarian split squat',
+    'lib.step_up':           'Dumbbell step-up',
+    'lib.superman':          'Superman hold',
+    'lib.upright_row':       'Upright row',
+    'lib.wrist_curl':        'Wrist curl',
     'load.bwkg':             'น้ำหนักตัว +kg',
     'load.seconds':          'วินาที',
     'load.stages':           '{n} ระดับ',
@@ -4937,7 +5635,24 @@ const LANG = {
     'msg.shown':             '{name} กลับมาในรายการเลือกแล้ว',
     'msg.shown.short':       'แสดง {name} อีกครั้งแล้ว',
     'msg.targetset':         'ตั้งเป้า · {n} kcal',
+    'mus.abs':               'หน้าท้อง',
+    'mus.back':              'หลัง',
+    'mus.biceps':            'หน้าแขน',
+    'mus.calves':            'น่อง',
+    'mus.chest':             'อก',
+    'mus.delt_front':        'ไหล่หน้า',
+    'mus.delt_rear':         'ไหล่หลัง',
+    'mus.delt_side':         'ไหล่ข้าง',
+    'mus.forearms':          'ปลายแขน',
+    'mus.glutes':            'ก้น',
+    'mus.hamstrings':        'ต้นขาหลัง',
+    'mus.lower_back':        'หลังล่าง',
+    'mus.quads':             'ต้นขาหน้า',
+    'mus.traps':             'บ่า',
+    'mus.triceps':           'หลังแขน',
     'nav.body':              'ภาพรวม',
+    'nav.guide':             'คู่มือ',
+    'nav.gym':               'ยิมของฉัน',
     'nav.history':           'ประวัติ',
     'nav.settings':          'ตั้งค่า',
     'nav.workout':           'ออกกำลัง',
@@ -5023,6 +5738,7 @@ const LANG = {
     'sh.del.removes':        'จะลบ {name} — ยังไม่มีการบันทึกไว้เลย — และ',
     'sh.loading':            'รูปแบบน้ำหนัก',
     'sh.manage':             'จัดการ',
+    'sh.muscles':            'กล้ามเนื้อ · แตะครั้งเดียวคือกล้ามหลัก สองครั้งคือกล้ามรอง',
     'sh.new':                'ท่าใหม่',
     'sh.note':               'โน้ต · แสดงใต้ชื่อ',
     'sh.ph.name':            'ยกดัมบ์เบลออกข้าง',
@@ -5174,6 +5890,12 @@ const LANG = {
   document.querySelectorAll('#shGoal button').forEach(b=>b.onclick=()=>shGoalPick(b.dataset.g));
   ['shMin','shMax'].forEach(id=>$(id).addEventListener('input', shRangeTyped));
   $("shStep").addEventListener('input', shCoachSync);
+  // the Guide and My Gym; everything else on both pages is wired as it is drawn
+  $("volLo").addEventListener('change', volBandSet);
+  $("volHi").addEventListener('change', volBandSet);
+  $("browseAll").onclick=()=>{ guideAll=!guideAll; drawGuide(); };
+  $("gymAdd").onclick=gymAddOwn;
+  $("gymName").addEventListener('keydown', e=>{ if(e.key==='Enter') gymAddOwn(); });
   // rest timer
   document.querySelectorAll('#segRest button').forEach(b=>b.onclick=()=>setRestPreset(+b.dataset.s));
   document.querySelectorAll('#segLead button').forEach(b=>b.onclick=()=>setLeadPreset(+b.dataset.l));
@@ -5207,7 +5929,7 @@ const LANG = {
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   await loadLang();    // before applyLang, so the first paint is already in the chosen language
   await loadTheme();   // first, so the app never flashes the default colours before the chosen ones
-  await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio();
+  await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio(); await loadGym();
   await load(); await loadSettings();
   // the collection ships empty, so rebuild definitions for anything the history already references
   const rec=await recoverMovements(); await recoverStretches(); await recoverCardio();
