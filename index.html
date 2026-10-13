@@ -65,7 +65,6 @@
   .title .sub{display:block;font-family:var(--font-body);font-weight:800;
     font-size:11px;letter-spacing:3px;color:var(--on-bg);opacity:.62;text-transform:uppercase;margin-bottom:8px}
 
-
   .sched{display:flex;gap:9px;margin:0 0 22px;flex-wrap:wrap}
   .day{flex:1;min-width:96px;background:var(--panel);border:2.5px solid var(--line);border-radius:11px;box-shadow:3px 3px 0 var(--line);
     padding:9px 7px;text-align:center;font-family:var(--font-mono);font-weight:700;font-size:10px;color:var(--ink-dim);cursor:pointer;transition:.12s;line-height:1.35}
@@ -78,7 +77,7 @@
   .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
   .card{background:var(--panel);border:3px solid var(--line);border-radius:14px;padding:18px 18px 17px;position:relative;overflow:hidden;box-shadow:5px 5px 0 var(--line)}
   .card::before{content:"";position:absolute;top:0;left:0;right:0;height:7px;background:var(--brass)}
-  .col-3{grid-column:span 3}.col-4{grid-column:span 4}.col-6{grid-column:span 6}.col-8{grid-column:span 8}.col-12{grid-column:span 12}
+  .col-4{grid-column:span 4}.col-12{grid-column:span 12}
 
   .lbl{font-family:var(--font-display);font-weight:var(--display-weight,400);font-size:16px;letter-spacing:var(--display-spacing,1.2px);text-transform:var(--display-transform,uppercase);color:var(--ink);margin-bottom:12px}
   .sub-note{font-family:var(--font-body);font-weight:600;color:var(--ink-faint);text-transform:none;letter-spacing:.3px;font-size:11px}
@@ -102,11 +101,13 @@
   .axis{font-family:var(--font-mono);font-size:12.5px;fill:var(--ink-faint)}
 
   /* form */
-  .logsplit{display:grid;grid-template-columns:1fr 1fr;gap:26px}
   .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   .field label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px}
   .field input,.daysel{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:11px 12px;font-family:var(--font-mono);font-size:14px}
-  .field input:focus,.daysel:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 2px rgba(13,89,209,.15)}
+  /* Tints are mixed from the accent so they follow the palette. The rgba line before each is the fallback
+     for a browser without color-mix(), which drops the second declaration and keeps the first. */
+  .field input:focus,.daysel:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 2px rgba(13,89,209,.15);
+    box-shadow:0 0 0 2px color-mix(in srgb,var(--brass) 25%,transparent)}
   .daysel{cursor:pointer;margin-bottom:14px}
   .meas-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .meas-grid .field input{width:100%}
@@ -120,12 +121,6 @@
   /* line-height and min-height are the same number on purpose: the line is empty most of the
      time, and without that the grid jumps 5px the moment a sum appears under one field. */
   .calcsum{font-family:var(--font-mono);font-size:11px;line-height:13px;color:var(--brass);margin-top:5px;min-height:13px}
-  .toggles{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
-  .tog{flex:1;min-width:120px;cursor:pointer;user-select:none;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:9px;transition:.18s}
-  .tog .box{width:16px;height:16px;border-radius:4px;border:1px solid var(--ink-faint);flex:none;position:relative}
-  .tog.on{border-color:var(--brass);color:var(--ink);background:rgba(13,89,209,.08)}
-  .tog.on .box{background:var(--brass);border-color:var(--brass)}
-  .tog.on .box::after{content:"";position:absolute;left:5px;top:1px;width:4px;height:9px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
 
   .ex{margin-bottom:13px}
   .ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:8px}
@@ -209,11 +204,8 @@
   .baknudge span{flex:1 1 200px}
   .bakskip{background:none;border:none;color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;cursor:pointer;padding:8px 6px;min-height:34px}
   .bakline{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:8px 0 2px}
-  .vseg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
-  .vbtn{background:var(--panel-2);border:none;border-right:1px solid var(--line);color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:8px 11px;cursor:pointer;transition:.12s;line-height:1}
-  .vbtn:last-child{border-right:none}
-  .vbtn:hover{color:var(--brass-bright)}
-  .vbtn.von{background:rgba(13,89,209,.16);color:var(--brass-bright)}
+  /* which app and which version this is, at the foot of Settings */
+  .appver{font-family:var(--font-mono);font-size:11px;letter-spacing:.4px;color:var(--ink-faint);text-align:center;padding:6px 0 2px}
   .rmset{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:14px;padding:2px 6px;border-radius:5px;margin-left:auto}
   .rmset:hover{color:var(--rust)}
   .restnote{font-family:var(--font-mono);font-size:12px;color:var(--ink-faint);line-height:1.7;padding:16px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:9px}
@@ -230,16 +222,20 @@
   .seg button{background:none;border:none;color:var(--ink-dim);font-family:var(--font-mono);font-size:11.5px;letter-spacing:.4px;padding:9px 13px;cursor:pointer;transition:.15s;border-right:1px solid var(--line)}
   .seg button:last-child{border-right:none}
   .seg button:hover{color:var(--brass-bright)}
-  .seg button.on{background:rgba(13,89,209,.14);color:var(--brass-bright)}
+  .seg button.on{background:rgba(13,89,209,.14);background:color-mix(in srgb,var(--brass) 18%,transparent);color:var(--brass-bright)}
   .calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
   .cstat{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:14px 16px}
-  .cstat.head{border-color:var(--brass);background:rgba(13,89,209,.09)}
+  .cstat.head{border-color:var(--brass);background:rgba(13,89,209,.09);background:color-mix(in srgb,var(--brass) 12%,transparent)}
   .cs-lbl{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-faint);margin-bottom:9px}
   .cs-val{font-family:var(--font-body);font-size:30px;font-weight:900;line-height:1;color:var(--ink)}
   .cs-val span{font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ink-dim);margin-left:4px}
   .cstat.head .cs-val{color:var(--brass-bright)}
   .cs-sub{font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);margin-top:7px}
   .calib-meta{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);line-height:1.6;margin-bottom:8px}
+  /* the headline of an estimate, with its working on the line under it: unstyled, the two ran together */
+  .calib-line{font-size:15px;line-height:1.45;color:var(--ink);margin:2px 0 8px}
+  .calib-line b{color:var(--brass-bright)}
+  .calib-sub{display:block;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin-top:3px}
   .calib-note{font-family:var(--font-mono);font-size:11px;color:var(--warn);line-height:1.55;margin-bottom:16px}
   .calib-need{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-dim);line-height:1.7;padding:18px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px}
   .calib-need b{color:var(--brass-bright)}
@@ -311,9 +307,10 @@
   .dp-today{background:var(--brass);color:#fff}
   .dp-cancel{background:var(--panel-2);color:var(--ink-dim)}
 
-  /* the four page tabs - Body / Workout / Settings / History */
+  /* the six page tabs. They sit on the card colour, so a dark palette gets dark tabs: on white, its light
+     text measured 2.1:1, well under the 4.5:1 that text needs */
   .qnav{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap}
-  .qnav button{flex:1;min-width:78px;background:rgba(255,255,255,.93);border:2.5px solid var(--line);border-radius:10px;box-shadow:3px 3px 0 var(--line);
+  .qnav button{flex:1;min-width:78px;background:var(--panel);border:2.5px solid var(--line);border-radius:10px;box-shadow:3px 3px 0 var(--line);
     padding:9px 6px;font-family:var(--font-mono);font-weight:700;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-dim);cursor:pointer;transition:.12s}
   .qnav button:hover{color:var(--ink);transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--line)}
   .qnav button:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
@@ -343,7 +340,7 @@
   .xtag{display:inline-block;background:var(--panel-2);color:var(--ink-faint);border:1px solid var(--line-soft);border-radius:5px;padding:2px 5px;margin:0 2px;
     font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;vertical-align:1px;line-height:1.2;cursor:pointer}
   .xtag:hover{border-color:var(--brass);color:var(--brass-bright)}
-  .xtag.pin{background:rgba(13,89,209,.12);color:var(--brass-bright);border-color:var(--brass)}
+  .xtag.pin{background:rgba(13,89,209,.12);background:color-mix(in srgb,var(--brass) 15%,transparent);color:var(--brass-bright);border-color:var(--brass)}
   .exdrop{background:none;border:none;color:var(--ink-faint);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:5px;flex:none}
   .exdrop:hover{color:var(--rust)}
 
@@ -362,7 +359,6 @@
      screen with the last few movements unreachable. */
   #shListMode,#shFormMode{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
   .sh-list{overflow-y:auto;flex:1 1 auto;min-height:0;-webkit-overflow-scrolling:touch}
-  .sh-foot{flex:none}
   .sh-grp{font-family:var(--font-mono);font-size:9.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--ink-faint);margin:13px 0 6px}
   .sh-grp:first-child{margin-top:0}
   .sh-row{display:flex;align-items:center;gap:7px;border:1px solid var(--line-soft);border-radius:8px;background:var(--panel-2);padding:8px 9px;margin-bottom:6px}
@@ -372,7 +368,7 @@
   .sh-add.ghost{background:var(--panel);color:var(--ink-dim)}
   .sh-pin{background:var(--panel);border:2px solid var(--line);border-radius:7px;color:var(--ink-faint);font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:9px 9px;cursor:pointer;flex:none;min-height:40px}
   .sh-pin.on{background:var(--gold);color:var(--on-accent)}
-  .sh-foot{display:flex;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
+  .sh-foot{display:flex;flex:none;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
   .sh-foot button{flex:1;border:2px solid var(--line);border-radius:9px;padding:12px;font-family:var(--font-body);font-weight:800;font-size:12px;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;background:var(--panel-2);color:var(--ink-dim);min-height:44px}
   .sh-foot .prim{background:var(--orange);color:#fff}
   .sh-msg{font-family:var(--font-mono);font-size:11px;color:var(--brass);min-height:14px;margin-top:8px;line-height:1.5}
@@ -524,20 +520,20 @@
   table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:12px}
   th{text-align:left;color:var(--ink-faint);font-weight:500;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:0 8px 10px;border-bottom:1px solid var(--line)}
   td{padding:9px 8px;border-bottom:1px solid var(--line-soft);color:var(--ink-dim)}
-  tr:hover td{background:rgba(13,89,209,.04)}
+  tr:hover td{background:rgba(13,89,209,.04);background:color-mix(in srgb,var(--brass) 7%,transparent)}
   td.w{color:var(--ink)}
   .chk{color:var(--good)}.dash{color:var(--ink-faint)}
   .del{cursor:pointer;color:var(--ink-faint);font-size:14px;border:none;background:none;padding:2px 6px;border-radius:5px}
-  .del:hover{color:var(--rust);background:rgba(225,29,42,.12)}
+  .del:hover{color:var(--rust);background:rgba(225,29,42,.12);background:color-mix(in srgb,var(--rust) 15%,transparent)}
   .empty{text-align:center;color:var(--ink-faint);font-family:var(--font-mono);font-size:12px;padding:28px 0;letter-spacing:.5px}
   .tablescroll{overflow-x:auto}
+  .histmore{display:block;margin:14px auto 0}
 
   @media(max-width:860px){
-    .col-3,.col-4,.col-6,.col-8{grid-column:span 12}
+    .col-4{grid-column:span 12}
     .form-grid{grid-template-columns:1fr 1fr}
     .meas-grid{grid-template-columns:1fr 1fr}
     .calib-grid{grid-template-columns:1fr 1fr}
-    .logsplit{grid-template-columns:1fr;gap:22px}
     .prog{grid-template-columns:1fr}
     .pcol{border-left:none;padding-left:0;border-top:1px solid var(--line-soft);padding-top:13px}
     .pcol:nth-child(3n+1){border-top:1px solid var(--line-soft);padding-top:13px}
@@ -550,19 +546,11 @@
     .meas-grid{grid-template-columns:1fr 1fr}
     .calib-grid{grid-template-columns:1fr}
     .day{min-width:0;flex:1 1 28%}
-    .qnav button{min-width:0;flex:1 1 calc(33.333% - 6px);font-size:9px;letter-spacing:.5px}   /* six tabs: three and three */
+    .qnav button{font-size:9px;letter-spacing:.5px}   /* the 560px rule above lays them out three and three */
     /* thumb-sized targets while logging: the set row is the one control used mid-workout */
     .setrow input{width:62px;padding:11px 6px}
     .setrow .rmset,.setrow .rmrest{padding:9px 8px;font-size:15px}
-    /* five pistol stages will not fit beside the rep box - give the strip its own row and let it scroll */
-    .vseg{flex:1 1 100%;overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start}
-    .vbtn{flex:none;padding:10px 12px}
     .restnum{font-size:25px;min-width:76px}
-  }
-  @media(max-width:620px){
-    /* charts scale to fit the viewport - newest point and legend stay on-screen, no scrolling */
-    .chartwrap{overflow-x:visible}
-    .chartwrap svg{min-width:0}
   }
 </style>
 </head>
@@ -820,7 +808,7 @@
     <div class="card col-12" id="cardBrowse">
       <div class="lbl" data-i18n-html="guide.browse.title">Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span></div>
       <div class="muschips" id="browseMus"></div>
-      <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll">Show everything</button></div>
+      <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll" data-i18n="guide.all.on">Show everything</button></div>
       <div id="browseWrap"></div>
     </div>
   </div>
@@ -963,6 +951,9 @@
       </div>
     </div>
 
+    <!-- VERSION -->
+    <div class="col-12 appver" id="appVer"></div>
+
   </div>
 
   <div class="grid page" id="pg-history">
@@ -982,6 +973,7 @@
           <tbody id="histBody"></tbody>
         </table>
       </div>
+      <button type="button" class="ghostbtn histmore" id="histMore" style="display:none"></button>
       <div class="empty" id="histEmpty" data-i18n="hist.empty">No entries logged yet. Log your first day on the Body or Workout page.</div>
     </div>
 
@@ -1028,13 +1020,13 @@
         <div class="field"><label data-i18n="sh.muscles">Muscles · tap once for primary, twice for secondary</label>
           <div class="muschips" id="shMus"></div>
         </div>
-        <div class="field" id="shLoadRow"><label data-i18n="sh.loading">Loading</label>
+        <div class="field"><label data-i18n="sh.loading">Loading</label>
           <div class="seg" id="shMode">
             <button type="button" data-m="kg">kg</button><button type="button" data-m="bw" data-i18n="sh.bw">Bodyweight +kg</button><button type="button" data-m="sec" data-i18n="sh.secs">Seconds</button>
           </div>
         </div>
-        <div class="field" id="shDefRow"><label for="shDef" data-i18n="sh.startload">Starting load · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shDef" placeholder="0"></div>
-        <div class="field" id="shCoachRow"><label data-i18n="sh.coach">Coaching · what the next session suggests</label>
+        <div class="field"><label for="shDef" data-i18n="sh.startload">Starting load · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shDef" placeholder="0"></div>
+        <div class="field"><label data-i18n="sh.coach">Coaching · what the next session suggests</label>
           <div class="seg segwrap" id="shGoal">
             <button type="button" data-g="off" data-i18n="goal.off">Off</button><button type="button" data-g="strength" data-i18n="goal.strength">Strength</button><button type="button" data-g="size" data-i18n="goal.size">Size</button><button type="button" data-g="endurance" data-i18n="goal.endurance">Endurance</button><button type="button" data-g="custom" data-i18n="goal.custom">Custom</button>
           </div>
@@ -1050,7 +1042,7 @@
       <div class="sh-foot">
         <button type="button" id="shCancelNew" data-i18n="btn.back">Back</button>
         <button type="button" id="shDelete" style="display:none" data-i18n="btn.remove">Remove</button>
-        <button type="button" class="prim" id="shCreate">Create &amp; add</button>
+        <button type="button" class="prim" id="shCreate" data-i18n="sh.createadd">Create &amp; add</button>
       </div>
     </div>
     <div class="sh-msg" id="shMsg"></div>
@@ -1106,7 +1098,7 @@
 <div class="restbar" id="restBar" role="status" aria-live="polite">
   <div class="restrow">
     <div class="restnum" id="restNum">0:00</div>
-    <div class="restwho" id="restWho">rest</div>
+    <div class="restwho" id="restWho" data-i18n="rest.rest">rest</div>
     <div class="restbtns">
       <button type="button" id="restMinus">−15</button>
       <button type="button" id="restPlus">+30</button>
@@ -1125,6 +1117,9 @@
 </div>
 
 <script>
+/* The version this page is, shown at the foot of Settings. build.sh refuses to build an APK whose version
+   name disagrees with it, so the number in Settings is always the number Android shows. */
+const APP_VERSION = '5.4';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";   // user-defined movements
@@ -1158,9 +1153,6 @@ const PROT_PER_KG = [
 const protName = k => t('prot.'+k+'.name');
 const protNote = k => t('prot.'+k+'.note');
 const DEF_TARGET = 2000;        // placeholder only, until there is enough data or a profile estimate
-/* Mifflin-St Jeor (1990) resting metabolic rate, the equation most widely used in practice, times a
-   standard activity multiplier. Used only as a starting point before there is enough logged data to
-   back-calculate maintenance from actual intake and weight change. */
 /* "1–3 sessions a week" is the vaguest thing in every calorie app: nobody says what a session is or
    what counts as hard, and three easy half-hours is nothing like three hard hours. So each level is
    described in hours of real work and in the only effort marker anyone can judge on the spot —
@@ -1178,6 +1170,9 @@ const actNote  = k => t('act.'+k+'.note');
 /* The two things the levels above depend on, stated once. Both are the usual reason people land a
    level too high. */
 const ACTIVITY_HELP = ['hour','hard','week','lower'];
+/* Mifflin-St Jeor (1990) resting metabolic rate, the equation most widely used in practice, times a
+   standard activity multiplier. Used only as a starting point before there is enough logged data to
+   back-calculate maintenance from actual intake and weight change. */
 function mifflinBMR(kg, cm, age, sex){
   if(kg==null||cm==null||age==null) return null;
   if(kg<=0||cm<=0||age<=0||age>120) return null;
@@ -1205,9 +1200,8 @@ const FONTS = [
 
 /* Every colour in the interface, in one place. The label is what the user sees; nothing here is
    named after where it happens to be used, because a user recolouring the app does not know or care
-   what "brass" was. */
-/* These must track :root exactly — the swatch grid shows `def` as the current value for any
-   colour the user has not overridden, so a stale one lies about what is on screen. */
+   what "brass" was. The `def` values must track :root exactly — the swatch grid shows them as the
+   current value for any colour the user has not overridden, so a stale one lies about what is on screen. */
 const THEME_VARS = [
   {v:'--bg',          def:'#dde6da'},
   {v:'--panel',       def:'#fbfaf7'},
@@ -1259,20 +1253,12 @@ const THEME_PRESETS = [
 const HEXRE = /^#[0-9a-f]{6}$/i;
 const MAX_SERIES = 8;           // LINE_COLORS holds 9, so 8 keeps every plotted line distinct
 
-/* Exercise catalogue. Entries not present in any DAYS template are retired movements, kept only so
-   historical logs still render; they are never offered in the form. Flags: added=bodyweight movement
-   (charted load ≈ bodyweight + any added kg); variants=selectable load levels; unit overrides the rep
-   label (e.g. seconds). The old `chart` flag was retired in 1.5 — which movements a trend plots is
-   now chosen in the UI and stored in settings.chartEx, not fixed per movement here. */
-const EX = [];   // ships empty — every movement is the user's own
-/* User-defined movements, stored apart from EX so a page update can never clobber them. They carry
-   exactly the flags EX carries and no new mechanism: kg, bodyweight+kg (added), or seconds (unit).
-   The variant/stage mechanism is deliberately NOT offered here — a weighted stage progression wants
-   a separate added:true movement, not a sixth variant (see the pistol note in CLAUDE.md). */
+/* The movements. Every one is the user's own: the collection ships empty, and the Guide's library is a
+   menu to pick from rather than a catalogue. A movement is loaded in kg, as bodyweight plus kg (added),
+   or in seconds (unit), and may carry a rep range for the coach and the muscles it trains for the Guide. */
 let customEx = [];
-/* Renames and hides, for built-ins as much as for your own movements. EX is code and cannot be
-   edited, so the change lives here as an overlay keyed by movement. The key never changes, which
-   is what lets a rename carry every logged session with it. */
+/* Renames and hides, kept as an overlay keyed by movement rather than written into the definition. The
+   key never changes, which is what lets a rename carry every logged session with it. */
 let exEdits = {};
 function normExEdits(o){
   const out={};
@@ -1291,17 +1277,16 @@ function normExEdits(o){
 }
 let CATALOGUE = [], CAT_BY_KEY = new Map();
 function rebuildCatalogue(){
-  CATALOGUE=EX.concat(customEx).map(e=>{ const ed=exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
+  CATALOGUE=customEx.map(e=>{ const ed=exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
   CAT_BY_KEY=new Map(CATALOGUE.map(e=>[e.key,e]));
 }
 rebuildCatalogue();                       // built at definition time so lookups work before any load
 const exByKey = k => CAT_BY_KEY.get(k);
 
-/* Custom keys are always cx_ + slug. The prefix guarantees a user can never shadow a built-in
-   movement, and keeps the key usable inside id="sets-<key>". */
-/* New movements always get a cx_ key from cxKeyFor. Plain keys are accepted too, because a log
-   written before the collection was emptied references keys like `bench`, and the recovery pass has
-   to be able to rebuild a definition under that exact key or the history stops resolving. */
+/* New movements always get a cx_ key from cxKeyFor, which stays usable inside id="sets-<key>". Plain
+   keys are accepted too, because a log written before the collection was emptied (3.0) references keys
+   like `bench`, and the recovery pass has to rebuild a definition under that exact key or the history
+   stops resolving. */
 const CX_KEY = /^(cx_)?[a-z][a-z0-9_]{0,31}$/;
 /* Muscles, for the Guide and the weekly count of sets. Structure only: names are 'mus.<key>' in LANG.
    Shoulders are three, not one. Side and rear delts are the classic undertrained muscles, and a single
@@ -1330,8 +1315,7 @@ const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullu
                'cable','leg_press','leg_curl','leg_ext','back_ext','bands'];
 
 /* The Guide's library: a menu to pick from, never part of anyone's collection or week until they choose
-   it, so "nothing ships pre-filled" still holds exactly as written. Names are 'lib.<key>' in LANG and
-   deliberately English in both languages — that is how Thai gyms name these movements, and it means a
+   it, so "nothing ships pre-filled" still holds exactly as written. Names are 'lib.<key>' in LANG, and a
    picked exercise simply keeps its name, like anything the user creates.
    p primary muscles, s secondary, eq everything it needs (none: bodyweight, always available),
    ld loading — kg, bw (bodyweight plus kg) or sec. */
@@ -1547,19 +1531,11 @@ const stretchByKey = k => stretches.find(s=>s.key===k);
 const exNote = ex => (ex && ex.note) ? ex.note : t('ex.defaultnote');
 const activeStretches = () => stretches.filter(s=>!s.retired);
 
-/* weekly session templates */
-/* Seven empty days. There is no shipped programme: the week is whatever the user pins onto it.
-   `ex` stays here as the coded template and is always empty — everything real lives in planExtras,
-   which is what keeps the layering, and verify.js's checks on it, intact. */
-/* Sunday first, matching the date picker, which has always started its weeks on Sunday. Order here
-   drives the day strip, the session dropdown and planKeys(); the keys are untouched, so a plan
-   pinned under the old order still resolves. */
-const DAYS = [
-  {key:'sun', label:'Sun', ex:[]}, {key:'mon', label:'Mon', ex:[]},
-  {key:'tue', label:'Tue', ex:[]}, {key:'wed', label:'Wed', ex:[]},
-  {key:'thu', label:'Thu', ex:[]}, {key:'fri', label:'Fri', ex:[]},
-  {key:'sat', label:'Sat', ex:[]}
-];
+/* ---------- the week ---------- */
+/* Seven days, Sunday first to match the date picker, which has always started its weeks on Sunday. The
+   order drives the day strip, the session dropdown and planKeys(), and the index matches Date.getDay().
+   There is no shipped programme: a day holds whatever the user pins to it, in planExtras. */
+const DAYS = ['sun','mon','tue','wed','thu','fri','sat'].map(key=>({key}));
 // day names and their three-letter forms are display text, so they come from the dictionary
 const dayName = k => t('day.'+k);
 const dayShort = k => t('day.short.'+k);
@@ -1569,9 +1545,8 @@ function dayLabel(k){
   if(!ks.length) return dayName(k)+' · '+t('day.rest');
   return dayName(k)+' · '+ks.map(x=>{ const e=exByKey(x); return e?e.short:x; }).join(' + ');
 }
-const CURRENT_EX = new Set(DAYS.flatMap(d=>d.ex));   // the coded plan — fixed, and what verify.js checks DAY_TARGETS against
-/* Movements pinned onto a session at runtime, layered over DAYS rather than mutating it. Keeping
-   DAYS untouched is what lets verify.js keep asserting DAY_TARGETS matches its DAYS list. */
+/* The week's plan: the movements pinned to each day. Its own storage key rather than a settings field,
+   because settings is rebuilt from a fixed scalar key set on every load and this is a list per day. */
 let planExtras = {};
 function normPlan(p){
   const out={};
@@ -1579,36 +1554,22 @@ function normPlan(p){
   DAYS.forEach(d=>{
     const a=p[d.key]; if(!Array.isArray(a)) return;
     const keep=[];
-    a.forEach(k=>{ if(typeof k==='string' && exByKey(k) && !d.ex.includes(k) && keep.indexOf(k)<0) keep.push(k); });
+    a.forEach(k=>{ if(typeof k==='string' && exByKey(k) && keep.indexOf(k)<0) keep.push(k); });
     if(keep.length) out[d.key]=keep;
   });
   return out;
 }
-// the movements a session actually offers: its template, then anything pinned onto it
+// the movements a session offers: everything pinned to that day that is not hidden
 function sessionEx(dayKey){
-  const day=DAYS.find(d=>d.key===dayKey);
-  const out=day?day.ex.slice():[];
-  (planExtras[dayKey]||[]).forEach(k=>{ const ex=exByKey(k); if(ex && !ex.retired && out.indexOf(k)<0) out.push(k); });
-  return out;
+  return (planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
 }
 const planKeys = () => { const s=new Set(); DAYS.forEach(d=>sessionEx(d.key).forEach(k=>s.add(k))); return [...s]; };
-// Per-movement prescription for each day, shown in the log form: how many rounds/sets (n, unit),
-// the reps per round/set stated unambiguously (per side / per leg / total), and the load.
-// 360 and shield cast differ Tue↔Sat, which is why reps live here per day, not on the exercise.
-/* Empty, and it stays empty. Prescriptions were one person's programme written into the code; a
-   movement now carries its own note instead, which the user writes. Kept as a structure because
-   the form still asks it for a per-day target and gets null. */
-const DAY_TARGETS = {};
-const targetFor = (dayKey,k) => (DAY_TARGETS[dayKey]||{})[k] || null;
-const WDKEY = ['sun','mon','tue','wed','thu','fri','sat'];
-function weekdayKey(dateStr){ return WDKEY[new Date(dateStr+'T12:00:00').getDay()]; }
+function weekdayKey(dateStr){ return DAYS[new Date(dateStr+'T12:00:00').getDay()].key; }
 
 const LINE_COLORS = ['#0d59d1','#f7801e','#ffc21a','#e11d2a','#8b2fc9','#1b9fd8','#2fb84a','#d6006e','#141430'];
 
 let entries = [];
-let settings = {kcalTarget:DEF_TARGET, chartEx:null, restSec:DEF_REST, restSound:true, mobLead:5,
-                sex:'male', protFloor:DEF_PROT, protPerKg:null, activity:'mod',
-                age:null, ageSet:null, volLo:VOL_LO, volHi:VOL_HI, volMute:[]};
+let settings = normSettings({});   // the defaults live in normSettings and nowhere else
 /* Age is entered directly rather than as a year of birth: a year leaves it ambiguous whether the
    birthday has happened yet, and the app would have to guess. A stored age would instead go stale,
    so the date it was entered is stored with it and the age advances on its own. Both errors are
@@ -1625,7 +1586,7 @@ const protFloor = () => settings.protFloor || DEF_PROT;
    never accumulate in storage. Adding a field means adding it here — nowhere else. */
 function normSettings(s){
   s = (s && typeof s==='object') ? s : {};
-  const k=parseFloat(s.kcalTarget);
+  const k=parseFloat(s.kcalTarget), band=volBand(s);
   const r=parseInt(s.restSec,10);
   // null = never chosen, so the chart seeds itself from the plan; [] = chose nothing, and stays empty
   let sel=null;
@@ -1644,14 +1605,13 @@ function normSettings(s){
     ageSet: (typeof s.ageSet==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s.ageSet)) ? s.ageSet : null,
     activity: (ACTIVITY.some(a=>a.key===s.activity)) ? s.activity : 'mod',
     // the weekly band of sets per muscle, and the muscles whose "too little" is muted on purpose
-    volLo: volBand(s).lo,
-    volHi: volBand(s).hi,
+    volLo: band.lo,
+    volHi: band.hi,
     volMute: muscleList(s.volMute, MUSCLE_KEYS.length)
   };
 }
 let calPeriod = 14;
 let calRate = -0.25;      // lean-down default
-let lastRec = null;
 let chartPeriod = 'all';   // 30 | 90 | 'all' - shared display window for the trend charts
 
 /* Shared chart window. Anchored to the latest entry overall so every trend chart shows the same
@@ -1730,7 +1690,18 @@ const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 // movement names are user-supplied now, and they land in innerHTML and in SVG <text>
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const dnum = d => Math.floor(Date.parse(d)/86400000);
-const fmtMD = dn => { const d=new Date(dn*86400000); return (d.getUTCMonth()+1)+'/'+d.getUTCDate(); };
+/* Dates are shown day first everywhere, matching the date bar: dd/mm/yyyy in full, dd/mm where the year
+   goes without saying, d/m on a chart axis. Storage stays ISO, because ISO is what sorts. */
+const fmtDMY = ds => ds ? ds.slice(8,10)+'/'+ds.slice(5,7)+'/'+ds.slice(0,4) : '—';
+const fmtDM = ds => ds.slice(8,10)+'/'+ds.slice(5,7);
+const fmtTick = dn => { const d=new Date(dn*86400000); return d.getUTCDate()+'/'+(d.getUTCMonth()+1); };
+// a signed change to dp places (one by default); a change that rounds to nothing reads ±0.0, never −0.0
+const roundTo = (v, dp) => { const f=Math.pow(10, dp==null?1:dp); return Math.round(v*f)/f; };
+function fmtSigned(v,u,dp){
+  if(v==null) return 'n/a';
+  const r=roundTo(v,dp);
+  return (r>0?'+':r<0?'−':'±')+Math.abs(r).toFixed(dp==null?1:dp)+(u||'');
+}
 const localDate = d => { d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
 function daysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return localDate(d); }
 const within7 = d => d>=daysAgo(6) && d<=localDate();
@@ -1767,34 +1738,18 @@ function normEntry(e){
   o.bfSrc=(e.bfSrc==='manual' && o.bf!=null)?'manual':null;
   o.kcal=e.kcal!=null?nn(e.kcal):null;
   o.prot=e.prot!=null?nn(e.prot):null;
-  /* Mobility is per stretch: { <stretchKey>: secondsHeld }. Presence means it was done; 0 means
-     done but untimed. Keys are not checked against the catalogue, for the same reason lift keys
-     are not — a stretch logged on another device is still real data.
-     Migration: the 1.5 mobGen/mobPistol tick-boxes carried no duration, so they land as the two
-     seeded stretches with 0 seconds. `str` was the pre-1.4 name for mobGen. */
-  // cardio: { <cardioKey>: minutes }, same rules as mob
-  let cd=null;
-  if(e.cardio && typeof e.cardio==='object'){
-    const cc={};
-    for(const k in e.cardio){
-      const raw=e.cardio[k];
-      const v=(raw===true)?0:nn(raw);
-      if(v!=null) cc[k]=Math.round(v);
-    }
-    if(Object.keys(cc).length) cd=cc;
-  }
-  o.cardio=cd;
-  let mb=null;
-  if(e.mob && typeof e.mob==='object'){
-    const mm={};
-    for(const k in e.mob){
-      const raw=e.mob[k];
-      const v = (raw===true) ? 0 : nn(raw);
-      if(v!=null) mm[k]=Math.round(v);
-    }
-    if(Object.keys(mm).length) mb=mm;
-  }
-  o.mob=mb;
+  /* Mobility is per stretch, { <stretchKey>: seconds or reps }, and cardio per session, { <cardioKey>:
+     minutes }. Presence means it was done; 0 means done but uncounted, and a bare `true` is read as 0.
+     Keys are not checked against the lists, for the same reason lift keys are not: a stretch logged on
+     another device is still real data. */
+  const tally=x=>{
+    if(!x || typeof x!=='object') return null;
+    const out={};
+    for(const k in x){ const v=(x[k]===true) ? 0 : nn(x[k]); if(v!=null) out[k]=Math.round(v); }
+    return Object.keys(out).length ? out : null;
+  };
+  o.cardio=tally(e.cardio);
+  o.mob=tally(e.mob);
   let m=null;
   if(e.meas && typeof e.meas==='object'){ const mm={}; MEAS.forEach(x=>{ if(e.meas[x.key]!=null){ const v=pos(e.meas[x.key]); if(v!=null) mm[x.key]=v; } }); if(Object.keys(mm).length) m=mm; }
   o.meas=m;
@@ -1802,6 +1757,7 @@ function normEntry(e){
   if(e.lifts && typeof e.lifts==='object'){
     for(const k in e.lifts){ const a=e.lifts[k];
       if(Array.isArray(a)){ const arr=a.map(s=>{ if(!s) return null; const reps=pos(s.reps); if(reps==null) return null;
+        // a stage set predates 3.0 and only arrives in an old backup; it is kept as it was logged
         if(s.variant!=null) return {variant:String(s.variant), reps:reps};
         const kg=s.kg!=null?(nn(s.kg)??0):0; return {kg:kg, reps:reps}; }).filter(Boolean);
         if(arr.length) L[k]=arr; } }
@@ -1810,14 +1766,16 @@ function normEntry(e){
   return o;
 }
 
-/* One-time sweep of the previous namespace. Tally ships as a clean slate; leaving a dead
-   training-log:* set behind would sit in storage forever with nothing able to read it. */
+/* Keys nothing reads any more: the v1 stretch and cardio lists held seeded defaults that no longer ship,
+   and the language choice went when the app became English only (5.3). */
+const RETIRED_KEYS = ['tally:stretches:v1', 'tally:cardio:v1', 'tally:lang:v1'];
+/* Sweep of the previous namespace and the retired keys, on every launch but only ever touching what is
+   there. Tally ships as a clean slate; a dead key left behind would sit in storage forever with nothing
+   able to read it. */
 async function purgeOldNamespace(){
   try{
-    const old=(await STORE.list('training-log:')) || [];
-    // v1 stretch and cardio lists held seeded defaults that are no longer shipped
-    old.push('tally:stretches:v1', 'tally:cardio:v1');
-    if(!old.length) return 0;
+    const have=(await STORE.list('tally:')) || [];
+    const old=((await STORE.list('training-log:')) || []).concat(RETIRED_KEYS.filter(k=>have.indexOf(k)>=0));
     for(const k of old){ try{ await STORE.set(k,''); }catch(e){} }
     if(typeof localStorage!=='undefined'){ old.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} }); }
     return old.length;
@@ -1849,7 +1807,7 @@ async function load(){
 }
 async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
-  catch(e){ console.error('save failed',e); flash('Save failed — data may not have persisted',true); return false; }
+  catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
 const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','protPerKg','age','ageSet','activity','volLo','volHi','volMute'];
 async function loadSettings(){
@@ -1874,7 +1832,7 @@ async function loadCatalogue(){
     const v=await STORE.get(XKEY);
     if(v){ const a=JSON.parse(v);
       if(Array.isArray(a)){ const seen=new Set();
-        a.forEach(x=>{ const c=normCustomEx(x); if(c && !seen.has(c.key) && !EX.some(e=>e.key===c.key)){ seen.add(c.key); customEx.push(c); } });
+        a.forEach(x=>{ const c=normCustomEx(x); if(c && !seen.has(c.key)){ seen.add(c.key); customEx.push(c); } });
       } }
   }catch(e){ console.error('movement catalogue read failed',e); }
   rebuildCatalogue();
@@ -1913,8 +1871,9 @@ async function recoverMovements(){
   return seen.size;
 }
 /* ---------- pages ---------- */
-/* Four pages, switched by hiding rather than rebuilding. The day bar rides above them and is only
-   relevant where a day is being logged, so it hides on Settings and History. */
+/* Six pages, switched by hiding rather than rebuilding. A page is drawn as it is shown, if anything has
+   changed since it was last drawn (see render). The day bar rides above Body and Workout, the two pages
+   where a day is logged; the Guide reads the last seven days and the rest no day at all. */
 const PAGES=['body','workout','guide','gym','settings','history'];
 let curPage='body';
 function showPage(k){
@@ -1922,8 +1881,8 @@ function showPage(k){
   curPage=k;
   PAGES.forEach(p=>{ const el=$('pg-'+p); if(el) el.classList.toggle('on', p===k); });
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on', b.dataset.pg===k));
-  // the Guide reads the last seven days and My Gym no day at all, so neither offers a day to pick
-  const bar=$("dayBar"); if(bar) bar.classList.toggle('off', ['settings','history','guide','gym'].indexOf(k)>=0);
+  const bar=$("dayBar"); if(bar) bar.classList.toggle('off', k!=='body' && k!=='workout');
+  drawPage(k);
   window.scrollTo(0,0);
 }
 // step the logged day without opening the picker
@@ -1934,26 +1893,15 @@ function shiftDay(n){
   $("fDate").value=ds; fillForm(ds); render();
 }
 
-/* ---------- language ---------- */
-/* English is the source and the fallback. t() returns the English string for a key the current
-   language has not got, and the key itself if even English has not got it, so a half-finished
-   translation degrades to English on screen rather than to "undefined".
-   t(k,'en') forces English regardless of the interface: buildClaudeReport is a machine-facing
-   payload wrapped around JSON whose keys are identifiers, and stays English whatever is selected.
-   The choice lives in its own storage key, never in settings — settings is rebuilt from a fixed
-   scalar key set on every load and would discard it. */
-let lang = 'en';
-function t(k, lg){
-  const d = LANG[lg || lang] || LANG.en;
-  const v = d[k];
-  if(v != null) return v;
-  const e = LANG.en[k];
-  return e != null ? e : k;
-}
-const tEn = k => t(k, 'en');
-/* {name} placeholders rather than string concatenation, so a translation can put the value where
-   its own grammar needs it instead of where English happened to put it. */
+/* ---------- strings ---------- */
+/* Every visible string comes from LANG, through t(). A key the dictionary lacks comes back as the key
+   itself, never "undefined" or blank, so a slip is visible and searchable rather than silent. */
+function t(k){ const v=LANG.en[k]; return v!=null ? v : k; }
+/* {name} placeholders rather than string concatenation, so the value sits where the sentence needs it. */
 const tf = (k, vals) => String(t(k)).replace(/\{(\w+)\}/g, (m,p)=> (vals && vals[p]!=null) ? vals[p] : m);
+/* A count, in the singular when there is exactly one and the dictionary has a `.1` form for it: without
+   this, My Gym said "1 exercises" on every machine only one exercise needs. */
+const tn = (k, n, vals) => tf((n===1 && LANG.en[k+'.1']!=null) ? k+'.1' : k, Object.assign({n:n}, vals));
 /* Static markup carries its English copy in the source, but every node is still filled from LANG at
    start-up, so the dictionary stays the one place a string lives. applyLang runs before render(): it
    rewrites innerHTML on the mixed nodes, which throws away spans like #mobDate that render() puts back. */
@@ -1962,7 +1910,6 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML=t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.getAttribute('data-i18n-title')); });
-  const h=document.documentElement; if(h) h.setAttribute('lang', lang);
 }
 
 /* ---------- theme ---------- */
@@ -1970,13 +1917,13 @@ function applyLang(){
    settings is rebuilt from a fixed scalar key set on every load and this is an open map. Only
    recognised variables and well-formed hex survive, so a hand-edited file cannot inject CSS. */
 let theme = {font:'min', colors:{}};
-function normTheme(t){
+function normTheme(x){
   const out={font:'min', colors:{}};
-  if(!t || typeof t!=='object') return out;
-  if(FONTS.some(f=>f.key===t.font)) out.font=t.font;
-  if(t.colors && typeof t.colors==='object'){
+  if(!x || typeof x!=='object') return out;
+  if(FONTS.some(f=>f.key===x.font)) out.font=x.font;
+  if(x.colors && typeof x.colors==='object'){
     THEME_VARS.forEach(v=>{
-      const c=t.colors[v.v];
+      const c=x.colors[v.v];
       if(typeof c==='string' && HEXRE.test(c.trim())) out.colors[v.v]=c.trim().toLowerCase();
     });
   }
@@ -2043,19 +1990,17 @@ async function resetTheme(){
 function drawTheme(){
   const fs=$("segFont");
   if(fs){
-    fs.innerHTML=FONTS.map(f=>`<button type="button" data-f="${f.key}">${esc(t('font.'+f.key+'.name'))}</button>`).join('');
+    fs.innerHTML=FONTS.map(f=>`<button type="button" data-f="${f.key}"${f.key===theme.font?' class="on"':''}>${esc(t('font.'+f.key+'.name'))}</button>`).join('');
     fs.querySelectorAll('button').forEach(b=>b.onclick=()=>setFont(b.dataset.f));
   }
-  if(fs) fs.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.f===theme.font));
   const f=FONTS.find(x=>x.key===theme.font)||FONTS[0];
   const fn=$("fontNote"); if(fn) fn.innerHTML=`<b>${esc(t('font.'+f.key+'.name'))}</b> — ${esc(t('font.'+f.key+'.note'))}`;
 
-  const ps=$("segPreset");
+  const ps=$("segPreset"), on=activePreset();
   if(ps){
-    ps.innerHTML=THEME_PRESETS.map(p=>`<button type="button" data-p="${p.key}">${esc(t('pre.'+p.key))}</button>`).join('');
+    ps.innerHTML=THEME_PRESETS.map(p=>`<button type="button" data-p="${p.key}"${p.key===on?' class="on"':''}>${esc(t('pre.'+p.key))}</button>`).join('');
     ps.querySelectorAll('button').forEach(b=>b.onclick=()=>applyPreset(b.dataset.p));
   }
-  if(ps) ps.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.p===activePreset()));
   const grid=$("colGrid");
   if(grid){
     const cur=v=>theme.colors[v] || (THEME_VARS.find(x=>x.v===v)||{}).def;
@@ -2063,8 +2008,11 @@ function drawTheme(){
       `<label class="colrow"><input type="color" data-v="${v.v}" value="${cur(v.v)}">`
       +`<span class="colname">${esc(colName(v.v))}<i>${cur(v.v)}</i></span></label>`).join('');
     grid.querySelectorAll('input[type=color]').forEach(i=>{
-      i.oninput=()=>setThemeColor(i.dataset.v, i.value);
-      i.onchange=()=>repaintCharts();
+      /* Dragging a picker fires input continuously. Saving and rebuilding this grid on each one stuttered,
+         and replaced the very input being dragged; so input only previews, and change, when the picker
+         lets go, saves once and repaints the charts, whose colours are held in markup. */
+      i.oninput=()=>{ document.documentElement.style.setProperty(i.dataset.v, i.value); i.parentNode.querySelector('.colname i').textContent=i.value; };
+      i.onchange=async()=>{ await setThemeColor(i.dataset.v, i.value); repaintCharts(); };
     });
   }
 }
@@ -2168,21 +2116,13 @@ async function persistPlan(){
 
 /* ---------- helpers ---------- */
 const liftsOf = (e,k)=> (e.lifts && e.lifts[k]) ? e.lifts[k] : [];
-// every entry carries an explicit day (set on save, and backfilled by normEntry on load/import),
-// so the old lift-pattern inference is unreachable and has been removed
-function dayTypeOf(e){ return e.day || null; }
-// A day counts toward a weekly target only if at least one movement of that pattern was actually
-// logged — not merely because the calendar says it's that kind of day. (Saturday can satisfy bench,
-// mace and club, but only for the movements you really did.)
-/* Every movement carries a group, and the weekly dashboard is built from whatever groups the live
-   plan actually uses. The old fixed PATTERN map hard-coded one person's programme — a public app
-   cannot assume anyone trains bench on Tuesday. Groups are editable per movement, built-ins too. */
+/* Every movement carries a group, and the weekly counts are built from whatever groups the live plan
+   actually uses. A day counts towards a group only if a movement of that group was really logged on it,
+   not because the calendar says it is that kind of day. */
 const GROUPS = [{key:'push'}, {key:'pull'}, {key:'legs'}, {key:'core'}, {key:'other'}];
 const GROUP_KEYS = GROUPS.map(g=>g.key);
 const groupName = k => t('grp.'+(GROUP_KEYS.indexOf(k)>=0?k:'other'));
-const groupNameEn = k => tEn('grp.'+(GROUP_KEYS.indexOf(k)>=0?k:'other'));
 const groupOf = ex => (ex && GROUP_KEYS.indexOf(ex.group)>=0) ? ex.group : 'other';
-// keys in the live plan belonging to one group
 // did this day include any movement of that group
 function didGroup(e,group){
   return Object.keys(e.lifts||{}).some(k=>{ const ex=exByKey(k); return ex && groupOf(ex)===group && liftsOf(e,k).length>0; });
@@ -2329,66 +2269,46 @@ function recordsNewOn(date){
 /* ---------- set formatting ---------- */
 function fmtSets(key, sets){
   if(!sets || !sets.length) return '—';
-  const ex=exByKey(key);
-  if(ex && ex.variants){
-    const lbl=v=>{const m=ex.variants.find(x=>x.key===v);return m?m.label:v;};
-    const same=sets.every(s=>s.variant===sets[0].variant);
-    if(same) return lbl(sets[0].variant)+' — '+sets.map(s=>s.reps).join(', ');
-    return sets.map(s=>lbl(s.variant)+'×'+s.reps).join('  ');
-  }
-  const added=ex && ex.added;
-  const sec = ex && ex.unit==='sec';
+  const ex=exByKey(key)||{}, sec=ex.unit==='sec';
   const rp = r => sec ? r+'s' : r;
-  const wl=kg=>added?(kg>0?('BW+'+kg):'BW'):(kg+'kg');
-  const same=sets.every(s=>s.kg===sets[0].kg);
-  if(same) return wl(sets[0].kg)+' — '+sets.map(s=>rp(s.reps)).join(', ');
-  return sets.map(s=>wl(s.kg)+'×'+rp(s.reps)).join('  ');
+  /* the load as a set row shows it. A hold with no weight has none to show: "0kg — 45s" was noise. A stage
+     set ({variant, reps}) predates 3.0 and only arrives in an old backup; its stage stands in for a load
+     it never had, where it used to read "undefinedkg". */
+  const ld = s => s.variant!=null ? s.variant : ex.added ? (s.kg>0 ? 'BW+'+s.kg : 'BW') : (sec && !s.kg) ? '' : s.kg+'kg';
+  const first=ld(sets[0]);
+  if(sets.every(s=>ld(s)===first)) return (first ? first+' — ' : '')+sets.map(s=>rp(s.reps)).join(', ');
+  return sets.map(s=>{ const l=ld(s); return (l ? l+'×' : '')+rp(s.reps); }).join('  ');
 }
 
 /* ---------- exercise form ---------- */
-// one movement block. `extra` = not part of the session template, so it gets a marker and a remove.
+// one movement block, with its pin marker and a remove; the pin says whether it comes back every week
 function appendExBlock(wrap, ex, dayKey){
-  const day=DAYS.find(d=>d.key===dayKey);
-  const extra=!(day && day.ex.indexOf(ex.key)>=0);
   const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
-  const tgt=targetFor(dayKey,ex.key);
-  const chip=tgt?`<span class="rtag">${tgt.n} ${tgt.n===1?tgt.unit:tgt.unit+'s'}</span>`:'';
   // the coach speaks before a movement is logged for the day; once there are sets, they speak for themselves
   const onDate=$("fDate").value, curE=entries.find(e=>e.date===onDate);
   const plan=(curE && liftsOf(curE,ex.key).length) ? null : coachNext(ex, sessionsBefore(ex.key, onDate));
   const rchip=(ex.repMin!=null && ex.repMax!=null) ? `<span class="rtag">${ex.repMin}–${ex.repMax}${ex.unit==='sec'?'s':''}</span>` : '';
-  const mark=extra?`<button type="button" class="xtag${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`:'';
-  const addLbl=tgt?('+ '+tgt.unit):'+ '+t('ex.set');
-  const desc=tgt?`${tgt.reps} · ${tgt.load}`:exNote(ex);
+  const mark=`<button type="button" class="xtag${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`;
   const block=document.createElement('div'); block.className='ex';
   block.innerHTML=`<div class="ex-head">
-      <div class="ex-name">${esc(ex.name)} ${chip}${rchip}${mark}<span> · ${esc(desc)}</span></div>
+      <div class="ex-name">${esc(ex.name)} ${rchip}${mark}<span> · ${esc(exNote(ex))}</span></div>
       <div class="ex-ctl">
-        <button class="addset" data-ex="${ex.key}">${addLbl}</button>
-        ${extra?`<button class="exdrop" data-ex="${ex.key}" title="${esc(t('ex.droptip'))}">✕</button>`:''}
+        <button class="addset" data-ex="${ex.key}">+ ${esc(t('ex.set'))}</button>
+        <button class="exdrop" data-ex="${ex.key}" title="${esc(t('ex.droptip'))}">✕</button>
       </div>
-    </div>${plan?`<div class="coachline">${coachLine(ex,plan)}</div>`:''}<div class="sets" id="sets-${ex.key}" data-unit="${tgt?tgt.unit:'set'}"></div>`;
+    </div>${plan?`<div class="coachline">${coachLine(ex,plan)}</div>`:''}<div class="sets" id="sets-${ex.key}"></div>`;
   block.querySelector('.addset').onclick=()=>{
+    // a new set starts at the load of the one above it
     const rows=$("sets-"+ex.key).querySelectorAll('.setrow');
-    let lastLoad=ex.def;
-    if(rows.length){
-      const lr=rows[rows.length-1];
-      if(ex.variants){ const on=lr.querySelector('.vbtn.von'); lastLoad=on?on.dataset.v:ex.def; }
-      else { lastLoad=lr.querySelector('.kg').value; }
-    }
-    addSetRow(ex, lastLoad, '');
+    addSetRow(ex, rows.length ? rows[rows.length-1].querySelector('.kg').value : ex.def, '');
   };
-  const drop=block.querySelector('.exdrop');
-  if(drop) drop.onclick=()=>dropMovement(ex.key, dayKey);
-  const tag=block.querySelector('.xtag');
-  if(tag) tag.onclick=()=>togglePin(ex.key, dayKey);
+  block.querySelector('.exdrop').onclick=()=>dropMovement(ex.key, dayKey);
+  block.querySelector('.xtag').onclick=()=>togglePin(ex.key, dayKey);
   wrap.appendChild(block);
   return block;
 }
 // pin/unpin in place. Rebuilding the form here would throw away reps already typed into it.
 async function togglePin(key, dayKey){
-  const day=DAYS.find(d=>d.key===dayKey);
-  if(day && day.ex.indexOf(key)>=0) return;              // template movements are always there
   const list=planExtras[dayKey]||(planExtras[dayKey]=[]);
   const i=list.indexOf(key);
   if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; } else list.push(key);
@@ -2400,30 +2320,28 @@ async function togglePin(key, dayKey){
     tag.textContent=t(on?'ex.pinned':'ex.added');
     tag.title=on?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)});
   }
-  drawProg();
+  render();                                              // the day strip and the plan's cards follow the pin
 }
-// prefill: this date's own sets, else the last time this movement was done on this session
+// prefill: this date's own sets, else the coach's plan, else the last time this movement was done on this session
 function prefillEx(ex, dayKey, cur){
-  const tgt=targetFor(dayKey,ex.key);
-  const loadOf = s => ex.variants ? s.variant : s.kg;
   const sameDay = cur && cur.lifts && cur.lifts[ex.key];
-  if(sameDay && sameDay.length){ sameDay.forEach(s=>addSetRow(ex, loadOf(s), s.reps)); return; }
+  if(sameDay && sameDay.length){ sameDay.forEach(s=>addSetRow(ex, s.kg, s.reps)); return; }
   // a coached movement starts from the coach's load, each set's target in its placeholder
   const plan=coachNext(ex, sessionsBefore(ex.key, $("fDate").value));
   if(plan){ plan.targets.forEach(r=>addSetRow(ex, plan.load, '', r)); return; }
   const last=lastSessionOf(ex.key, dayKey);
-  if(last && last.length) last.forEach(s=>addSetRow(ex, loadOf(s), ''));
-  else { const n=tgt?tgt.n:1; for(let i=0;i<n;i++) addSetRow(ex, ex.def, ''); }
+  if(last && last.length) last.forEach(s=>addSetRow(ex, s.kg, ''));
+  else addSetRow(ex, ex.def, '');
 }
 function buildExForm(cur, dayKey){
   const wrap=$("exWrap"); wrap.innerHTML='';
-  const day=DAYS.find(d=>d.key===dayKey);
   const keys=sessionEx(dayKey);
   // A movement logged on this date that the session no longer offers still needs its block —
   // without one, readExForm sees nothing and re-saving the day would quietly drop those sets.
   if(cur && cur.lifts) Object.keys(cur.lifts).forEach(k=>{ if(exByKey(k) && keys.indexOf(k)<0) keys.push(k); });
   if(!keys.length){
-    wrap.innerHTML=`<div class="restnote">${esc(tf('log.restnote',{day: day?dayName(day.key):t('day.rest')}))}<br>${t('log.restnote2')}<br>${t('log.restnote3')}</div>`;
+    const known=DAYS.some(d=>d.key===dayKey);              // an imported day may carry a key this app never had
+    wrap.innerHTML=`<div class="restnote">${esc(tf('log.restnote',{day:known?dayName(dayKey):t('day.rest')}))}<br>${t('log.restnote2')}<br>${t('log.restnote3')}</div>`;
     return;
   }
   keys.forEach(k=>{ const ex=exByKey(k); if(ex) appendExBlock(wrap, ex, dayKey); });
@@ -2446,24 +2364,16 @@ async function dropMovement(key, dayKey){
   if(box && box.parentNode) box.parentNode.remove();
   const list=planExtras[dayKey]||[];
   const i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; await persistPlan(); }
+  if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; await persistPlan(); render(); }
   if(!$("exWrap").children.length) buildExForm(entries.find(e=>e.date===$("fDate").value), dayKey);
 }
 function addSetRow(ex, loadVal, reps, aim){
   const box=$("sets-"+ex.key); if(!box) return;
   const row=document.createElement('div'); row.className='setrow';
-  let loadHtml;
-  if(ex.variants){
-    const sel=(loadVal!=null && loadVal!=='') ? loadVal : ex.def;
-    loadHtml=`<div class="vseg">`+ex.variants.map(v=>`<button type="button" class="vbtn${v.key===sel?' von':''}" data-v="${v.key}">${v.label}</button>`).join('')+`</div>`;
-  }else{
-    const unit = ex.added ? '+kg' : 'kg';
-    loadHtml=`<input class="kg" type="number" min="0" step="0.5" inputmode="decimal" value="${loadVal}"><span class="u">${unit}</span>`;
-  }
   // aim is the coach's target for this set: shown as the placeholder, never written as a value
   const repPh = aim!=null ? String(aim) : (ex.unit==='sec' ? 'sec' : 'reps');
   row.innerHTML=`<span class="setn"></span>
-    ${loadHtml}
+    <input class="kg" type="number" min="0" step="0.5" inputmode="decimal" value="${loadVal==null?'':loadVal}"><span class="u">${ex.added?'+kg':'kg'}</span>
     <span class="x">×</span>
     <input class="rp${aim!=null?' aim':''}" type="number" min="0" inputmode="numeric" placeholder="${repPh}" value="${reps}">
     <button class="rmrest" title="${esc(t('ex.resttip'))}">⏱</button>
@@ -2471,12 +2381,9 @@ function addSetRow(ex, loadVal, reps, aim){
   // the set you just finished typing is where your thumb already is, so start rest from here
   row.querySelector('.rmrest').onclick=()=>startRest(null, ex.short||ex.name);
   row.querySelector('.rmset').onclick=()=>{ row.remove(); renumber(ex); };
-  if(ex.variants){
-    row.querySelectorAll('.vbtn').forEach(b=>b.onclick=()=>{ row.querySelectorAll('.vbtn').forEach(x=>x.classList.remove('von')); b.classList.add('von'); });
-  }
   box.appendChild(row); renumber(ex);
 }
-function renumber(ex){ const box=$("sets-"+ex.key); if(!box) return; const pre=box.dataset.unit==='round'?'R':''; box.querySelectorAll('.setrow').forEach((r,i)=>r.querySelector('.setn').textContent=pre+(i+1)); }
+function renumber(ex){ const box=$("sets-"+ex.key); if(box) box.querySelectorAll('.setrow').forEach((r,i)=>r.querySelector('.setn').textContent=i+1); }
 function readExForm(){
   const lifts={};
   CATALOGUE.forEach(ex=>{
@@ -2484,10 +2391,7 @@ function readExForm(){
     const arr=[];
     box.querySelectorAll('.setrow').forEach(r=>{
       const reps=num(r.querySelector('.rp').value);
-      if(reps && reps>0){
-        if(ex.variants){ const on=r.querySelector('.vbtn.von'); arr.push({variant:(on?on.dataset.v:ex.def), reps:reps}); }
-        else { let kg=num(r.querySelector('.kg').value); if(kg==null) kg=ex.def||0; arr.push({kg:kg, reps:reps}); }
-      }
+      if(reps && reps>0){ let kg=num(r.querySelector('.kg').value); if(kg==null) kg=ex.def||0; arr.push({kg:kg, reps:reps}); }
     });
     if(arr.length) lifts[ex.key]=arr;
   });
@@ -2497,7 +2401,6 @@ function readExForm(){
 /* ---------- movement picker ---------- */
 let shManaging=false;
 function loadDesc(ex){
-  if(ex.variants) return tf('load.stages',{n:ex.variants.length});
   if(ex.unit==='sec') return t('load.seconds');
   if(ex.added) return t('load.bwkg');
   return 'kg';
@@ -2527,7 +2430,7 @@ function shRenderList(){
     if(shManaging){
       const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
       return `<div class="sh-row">
-        <div class="nm">${esc(ex.name)}<span>${esc(loadDesc(ex))} · ${esc(days?tf('coll.sessions',{n:days}):t('coll.never'))}${ex.retired?' · '+esc(t('coll.hidden')):''}</span></div>
+        <div class="nm">${esc(ex.name)}<span>${esc(loadDesc(ex))} · ${esc(days?tn('coll.sessions',days):t('coll.never'))}${ex.retired?' · '+esc(t('coll.hidden')):''}</span></div>
         <button class="sh-pin" data-edit="${ex.key}">${esc(t('btn.edit'))}</button>
         <button class="sh-add${ex.retired?'':' ghost'}" data-ret="${ex.key}">${esc(t(ex.retired?'btn.show':'btn.hide'))}</button>
       </div>`;
@@ -2538,28 +2441,11 @@ function shRenderList(){
         <button class="sh-add" data-add="${ex.key}">${esc(t('btn.add'))}</button>
       </div>`;
   };
-  // Always list from CATALOGUE, never from EX or customEx directly — those are the raw sources and
-  // carry neither the renames nor the hidden flags that the edits overlay holds.
-  const isBuiltIn = k => EX.some(e=>e.key===k);
-  const pool = CATALOGUE.filter(hit);
-  let h='';
-  const grouped = list => {
-    let out='';
-    const mine=list.filter(ex=>!isBuiltIn(ex.key));
-    const built=list.filter(ex=>isBuiltIn(ex.key)).sort((a,b)=>a.name.localeCompare(b.name));
-    if(mine.length) out+=`<div class="sh-grp">${esc(t('sh.yours'))}</div>`+mine.map(row).join('');
-    if(built.length) out+=`<div class="sh-grp">${esc(t('sh.catalogue'))}</div>`+built.map(row).join('');
-    return out;
-  };
-  if(shManaging){
-    // manage everything, not just your own: a built-in can be renamed and hidden too
-    h=grouped(pool);
-    if(!h) h=`<div class="sh-empty">${esc(tf('nomatch',{q:esc(q)}))}</div>`;
-  }else{
-    h=grouped(pool.filter(ex=>!ex.retired && !onForm(ex.key)));
-    if(!h) h=`<div class="sh-empty">${esc(tf('nomatch',{q:esc(q)}))}<br>${esc(t('sh.tapnew'))}</div>`;
-  }
-  box.innerHTML=h;
+  // Always list from CATALOGUE, never from customEx directly — that is the raw source, and carries
+  // neither the renames nor the hidden flags that the edits overlay holds.
+  const pool = CATALOGUE.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key)));
+  box.innerHTML = pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+pool.map(row).join('')
+    : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`;
   box.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>shPick(b.dataset.add,false));
   box.querySelectorAll('[data-pin]').forEach(b=>b.onclick=()=>shPick(b.dataset.pin,true));
   box.querySelectorAll('[data-ret]').forEach(b=>b.onclick=()=>shRetire(b.dataset.ret));
@@ -2568,20 +2454,19 @@ function shRenderList(){
 async function shPick(key, pin){
   const dayKey=$("fDay").value;
   if(pin){
-    const day=DAYS.find(d=>d.key===dayKey);
-    if(day && day.ex.indexOf(key)<0){
-      const list=planExtras[dayKey]||(planExtras[dayKey]=[]);
-      if(list.indexOf(key)<0) list.push(key);
-      await persistPlan();
-    }
+    const list=planExtras[dayKey]||(planExtras[dayKey]=[]);
+    if(list.indexOf(key)<0) list.push(key);
+    await persistPlan();
   }
   addMovementToForm(key);
   shClose();
-  if(pin) drawProg();                    // the progression card follows the live plan
+  if(pin) render();                      // the day strip and the progression card follow the live plan
   const ex=exByKey(key);
   flash(pin ? tf('msg.pinned',{name:(ex?ex.name:t('ex.movement')), day:dayShort(dayKey)})
             : tf('msg.exadded',{name:(ex?ex.name:t('ex.movement'))}));
 }
+// bring a hidden movement back, dropping its overlay entry when hiding was all the entry held
+function unhide(key){ const ed=exEdits[key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete exEdits[key]; } }
 function unpinEverywhere(key){
   let touched=false;
   Object.keys(planExtras).forEach(dk=>{
@@ -2593,14 +2478,13 @@ function unpinEverywhere(key){
 async function shRetire(key){
   const ex=exByKey(key); if(!ex) return;
   const hide=!ex.retired;
-  const ed=exEdits[key]||(exEdits[key]={});
-  if(hide) ed.retired=true; else { delete ed.retired; if(!Object.keys(ed).length) delete exEdits[key]; }
+  if(hide) (exEdits[key]||(exEdits[key]={})).retired=true; else unhide(key);
   // a hidden movement must also stop being offered by any session it was pinned to
   const unpinned = hide ? unpinEverywhere(key) : false;
   await persistExEdits(); if(unpinned) await persistPlan();
   const box=$("sets-"+key), tag=(box&&box.parentNode)?box.parentNode.querySelector('.xtag'):null;
   if(tag && hide){ tag.className='xtag'; tag.textContent=t('ex.added'); }
-  shRenderList(); drawProg(); drawColl();      // hide can be tapped from either place; refresh both
+  shRenderList(); render();                    // hide can be tapped from the sheet or the collection; both follow
   shMsg(tf(hide?'msg.hidden':'msg.shown',{name:ex.name}));
   flash(tf(hide?'msg.hidden.short':'msg.shown.short',{name:ex.name}));
 }
@@ -2612,15 +2496,11 @@ async function shDelete(){
   const key=shEditing; if(!key) return;
   const ex=exByKey(key); if(!ex) return;
   const days=entries.filter(e=>liftsOf(e,key).length).length;
-  const builtIn=EX.some(e=>e.key===key);
   if(shDelArmed!==key){
     shDelArmed=key;
     $("shDelete").textContent=t('btn.tapagain');
-    const what = days
-      ? tf('sh.del.clears',{n:days, name:ex.name})
-      : tf('sh.del.removes',{name:ex.name});
-    const how = t(builtIn ? 'sh.del.builtin' : 'sh.del.custom');
-    shMsg(what+' '+how+' '+t('notreversible'), true);
+    const what = days ? tn('sh.del.clears',days,{name:ex.name}) : tf('sh.del.removes',{name:ex.name});
+    shMsg(what+' '+t('sh.del.custom')+' '+t('notreversible'), true);
     shDelTimer=setTimeout(shResetDel,4000);
     return;
   }
@@ -2628,29 +2508,24 @@ async function shDelete(){
   entries.forEach(e=>{ if(e.lifts && e.lifts[key]) delete e.lifts[key]; });
   unpinEverywhere(key);
   if(Array.isArray(settings.chartEx)) settings.chartEx=settings.chartEx.filter(k=>k!==key);
-  if(builtIn){ const ed=exEdits[key]||(exEdits[key]={}); ed.retired=true; }
-  else { customEx=customEx.filter(x=>x.key!==key); delete exEdits[key]; }
+  customEx=customEx.filter(x=>x.key!==key); delete exEdits[key];
   await persistCatalogue(); await persistExEdits(); await persistPlan(); await persistSettings(); await persist();
   shClose(); fillForm($("fDate").value); render();
-  flash(tf('msg.removed',{name:ex.name})+(days?(' · '+tf('msg.cleared',{n:days})):''));
+  flash(tf('msg.removed',{name:ex.name})+(days?(' · '+tn('msg.cleared',days)):''));
 }
 let shEditing=null;
 /* Adding a workout to the collection and putting one into today's session are two different acts.
    The Log card's picker does both at once because that is the point of it; the collection card
    only ever touches the library. */
 let shAddToDay=true;
-// the group strip is built once, then just re-selected
-function shGroupInit(){
-  const g=$("shGroup"); if(!g) return;
-  g.innerHTML='';
-  g.innerHTML=GROUPS.map(x=>`<button type="button" data-g="${x.key}">${esc(groupName(x.key))}</button>`).join('');
-  g.querySelectorAll('button').forEach(b=>b.onclick=()=>{
-    g.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
-  });
-}
+// the group strip: built the first time the sheet needs it, re-selected after that
 function shGroupSet(k){
-  shGroupInit();
-  document.querySelectorAll('#shGroup button').forEach(b=>b.classList.toggle('on', b.dataset.g===k));
+  const g=$("shGroup"); if(!g) return;
+  if(!g.children.length){
+    g.innerHTML=GROUPS.map(x=>`<button type="button" data-g="${x.key}">${esc(groupName(x.key))}</button>`).join('');
+    g.querySelectorAll('button').forEach(b=>b.onclick=()=>shGroupSet(b.dataset.g));
+  }
+  g.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.g===k));
 }
 const shGroupGet = () => { const b=document.querySelector('#shGroup button.on'); return b?b.dataset.g:'other'; };
 /* ---------- muscles, on the movement sheet ---------- */
@@ -2728,7 +2603,6 @@ function shNew(){
   $("shName").value=''; $("shShort").value=''; $("shNote").value=''; $("shDef").value='';
   shGroupSet('other');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m==='kg'));
-  $("shLoadRow").style.display=''; $("shDefRow").style.display=''; $("shCoachRow").style.display='';
   shCoachFill(null); shMusDraw([],[]);
   $("shDelete").style.display='none';
   $("shCreate").textContent=t(shAddToDay?'sh.createadd':'sh.addcoll');
@@ -2739,16 +2613,10 @@ function shEdit(key){
   const ex=exByKey(key); if(!ex) return;
   shEditing=key; shResetDel();
   $("shName").value=ex.name; $("shShort").value=ex.short||''; $("shNote").value=ex.note||'';
-  $("shDef").value=(ex.def!=null && !ex.variants)?ex.def:'';
+  $("shDef").value=ex.def!=null?ex.def:'';
   shGroupSet(groupOf(ex));
   const mode = ex.unit==='sec' ? 'sec' : (ex.added ? 'bw' : 'kg');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m===mode));
-  // loading and starting load are structural; only a movement you created can change them, and a
-  // stage-based one never can - bending the variant mechanism is exactly what CLAUDE.md forbids
-  const editable = !EX.some(e=>e.key===key) && !ex.variants;
-  $("shLoadRow").style.display=editable?'':'none';
-  $("shDefRow").style.display=editable?'':'none';
-  $("shCoachRow").style.display=editable?'':'none';
   shCoachFill(ex); shMusDraw(ex.prim||[], ex.sec||[]);
   $("shDelete").style.display='';
   $("shCreate").textContent=t('btn.saveshort');
@@ -2762,21 +2630,20 @@ async function shCreate(){
   const coach=shCoachRead();
   if(coach===undefined){ shMsg(t('sh.coach.bad'),true); $("shMin").focus(); return; }
 
+  const mode=shModeGet(), mus=shMusRead();
   if(shEditing){                                  // rename in place: the key is untouched, so logs follow
-    const ex=exByKey(shEditing);
     const ed=exEdits[shEditing]||(exEdits[shEditing]={});
     ed.name=name.slice(0,40);
     if(short) ed.short=short.slice(0,16); else delete ed.short;
     if(note) ed.note=note.slice(0,60); else delete ed.note;
-    ed.group=shGroupGet();          // regrouping retargets the weekly dashboard immediately
+    ed.group=shGroupGet();          // regrouping retargets the weekly counts immediately
     const own=customEx.find(x=>x.key===shEditing);
-    if(own && !ex.variants && $("shLoadRow").style.display!=='none'){
-      const on=document.querySelector('#shMode button.on'), mode=on?on.dataset.m:'kg';
+    if(own){
       const d=parseFloat($("shDef").value);
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
       own.def = (isNaN(d)||d<0) ? 0 : d;
       // through the gatekeeper, so an edited range is held to exactly the rules a new one is
-      const chk=normCustomEx(Object.assign({}, own, coach, shMusRead()));
+      const chk=normCustomEx(Object.assign({}, own, coach, mus));
       if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; own.prim=chk.prim; own.sec=chk.sec; }
       await persistCatalogue();
     }
@@ -2791,19 +2658,17 @@ async function shCreate(){
   const lower=name.toLowerCase();
   const existing=CATALOGUE.find(x=>x.name.toLowerCase()===lower);
   if(existing){
-    if(existing.retired){ const ed=exEdits[existing.key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete exEdits[existing.key]; } await persistExEdits(); }
+    if(existing.retired){ unhide(existing.key); await persistExEdits(); }
     if(shAddToDay) addMovementToForm(existing.key);
     shClose(); render();
     flash(tf('msg.already',{name:existing.name})+(shAddToDay?' — '+t('msg.addedthat'):''));
     return;
   }
-  const on=document.querySelector('#shMode button.on');
-  const mode=on?on.dataset.m:'kg';
   const def=normCustomEx({
     key: cxKeyFor(name), name, short:short, note:note, group: shGroupGet(),
     def: $("shDef").value, added: mode==='bw', unit: mode==='sec' ? 'sec' : null,
     repMin: coach.repMin, repMax: coach.repMax, step: coach.step,
-    prim: shMusRead().prim, sec: shMusRead().sec
+    prim: mus.prim, sec: mus.sec
   });
   if(!def){ shMsg(t('msg.badname'),true); return; }
   customEx.push(def);
@@ -2841,7 +2706,7 @@ function fmtClock(s){ return Math.floor(s/60)+':'+String(Math.floor(s%60)).padSt
 const hasAlarm = () => { try{ return !!(window.AndroidAlarm && window.AndroidAlarm.schedule); }catch(e){ return false; } };
 function alarmSet(secs, label){
   if(!hasAlarm() || !settings.restSound) return;
-  try{ window.AndroidAlarm.schedule(Math.max(0,Math.round(secs*1000)), label||'Timer finished'); }catch(e){}
+  try{ window.AndroidAlarm.schedule(Math.max(0,Math.round(secs*1000)), label||t('rest.alarm.rest')); }catch(e){}
 }
 function alarmCancel(){
   if(!hasAlarm()) return;
@@ -3026,10 +2891,9 @@ function drawBMR(){
   const out=$("bmrOut"); if(!out) return;
   const seg=$("segActivity");
   if(seg){
-    seg.innerHTML=ACTIVITY.map(a=>`<button type="button" data-a="${a.key}">${esc(actName(a.key))}<i>${esc(actHours(a.key))}</i></button>`).join('');
+    seg.innerHTML=ACTIVITY.map(a=>`<button type="button" data-a="${a.key}"${a.key===settings.activity?' class="on"':''}>${esc(actName(a.key))}<i>${esc(actHours(a.key))}</i></button>`).join('');
     seg.querySelectorAll('button').forEach(b=>b.onclick=()=>setActivity(b.dataset.a));
   }
-  if(seg) seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.a===settings.activity));
   const a=ACTIVITY.find(x=>x.key===settings.activity)||ACTIVITY[2];
   const an=$("actNote");
   if(an) an.innerHTML=`<b>${esc(actName(a.key))} · ${esc(actHours(a.key))} ${esc(t('prof.actweek'))}</b><br>${esc(actNote(a.key))}`;
@@ -3146,7 +3010,7 @@ async function setSex(sx){
   // render() does not reach the note under the body-fat box, which names the girths and the figure for one
   // sex; without this it kept the old sex's until the day was next opened. The box itself is left alone.
   bfModeSet(bfMode(), false);
-  flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(n?(' · '+tf('msg.recalcd',{n:n})):''));
+  flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(n?(' · '+tn('msg.recalcd',n)):''));
 }
 
 /* ---------- workout collection ---------- */
@@ -3156,7 +3020,6 @@ function drawColl(){
   const wrap=$("collWrap"); if(!wrap) return;
   const q=($("collSearch")?$("collSearch").value:'').trim().toLowerCase();
   const hit=ex=>!q || (ex.name+' '+ex.short+' '+ex.note).toLowerCase().indexOf(q)>=0;
-  const isBuiltIn=k=>EX.some(e=>e.key===k);
   const pool=CATALOGUE.filter(hit);
   const row=ex=>{
     const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
@@ -3164,7 +3027,7 @@ function drawColl(){
     const bits=[loadDesc(ex)];
     // the muscles it trains first, or a nudge: an untagged movement counts towards nothing in the Guide
     bits.push((ex.prim && ex.prim.length) ? ex.prim.map(m=>t('mus.'+m)).join(', ') : t('coll.nomus'));
-    bits.push(days?tf('coll.sessions',{n:days}):t('coll.never'));
+    bits.push(days?tn('coll.sessions',days):t('coll.never'));
     if(inDays.length) bits.push(tf('coll.indays',{days:inDays.join(', ')}));
     return `<div class="collrow${ex.retired?' off':''}" data-k="${ex.key}">
       <div class="collname">${esc(ex.name)}${ex.retired?' <span class="xtag">'+esc(t('coll.hidden'))+'</span>':''}<span class="sub">${esc(bits.join(' · '))}</span></div>
@@ -3172,12 +3035,8 @@ function drawColl(){
       <button type="button" class="collbtn${ex.retired?' on':''}" data-cret="${ex.key}">${esc(t(ex.retired?'btn.show':'btn.hide'))}</button>
     </div>`;
   };
-  const mine=pool.filter(ex=>!isBuiltIn(ex.key)), built=pool.filter(ex=>isBuiltIn(ex.key)).sort((a,b)=>a.name.localeCompare(b.name));
-  let h='';
-  if(mine.length) h+=`<div class="collgrp">${esc(t('coll.yours'))}</div>`+mine.map(row).join('');
-  if(built.length) h+=`<div class="collgrp">${esc(t('coll.builtin'))}</div>`+built.map(row).join('');
-  if(!h) h=`<div class="collempty">${q?esc(tf('nomatch',{q:esc(q)})):esc(t('coll.empty'))}<br>${esc(t('coll.addbelow'))}</div>`;
-  wrap.innerHTML=h;
+  wrap.innerHTML = pool.length ? `<div class="collgrp">${esc(t('coll.yours'))}</div>`+pool.map(row).join('')
+    : `<div class="collempty">${esc(q ? tf('nomatch',{q:q}) : t('coll.empty'))}<br>${esc(t('coll.addbelow'))}</div>`;
   wrap.querySelectorAll('[data-cedit]').forEach(b=>b.onclick=()=>{ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); });
   wrap.querySelectorAll('[data-cret]').forEach(b=>b.onclick=()=>shRetire(b.dataset.cret));
 }
@@ -3191,8 +3050,7 @@ function drawColl(){
 function drawReview(){
   const grid=$("revGrid"); if(!grid) return;
   const wk=entries.filter(e=>within7(e.date)), start=daysAgo(6), floor=protFloor(), tgt=settings.kcalTarget;
-  const trained=wk.filter(e=>Object.keys(e.lifts||{}).some(k=>liftsOf(e,k).length));
-  const planned=DAYS.filter(d=>sessionEx(d.key).length).length;
+  const done=wk.filter(trained), planned=sessionTarget(), rec=calRecommend().target;
   // records: the best inside the week against everything before it; a movement new this week has nothing to beat
   const recs=[];
   CATALOGUE.forEach(ex=>{
@@ -3209,21 +3067,20 @@ function drawReview(){
   const tagged=MUSCLE_KEYS.some(k=>mv[k]>0);
   const cnt={ok:0, low:0, high:0, muted:0};
   MUSCLE_KEYS.forEach(k=>{ cnt[(mv[k]<lo && mute.indexOf(k)>=0) ? 'muted' : volState(mv[k],lo,hi)]++; });
-  const sgn=v=>(v>0?'+':v<0?'−':'±')+Math.abs(v).toFixed(1);
   const cell=(lbl,val,sub)=>`<div class="cstat"><div class="cs-lbl">${esc(lbl)}</div><div class="cs-val">${val}</div><div class="cs-sub">${esc(sub)}</div></div>`;
   grid.innerHTML=
-      cell(t('rev.sessions'), trained.length+(planned?`<span>/ ${planned}</span>`:''), t(planned?'rev.planned':'rev.noplan'))
+      cell(t('rev.sessions'), done.length+(planned?`<span>/ ${planned}</span>`:''), t(planned?'rev.planned':'rev.noplan'))
     + cell(t('rev.records'), String(recs.length), recs.length ? recs.slice(0,3).join(', ')+(recs.length>3?' …':'') : t('rev.norecs'))
-    + cell(t('rev.weight'), dW==null ? '—' : sgn(dW)+'<span>kg</span>', t(dW!=null ? 'rev.trendwk' : wIn ? 'rev.notrend' : 'rev.noweigh'))
+    + cell(t('rev.weight'), dW==null ? '—' : fmtSigned(dW)+'<span>kg</span>', t(dW!=null ? 'rev.trendwk' : wIn ? 'rev.notrend' : 'rev.noweigh'))
     + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tf('rev.kcalsub',{target:tgt.toLocaleString(), n:kd.length}))
     + cell(t('rev.protein'), pd.length ? pHit+`<span>/ ${pd.length}</span>` : '—', tf('rev.protsub',{floor:floor}))
     + cell(t('rev.muscles'), tagged ? String(cnt.ok) : '—', tagged ? tf('rev.mussub',{under:cnt.low, over:cnt.high, muted:cnt.muted}) : t('rev.nomus'));
   const gap=tagged ? MUSCLES.find(m=>mv[m.key]===0 && mute.indexOf(m.key)<0) : null;
   let one;
   if(!wk.length) one=t('rev.one.empty');
-  else if(planned && trained.length<planned) one=tf('rev.one.sessions',{n:trained.length, planned:planned});
+  else if(planned && done.length<planned) one=tf('rev.one.sessions',{n:done.length, planned:planned});
   else if(pd.length>=3 && pHit*2<pd.length) one=tf('rev.one.protein',{hit:pHit, n:pd.length, floor:floor});
-  else if(lastRec!=null && Math.abs(lastRec-tgt)>=100) one=tf('rev.one.target',{rec:lastRec.toLocaleString(), target:tgt.toLocaleString()});
+  else if(rec!=null && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
   else if(kd.length>=4 && Math.abs(kAvg-tgt)>tgt*0.1) one=tf(kAvg>tgt?'rev.one.over':'rev.one.under',{avg:kAvg.toLocaleString(), target:tgt.toLocaleString()});
   else if(gap) one=tf('rev.one.muscle',{name:t('mus.'+gap.key)});
   else one=t('rev.one.ok');
@@ -3263,6 +3120,22 @@ function bakFromNudge(){
   if(lastBackup!==localDate()) $("bakNudgeText").textContent=$("syncMsg").textContent || t('sync.writefail');
 }
 
+/* ---------- version ---------- */
+/* Which app this is and which version, at the foot of Settings. The two APKs are told apart by the banner
+   class only the free build adds. The web app adds the build its service worker cached, so a copy still
+   running last week's build says so, rather than leaving its owner to guess why nothing has changed. */
+function drawVersion(){
+  const el=$("appVer"); if(!el) return;
+  const android=!!window.AndroidFile, pro=android && !document.body.classList.contains('ads');
+  const line=tf('ver.line',{name:t(pro?'ver.pro':'ver.free'), v:APP_VERSION,
+    where:t(android ? 'ver.android' : location.protocol==='file:' ? 'ver.file' : 'ver.web')});
+  el.textContent=line;
+  if(!android && window.caches && caches.keys) caches.keys().then(ks=>{
+    const k=ks.find(x=>/^tally-[0-9a-f]{12}$/.test(x));
+    if(k) el.textContent=line+' · '+tf('ver.build',{id:k.slice(6,13)});
+  }).catch(()=>{});
+}
+
 /* ---------- the Guide ---------- */
 /* Three views of one question, what to train next: sets per muscle over the last seven days, a
    recommendation for each muscle under the band using what the gym has, and the library by muscle.
@@ -3272,7 +3145,7 @@ let guideMus=null, guideAll=false;
 const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
 // already in the collection, by its library link or by name — it may well have been made by hand
 function libOwned(l){
-  const nm=t('lib.'+l.key,'en').toLowerCase();
+  const nm=t('lib.'+l.key).toLowerCase();
   return CATALOGUE.find(x=>x.lib===l.key || x.name.toLowerCase()===nm) || null;
 }
 const libLive = l => { const o=libOwned(l); return !!o && !o.retired; };
@@ -3344,10 +3217,10 @@ async function guideAdd(k){
   const have=libOwned(l);
   if(have){
     // defined already, perhaps hidden: bring it back rather than make a second one with its own history
-    if(have.retired){ const ed=exEdits[have.key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete exEdits[have.key]; } await persistExEdits(); }
+    if(have.retired){ unhide(have.key); await persistExEdits(); }
     render(); return;
   }
-  const name=t('lib.'+k,'en');
+  const name=t('lib.'+k);
   const def=normCustomEx({key:cxKeyFor(name), name:name, group:muscleGrp(l.p[0]), def:0,
     added:l.ld==='bw', unit:l.ld==='sec' ? 'sec' : null, prim:l.p, sec:l.s, lib:k});
   if(!def) return;
@@ -3358,13 +3231,13 @@ async function guideAdd(k){
 async function volMuteToggle(k){
   const m=settings.volMute||(settings.volMute=[]), i=m.indexOf(k);
   if(i>=0) m.splice(i,1); else m.push(k);
-  await persistSettings(); drawGuide();
+  await persistSettings(); render();          // This Week counts muted muscles too
 }
 // a band has to be a band: an impossible pair is ignored and the boxes go back to the last good one
 async function volBandSet(){
   const lo=parseInt($("volLo").value,10), hi=parseInt($("volHi").value,10);
   if(!isNaN(lo) && !isNaN(hi) && lo>=0 && hi<=100 && lo<hi){ settings.volLo=lo; settings.volHi=hi; await persistSettings(); }
-  drawGuide();
+  render();
 }
 
 /* ---------- My Gym ---------- */
@@ -3373,7 +3246,7 @@ function drawGym(){
   wrap.innerHTML=EQUIP.map(q=>{
     const on=gym.have.indexOf(q)>=0, n=LIB.filter(l=>l.eq.indexOf(q)>=0).length;
     return `<button type="button" class="gymitem${on?' on':''}" data-eq="${q}"><span class="box"></span>`
-      + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tf('gym.uses',{n:n}))}</span></span></button>`;
+      + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tn('gym.uses',n))}</span></span></button>`;
   }).join('');
   $("gymCount").textContent = gym.set ? tf('gym.count',{n:LIB.filter(l=>libAvailable(l, gym.have)).length, total:LIB.length}) : t('gym.unset');
   $("gymOwn").innerHTML = gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
@@ -3385,7 +3258,7 @@ function drawGym(){
 async function gymToggle(q){
   const i=gym.have.indexOf(q);
   if(i>=0) gym.have.splice(i,1); else gym.have.push(q);
-  gym.set=true; await persistGym(); drawGym(); drawGuide();
+  gym.set=true; await persistGym(); render();
 }
 // your own items are a record only, so adding one does not switch the Guide over to filtering
 async function gymAddOwn(){
@@ -3396,23 +3269,28 @@ async function gymAddOwn(){
 async function gymDelOwn(k){ gym.own=gym.own.filter(o=>o.key!==k); await persistGym(); drawGym(); }
 
 /* ---------- mobility ---------- */
-/* The card writes straight through to the entry rather than waiting for Save. A stretch finished
-   on the floor with the phone across the room must already be recorded by the time you pick it up. */
-async function setMob(key, secs){
+/* The mobility and cardio cards write straight through to the entry rather than waiting for Save. A
+   stretch finished on the floor with the phone across the room must already be recorded by the time you
+   pick it up. This is the entry they write to: the selected day's, made on the spot if the day has none
+   yet, or null when nothing may be written. */
+function dayEntry(){
   const date=$("fDate").value;
-  if(!date) return;
-  if(loadFailed){ flash(t('msg.loadfail.save'),true); return; }
+  if(!date) return null;
+  if(loadFailed){ flash(t('msg.loadfail.save'),true); return null; }
   let e=entries.find(x=>x.date===date);
   if(!e){
-    e=normEntry({date:date, day:$("fDay").value});
-    if(!e) return;
+    e=normEntry({date:date, day:$("fDay").value}); if(!e) return null;
     entries.push(e); entries.sort((a,b)=>a.date.localeCompare(b.date));
   }
+  return e;
+}
+async function setMob(key, secs){
+  const e=dayEntry(); if(!e) return;
   const m=Object.assign({}, e.mob||{});
   if(secs==null) delete m[key]; else m[key]=Math.max(0,Math.round(secs));
   e.mob=Object.keys(m).length?m:null;
   await persist();
-  drawMob(); drawHistory();
+  drawMob(); stale('history');
 }
 function toggleMob(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
@@ -3424,7 +3302,7 @@ function toggleMob(key){
 function mobRowHtml(s, mob, gone){
   const on=(s.key in mob);
   const reps=sxIsReps(s), tgt=sxTarget(s);
-  const sub = tgt ? tf(reps?'mob.repsn':'mob.holdn',{n:tgt}) : t(reps?'mob.noreps':'mob.nohold');
+  const sub = tgt ? (reps ? tn('mob.repsn',tgt) : tf('mob.holdn',{n:tgt})) : t(reps?'mob.noreps':'mob.nohold');
   // a rep count cannot be counted down, so the timer button belongs to timed stretches only
   const go = (!reps && s.secs) ? '<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>' : '';
   return `<div class="mobrow${on?' done':''}" data-k="${s.key}">
@@ -3440,7 +3318,7 @@ function drawMob(){
   const date=$("fDate").value;
   const cur=entries.find(e=>e.date===date);
   const mob=(cur && cur.mob)?cur.mob:{};
-  const dd=$("mobDate"); if(dd) dd.textContent=date?(date.slice(8,10)+'/'+date.slice(5,7)+'/'+date.slice(0,4)):'—';
+  const dd=$("mobDate"); if(dd) dd.textContent=fmtDMY(date);
   const list=activeStretches();
   // a stretch logged on this date whose definition is gone still gets a row, for the same reason a
   // lift under an unknown movement keeps its block: the logged number is real
@@ -3468,7 +3346,7 @@ function drawMob(){
   });
   const parts=[tf('done.n',{n:n})];
   if(secs) parts.push(fmtClock(secs));
-  if(reps) parts.push(tf('mob.repsn',{n:reps}));
+  if(reps) parts.push(tn('mob.repsn',reps));
   const summary = n ? parts.join(' · ') : t('nothingyet');
   const tot=$("mobTot"); if(tot) tot.textContent=summary;
   const hint=$("mobHint");
@@ -3480,20 +3358,12 @@ function drawMob(){
 /* Deliberately the same shape as mobility, in minutes: same write-through saving, same countdown,
    same editable number. One mental model for both sections. */
 async function setCardio(key, mins){
-  const date=$("fDate").value;
-  if(!date) return;
-  if(loadFailed){ flash(t('msg.loadfail.save'),true); return; }
-  let e=entries.find(x=>x.date===date);
-  if(!e){
-    e=normEntry({date:date, day:$("fDay").value});
-    if(!e) return;
-    entries.push(e); entries.sort((a,b)=>a.date.localeCompare(b.date));
-  }
+  const e=dayEntry(); if(!e) return;
   const m=Object.assign({}, e.cardio||{});
   if(mins==null) delete m[key]; else m[key]=Math.max(0,Math.round(mins));
   e.cardio=Object.keys(m).length?m:null;
   await persist();
-  drawCardio(); drawHistory();
+  drawCardio(); stale('history');
 }
 function toggleCardio(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
@@ -3504,17 +3374,17 @@ function toggleCardio(key){
 }
 function startCardioTimer(key){
   const c=cardioByKey(key);
-  if(!c || !c.mins){ flash('Give that session a target time first'); return; }
+  if(!c || !c.mins){ flash(t('msg.needmins')); return; }
   timerStart({kind:'cardio', key:key, label:c.name, hold:c.mins*60, lead:settings.mobLead||0});
 }
 function cdRowHtml(c, log, gone){
   const on=(c.key in log);
   return `<div class="mobrow${on?' done':''}" data-k="${c.key}">
-    <button type="button" class="mobtick" title="Mark done" aria-pressed="${on}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">removed</span>':''}<span>${c.mins?('target '+c.mins+' min'):'no target set'}</span></div>
-    <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="${on?log[c.key]:''}"><span class="mobu">min</span>
-    ${c.mins?'<button type="button" class="mobgo">Start</button>':''}
-    ${gone?'':'<button type="button" class="mobedit" title="Rename, retime or remove">⋯</button>'}
+    <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
+    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':''}<span>${esc(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget'))}</span></div>
+    <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="${on?log[c.key]:''}"><span class="mobu">${esc(t('unit.min'))}</span>
+    ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
+    ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'">⋯</button>'}
   </div>`;
 }
 function drawCardio(){
@@ -3522,7 +3392,7 @@ function drawCardio(){
   const date=$("fDate").value;
   const cur=entries.find(e=>e.date===date);
   const log=(cur && cur.cardio)?cur.cardio:{};
-  const dd=$("cdDate"); if(dd) dd.textContent=date?(date.slice(8,10)+'/'+date.slice(5,7)+'/'+date.slice(0,4)):'—';
+  const dd=$("cdDate"); if(dd) dd.textContent=fmtDMY(date);
   const list=activeCardio();
   const orphan=Object.keys(log).filter(k=>!list.some(c=>c.key===k));
   if(!list.length && !orphan.length){
@@ -3540,9 +3410,9 @@ function drawCardio(){
     });
   }
   const n=Object.keys(log).length;
-  const mins=Object.keys(log).reduce((t,k)=>t+(log[k]||0),0);
+  const mins=Object.keys(log).reduce((a,k)=>a+(log[k]||0),0);
   const tot=$("cdTot");
-  if(tot) tot.textContent = n ? (tf('done.n',{n:n})+(mins?(' · '+mins+' min'):'')) : t('nothingyet');
+  if(tot) tot.textContent = n ? (tf('done.n',{n:n})+(mins?(' · '+mins+' '+t('unit.min')):'')) : t('nothingyet');
 }
 /* cardio editor — same sheet pattern as the stretch editor */
 let cdEditing=null, cdDelArmed=false, cdDelTimer=null;
@@ -3584,8 +3454,7 @@ async function cdDelete(){
   if(!cdDelArmed){
     cdDelArmed=true;
     $("cdDelete").textContent=t('btn.tapagain');
-    cdMsg(days ? ('Removes '+c.name+' and clears it from '+days+' logged day'+(days===1?'':'s')+'. Not reversible.')
-               : ('Removes '+c.name+'. Nothing is logged against it.'), true);
+    cdMsg(days ? tn('del.clears',days,{name:c.name})+' '+t('notreversible') : tf('del.removes',{name:c.name}), true);
     cdDelTimer=setTimeout(cdResetDel, 4000);
     return;
   }
@@ -3594,23 +3463,19 @@ async function cdDelete(){
   entries.forEach(e=>{ if(e.cardio && (c.key in e.cardio)){ delete e.cardio[c.key]; if(!Object.keys(e.cardio).length) e.cardio=null; } });
   await persistCardio(); await persist();
   cdClose(); render();
-  flash(c.name+' removed');
+  flash(tf('msg.removed',{name:c.name}));
 }
 
 /* stretch editor */
 let sxEditing=null, sxDelArmed=false, sxDelTimer=null;
-function sxMsg(t,err){ const m=$("sxMsg"); if(!m) return; m.textContent=t||''; m.className='sh-msg'+(err?' err':''); }
+function sxMsg(msg,err){ const m=$("sxMsg"); if(!m) return; m.textContent=msg||''; m.className='sh-msg'+(err?' err':''); }
 function sxResetDel(){ sxDelArmed=false; if(sxDelTimer) clearTimeout(sxDelTimer); const b=$("sxDelete"); if(b) b.textContent=t('btn.remove'); }
-/* The label and the note describe whichever unit is selected, so the data-i18n attribute is
-   rewritten rather than the text alone — otherwise applyLang would put the seconds wording back
-   on the next language switch. */
+// the label and the note describe whichever unit is selected
 function sxModeSet(m){
   const reps = m==='reps';
   document.querySelectorAll('#sxMode button').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
-  const lab=$("sxNumLabel");
-  if(lab){ lab.setAttribute('data-i18n', reps?'sx.reps':'sx.hold'); lab.textContent=t(lab.getAttribute('data-i18n')); }
-  const nt=$("sxNote");
-  if(nt){ nt.setAttribute('data-i18n', reps?'sx.note.reps':'sx.note'); nt.textContent=t(nt.getAttribute('data-i18n')); }
+  const lab=$("sxNumLabel"); if(lab) lab.textContent=t(reps?'sx.reps':'sx.hold');
+  const nt=$("sxNote"); if(nt) nt.textContent=t(reps?'sx.note.reps':'sx.note');
   const inp=$("sxSecs");
   if(inp){
     inp.max=reps?999:3600; inp.step=reps?1:5; inp.placeholder=reps?'10':'45';
@@ -3664,8 +3529,7 @@ async function sxDelete(){
     // two taps, like deleting a day: the second one also clears the logged history for this stretch
     sxDelArmed=true;
     $("sxDelete").textContent=t('btn.tapagain');
-    sxMsg(days ? tf('sx.del.clears',{name:s.name, n:days})+' '+t('notreversible')
-               : tf('sx.del.removes',{name:s.name}), true);
+    sxMsg(days ? tn('del.clears',days,{name:s.name})+' '+t('notreversible') : tf('del.removes',{name:s.name}), true);
     sxDelTimer=setTimeout(sxResetDel, 4000);
     return;
   }
@@ -3679,9 +3543,8 @@ async function sxDelete(){
 
 /* ---------- date picker (Sunday-first, dd/mm/yyyy) ---------- */
 const DP_MONTH=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-const DP_DOW=['sun','mon','tue','wed','thu','fri','sat'];   // index matches Date.getDay(), so Sunday is column 0
 let dpY=0, dpM=0;
-function setDateDisplay(ds){ const b=$("dateBtn"); if(b) b.textContent=ds?ds.slice(8,10)+'/'+ds.slice(5,7)+'/'+ds.slice(0,4):'—'; }
+function setDateDisplay(ds){ const b=$("dateBtn"); if(b) b.textContent=fmtDMY(ds); }
 function dpOpen(){
   const d=new Date(($("fDate").value||localDate())+'T12:00:00');
   dpY=d.getFullYear(); dpM=d.getMonth();
@@ -3694,7 +3557,7 @@ function dpRender(){
   const sel=$("fDate").value, today=localDate();
   const lead=new Date(dpY,dpM,1).getDay();          // 0 = Sunday: with a Sunday-first grid this IS the blank count
   const days=new Date(dpY,dpM+1,0).getDate();
-  let h=DP_DOW.map(d=>`<div class="dp-dow">${esc(dayShort(d))}</div>`).join('');
+  let h=DAYS.map(d=>`<div class="dp-dow">${esc(dayShort(d.key))}</div>`).join('');   // DAYS is Sunday first, as the grid is
   for(let i=0;i<lead;i++) h+='<button type="button" class="dp-day blank" disabled></button>';
   for(let d=1;d<=days;d++){
     const ds=dpY+'-'+String(dpM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
@@ -3705,10 +3568,10 @@ function dpRender(){
   $("dpGrid").querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>dpPick(b.dataset.d));
 }
 
-function setTog(id,on){ const t=$(id); if(!t) return; t.classList.toggle('on',on); t.setAttribute('aria-checked',on?'true':'false'); }
-
-/* fill the form for a date */
+/* fill the form for a date; the day strip goes first, so the session selector has its options and the
+   strip marks the day now selected, however the date was changed */
 function fillForm(date){
+  drawSched();
   setDateDisplay(date);
   const cur=entries.find(e=>e.date===date);
   const dayKey=(cur && cur.day) ? cur.day : weekdayKey(date);
@@ -3737,13 +3600,33 @@ function fillForm(date){
 }
 
 /* ---------- render ---------- */
+/* Everything a page shows is drawn from the data, so after any change every page is out of date; but only
+   the one on screen needs drawing now, and the rest are drawn as they are opened. Drawing all six on every
+   save took 55 ms with two years of logs, most of it the History table, on a page nobody was looking at. */
+const PAGE_DRAW = {
+  body:     () => { drawBodyStats(); drawWeight(entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
+  workout:  () => { drawStrength(); drawProg(); drawColl(); },
+  guide:    () => drawGuide(),
+  gym:      () => drawGym(),
+  settings: () => { drawTheme(); drawVersion(); },
+  history:  () => { drawReview(); drawHistory(); }
+};
+const stalePages = new Set();
+function drawPage(k){ if(stalePages.delete(k)) PAGE_DRAW[k](); }
+// one page out of date: drawn now if it is on screen, otherwise when it is next opened
+function stale(k){ stalePages.add(k); if(k===curPage) drawPage(k); }
 function render(){
+  drawSched(); drawBackup(); syncChartSegs();          // the strip and the reminder show on every page
+  PAGES.forEach(p=>stalePages.add(p));
+  drawPage(curPage);
+}
+// the three cards at the head of the Body page
+function drawBodyStats(){
   const weighed=entries.filter(e=>e.weight!=null);
   const latestW=weighed.length?weighed[weighed.length-1]:null;
   if(latestW){
     $("wNow").innerHTML=latestW.weight.toFixed(1)+'<small>kg</small>';
-    const d7=deltaOf(e=>e.weight,7), d30=deltaOf(e=>e.weight,30);
-    $("wDelta").innerHTML = fmtDelta('7-day',d7,'kg') + fmtDelta('30-day',d30,'kg');
+    $("wDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.weight,7),'kg') + fmtDelta(t('stat.d30'),deltaOf(e=>e.weight,30),'kg');
   }
   const bfE=entries.filter(e=>e.bf!=null), lbf=bfE.length?bfE[bfE.length-1]:null;
   // the sub-note names the method, so it has to follow whichever one produced the figure on show
@@ -3751,12 +3634,9 @@ function render(){
   if(bfSub) bfSub.textContent=t(lbf && lbf.bfSrc==='manual' ? 'stat.bf.manual' : 'stat.bf.calc');
   if(lbf){
     $("bfNow").innerHTML=lbf.bf.toFixed(1)+'<small>%</small>';
-    const d7=deltaOf(e=>e.bf,7), d30=deltaOf(e=>e.bf,30);
-    $("bfDelta").innerHTML = fmtDelta('7-day',d7,'%') + fmtDelta('30-day',d30,'%');
+    $("bfDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.bf,7),'%') + fmtDelta(t('stat.d30'),deltaOf(e=>e.bf,30),'%');
   }
-
   const wk=entries.filter(e=>within7(e.date));
-
   const kE=wk.filter(e=>e.kcal!=null), pE=wk.filter(e=>e.prot!=null);
   const kcalAvg=kE.length?Math.round(kE.reduce((s,e)=>s+e.kcal,0)/kE.length):null;
   $("mKcal").textContent=kcalAvg!=null?kcalAvg+' kcal':'—';
@@ -3766,18 +3646,14 @@ function render(){
   $("mProt").textContent=pE.length?protHit+' / 7':'—';
   const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protdays',{n:protFloor()});
   setDot("dProt",protHit,7,5);
-  $("mToday").textContent=entries.length?entries[entries.length-1].date.slice(5):'—';
-
-  drawSched(); drawWeight(weighed); drawStrength(); drawBody(); drawProg(); drawColl(); drawHistory(); drawCalibration(); drawGuide(); drawGym(); drawReview(); drawBackup();
-  syncChartSegs(); refreshManualTarget(); drawProtein(); drawBMR(); drawTheme();
+  $("mToday").textContent=entries.length?fmtDM(entries[entries.length-1].date):'—';
 }
 function fmtDelta(lbl, d, unit){
-  if(!d) return `<div>Δ ${lbl}: <span style="color:var(--ink-faint)">—</span></div>`;
-  const v=d.delta, cls = v>0?'up':v<0?'down':'';
-  const sign = v>0?'+':(v<0?'−':'±');
-  return `<div>Δ ${lbl}: <b class="${cls}">${sign}${Math.abs(v).toFixed(1)} ${unit}</b></div>`;
+  if(!d) return `<div>Δ ${esc(lbl)}: <span style="color:var(--ink-faint)">—</span></div>`;
+  const r=roundTo(d.delta), cls = r>0?'up':r<0?'down':'';
+  return `<div>Δ ${esc(lbl)}: <b class="${cls}">${fmtSigned(r,' '+unit)}</b></div>`;
 }
-function setDot(id,v,t,m){ const e=$(id); if(e) e.className='dot '+(v>=t?'ok':v>=m?'mid':'no'); }
+function setDot(id,v,good,mid){ const e=$(id); if(e) e.className='dot '+(v>=good?'ok':v>=mid?'mid':'no'); }
 function drawSched(){
   // the session selector carries the same derived labels, so both stay in step with the plan
   const sel=$("fDay");
@@ -3856,11 +3732,11 @@ function drawWeight(weighed){
   // up to 5 date ticks across the span
   if(dMax>dMin){ const nT=Math.min(5,dMax-dMin+1);
     for(let i=0;i<nT;i++){ const dn=Math.round(dMin+(dMax-dMin)*i/(nT-1)), x=xTo(dn);
-      g+=`<text class="axis" x="${x.toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtMD(dn)}</text>`; } }
-  else { g+=`<text class="axis" x="${((x0+x1)/2).toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtMD(dMin)}</text>`; }
+      g+=`<text class="axis" x="${x.toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtTick(dn)}</text>`; } }
+  else { g+=`<text class="axis" x="${((x0+x1)/2).toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtTick(dMin)}</text>`; }
   const avg=ws.reduce((a,b)=>a+b,0)/ws.length, ay=yTo(avg);
   g+=`<line x1="${x0}" y1="${ay}" x2="${x1}" y2="${ay}" stroke="${C.avg}" stroke-width="1.3" stroke-dasharray="5 5" opacity="0.55"/>`;
-  g+=`<text class="axis" x="${x1}" y="${ay-6}" text-anchor="end" fill="${C.avg}">${esc(t('chart.avg'))} ${avg.toFixed(1)}</text>`;
+  g+=`<text class="axis" x="${x1}" y="${ay-6}" text-anchor="end" style="fill:${C.avg}">${esc(t('chart.avg'))} ${avg.toFixed(1)}</text>`;
   const n=weighed.length;
   // each weigh-in, faint: they are the noise the trend reads through. The trend is the line that matters.
   const raw=weighed.map(e=>`${xTo(dnum(e.date)).toFixed(1)},${yTo(e.weight).toFixed(1)}`);
@@ -3870,7 +3746,7 @@ function drawWeight(weighed){
   weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="2.6" fill="${C.dot}" stroke="${C.line}" stroke-width="1.4" opacity="0.6"/>`);
   g+=`<polyline points="${trl.join(' ')}" fill="none" stroke="${C.line}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
   const le=weighed[n-1], lt=trOf.get(le.date);
-  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" fill="${C.ink}" font-size="13">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
+  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" style="fill:${C.ink};font-size:13px">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
   svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient></defs>`+g;
 }
 
@@ -3884,7 +3760,7 @@ function drawMultiLine(svgId, series, opts){
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   series=series.filter(s=>s.points.length);
-  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${opts.empty||'no data yet'}</text>`; return; }
+  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${esc(opts.empty||'')}</text>`; return; }
   let allD=[]; series.forEach(s=>s.points.forEach(p=>allD.push(dnum(p.date))));
   const dMin=Math.min(...allD), dMax=Math.max(...allD);
   const xTo=d=>dMin===dMax?(x0+x1)/2:x0+(dnum(d)-dMin)/(dMax-dMin)*(x1-x0);
@@ -3909,32 +3785,32 @@ function drawMultiLine(svgId, series, opts){
     if(legend){
       const ly=y0+12+si*17;
       g+=`<line x1="${x1+12}" y1="${ly-4}" x2="${x1+28}" y2="${ly-4}" stroke="${col}" stroke-width="2.6"/>`;
-      g+=`<text class="axis" x="${x1+32}" y="${ly}" fill="#3f4f74">${esc(s.name)}</text>`;
+      g+=`<text class="axis" x="${x1+32}" y="${ly}">${esc(s.name)}</text>`;
     }
   });
   svg.innerHTML=g;
 }
 
 /* ---------- strength ---------- */
+/* Bodyweight movements are charted at bodyweight plus anything added. Until a weigh-in is logged a neutral
+   adult figure stands in, rather than anything profile-specific; the chart is indexed to the first session,
+   so it largely cancels. */
+const BW_FALLBACK = 70;
 function exVolume(ex, sets, bw){
-  if(ex.variants){ const load=v=>(ex.variants.find(x=>x.key===v)||ex.variants[0]).load; return sets.reduce((t,s)=>t+load(s.variant)*s.reps,0); }
-  // bodyweight movements: load ≈ actual bodyweight + any added kg. The fallback only applies when
-  // no weight has ever been logged; since the chart is indexed to the first session it largely
-  // cancels, so a neutral adult figure is used rather than anything profile-specific.
-  const base = ex.added ? (bw||70) : 0;
-  return sets.reduce((t,s)=>t+(base+(s.kg||0))*s.reps,0);
+  const base = ex.added ? (bw||BW_FALLBACK) : 0;
+  return sets.reduce((a,s)=>a+(base+(s.kg||0))*s.reps,0);
 }
 /* One number per session in real units, for the single-movement view. Mixing units on one axis is
    exactly what the index-to-100 mode exists to avoid, which is why absolute values are only ever
    offered when a single movement is selected. */
 function sessionMetric(ex, sets, bw){
-  const reps=sets.reduce((t,s)=>t+s.reps,0);
-  if(ex.unit==='sec')          return {val:reps, unit:'sec',  lbl:'metric.time'};
-  if(ex.variants || ex.added)  return {val:reps, unit:'reps', lbl:'metric.reps'};
-  return {val:sets.reduce((t,s)=>t+(s.kg||0)*s.reps,0), unit:'kg', lbl:'metric.volume'};
+  const reps=sets.reduce((a,s)=>a+s.reps,0);
+  if(ex.unit==='sec') return {val:reps, unit:'sec',  lbl:'metric.time'};
+  if(ex.added)        return {val:reps, unit:'reps', lbl:'metric.reps'};
+  return {val:sets.reduce((a,s)=>a+(s.kg||0)*s.reps,0), unit:'kg', lbl:'metric.volume'};
 }
 function exSessions(key){
-  const bwFallback=lastNumOf(e=>e.weight)||85;
+  const bwFallback=lastNumOf(e=>e.weight)||BW_FALLBACK;
   return entries.filter(e=>liftsOf(e,key).length)
     .map(e=>({date:e.date, sets:e.lifts[key], bw:(e.weight!=null?e.weight:bwFallback)}))
     .sort((a,b)=>a.date.localeCompare(b.date));
@@ -3988,11 +3864,11 @@ function absSummary(a){
   const sess=exSessions(a.ex.key), last=sess[sess.length-1];
   const best=Math.max(...sess.map(s=>sessionMetric(a.ex,s.sets,s.bw).val));
   const wk=entries.filter(e=>within7(e.date) && liftsOf(e,a.ex.key).length);
-  const bwFallback=lastNumOf(e=>e.weight)||85;
-  const wkTot=wk.reduce((t,e)=>t+sessionMetric(a.ex,e.lifts[a.ex.key],(e.weight!=null?e.weight:bwFallback)).val,0);
+  const bwFallback=lastNumOf(e=>e.weight)||BW_FALLBACK;
+  const wkTot=wk.reduce((sum,e)=>sum+sessionMetric(a.ex,e.lifts[a.ex.key],(e.weight!=null?e.weight:bwFallback)).val,0);
   const u=a.unit==='kg'?' kg':a.unit==='sec'?' s':' reps';
   return `<b>${esc(t(a.lbl))}</b> · ${esc(tf('chart.abs',{unit:a.unit}))}<br>`+
-    `${esc(t('prog.last'))} ${last.date.slice(5)} · ${esc(fmtSets(a.ex.key,last.sets))} — ${esc(tf('chart.best',{n:Math.round(best).toLocaleString()+u}))} · ${esc(tf('chart.7day',{n:Math.round(wkTot).toLocaleString()+u}))}`;
+    `${esc(t('prog.last'))} ${fmtDM(last.date)} · ${esc(fmtSets(a.ex.key,last.sets))} — ${esc(tf('chart.best',{n:Math.round(best).toLocaleString()+u}))} · ${esc(tf('chart.7day',{n:Math.round(wkTot).toLocaleString()+u}))}`;
 }
 function drawStrength(){
   const avail=chartCandidates(), sel=chartSelection(), note=$("strNote"), pick=$("strPick");
@@ -4023,16 +3899,17 @@ function drawStrength(){
 }
 
 /* ---------- body size ---------- */
-const MEAS=[{key:'neck',name:'Neck'},{key:'shoulders',name:'Shoulders'},{key:'chest',name:'Chest'},
-  {key:'arm',name:'Arm'},{key:'forearm',name:'Forearm'},{key:'waist',name:'Waist'},
-  {key:'hips',name:'Hips'},{key:'thigh',name:'Thigh'},{key:'calf',name:'Calf'}];
+/* The nine girths. Structure only: their names are 'm.<key>' in LANG, the labels the form shows. */
+const MEAS=['neck','shoulders','chest','arm','forearm','waist','hips','thigh','calf'].map(key=>({key}));
+// a girth's name for a chart legend or the report: the form's label without its note, so "Arm (flexed)" is "arm"
+const measName = k => t('m.'+k).replace(/\s*\(.*\)$/,'').toLowerCase();
 function buildBodySeries(){
   return MEAS.map(m=>{
     const pts=entries.filter(e=>e.meas && e.meas[m.key]!=null).map(e=>({date:e.date, cm:e.meas[m.key]})).sort((a,b)=>a.date.localeCompare(b.date));
-    if(!pts.length) return {name:m.name.toLowerCase(), points:[]};
+    if(!pts.length) return {name:measName(m.key), points:[]};
     const base=pts[0].cm||1;                       // each girth indexed to its own baseline so one axis serves all
     const latest=pts[pts.length-1].cm;
-    return {name:m.name.toLowerCase()+' '+latest.toFixed(1), points:pts.map(p=>({date:p.date, val:p.cm/base*100}))};
+    return {name:measName(m.key)+' '+latest.toFixed(1), points:pts.map(p=>({date:p.date, val:p.cm/base*100}))};
   });
 }
 function drawBody(){ drawMultiLine('bodyChart', windowSeries(buildBodySeries()), {refLine:100, fmt:v=>v.toFixed(0), empty:t('chart.empty.size')}); }
@@ -4066,14 +3943,23 @@ function calcCalibration(win){
   if(out.slope!=null && out.meanK!=null) out.tdee=out.meanK-out.slope*KCAL_PER_KG;
   return out;
 }
+/* What the selected window and goal recommend, or a null target until there is enough data to trust. Pure,
+   and read wherever it is needed — the card, the Apply button, This Week — so nothing depends on which
+   page happened to draw first. */
+const CAL_NEED = {span:14, weighIns:6, kcalDays:6};
+// the daily target a maintenance figure gives at the selected rate, never under the floor
+const kcalTargetFor = tdee => Math.round(Math.max(kcalFloor(), tdee+calRate*KCAL_PER_KG/7)/25)*25;
+function calRecommend(){
+  const c=calcCalibration(entriesInWindow());
+  const enough = c.tdee!=null && c.spanDays>=CAL_NEED.span && c.weighIns>=CAL_NEED.weighIns && c.kcalDays>=CAL_NEED.kcalDays;
+  return {c:c, target: enough ? kcalTargetFor(c.tdee) : null, floored: enough && c.tdee+calRate*KCAL_PER_KG/7<kcalFloor()};
+}
 function drawCalibration(){
   document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(calPeriod)));
   document.querySelectorAll('#segRate button').forEach(b=>b.classList.toggle('on', b.dataset.r===String(calRate)));
   const out=$("calibOut");
-  const c=calcCalibration(entriesInWindow());
-  const NEED={span:14, weighIns:6, kcalDays:6};
-  lastRec=null;
-  if(c.tdee==null || c.spanDays<NEED.span || c.weighIns<NEED.weighIns || c.kcalDays<NEED.kcalDays){
+  const r=calRecommend(), c=r.c, NEED=CAL_NEED;
+  if(r.target==null){
     const need=[];
     if(c.weighIns<NEED.weighIns) need.push(tf('calib.need.weighins',{n:'<b>'+c.weighIns+'/'+NEED.weighIns+'</b>'}));
     if(c.kcalDays<NEED.kcalDays) need.push(tf('calib.need.kcaldays',{n:'<b>'+c.kcalDays+'/'+NEED.kcalDays+'</b>'}));
@@ -4084,13 +3970,7 @@ function drawCalibration(){
       ${c.slope!=null?`<br><br>${tf('calib.need.trend',{kg:'<b>'+(c.slope*7).toFixed(2)+' kg/wk</b>'})}`:''}</div>`;
     return;
   }
-  const kgWk=c.slope*7;
-  const adj=calRate*KCAL_PER_KG/7;     // +surplus / −deficit
-  let target=c.tdee+adj;
-  const floored = target<kcalFloor();
-  target=Math.max(kcalFloor(),target);
-  target=Math.round(target/25)*25;
-  lastRec=target;
+  const kgWk=c.slope*7, target=r.target, floored=r.floored;
   const tdeeR=Math.round(c.tdee/10)*10, meanR=Math.round(c.meanK);
   /* Sanity band scaled to bodyweight, not fixed numbers. A 2,000 kcal maintenance is unremarkable
      for a 55 kg person and implausible for a 110 kg one; a fixed 1900–4600 window only ever fitted
@@ -4104,56 +3984,59 @@ function drawCalibration(){
       <div class="cstat head"><div class="cs-lbl">${t('calib.rec')}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored?' · '+t('calib.floored'):''}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.est')}</div><div class="cs-val">${tdeeR}<span>kcal</span></div><div class="cs-sub">${t('calib.esttdee')}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.avg')}</div><div class="cs-val">${meanR}<span>kcal</span></div><div class="cs-sub">${t('calib.overwindow')}</div></div>
-      <div class="cstat"><div class="cs-lbl">${t('calib.trend')}</div><div class="cs-val">${kgWk>=0?'+':'−'}${Math.abs(kgWk).toFixed(2)}<span>kg/wk</span></div><div class="cs-sub">${t(kgWk<0?'calib.losing':kgWk>0?'calib.gaining':'calib.flat')}</div></div>
+      <div class="cstat"><div class="cs-lbl">${t('calib.trend')}</div><div class="cs-val">${fmtSigned(kgWk,'',2)}<span>kg/wk</span></div><div class="cs-sub">${t(roundTo(kgWk,2)<0?'calib.losing':roundTo(kgWk,2)>0?'calib.gaining':'calib.flat')}</div></div>
     </div>
     <div class="calib-meta">${tf('calib.meta',{w:'<b style="color:var(--brass-bright)">'+c.weighIns+'</b>', k:'<b style="color:var(--brass-bright)">'+c.kcalDays+'</b>', d:'<b style="color:var(--brass-bright)">'+c.spanDays+'</b>'})}</div>
     <div class="calib-note">${t(shaky?'calib.shaky':'calib.steady')}</div>
     <button class="apply${settings.kcalTarget===target?' done':''}" id="applyBtn">${settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
   $("applyBtn").onclick=applyTarget;
 }
-async function applyTarget(){ if(lastRec==null) return; settings.kcalTarget=lastRec; await persistSettings(); render(); }
+async function applyTarget(){ const rec=calRecommend().target; if(rec==null) return; settings.kcalTarget=rec; await persistSettings(); render(); }
 
 /* ---------- progression ---------- */
 function drawProg(){
   const wrap=$("progWrap"); wrap.innerHTML='';
   // every movement in the live plan, in session order - unlogged ones show as pending rather than vanishing
-  const plan=planKeys().map(exByKey).filter(Boolean);
+  const plan=planKeys().map(exByKey).filter(Boolean), wk=entries.filter(e=>within7(e.date));
   if(!plan.length){ wrap.innerHTML=`<div class="restnote">${esc(t('prog.empty'))}</div>`; return; }
   plan.forEach(ex=>{
     const sess=entries.filter(e=>liftsOf(e,ex.key).length).map(e=>({date:e.date,sets:e.lifts[ex.key]}));
     const col=document.createElement('div'); col.className='pcol';
     let html=`<div class="pname">${esc(ex.name)}</div><div class="ptarget">${esc(exNote(ex))}</div>`;
     // the session after everything logged so far - so the card always looks forward
-    const plan=coachNext(ex, sess.map(s=>s.sets));
-    const next=plan ? `<div class="pnext">${coachLine(ex,plan)}</div>` : '';
+    const cn=coachNext(ex, sess.map(s=>s.sets));
+    const next=cn ? `<div class="pnext">${coachLine(ex,cn)}</div>` : '';
     if(!sess.length){
       html+=`<div class="plast" style="color:var(--ink-faint)">—<span class="pd">${esc(t('prog.notlogged'))}</span></div>`+next;
       col.innerHTML=html; wrap.appendChild(col); return;
     }
     const last=sess[sess.length-1];
-    html+=`<div class="plast">${fmtSets(ex.key,last.sets)}<span class="pd">${esc(t('prog.last'))} · ${last.date.slice(5)}</span></div>`;
+    html+=`<div class="plast">${fmtSets(ex.key,last.sets)}<span class="pd">${esc(t('prog.last'))} · ${fmtDM(last.date)}</span></div>`;
     const recs=recordsLine(ex, recordsOf(ex, sess));
     if(recs) html+=`<div class="prec">${recs}</div>`;
     html+=next;
     const prior=sess.slice(0,-1).reverse().slice(0,3);
-    if(prior.length) html+=`<div class="phist">`+prior.map(s=>`<div><span class="pdate">${s.date.slice(5)}</span>${fmtSets(ex.key,s.sets)}</div>`).join('')+`</div>`;
-    const wk=entries.filter(e=>within7(e.date));
-    const sumReps=()=>wk.reduce((t,e)=>t+liftsOf(e,ex.key).reduce((a,s)=>a+s.reps,0),0);
-    let p7;
-    if(ex.unit==='sec') p7=tf('prog.7time',{n:sumReps()});
-    else if(ex.added || ex.variants) p7=tf('prog.7reps',{n:sumReps()});
-    else { const ton=wk.reduce((t,e)=>t+liftsOf(e,ex.key).reduce((a,s)=>a+(s.kg||0)*s.reps,0),0); p7=tf('prog.7vol',{n:ton.toLocaleString()}); }
+    if(prior.length) html+=`<div class="phist">`+prior.map(s=>`<div><span class="pdate">${fmtDM(s.date)}</span>${fmtSets(ex.key,s.sets)}</div>`).join('')+`</div>`;
+    const sumOf=f=>wk.reduce((a,e)=>a+liftsOf(e,ex.key).reduce((b,x)=>b+f(x),0),0);
+    const p7 = ex.unit==='sec' ? tf('prog.7time',{n:sumOf(x=>x.reps)})
+             : ex.added ? tf('prog.7reps',{n:sumOf(x=>x.reps)})
+             : tf('prog.7vol',{n:sumOf(x=>(x.kg||0)*x.reps).toLocaleString()});
     html+=`<div class="p7">${p7}</div>`;
     col.innerHTML=html; wrap.appendChild(col);
   });
 }
 
 /* ---------- history ---------- */
+/* The latest HIST_PAGE days, and older ones a page at a time on request. Every row is laid out by the
+   browser, and two years of them took over 100 ms to show; two months take a tenth of that, and are
+   what anyone opening History is looking for. */
+const HIST_PAGE = 60;
+let histShown = HIST_PAGE;
 function drawHistory(){
-  const body=$("histBody");
-  if(!entries.length){ $("histEmpty").style.display='block'; body.innerHTML=''; return; }
+  const body=$("histBody"), more=$("histMore");
+  if(!entries.length){ $("histEmpty").style.display='block'; body.innerHTML=''; more.style.display='none'; return; }
   $("histEmpty").style.display='none';
-  const yes='<span class="chk">✓</span>', no='<span class="dash">·</span>';
+  const no='<span class="dash">·</span>';
   // one column now: how many stretches, and the time held if any was timed
   const mobCell=e=>{
     const m=e.mob||{}, n=Object.keys(m).length;
@@ -4165,19 +4048,22 @@ function drawHistory(){
     if(reps) bits.push(reps+'\u00d7');
     return '<span class="chk">'+n+'</span>'+(bits.length?' <span class="dash">'+bits.join(' ')+'</span>':'');
   };
-  body.innerHTML=[...entries].reverse().map(e=>{
-    const d=dayTypeOf(e);
+  const rows=entries.slice(-histShown).reverse();
+  body.innerHTML=rows.map(e=>{
+    const d=DAYS.some(x=>x.key===e.day) ? e.day : null;       // an imported day may carry a key this app never had
     return `<tr>
-    <td>${e.date.slice(5)}</td>
+    <td>${fmtDM(e.date)}</td>
     <td>${d?esc(dayShort(d)):'·'}</td>
     <td class="w">${e.weight!=null?e.weight.toFixed(1):'·'}</td>
     <td>${e.bf!=null?e.bf.toFixed(1):'·'}</td>
     <td>${e.kcal!=null?e.kcal:'·'}</td>
     <td>${e.prot!=null?e.prot:'·'}</td>
     <td>${mobCell(e)}</td>
-    <td><button class="del" data-d="${e.date}" title="Delete">✕</button></td></tr>`;
+    <td><button class="del" data-d="${e.date}" title="${esc(t('hist.del'))}">✕</button></td></tr>`;
   }).join('');
-  body.querySelectorAll('.del').forEach(b=>b.onclick=()=>removeEntry(b.dataset.d, b));
+  const left=entries.length-rows.length;
+  more.style.display=left ? '' : 'none';
+  if(left) more.textContent=tn('hist.more',Math.min(HIST_PAGE,left));
 }
 let delArmed=null, delTimer=null;
 async function removeEntry(date, btn){
@@ -4252,13 +4138,14 @@ const bfNeeds = () => settings.sex==='female' ? ['waist','hips','neck'] : ['wais
 const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); return n.length>1 ? n.slice(0,-1).join(', ')+' and '+n[n.length-1] : (n[0]||''); };
 
 /* ---------- sync: export / import ---------- */
-/* Version 3 carries the movement definitions and the pinned-session plan alongside the entries.
-   Without them a backup restored on the other device renders its own history under raw keys. */
+/* Everything the device holds, so a backup restored elsewhere renders its own history: the entries, and
+   the movements, plan, stretches, cardio, renames, theme and gym they are read through. Not the date of
+   the last backup, which is this device's alone (see the backup reminder). */
 function exportObject(extra){
   // renamed from 'body-and-iron' at 2.2; import never checked this field, so older backups still load
   return Object.assign({app:'tally', version:4, exportedAt:new Date().toISOString(),
     entries, settings, exercises:customEx, plan:planExtras, stretches:stretches, exEdits:exEdits, cardio:cardios,
-    theme:theme, lang:lang, gym:gym}, extra||{});
+    theme:theme, gym:gym}, extra||{});
 }
 function exportPayload(){ return JSON.stringify(exportObject()); }
 function doExport(){
@@ -4323,7 +4210,6 @@ function setManualTarget(){
 /* ---------- report for Claude ---------- */
 function goalLabel(r){ return r>0?('+'+r+' kg/week'):r<0?('\u2212'+Math.abs(r)+' kg/week'):'maintain'; }
 function periodLabel(p){ return p==='all'?'all logged days':(p+' days'); }
-function fmtSigned(v,u,dp){ if(v==null) return 'n/a'; const s=v>0?'+':v<0?'\u2212':'\u00b1'; return s+Math.abs(v).toFixed(dp==null?1:dp)+(u||''); }
 function weeklySlope(list){
   const p=list.filter(e=>e.weight!=null).map(e=>({t:dnum(e.date),w:e.weight}));
   if(p.length<2) return null;
@@ -4375,7 +4261,7 @@ function buildClaudeReport(){
   L.push('Trend, all data: '+fmtSigned(slopeAll,' kg/week',2));
   if(cal.slope!=null) L.push('Trend, calibration window ('+periodLabel(calPeriod)+'): '+fmtSigned(cal.slope*7,' kg/week',2));
   if(cal.tdee!=null){
-    const rec=Math.max(kcalFloor(),Math.round((cal.tdee+calRate*KCAL_PER_KG/7)/25)*25);
+    const rec=kcalTargetFor(cal.tdee);
     L.push('Estimated maintenance (TDEE, back-calculated): '+Math.round(cal.tdee/10)*10+' kcal');
     L.push('Mean intake logged (window): '+Math.round(cal.meanK)+' kcal');
     L.push('Recommended intake for the selected goal: '+rec+' kcal   (currently set: '+settings.kcalTarget+')');
@@ -4396,7 +4282,7 @@ function buildClaudeReport(){
   const sess=wk.filter(e=>trained(e)).length;
   const cc=g=>wk.filter(e=>didGroup(e,g)).length;
   L.push('Sessions, last 7 days: '+sess+' / '+sessionTarget()
-    +(activeGroups().length?('   ('+activeGroups().map(g=>groupNameEn(g.key).toLowerCase()+' '+cc(g.key)+'/'+groupTarget(g.key)).join(' \u00b7 ')+')'):''));
+    +(activeGroups().length?('   ('+activeGroups().map(g=>groupName(g.key).toLowerCase()+' '+cc(g.key)+'/'+groupTarget(g.key)).join(' \u00b7 ')+')'):''));
   const mobDays=wk.filter(e=>e.mob && Object.keys(e.mob).length);
   let mobSecs=0, mobReps=0;
   mobDays.forEach(e=>Object.keys(e.mob).forEach(k=>{
@@ -4426,8 +4312,8 @@ function buildClaudeReport(){
   const measE=entries.filter(e=>e.meas);
   if(measE.length){
     const lm=measE[measE.length-1], fm=measE[0];
-    L.push('Latest ('+lm.date+'): '+MEAS.map(m=>m.name.toLowerCase()+' '+(lm.meas[m.key]!=null?lm.meas[m.key]:'-')).join(' \u00b7 '));
-    const dl=MEAS.map(m=>{ const a=fm.meas[m.key], b=lm.meas[m.key]; return (a!=null&&b!=null)?m.name.toLowerCase()+' '+fmtSigned(b-a,'',1):null; }).filter(Boolean);
+    L.push('Latest ('+lm.date+'): '+MEAS.map(m=>measName(m.key)+' '+(lm.meas[m.key]!=null?lm.meas[m.key]:'-')).join(' \u00b7 '));
+    const dl=MEAS.map(m=>{ const a=fm.meas[m.key], b=lm.meas[m.key]; return (a!=null&&b!=null)?measName(m.key)+' '+fmtSigned(b-a,'',1):null; }).filter(Boolean);
     if(dl.length) L.push('Change since '+fm.date+': '+dl.join(' \u00b7 '));
     const bfE=entries.filter(e=>e.bf!=null);
     if(bfE.length) L.push('Body fat (Navy est, latest): '+bfE[bfE.length-1].bf.toFixed(1)+'%');
@@ -4508,7 +4394,7 @@ async function loadImport(){
   // must not be stripped just because an older backup didn't carry it.
   if(impEx){
     const byKey=new Map(customEx.map(x=>[x.key,x]));
-    impEx.forEach(x=>{ const c=normCustomEx(x); if(c && !EX.some(e=>e.key===c.key)) byKey.set(c.key,c); });
+    impEx.forEach(x=>{ const c=normCustomEx(x); if(c) byKey.set(c.key,c); });
     customEx=[...byKey.values()];
     await persistCatalogue();
   }
@@ -4529,8 +4415,8 @@ async function loadImport(){
   await persist();
   $("importBox").classList.remove('show'); $("loadBtn").classList.remove('show'); $("exportBox").classList.remove('show');
   fillForm($("fDate").value); render();
-  smsg(tf('sync.imported',{n:entries.length}));
-  flash(tf('sync.imported',{n:entries.length}));
+  smsg(tn('sync.imported',entries.length));
+  flash(tn('sync.imported',entries.length));
 }
 
 /* ---------- save ---------- */
@@ -4580,21 +4466,20 @@ async function saveEntry(){
   if(ok){
     // a record outranks the date for the one line of feedback a save gets
     const rec=recordsNewOn(date);
-    flash(t('msg.saved')+' · '+(rec || (date+(bf!=null?(' · BF '+bf.toFixed(1)+'%'):''))));
+    flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(bf!=null?(' · BF '+bf.toFixed(1)+'%'):''))));
   }
   fillForm(date);
   if($("exportBox").classList.contains('show')) $("exportBox").value=exportPayload();
 }
-// there is a Save on both the Body and the Workout page; the message goes to both, so it appears
-// wherever the user actually is
+/* There is a Save on both the Body and the Workout page; the message goes to both, so it appears wherever
+   the user actually is. One timer for both, restarted each time, so a second message is not cut short by
+   the countdown of the first. */
+let flashTimer=null;
 function flash(msg,err){
-  ['savedMsg','savedMsg2'].forEach(id=>{
-    const m=$(id); if(!m) return;
-    m.textContent=msg;
-    m.style.color=err?'var(--rust)':'var(--orange)';
-    m.classList.add('show');
-    setTimeout(()=>m.classList.remove('show'),2400);
-  });
+  const els=['savedMsg','savedMsg2'].map($).filter(Boolean);
+  els.forEach(m=>{ m.textContent=msg; m.style.color=err?'var(--rust)':'var(--orange)'; m.classList.add('show'); });
+  clearTimeout(flashTimer);
+  flashTimer=setTimeout(()=>els.forEach(m=>m.classList.remove('show')),2400);
 }
 
 /* ---------- dictionary ---------- */
@@ -4704,6 +4589,8 @@ const LANG = {
     'cd.add':                '+ Add cardio',
     'cd.empty1':             'No cardio on the list.',
     'cd.empty2':             'Add whatever you actually do — a name and how long you usually go for.',
+    'cd.notarget':           'no target set',
+    'cd.target':             'target {n} min',
     'cd.title':              'Cardio <span class="sub-note">· <span id="cdDate">—</span> · every tick and time saves itself</span>',
     'cdx.edit':              'Edit cardio',
     'cdx.mins':              'Usual length · minutes',
@@ -4756,7 +4643,6 @@ const LANG = {
     'col.warn':              'Warning',
     'coll.add':              '+ Add a workout to the collection',
     'coll.addbelow':         'Add a workout below.',
-    'coll.builtin':          'Built in',
     'coll.empty':            'The collection is empty.',
     'coll.hidden':           'hidden',
     'coll.indays':           'in {days}',
@@ -4764,6 +4650,7 @@ const LANG = {
     'coll.nomus':            'no muscles set',
     'coll.search':           'Search the collection',
     'coll.sessions':         '{n} sessions logged',
+    'coll.sessions.1':       '1 session logged',
     'coll.title':            'Workout Collection <span class="sub-note">· the library every session picks from · adding here does not add it to today</span>',
     'coll.yours':            'Your workouts',
     'day.fri':               'Friday',
@@ -4786,6 +4673,9 @@ const LANG = {
     'day.today':             'Today',
     'day.tue':               'Tuesday',
     'day.wed':               'Wednesday',
+    'del.clears':            'Removes {name} and clears it from {n} logged days.',
+    'del.clears.1':          'Removes {name} and clears it from 1 logged day.',
+    'del.removes':           'Removes {name}. Nothing is logged against it.',
     'disc':                  '<b>These are estimates for tracking your own training, not medical or dietary advice.</b> Every formula here is a population average applied to one person, and every one of them can be wrong for you. Nothing in this app is a diagnosis, a treatment, or a substitute for a doctor or a registered dietitian. If you are pregnant, under 18, managing a medical condition or an eating disorder, or taking medication affected by diet, speak to a qualified professional before acting on any number here. You are responsible for what you do with it.',
     'done.n':                '{n} done',
     'eq.back_ext':           'Back extension bench',
@@ -4871,10 +4761,14 @@ const LANG = {
     'gym.title':             'My Gym <span class="sub-note">· what you can train with</span>',
     'gym.unset':             'Nothing ticked yet, so the Guide shows every exercise.',
     'gym.uses':              '{n} exercises',
+    'gym.uses.1':            '1 exercise',
     'hist.date':             'Date',
     'hist.day':              'Day',
+    'hist.del':              'Delete this day',
     'hist.empty':            'No entries logged yet. Log your first day on the Body or Workout page.',
     'hist.mob':              'Mobility',
+    'hist.more':             'Show {n} older days',
+    'hist.more.1':           'Show 1 older day',
     'hist.title':            'History',
     'lib.air_squat':         'Bodyweight squat',
     'lib.back_ext':          'Back extension',
@@ -4956,7 +4850,6 @@ const LANG = {
     'lib.wrist_curl':        'Wrist curl',
     'load.bwkg':             'bodyweight +kg',
     'load.seconds':          'seconds',
-    'load.stages':           '{n} stages',
     'log.addmove':           '+ Add movement',
     'log.beeptip':           'Beep when a timer finishes',
     'log.restnote':          '{day} — full rest, no lifts.',
@@ -5006,6 +4899,7 @@ const LANG = {
     'mob.nohold':            'no hold time set',
     'mob.noreps':            'no count set',
     'mob.repsn':             '{n} reps',
+    'mob.repsn.1':           '1 rep',
     'mob.straight':          'Straight in',
     'mob.ticktip':           'Mark done',
     'mob.title':             'Mobility <span class="sub-note">· <span id="mobDate">—</span> · every tick and time saves itself</span>',
@@ -5025,6 +4919,7 @@ const LANG = {
     'msg.already':           '{name} is already in the collection',
     'msg.badname':           'That name has no letters or numbers in it',
     'msg.cleared':           '{n} logged sessions cleared',
+    'msg.cleared.1':         '1 logged session cleared',
     'msg.colreset':          'Colours reset',
     'msg.created':           '{name} created — log the sets, then save',
     'msg.createdcoll':       '{name} added to the collection — pick it from any day',
@@ -5040,6 +4935,7 @@ const LANG = {
     'msg.loadfail.read':     'Couldn\'t read saved data — check storage; avoid saving over it',
     'msg.loadfail.save':     'Data failed to load — not saving, to avoid overwriting it',
     'msg.needhold':          'Give that stretch a hold time first',
+    'msg.needmins':          'Give that session a target time first',
     'msg.needname':          'Give it a name first',
     'msg.needweight':        'Log a bodyweight first',
     'msg.nothingtosave':     'Nothing to save on this day yet',
@@ -5048,7 +4944,9 @@ const LANG = {
     'msg.pinned':            '{name} pinned to {day}',
     'msg.preset':            '{name} colours applied',
     'msg.rebuilt':           '{n} movements rebuilt from your history',
+    'msg.rebuilt.1':         '1 movement rebuilt from your history',
     'msg.recalcd':           '{n} days recalculated',
+    'msg.recalcd.1':         '1 day recalculated',
     'msg.recoverednote':     'recovered from your history',
     'msg.removed':           '{name} removed',
     'msg.renamed':           'Renamed to {name}',
@@ -5169,7 +5067,6 @@ const LANG = {
     'rev.weight':            'Weight',
     'sh.addcoll':            'Add to collection',
     'sh.bw':                 'Bodyweight +kg',
-    'sh.catalogue':          'Catalogue',
     'sh.coach':              'Coaching · what the next session suggests',
     'sh.coach.bad':          'Fill in both ends of the range, the smaller number first.',
     'sh.coach.from':         'From',
@@ -5182,8 +5079,8 @@ const LANG = {
     'sh.coach.to':           'To',
     'sh.countsas':           'Counts as',
     'sh.createadd':          'Create & add',
-    'sh.del.builtin':        'hides it from the picker. A built-in movement cannot be deleted outright.',
     'sh.del.clears':         'Clears {n} logged sessions of {name}, and',
+    'sh.del.clears.1':       'Clears 1 logged session of {name}, and',
     'sh.del.custom':         'deletes the movement.',
     'sh.del.removes':        'Removes {name} — nothing is logged against it — and',
     'sh.loading':            'Loading',
@@ -5209,6 +5106,8 @@ const LANG = {
     'stat.bf.calc':          '· estimate · US Navy girth method',
     'stat.bf.manual':        '· your own figure',
     'stat.bw':               'Bodyweight',
+    'stat.d30':              '30-day',
+    'stat.d7':               '7-day',
     'stat.energy':           'Energy',
     'stat.last':             'Last logged',
     'stat.lastsub':          'most recent entry',
@@ -5218,8 +5117,6 @@ const LANG = {
     'stat.protdays':         'days at or above {n} g',
     'stat.targetn':          'target {n} · {logged}/7 logged',
     'sx.counts':             'Counted in',
-    'sx.del.clears':         'Removes {name} and clears it from {n} logged days.',
-    'sx.del.removes':        'Removes {name}. Nothing is logged against it.',
     'sx.edit':               'Edit stretch',
     'sx.hold':               'Hold · seconds',
     'sx.mode.reps':          'Reps',
@@ -5237,6 +5134,7 @@ const LANG = {
     'sync.fromfile':         'Import from file',
     'sync.import':           'Import data',
     'sync.imported':         'Imported {n} entries',
+    'sync.imported.1':       'Imported 1 entry',
     'sync.load':             'Load imported data',
     'sync.noentries':        'Unexpected format — no entries found in that data',
     'sync.noload':           'Nothing to load — pick a file or paste data first',
@@ -5260,7 +5158,15 @@ const LANG = {
     'theme.presets':         'Colour presets',
     'theme.reset':           'Reset colours to default',
     'theme.title':           'Appearance <span class="sub-note">· font and colours, saved on this device</span>',
-    'unit.reps':             'reps'
+    'unit.min':              'min',
+    'unit.reps':             'reps',
+    'ver.android':           'Android app',
+    'ver.build':             'build {id}',
+    'ver.file':              'laptop copy',
+    'ver.free':              'Tally',
+    'ver.line':              '{name} {v} · {where}',
+    'ver.pro':               'Tally Pro',
+    'ver.web':               'web app'
   },
 };
 
@@ -5274,9 +5180,6 @@ const LANG = {
  try{
   const today=localDate();
   $("fDate").value=today;
-  // the session selector and the week strip are both drawn from the live plan; seed the selector
-  // before the first fillForm so it has options to select from
-  $("fDay").innerHTML=DAYS.map(d=>`<option value="${d.key}">${esc(d.label)}</option>`).join('');
   // associate each label with its control for focus + screen readers
   document.querySelectorAll('.field').forEach(f=>{
     const lab=f.querySelector('label'), inp=f.querySelector('input,select');
@@ -5347,6 +5250,9 @@ const LANG = {
   $("gymAdd").onclick=gymAddOwn;
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };   // until the app is next opened
+  $("histMore").onclick=()=>{ histShown+=HIST_PAGE; drawHistory(); };
+  // one listener for every row's delete, rather than one per row on a table that grows by a row a day
+  $("histBody").onclick=ev=>{ const b=ev.target.closest('.del'); if(b) removeEntry(b.dataset.d, b); };
   $("gymName").addEventListener('keydown', e=>{ if(e.key==='Enter') gymAddOwn(); });
   // rest timer
   document.querySelectorAll('#segRest button').forEach(b=>b.onclick=()=>setRestPreset(+b.dataset.s));
@@ -5384,9 +5290,8 @@ const LANG = {
   await load(); await loadSettings();
   // the collection ships empty, so rebuild definitions for anything the history already references
   const rec=await recoverMovements(); await recoverStretches(); await recoverCardio();
-  if(rec) flash(tf('msg.rebuilt',{n:rec}));
+  if(rec) flash(tn('msg.rebuilt',rec));
   syncRestSegs();
-  if(settings.kcalTarget===2900){ settings.kcalTarget=DEF_TARGET; await persistSettings(); }  // move old maintenance default onto the lean-down target
   applyLang();
   fillForm(today); render();
   if(loadFailed) flash(t('msg.loadfail.read'),true);
