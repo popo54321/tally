@@ -3201,9 +3201,7 @@ function drawReview(){
     if(before.length && inWk.length && recordsBeaten(ex, recordsOf(ex,before), recordsOf(ex,inWk)).length) recs.push(ex.short||ex.name);
   });
   // weight: the smoothed trend now, against the trend at the last weigh-in before the week began
-  const wp=entries.filter(e=>e.weight!=null), trs=trendWeights(wp.map(e=>({t:dnum(e.date), w:e.weight})));
-  let iB=-1; wp.forEach((e,i)=>{ if(e.date<start) iB=i; });
-  const dW=(wp.length && iB>=0) ? trs[trs.length-1]-trs[iB] : null;
+  const wp=entries.filter(e=>e.weight!=null), dW=weekTrendChange(wp,start), wIn=wp.some(e=>e.date>=start);
   const kd=wk.filter(e=>e.kcal!=null), pd=wk.filter(e=>e.prot!=null);
   const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+e.kcal,0)/kd.length) : null;
   const pHit=pd.filter(e=>e.prot>=floor).length;
@@ -3216,7 +3214,7 @@ function drawReview(){
   grid.innerHTML=
       cell(t('rev.sessions'), trained.length+(planned?`<span>/ ${planned}</span>`:''), t(planned?'rev.planned':'rev.noplan'))
     + cell(t('rev.records'), String(recs.length), recs.length ? recs.slice(0,3).join(', ')+(recs.length>3?' …':'') : t('rev.norecs'))
-    + cell(t('rev.weight'), dW==null ? '—' : sgn(dW)+'<span>kg</span>', t(dW==null?'rev.notrend':'rev.trendwk'))
+    + cell(t('rev.weight'), dW==null ? '—' : sgn(dW)+'<span>kg</span>', t(dW!=null ? 'rev.trendwk' : wIn ? 'rev.notrend' : 'rev.noweigh'))
     + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tf('rev.kcalsub',{target:tgt.toLocaleString(), n:kd.length}))
     + cell(t('rev.protein'), pd.length ? pHit+`<span>/ ${pd.length}</span>` : '—', tf('rev.protsub',{floor:floor}))
     + cell(t('rev.muscles'), tagged ? String(cnt.ok) : '—', tagged ? tf('rev.mussub',{under:cnt.low, over:cnt.high, muted:cnt.muted}) : t('rev.nomus'));
@@ -3826,6 +3824,13 @@ function trendWeights(pts){
     else tr+=(1-Math.pow(0.9, Math.max(1, p.t-prev)))*(p.w-tr);
     prev=p.t; return Math.round(tr*100)/100;
   });
+}
+// the trend's change across a week: from the last weigh-in before it began to the latest. Null without a
+// weigh-in on each side — no weigh-in this week would otherwise read as no change at all
+function weekTrendChange(wp, start){
+  const trs=trendWeights(wp.map(e=>({t:dnum(e.date), w:e.weight})));
+  let iB=-1; wp.forEach((e,i)=>{ if(e.date<start) iB=i; });
+  return (iB>=0 && iB<wp.length-1) ? Math.round((trs[trs.length-1]-trs[iB])*100)/100 : null;
 }
 function drawWeight(weighed){
   // the trend runs over every weigh-in and is windowed with them, so the first point on screen is not cold
@@ -5144,6 +5149,7 @@ const LANG = {
     'rev.noplan':            'no training days in your plan',
     'rev.norecs':            'none this week',
     'rev.notrend':           'needs a weigh-in from before the week',
+    'rev.noweigh':           'no weigh-in this week',
     'rev.one.empty':         'Nothing logged in the last 7 days yet.',
     'rev.one.lbl':           'The one thing',
     'rev.one.muscle':        '{name} got no sets this week. The Guide has exercises for it — or mute it there if that is deliberate.',
