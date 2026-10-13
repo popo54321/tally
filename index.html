@@ -28,10 +28,6 @@
   @font-face{font-family:'Bangers';src:url('fonts/Bangers.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
   @font-face{font-family:'Archivo';src:url('fonts/Archivo.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:block}
   @font-face{font-family:'JetBrains Mono';src:url('fonts/JetBrainsMono.woff2') format('woff2');font-weight:100 800;font-style:normal;font-display:block}
-  /* Thai subset only - Archivo and JetBrains Mono already cover Latin, and CSS resolves
-     fallbacks per glyph, so a mixed line takes the preset face for Latin and this for Thai.
-     Variable 100-900 in one 27 kB file, so <b> gets a real bold rather than a synthesised one. */
-  @font-face{font-family:'Noto Sans Thai';src:url('fonts/NotoSansThai.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:block;unicode-range:U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC}
 </style>
 <style>
   :root{
@@ -69,73 +65,6 @@
   .title .sub{display:block;font-family:var(--font-body);font-weight:800;
     font-size:11px;letter-spacing:3px;color:var(--on-bg);opacity:.62;text-transform:uppercase;margin-bottom:8px}
 
-  /* Thai has no letter case. The uppercase transforms only reach the Latin fragments mixed into
-     it — "200 g" rendering as "200 G" — so they are switched off wholesale for Thai. Letter-spacing
-     goes with them: it separates the marks in a Thai cluster from the character they belong to. */
-  html[lang="th"] .lbl,html[lang="th"] .qnav button,html[lang="th"] .ctl-lbl,html[lang="th"] .daybar-lbl,
-  html[lang="th"] .title .sub,html[lang="th"] .empty,html[lang="th"] .day b,html[lang="th"] .collgrp,
-  html[lang="th"] .sh-grp,html[lang="th"] .apply,html[lang="th"] .save,html[lang="th"] .loadbtn,
-  html[lang="th"] .ghostbtn,html[lang="th"] .addmove,html[lang="th"] .reststart,html[lang="th"] .dp-foot button,
-  html[lang="th"] .cs-lbl,html[lang="th"] .m-h,html[lang="th"] .pname,html[lang="th"] .restwho,
-  html[lang="th"] .adph{
-    text-transform:none;letter-spacing:0}
-  /* Thai runs taller and its vowel and tone marks stack above and below the line, so the tight
-     line-heights that suit Latin clip them. */
-  html[lang="th"] body{line-height:1.7}
-
-  /* The interface leans on 9-10px labels. That works in Latin because they are uppercase with
-     letter-spacing — neither of which applies to Thai, and Thai carries its meaning in tone marks
-     and loops that are simply gone at that size. Real users could not read them. So every small
-     label gets a floor of about 12px in Thai, and the notes go to 13px. Latin is untouched. */
-  html[lang="th"] .qnav button{font-size:12.5px}
-  html[lang="th"] .daybar-lbl{font-size:12px}
-  html[lang="th"] .ctl-lbl{font-size:12.5px}
-  html[lang="th"] .field label,html[lang="th"] label{font-size:12.5px}
-  html[lang="th"] .day{font-size:12px}
-  html[lang="th"] .day b{font-size:12px}
-  html[lang="th"] .segwrap button{font-size:13px}
-  html[lang="th"] .segwrap button i{font-size:11.5px}
-  html[lang="th"] .seg button{font-size:13px}
-  html[lang="th"] .metric .name span{font-size:12px}
-  html[lang="th"] th{font-size:12.5px}
-  html[lang="th"] .sub-note{font-size:12px}
-  html[lang="th"] .adph{font-size:12px}
-  html[lang="th"] .coachline,html[lang="th"] .prec,html[lang="th"] .pnext{font-size:12.5px}
-  html[lang="th"] .mchip{font-size:12.5px}
-  html[lang="th"] .volgrp,html[lang="th"] .volstate{text-transform:none;letter-spacing:0}
-  html[lang="th"] .volgrp,html[lang="th"] .volstate,html[lang="th"] .volmute,html[lang="th"] .reclbl,html[lang="th"] .browsehead,
-  html[lang="th"] .librow .libname .sub,html[lang="th"] .libin,html[lang="th"] .gymitem .sub,html[lang="th"] .volband,html[lang="th"] .volname{font-size:12px}
-  html[lang="th"] .picknote,html[lang="th"] .chartnote,html[lang="th"] .sxnote,
-  html[lang="th"] .calib-meta,html[lang="th"] .calib-note,html[lang="th"] .calib-need,
-  html[lang="th"] .calib-sub,html[lang="th"] .cs-sub,html[lang="th"] .mobhint,
-  html[lang="th"] .helprow,html[lang="th"] .collempty,html[lang="th"] .mobempty,
-  html[lang="th"] .sh-empty,html[lang="th"] .restnote,html[lang="th"] .synctip,
-  html[lang="th"] .empty,html[lang="th"] .saved,html[lang="th"] .syncmsg,
-  html[lang="th"] .sh-msg,html[lang="th"] .delta{font-size:13px}
-  html[lang="th"] .cs-lbl{font-size:12px}
-  html[lang="th"] .collgrp,html[lang="th"] .sh-grp{font-size:12px}
-  html[lang="th"] .collname span,html[lang="th"] .sh-row .nm span,
-  html[lang="th"] .mobname span,html[lang="th"] .pd,html[lang="th"] .p7,
-  html[lang="th"] .ptarget{font-size:12px}
-  html[lang="th"] .xtag,html[lang="th"] .rtag,html[lang="th"] .mobu{font-size:11.5px}
-  html[lang="th"] .m-b,html[lang="th"] .disclaimer{font-size:14px}
-  html[lang="th"] .colname{font-size:12px}
-  html[lang="th"] .langseg button{font-size:12px}
-  /* the taller type needs the two-line buttons and the day tiles to grow with it */
-  html[lang="th"] .helprow b,html[lang="th"] .m-h{font-size:13px}
-  html[lang="th"] .restsnd,html[lang="th"] .ghostbtn,html[lang="th"] .addmove,
-  html[lang="th"] .daynav,html[lang="th"] .loadbtn,html[lang="th"] .mt-set,
-  html[lang="th"] .collbtn,html[lang="th"] .sh-add,html[lang="th"] .sh-pin{font-size:12.5px}
-  html[lang="th"] .title .sub{font-size:12.5px}
-  html[lang="th"] .mt-current,html[lang="th"] .segwrap button i{font-size:12px}
-  html[lang="th"] .day{min-height:64px}
-  html[lang="th"] .segwrap button{min-height:52px;line-height:1.45}
-  html[lang="th"] .day{line-height:1.6}
-  html[lang="th"] .m-b,html[lang="th"] .disclaimer,html[lang="th"] .synctip,html[lang="th"] .helprow{line-height:1.85}
-
-  /* the language switch rides in the header, beside the title, on every page */
-  .langseg{align-self:flex-end;margin-bottom:3px}
-  .langseg button{padding:7px 12px;font-size:11px;letter-spacing:1px;font-weight:700}
 
   .sched{display:flex;gap:9px;margin:0 0 22px;flex-wrap:wrap}
   .day{flex:1;min-width:96px;background:var(--panel);border:2.5px solid var(--line);border-radius:11px;box-shadow:3px 3px 0 var(--line);
@@ -269,6 +198,17 @@
   .gymitem .sub{display:block;font-family:var(--font-mono);font-size:10px;color:var(--ink-faint);margin-top:2px}
   .gymadd{display:flex;gap:8px;margin-top:10px}
   .gymadd input{flex:1;min-width:0;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:10px 12px;font-family:var(--font-mono);font-size:14px}
+  /* this week: six figures in the calorie card's own style, then the one thing */
+  #revGrid{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:620px){ #revGrid{grid-template-columns:1fr 1fr} }
+  .revone{font-size:15px;line-height:1.55;color:var(--ink);background:var(--panel-2);border-left:3px solid var(--brass);border-radius:0 8px 8px 0;padding:12px 14px}
+  .revone b{color:var(--brass-bright)}
+  /* the backup reminder: one line under the header, on every page, until a file is saved */
+  .baknudge{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:2px solid var(--warn);border-radius:10px;
+    padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
+  .baknudge span{flex:1 1 200px}
+  .bakskip{background:none;border:none;color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;cursor:pointer;padding:8px 6px;min-height:34px}
+  .bakline{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:8px 0 2px}
   .vseg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex:none}
   .vbtn{background:var(--panel-2);border:none;border-right:1px solid var(--line);color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;padding:8px 11px;cursor:pointer;transition:.12s;line-height:1}
   .vbtn:last-child{border-right:none}
@@ -631,8 +571,13 @@
 
   <header>
     <div class="title"><span class="sub" data-i18n="app.sub">Training &amp; Body Log</span>Tally</div>
-    <div class="seg langseg" id="segLang"></div>
   </header>
+
+  <div class="baknudge" id="bakNudge" style="display:none">
+    <span id="bakNudgeText"></span>
+    <button type="button" class="ghostbtn" id="bakNow" data-i18n="bak.now">Save backup</button>
+    <button type="button" class="bakskip" id="bakLater" data-i18n="bak.later">Not now</button>
+  </div>
 
   <div class="sched" id="sched"></div>
 
@@ -719,7 +664,7 @@
     </div>
 
     <div class="card col-12">
-      <div class="lbl" data-i18n="chart.weight">Weight Trend</div>
+      <div class="lbl" data-i18n-html="chart.weight">Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in</span></div>
       <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
       <div class="chartwrap"><svg id="wChart" viewBox="0 0 760 300"></svg></div>
     </div>
@@ -904,6 +849,7 @@
         <button class="ghostbtn" id="exportBtn" data-i18n="sync.export">Export data</button>
         <button class="ghostbtn" id="importBtn" data-i18n="sync.import">Import data</button>
       </div>
+      <div class="bakline" id="bakLine"></div>
       <input type="file" id="importFile" accept="application/json,.json,text/plain" style="display:none">
       <div class="syncmsg" id="syncMsg"></div>
       <textarea id="exportBox" class="databox" readonly></textarea>
@@ -1020,6 +966,13 @@
   </div>
 
   <div class="grid page" id="pg-history">
+    <!-- THIS WEEK -->
+    <div class="card col-12" id="cardReview">
+      <div class="lbl" data-i18n-html="rev.title">This Week <span class="sub-note">· the last 7 days, and the one thing most worth changing</span></div>
+      <div class="calib-grid" id="revGrid"></div>
+      <div class="revone" id="revOne"></div>
+    </div>
+
     <!-- HISTORY -->
     <div class="card col-12" id="cardHist">
       <div class="lbl" data-i18n="hist.title">History</div>
@@ -1180,8 +1133,8 @@ const SXKEY = "tally:stretches:v2";  // the mobility list
 const EKEY = "tally:exedits:v1";     // renames and hides, including for built-in movements
 const TKEY = "tally:theme:v1";       // colours and font choice
 const CDKEY = "tally:cardio:v2";     // the cardio list
-const LKEY = "tally:lang:v1";        // display language, its own key - settings is rebuilt from a fixed set
 const GKEY = "tally:gym:v1";         // My Gym: equipment ticked, and anything the user added
+const BKEY = "tally:backup:v1";      // when a backup file was last saved; never exported, so an import cannot fake one
 const KCAL_PER_KG = 7700;       // approx energy per kg of body mass change
 /* Lowest intake the app will ever recommend. The commonly cited minimums for unsupervised dieting
    are ~1500 kcal/day for men and ~1200 for women; below that it is hard to meet micronutrient needs
@@ -1233,26 +1186,20 @@ function mifflinBMR(kg, cm, age, sex){
 const DEF_REST = 90;            // rest timer default, seconds
 
 /* Only three Latin faces are bundled, and the app makes no network request, so a preset is a
-   recombination of those plus the platform's own serif. 'Noto Sans Thai' is named after the Latin
-   face in every stack: CSS resolves fallbacks per glyph, so Latin takes the preset face and Thai
-   takes Noto Sans Thai on the same line. Until the woff2 is dropped into app/assets/fonts/ the
-   name resolves to nothing in the APK and Thai falls through to the system face, which is exactly
-   the behaviour before it was named. The browser build pulls it from Google Fonts already.
-   There is no Thai display face: no equivalent of Bangers exists to bundle, and text-transform
-   does nothing on Thai, so the presets differentiate Thai by weight, spacing and colour only. There is no stencil or Impact-style face on Android to
-   build a "tactical" look from, which is why that one is not offered rather than faked. */
+   recombination of those plus the platform's own serif. There is no stencil or Impact-style face on
+   Android to build a "tactical" look from, which is why that one is not offered rather than faked. */
 const FONTS = [
   {key:'min',
-   body:"'Archivo','Noto Sans Thai',system-ui,sans-serif", display:"'Archivo','Noto Sans Thai',system-ui,sans-serif", mono:"'JetBrains Mono','Noto Sans Thai',monospace",
+   body:"'Archivo',system-ui,sans-serif", display:"'Archivo',system-ui,sans-serif", mono:"'JetBrains Mono',monospace",
    displayWeight:'900', displaySpacing:'-0.5px', displayTransform:'uppercase'},
   {key:'bold',
-   body:"'Archivo','Noto Sans Thai',system-ui,sans-serif", display:"'Bangers','Noto Sans Thai',system-ui,cursive", mono:"'JetBrains Mono','Noto Sans Thai',monospace",
+   body:"'Archivo',system-ui,sans-serif", display:"'Bangers',system-ui,cursive", mono:"'JetBrains Mono',monospace",
    displayWeight:'400', displaySpacing:'1.2px', displayTransform:'uppercase'},
   {key:'zen',
-   body:"Georgia,'Noto Serif','Noto Sans Thai',serif", display:"Georgia,'Noto Serif','Noto Sans Thai',serif", mono:"'JetBrains Mono','Noto Sans Thai',monospace",
+   body:"Georgia,'Noto Serif',serif", display:"Georgia,'Noto Serif',serif", mono:"'JetBrains Mono',monospace",
    displayWeight:'700', displaySpacing:'0.2px', displayTransform:'none'},
   {key:'cyber',
-   body:"'JetBrains Mono','Noto Sans Thai',monospace", display:"'JetBrains Mono','Noto Sans Thai',monospace", mono:"'JetBrains Mono','Noto Sans Thai',monospace",
+   body:"'JetBrains Mono',monospace", display:"'JetBrains Mono',monospace", mono:"'JetBrains Mono',monospace",
    displayWeight:'700', displaySpacing:'1px', displayTransform:'uppercase'}
 ];
 
@@ -2007,34 +1954,15 @@ const tEn = k => t(k, 'en');
 /* {name} placeholders rather than string concatenation, so a translation can put the value where
    its own grammar needs it instead of where English happened to put it. */
 const tf = (k, vals) => String(t(k)).replace(/\{(\w+)\}/g, (m,p)=> (vals && vals[p]!=null) ? vals[p] : m);
-async function loadLang(){
-  try{ const v=await STORE.get(LKEY); if(typeof v==='string' && LANG[v]) lang=v; }
-  catch(e){ console.error('lang read failed',e); }
-}
-async function setLang(k){
-  if(!LANG[k] || k===lang) return;
-  lang=k;
-  try{ await STORE.set(LKEY, k); }catch(e){ console.error('lang save failed',e); }
-  applyLang(); fillForm($("fDate").value); render();
-}
-/* Static markup carries its own copy; render() only reaches the data-driven cards. Both run on a
-   switch, and applyLang goes first: it rewrites innerHTML on the mixed nodes, which throws away
-   spans like #mobDate that render() then puts back. */
+/* Static markup carries its English copy in the source, but every node is still filled from LANG at
+   start-up, so the dictionary stays the one place a string lives. applyLang runs before render(): it
+   rewrites innerHTML on the mixed nodes, which throws away spans like #mobDate that render() puts back. */
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.getAttribute('data-i18n')); });
   document.querySelectorAll('[data-i18n-html]').forEach(el=>{ el.innerHTML=t(el.getAttribute('data-i18n-html')); });
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.getAttribute('data-i18n-title')); });
   const h=document.documentElement; if(h) h.setAttribute('lang', lang);
-  drawLangSeg();
-}
-function drawLangSeg(){
-  const sg=$("segLang"); if(!sg) return;
-  if(!sg.children.length){
-    sg.innerHTML=LANG_LIST.map(l=>`<button type="button" data-l="${l.key}">${l.name}</button>`).join('');
-    sg.querySelectorAll('button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
-  }
-  sg.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.l===lang));
 }
 
 /* ---------- theme ---------- */
@@ -3174,7 +3102,7 @@ function drawProtein(){
         +`<span class="calib-sub">${shown} · ${tf('prot.goalis',{goal:esc(protName(s.goal).toLowerCase())})}</span></div>`
         +`<div class="calib-meta">${s.basis==='lean mass'
             ? tf('prot.basis.lean',{kg:s.weight.toFixed(1), bf:s.bf.toFixed(1)})
-            : t('prot.basis.bw')} ${t('prot.followsrate')}</div>`
+            : tf('prot.basis.bw',{girths:bfNeedsText()})} ${t('prot.followsrate')}</div>`
         +`<button class="apply${same?' done':''}" id="applyProtBtn">${same?tf('prot.isfloor',{g:cur}):tf('prot.usefloor',{g:s.grams})}</button>`;
       const b=$("applyProtBtn"); if(b) b.onclick=()=>applyProtein(s.perKg);
     }
@@ -3215,6 +3143,9 @@ async function setSex(sx){
   });
   if(n) await persist();
   render();
+  // render() does not reach the note under the body-fat box, which names the girths and the figure for one
+  // sex; without this it kept the old sex's until the day was next opened. The box itself is left alone.
+  bfModeSet(bfMode(), false);
   flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(n?(' · '+tf('msg.recalcd',{n:n})):''));
 }
 
@@ -3249,6 +3180,89 @@ function drawColl(){
   wrap.innerHTML=h;
   wrap.querySelectorAll('[data-cedit]').forEach(b=>b.onclick=()=>{ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); });
   wrap.querySelectorAll('[data-cret]').forEach(b=>b.onclick=()=>shRetire(b.dataset.cret));
+}
+
+/* ---------- this week ---------- */
+/* The week in one card, and the one thing most worth changing. Everything is read off data the app already
+   holds, over the same rolling seven days as the rest of it, and nothing is stored. The one thing is the first
+   of these that applies, in this order, because each matters more than the next: training at all, protein,
+   a calorie target the data has moved past, intake against the target, and a muscle nothing trained. Only one
+   is shown — five would be a report, and a report is what the Claude export is for. */
+function drawReview(){
+  const grid=$("revGrid"); if(!grid) return;
+  const wk=entries.filter(e=>within7(e.date)), start=daysAgo(6), floor=protFloor(), tgt=settings.kcalTarget;
+  const trained=wk.filter(e=>Object.keys(e.lifts||{}).some(k=>liftsOf(e,k).length));
+  const planned=DAYS.filter(d=>sessionEx(d.key).length).length;
+  // records: the best inside the week against everything before it; a movement new this week has nothing to beat
+  const recs=[];
+  CATALOGUE.forEach(ex=>{
+    const all=entries.map(e=>({date:e.date, sets:liftsOf(e,ex.key)})).filter(s=>s.sets.length);
+    const before=all.filter(s=>s.date<start), inWk=all.filter(s=>s.date>=start);
+    if(before.length && inWk.length && recordsBeaten(ex, recordsOf(ex,before), recordsOf(ex,inWk)).length) recs.push(ex.short||ex.name);
+  });
+  // weight: the smoothed trend now, against the trend at the last weigh-in before the week began
+  const wp=entries.filter(e=>e.weight!=null), trs=trendWeights(wp.map(e=>({t:dnum(e.date), w:e.weight})));
+  let iB=-1; wp.forEach((e,i)=>{ if(e.date<start) iB=i; });
+  const dW=(wp.length && iB>=0) ? trs[trs.length-1]-trs[iB] : null;
+  const kd=wk.filter(e=>e.kcal!=null), pd=wk.filter(e=>e.prot!=null);
+  const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+e.kcal,0)/kd.length) : null;
+  const pHit=pd.filter(e=>e.prot>=floor).length;
+  const mv=muscleVolume(wk, exByKey).vol, mute=settings.volMute||[], lo=settings.volLo, hi=settings.volHi;
+  const tagged=MUSCLE_KEYS.some(k=>mv[k]>0);
+  const cnt={ok:0, low:0, high:0, muted:0};
+  MUSCLE_KEYS.forEach(k=>{ cnt[(mv[k]<lo && mute.indexOf(k)>=0) ? 'muted' : volState(mv[k],lo,hi)]++; });
+  const sgn=v=>(v>0?'+':v<0?'−':'±')+Math.abs(v).toFixed(1);
+  const cell=(lbl,val,sub)=>`<div class="cstat"><div class="cs-lbl">${esc(lbl)}</div><div class="cs-val">${val}</div><div class="cs-sub">${esc(sub)}</div></div>`;
+  grid.innerHTML=
+      cell(t('rev.sessions'), trained.length+(planned?`<span>/ ${planned}</span>`:''), t(planned?'rev.planned':'rev.noplan'))
+    + cell(t('rev.records'), String(recs.length), recs.length ? recs.slice(0,3).join(', ')+(recs.length>3?' …':'') : t('rev.norecs'))
+    + cell(t('rev.weight'), dW==null ? '—' : sgn(dW)+'<span>kg</span>', t(dW==null?'rev.notrend':'rev.trendwk'))
+    + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tf('rev.kcalsub',{target:tgt.toLocaleString(), n:kd.length}))
+    + cell(t('rev.protein'), pd.length ? pHit+`<span>/ ${pd.length}</span>` : '—', tf('rev.protsub',{floor:floor}))
+    + cell(t('rev.muscles'), tagged ? String(cnt.ok) : '—', tagged ? tf('rev.mussub',{under:cnt.low, over:cnt.high, muted:cnt.muted}) : t('rev.nomus'));
+  const gap=tagged ? MUSCLES.find(m=>mv[m.key]===0 && mute.indexOf(m.key)<0) : null;
+  let one;
+  if(!wk.length) one=t('rev.one.empty');
+  else if(planned && trained.length<planned) one=tf('rev.one.sessions',{n:trained.length, planned:planned});
+  else if(pd.length>=3 && pHit*2<pd.length) one=tf('rev.one.protein',{hit:pHit, n:pd.length, floor:floor});
+  else if(lastRec!=null && Math.abs(lastRec-tgt)>=100) one=tf('rev.one.target',{rec:lastRec.toLocaleString(), target:tgt.toLocaleString()});
+  else if(kd.length>=4 && Math.abs(kAvg-tgt)>tgt*0.1) one=tf(kAvg>tgt?'rev.one.over':'rev.one.under',{avg:kAvg.toLocaleString(), target:tgt.toLocaleString()});
+  else if(gap) one=tf('rev.one.muscle',{name:t('mus.'+gap.key)});
+  else one=t('rev.one.ok');
+  $("revOne").innerHTML=`<b>${esc(t('rev.one.lbl'))}</b> · ${esc(one)}`;
+}
+
+/* ---------- backup reminder ---------- */
+/* The backup file is the only thing between a user and losing everything — Safari clears idle sites, phones
+   get lost — and the likeliest way to lose it all is simply never having saved one. So the app remembers when
+   the last file was saved, under its own key that no backup carries (importing an old file must not make an
+   old backup look recent), and says so on every page once it is a fortnight stale. */
+const BACKUP_DAYS = 14;
+let lastBackup=null, bakSnoozed=false;
+async function loadBackupDate(){
+  try{ const v=await STORE.get(BKEY); lastBackup=(typeof v==='string' && validDate(v)) ? v : null; }catch(e){ lastBackup=null; }
+}
+async function markBackedUp(){ lastBackup=localDate(); try{ await STORE.set(BKEY, lastBackup); }catch(e){} drawBackup(); }
+// days since the last backup, or null when there has never been one
+const backupAge = () => lastBackup ? dnum(localDate())-dnum(lastBackup) : null;
+function backupDue(){
+  if(!entries.length) return false;
+  const age=backupAge();
+  if(age==null) return dnum(localDate())-dnum(entries[0].date)>=7;      // a week of logging, never saved
+  return age>=BACKUP_DAYS && entries.some(e=>e.date>lastBackup);        // stale, and something new to lose
+}
+function drawBackup(){
+  const age=backupAge(), line=$("bakLine");
+  if(line) line.textContent = age==null ? t('bak.never') : age===0 ? t('bak.today') : age===1 ? t('bak.yesterday') : tf('bak.ago',{n:age});
+  const bar=$("bakNudge"); if(!bar) return;
+  const show=backupDue() && !bakSnoozed;
+  bar.style.display = show ? '' : 'none';
+  if(show) $("bakNudgeText").textContent = age==null ? t('bak.nudge.never') : tf('bak.nudge.ago',{n:age});
+}
+// from the reminder: a save makes the bar go, which says it worked; a failure is said in the bar, where the tap was
+function bakFromNudge(){
+  saveBackupFile();
+  if(lastBackup!==localDate()) $("bakNudgeText").textContent=$("syncMsg").textContent || t('sync.writefail');
 }
 
 /* ---------- the Guide ---------- */
@@ -3756,7 +3770,7 @@ function render(){
   setDot("dProt",protHit,7,5);
   $("mToday").textContent=entries.length?entries[entries.length-1].date.slice(5):'—';
 
-  drawSched(); drawWeight(weighed); drawStrength(); drawBody(); drawProg(); drawColl(); drawHistory(); drawCalibration(); drawGuide(); drawGym();
+  drawSched(); drawWeight(weighed); drawStrength(); drawBody(); drawProg(); drawColl(); drawHistory(); drawCalibration(); drawGuide(); drawGym(); drawReview(); drawBackup();
   syncChartSegs(); refreshManualTarget(); drawProtein(); drawBMR(); drawTheme();
 }
 function fmtDelta(lbl, d, unit){
@@ -3800,14 +3814,30 @@ function chartColors(){
 }
 
 /* ---------- weight chart (date-scaled, auto-range, maintenance avg line) ---------- */
+/* The weight trend is an exponentially smoothed average, the Hacker's Diet method: each weigh-in moves the
+   trend a tenth of the way towards it, compounded per day, so a week's gap moves it further than a single
+   day does. A litre of water or a salty dinner shifts the scale a kilo overnight; the trend barely moves,
+   and that is the point. It is drawn, never fed to the calorie estimate — least squares over the window is
+   already the right estimator there, and smoothing first would only add lag (settled with the owner). */
+function trendWeights(pts){
+  let tr=null, prev=null;
+  return (pts||[]).map(p=>{
+    if(tr==null) tr=p.w;
+    else tr+=(1-Math.pow(0.9, Math.max(1, p.t-prev)))*(p.w-tr);
+    prev=p.t; return Math.round(tr*100)/100;
+  });
+}
 function drawWeight(weighed){
+  // the trend runs over every weigh-in and is windowed with them, so the first point on screen is not cold
+  const trAll=trendWeights(weighed.map(e=>({t:dnum(e.date), w:e.weight})));
+  const trOf=new Map(weighed.map((e,i)=>[e.date, trAll[i]]));
   weighed=weighed.filter(e=>inChartWin(e.date));
   const svg=$("wChart"), W=760,H=300,padL=46,padR=22,padT=16,padB=34;
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; return; }
-  const ws=weighed.map(e=>e.weight);
-  let yMin=Math.min(...ws), yMax=Math.max(...ws);
+  const ws=weighed.map(e=>e.weight), wt=weighed.map(e=>trOf.get(e.date));
+  let yMin=Math.min(...ws,...wt), yMax=Math.max(...ws,...wt);
   if(yMin===yMax){ yMin-=1; yMax+=1; }
   const pad=(yMax-yMin)*0.25||1; yMin-=pad; yMax+=pad;
   const yTo=v=>y1-(v-yMin)/(yMax-yMin)*(y1-y0);
@@ -3827,12 +3857,15 @@ function drawWeight(weighed){
   g+=`<line x1="${x0}" y1="${ay}" x2="${x1}" y2="${ay}" stroke="${C.avg}" stroke-width="1.3" stroke-dasharray="5 5" opacity="0.55"/>`;
   g+=`<text class="axis" x="${x1}" y="${ay-6}" text-anchor="end" fill="${C.avg}">${esc(t('chart.avg'))} ${avg.toFixed(1)}</text>`;
   const n=weighed.length;
-  const pts=weighed.map(e=>`${xTo(dnum(e.date)).toFixed(1)},${yTo(e.weight).toFixed(1)}`);
-  if(n>1) g+=`<polygon points="${x0},${y1} ${pts.join(' ')} ${x1},${y1}" fill="url(#ag)" opacity="0.16"/>`;
-  g+=`<polyline points="${pts.join(' ')}" fill="none" stroke="${C.line}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`;
-  weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="3.2" fill="${C.dot}" stroke="${C.line}" stroke-width="2"/>`);
-  const le=weighed[n-1];
-  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(le.weight)-9}" text-anchor="end" fill="${C.ink}" font-size="13">${le.weight.toFixed(1)}</text>`;
+  // each weigh-in, faint: they are the noise the trend reads through. The trend is the line that matters.
+  const raw=weighed.map(e=>`${xTo(dnum(e.date)).toFixed(1)},${yTo(e.weight).toFixed(1)}`);
+  const trl=weighed.map(e=>`${xTo(dnum(e.date)).toFixed(1)},${yTo(trOf.get(e.date)).toFixed(1)}`);
+  if(n>1) g+=`<polygon points="${x0},${y1} ${trl.join(' ')} ${x1},${y1}" fill="url(#ag)" opacity="0.16"/>`;
+  if(n>1) g+=`<polyline points="${raw.join(' ')}" fill="none" stroke="${C.line}" stroke-width="1.2" stroke-linejoin="round" opacity="0.35"/>`;
+  weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="2.6" fill="${C.dot}" stroke="${C.line}" stroke-width="1.4" opacity="0.6"/>`);
+  g+=`<polyline points="${trl.join(' ')}" fill="none" stroke="${C.line}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const le=weighed[n-1], lt=trOf.get(le.date);
+  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" fill="${C.ink}" font-size="13">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
   svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient></defs>`+g;
 }
 
@@ -4186,7 +4219,7 @@ function bfModeSet(m, seed){
   }
   const note=$("bfSrcNote");
   if(note) note.textContent = manual ? ''
-    : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1)}) : t('body.bf.none'));
+    : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1), girths:bfNeedsText()}) : tf('body.bf.none',{girths:bfNeedsText()}));
 }
 
 /* US Navy girth method. The two sexes use different equations and different girths: the male form
@@ -4210,6 +4243,8 @@ function bfNavy(meas, height, sex){
 }
 // what the current sex setting needs before an estimate is possible
 const bfNeeds = () => settings.sex==='female' ? ['waist','hips','neck'] : ['waist','neck'];
+// the girths that sex's equation needs, as a phrase: "waist and neck", or "waist, hips and neck"
+const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); return n.length>1 ? n.slice(0,-1).join(', ')+' and '+n[n.length-1] : (n[0]||''); };
 
 /* ---------- sync: export / import ---------- */
 /* Version 3 carries the movement definitions and the pinned-session plan alongside the entries.
@@ -4255,6 +4290,7 @@ function saveBackupFile(){
   if(window.AndroidFile && typeof window.AndroidFile.save==='function'){
     const written=window.AndroidFile.save(name,payload);
     smsg(written?tf('sync.savedto',{path:written}):t('sync.writefail'), !written);
+    if(written) markBackedUp();
     return;
   }
   const url=URL.createObjectURL(new Blob([payload],{type:'application/json'}));
@@ -4262,6 +4298,7 @@ function saveBackupFile(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   smsg(tf('sync.saved',{name:name}));
+  markBackedUp();        // a browser cannot report whether the download was kept; starting it is the best there is
 }
 
 /* ---------- manual calorie target ---------- */
@@ -4296,12 +4333,8 @@ function buildClaudeReport(){
   const L=[];
   L.push('=== TRAINING REPORT FOR ANALYSIS ===');
   L.push('Generated: '+gen+'  |  Data span: '+first+' \u2192 '+last+'  |  '+entries.length+' entries');
-  /* The report is a machine-facing payload and stays English whatever the interface is set to —
-     it ends with JSON whose keys are identifiers, and half-translating that reads worse than not
-     translating it at all. The reply language is asked for instead, which is what was actually
-     wanted. */
-  L.push('Ask: read the plan and selected goal, then assess how the recent weeks track against them. The raw JSON at the end is complete - use it for anything the summary omits.'
-    + (lang==='en' ? '' : ' Reply in '+REPLY_LANG[lang]+'.'));
+  /* The report is a machine-facing payload: plain English wrapped around JSON whose keys are identifiers. */
+  L.push('Ask: read the plan and selected goal, then assess how the recent weeks track against them. The raw JSON at the end is complete - use it for anything the summary omits.');
   L.push('');
   L.push('--- CURRENT PLAN & SELECTED GOAL ---');
   L.push('Selected goal (calibration): '+goalLabel(calRate)+'   [options: \u22120.5 / \u22120.25 / maintain / +0.25 / +0.5]');
@@ -4436,7 +4469,7 @@ function resetImportBtn(){ importArmed=false; if(importTimer) clearTimeout(impor
 async function loadImport(){
   const raw=$("importBox").value.trim();
   if(!raw){ smsg(t('sync.noload'),true); return; }
-  let data, impEntries, impSettings=null, impEx=null, impPlan=null, impSx=null, impEd=null, impCd=null, impTh=null, impLg=null, impGym=null;
+  let data, impEntries, impSettings=null, impEx=null, impPlan=null, impSx=null, impEd=null, impCd=null, impTh=null, impGym=null;
   try{ data=JSON.parse(raw); }
   catch(e){ resetImportBtn(); smsg(t('sync.notvalid'),true); return; }
   if(Array.isArray(data)){ impEntries=data; }                                   // legacy bare-array export
@@ -4448,7 +4481,6 @@ async function loadImport(){
     if(Array.isArray(data.stretches)) impSx=data.stretches;      // version 4 and up
     if(Array.isArray(data.cardio)) impCd=data.cardio;
     if(data.theme && typeof data.theme==='object') impTh=data.theme;
-    if(typeof data.lang==='string' && LANG[data.lang]) impLg=data.lang;
     if(data.exEdits && typeof data.exEdits==='object') impEd=data.exEdits;
     if(data.gym && typeof data.gym==='object') impGym=data.gym;          // 5.1 and up
   }
@@ -4487,7 +4519,6 @@ async function loadImport(){
   if(impCd){ const bk=new Map(cardios.map(c=>[c.key,c])); impCd.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
   if(impTh){ theme=normTheme(impTh); await persistTheme(); }
   if(impGym){ gym=normGym(impGym); await persistGym(); }
-  if(impLg){ lang=impLg; try{ await STORE.set(LKEY, lang); }catch(e){} applyLang(); }
   if(impPlan){ planExtras=normPlan(impPlan); await persistPlan(); }
   if(impSettings && typeof impSettings==='object'){ settings=normSettings(impSettings); await persistSettings(); }
   await persist();
@@ -4562,15 +4593,11 @@ function flash(msg,err){
 }
 
 /* ---------- dictionary ---------- */
-/* English is the source; every key here exists in both languages and verify.js asserts it.
-   Keys are display text only — never a storage key, a movement key, a day key or a setting name.
-   {name} placeholders are filled by tf(), so a translation can reorder them freely.
-   Units (kg, cm, kcal, g) and the formulas, numbers and researcher names in the methods card stay
-   in Latin script deliberately: they are symbols, not words, and translating them would make the
-   maths harder to check rather than easier to read. */
-const LANG_LIST = [{key:'en', name:'EN'}, {key:'th', name:'ไทย'}];
-// what the report asks Claude to answer in, when the interface is not English
-const REPLY_LANG = {th:'Thai'};
+/* English only, since 5.3: the owner found one language less confusing and neater than two. Every
+   visible string still lives here rather than in markup or code, so a language could come back
+   without touching a call site — the Thai dictionary that shipped in 3.3 to 5.2 is kept in
+   docs/archive for exactly that. Keys are display text only: never a storage key, a movement key,
+   a day key or a setting name. {name} placeholders are filled by tf(). */
 const LANG = {
   en: {
     'act.ath.hours':         '10+ hours',
@@ -4599,6 +4626,14 @@ const LANG = {
     'ads.slot':              'Ad space',
     'and':                   ' and ',
     'app.sub':               'Training & Body Log',
+    'bak.ago':               'Last backup file saved {n} days ago.',
+    'bak.later':             'Not now',
+    'bak.never':             'No backup file saved on this device yet.',
+    'bak.now':               'Save backup',
+    'bak.nudge.ago':         'Your last backup is {n} days old, and you have logged since.',
+    'bak.nudge.never':       'You have not saved a backup yet, and everything you log lives only on this device.',
+    'bak.today':             'Last backup file saved today.',
+    'bak.yesterday':         'Last backup file saved yesterday.',
     'basis.bw':              'bodyweight',
     'basis.lean':            'lean mass',
     'bf.female':             'Female Navy formula: needs waist, hips and neck. Body fat stays blank until all three are logged on a day.',
@@ -4612,10 +4647,10 @@ const LANG = {
     'bmr.need.weight':       'a bodyweight',
     'bmr.sub':               'resting {bmr} kcal × {mult} ({act}) · age {age}',
     'body.bf':               'Body fat',
-    'body.bf.calc':          '{n}% from your waist and neck',
+    'body.bf.calc':          '{n}% from your {girths}',
     'body.bf.mode.calc':     'Work it out for me',
     'body.bf.mode.manual':   'I\'ll enter it',
-    'body.bf.none':          'Log waist and neck and this fills itself in.',
+    'body.bf.none':          'Log {girths} and this fills itself in.',
     'body.bfpct':            'Body fat (%)',
     'body.meas':             'Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span>',
     'body.title':            'Body & food',
@@ -4686,7 +4721,8 @@ const LANG = {
     'chart.nosel':           'Nothing selected.',
     'chart.size':            'Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend</span>',
     'chart.str':             'Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span>',
-    'chart.weight':          'Weight Trend',
+    'chart.trend':           'trend',
+    'chart.weight':          'Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in</span>',
     'coach.confirm':         'same weight, every set reached {max}; {left} more like that and it goes up',
     'coach.first':           'first session: find a weight you can do for {min}–{max} {unit}',
     'coach.floor':           'same weight, get every set to at least {aim} first (last time {last})',
@@ -5064,7 +5100,7 @@ const LANG = {
     'prog.last':             'last',
     'prog.notlogged':        'not logged yet',
     'prog.title':            'Lift Progression <span class="sub-note">· current plan only</span>',
-    'prot.basis.bw':         'Based on bodyweight. Log waist and neck girths and this switches to lean mass, which is more accurate.',
+    'prot.basis.bw':         'Based on bodyweight. Log {girths} and this switches to lean mass, which is more accurate.',
     'prot.basis.lean':       'Based on lean mass ({kg} kg at {bf}% fat), which is the fairer basis once body fat is known — fat mass carries no protein requirement.',
     'prot.byhand':           'set by hand',
     'prot.cut.name':         'Losing',
@@ -5100,6 +5136,31 @@ const LANG = {
     'rest.rest':             'rest',
     'rest.resume':           'Resume',
     'rest.silent':           'Silent',
+    'rev.food':              'Average intake',
+    'rev.kcalsub':           'kcal a day · target {target} · {n} days logged',
+    'rev.muscles':           'Muscles in range',
+    'rev.mussub':            '{under} under · {over} over · {muted} muted',
+    'rev.nomus':             'tag movements with muscles to count this',
+    'rev.noplan':            'no training days in your plan',
+    'rev.norecs':            'none this week',
+    'rev.notrend':           'needs a weigh-in from before the week',
+    'rev.one.empty':         'Nothing logged in the last 7 days yet.',
+    'rev.one.lbl':           'The one thing',
+    'rev.one.muscle':        '{name} got no sets this week. The Guide has exercises for it — or mute it there if that is deliberate.',
+    'rev.one.ok':            'Nothing stands out. The same again next week is the plan.',
+    'rev.one.over':          'You averaged {avg} kcal a day against a {target} target — more than a tenth over.',
+    'rev.one.protein':       'Protein reached your {floor} g floor on only {hit} of {n} logged days.',
+    'rev.one.sessions':      'You trained {n} of the {planned} days your plan trains. The missing sessions matter more than anything else this week.',
+    'rev.one.target':        'Your data now puts the calorie target at {rec}; yours is set to {target}. Apply the new one on the Body page.',
+    'rev.one.under':         'You averaged {avg} kcal a day against a {target} target — more than a tenth under.',
+    'rev.planned':           'of the days your plan trains',
+    'rev.protein':           'Protein',
+    'rev.protsub':           'days at or over {floor} g',
+    'rev.records':           'Records',
+    'rev.sessions':          'Sessions',
+    'rev.title':             'This Week <span class="sub-note">· the last 7 days, and the one thing most worth changing</span>',
+    'rev.trendwk':           'smoothed trend, over the week',
+    'rev.weight':            'Weight',
     'sh.addcoll':            'Add to collection',
     'sh.bw':                 'Bodyweight +kg',
     'sh.catalogue':          'Catalogue',
@@ -5195,629 +5256,6 @@ const LANG = {
     'theme.title':           'Appearance <span class="sub-note">· font and colours, saved on this device</span>',
     'unit.reps':             'reps'
   },
-  th: {
-    'act.ath.hours':         '10 ชั่วโมงขึ้นไป',
-    'act.ath.name':          'นักกีฬาอาชีพ',
-    'act.ath.note':          'ออกกำลังหนักวันละสองรอบเกือบทุกวัน หรือทำงานใช้แรงงานหนักตลอด — ก่อสร้าง ทำไร่ ขนของ — บวกกับการฝึกจริงจัง กรณีนี้พบน้อยมาก ถ้าไม่มั่นใจมากว่าตรงตามนี้ อย่าเลือกข้อนี้',
-    'act.high.hours':        'ราว 6–9 ชั่วโมง',
-    'act.high.name':         'หนัก',
-    'act.high.note':         'ออกกำลังเกือบทุกวันในสัปดาห์ เหงื่อออกและแทบพูดไม่ได้ตอนออกกำลัง หรือทำงานที่ต้องยืนและเดินไปมาทั้งวันบวกกับฝึกสม่ำเสมอ',
-    'act.light.hours':       'ราว 1–3 ชั่วโมง',
-    'act.light.name':        'เบา',
-    'act.light.note':        'ออกกำลังสัปดาห์ละสองสามครั้ง ครั้งละครึ่งชั่วโมงแบบสบาย ๆ — เดิน ว่ายน้ำ ยกน้ำหนักเบา ๆ — แบบที่คุยระหว่างนั้นได้ตลอด หรืองานนั่งโต๊ะที่เดินจริงจังทุกวัน คนเข้ายิมทั่วไปส่วนใหญ่อยู่ตรงนี้ ไม่ใช่สูงกว่านี้',
-    'act.mod.hours':         'ราว 3–5 ชั่วโมง',
-    'act.mod.name':          'ปานกลาง',
-    'act.mod.note':          'ออกกำลังสัปดาห์ละสามถึงห้าชั่วโมงจริง ๆ ที่เหนื่อยจนหายใจแรงและตอบได้แค่ประโยคสั้น ๆ เล่นเวตตามปกติพักตามปกติ วิ่งเหยาะ ปั่นจักรยาน คลาสออกกำลังกาย นี่คือข้อที่คนฝึกจริงจังส่วนใหญ่เลือก',
-    'act.sed.hours':         'ไม่ถึง 1 ชั่วโมง',
-    'act.sed.name':          'นั่งเป็นหลัก',
-    'act.sed.note':          'คุณนั่งเกือบทั้งวันและฝึกไม่ถึงสัปดาห์ละครั้ง ในสัปดาห์ปกติไม่มีอะไรทำให้หอบ เลือกข้อนี้ถ้าเพิ่งเริ่มต้น',
-    'acth.hard.b':           'ดูว่าระหว่างออกกำลังพูดได้แค่ไหน คุยได้เป็นเรื่องเป็นราว: เบา ตอบได้แค่ประโยคสั้น ๆ: ปานกลาง แทบพูดไม่ได้: หนัก',
-    'acth.hard.h':           'หนักแค่ไหนถึงเรียกว่าหนัก',
-    'acth.hour.b':           'นับเฉพาะเวลาที่ออกแรงจริง อยู่ยิมเก้าสิบนาทีแต่ครึ่งหนึ่งหมดไปกับการพัก รอเครื่อง และเล่นมือถือ เท่ากับฝึกจริงราวสี่สิบห้านาที',
-    'acth.hour.h':           'หนึ่งชั่วโมงนับยังไง',
-    'acth.lower.b':          'ประเมินสูงเกินไปคือความผิดพลาดที่พบบ่อยที่สุด และทำให้เป้าแคลอรีเฟ้อเกินจริง อย่างไรก็ดีมันมีผลแค่กับค่าประมาณเริ่มต้น — เมื่อบันทึกน้ำหนักและอาหารครบสองสัปดาห์ แอปจะวัดค่าคงน้ำหนักจริงของคุณ แล้วข้อนี้ก็จะไม่สำคัญอีก',
-    'acth.lower.h':          'ลังเลระหว่างสองข้อ? เลือกข้อต่ำกว่า',
-    'acth.week.b':           'งานและชีวิตประจำวันสำคัญกว่าเวลาในยิม คนที่ยืนและเดินทั้งวันแต่ไม่เคยฝึกเลยก็ยังเผา Kcal มากกว่าคนนั่งโต๊ะทั้งวันที่ยกเวทสัปดาห์ละสามครั้ง',
-    'acth.week.h':           'นับพฤติกรรมทั้งสัปดาห์ของคุณ',
-    'ads.slot':              'พื้นที่โฆษณา',
-    'and':                   'และ',
-    'app.sub':               'บันทึกการฝึกและร่างกาย',
-    'basis.bw':              'น้ำหนักตัว',
-    'basis.lean':            'มวลไร้ไขมัน',
-    'bf.female':             'สูตร Navy หญิง: ต้องมีรอบเอว รอบสะโพก และรอบคอ ไขมันในร่างกายจะว่างไว้จนกว่าจะบันทึกครบทั้งสามในวันเดียวกัน',
-    'bf.male':               'สูตร Navy ชาย: ต้องมีรอบเอวและรอบคอ',
-    'bmr.drift':             'อายุเดินหน้าจาก {age} ที่คุณกรอกไว้ แก้ตรงนี้ได้ถ้าไม่ถูกต้อง',
-    'bmr.line':              'ค่าประมาณเริ่มต้น {kcal} ต่อวันเพื่อคงน้ำหนัก',
-    'bmr.meta':              'อัตราเผาผลาญขณะพักแบบ Mifflin-St Jeor จาก {kg} kg, {cm} cm, อายุ {age} คูณด้วยตัวคูณกิจกรรม เป็นค่าเฉลี่ยของประชากร — แต่ละคนต่างจากค่านี้ได้ราว ±10% เมื่อมีข้อมูลน้ำหนักและอาหารราวสองสัปดาห์ เป้าหมายแคลอรีแบบปรับตัวด้านบนจะแทนที่ค่านี้ด้วยตัวเลขที่วัดจากตัวคุณเอง',
-    'bmr.need':              'ใส่{list} แล้วค่าประมาณพลังงานเริ่มต้นจะขึ้นตรงนี้',
-    'bmr.need.age':          'อายุ',
-    'bmr.need.height':       'ส่วนสูง',
-    'bmr.need.weight':       'น้ำหนักตัว',
-    'bmr.sub':               'ขณะพัก {bmr} kcal × {mult} ({act}) · อายุ {age}',
-    'body.bf':               'ไขมันในร่างกาย',
-    'body.bf.calc':          '{n}% จากรอบเอวและรอบคอ',
-    'body.bf.mode.calc':     'คำนวณให้',
-    'body.bf.mode.manual':   'กรอกเอง',
-    'body.bf.none':          'บันทึกรอบเอวและรอบคอแล้วค่านี้จะขึ้นเอง',
-    'body.bfpct':            'ไขมันในร่างกาย (%)',
-    'body.meas':             'วัดสัดส่วน · cm <span class="sub-note">· ไม่บังคับทั้งหมด · ค่าล่าสุดแสดงเป็นตัวจาง บันทึกเฉพาะที่พิมพ์เอง</span>',
-    'body.title':            'ร่างกาย & อาหาร',
-    'btn.add':               'เพิ่ม',
-    'btn.back':              'ย้อนกลับ',
-    'btn.cancel':            'ยกเลิก',
-    'btn.edit':              'แก้ไข',
-    'btn.hide':              'ซ่อน',
-    'btn.remove':            'ลบ',
-    'btn.save':              'บันทึก',
-    'btn.saveshort':         'บันทึก',
-    'btn.set':               'ตั้ง',
-    'btn.show':              'แสดง',
-    'btn.start':             'เริ่ม',
-    'btn.tapagain':          'แตะอีกครั้งเพื่อลบ',
-    'calib.applied':         '✓ ใช้แล้ว · {n} kcal',
-    'calib.apply':           'ใช้ {n} kcal เป็นเป้าหมาย',
-    'calib.avg':             'ค่าเฉลี่ยที่บันทึก',
-    'calib.current':         'ปัจจุบัน: {n} kcal',
-    'calib.est':             'ค่าคงน้ำหนักโดยประมาณ',
-    'calib.esttdee':         'TDEE จริงของคุณ',
-    'calib.flat':            'คงที่',
-    'calib.floored':         'ถึงขั้นต่ำ',
-    'calib.for':             'สำหรับ {rate}',
-    'calib.gaining':         'เพิ่มน้ำหนัก',
-    'calib.goal':            'เป้าหมาย · อัตราต่อสัปดาห์',
-    'calib.losing':          'ลดน้ำหนัก',
-    'calib.maintain':        'คงน้ำหนัก',
-    'calib.manual':          'ตั้งเป้าเอง',
-    'calib.meta':            'วัดจากการชั่งน้ำหนัก {w} ครั้ง และวันที่บันทึก kcal {k} วัน ตลอด {d} วัน: ค่าเฉลี่ยที่กิน ลบด้วยแนวโน้มน้ำหนัก × 7,700 kcal/kg แม่นยำเท่าที่การบันทึกอาหารแม่นยำเท่านั้น',
-    'calib.need.head':       'ข้อมูลในช่วงนี้ยังไม่พอจะประมาณค่าคงน้ำหนักได้แม่นยำ',
-    'calib.need.kcaldays':   'วันที่บันทึก kcal {n} วัน',
-    'calib.need.keep':       'บันทึกน้ำหนัก (เกือบทุกวัน) และ kcal ต่อไป — เมื่อครบราว 2 สัปดาห์ ค่าเป้าหมายจะขึ้นตรงนี้',
-    'calib.need.sofar':      'มีแล้ว: {list}',
-    'calib.need.span':       'ช่วงกว้าง {n} วัน',
-    'calib.need.trend':      'แนวโน้มน้ำหนักตอนนี้: {kg}',
-    'calib.need.weighins':   'ชั่งน้ำหนัก {n} ครั้ง',
-    'calib.overwindow':      'ตลอดช่วงเวลานี้',
-    'calib.rec':             'ปริมาณที่แนะนำ',
-    'calib.shaky':           'ใช้ค่านี้อย่างระวัง — ช่วงเวลาสั้นเกินไป หรือผลออกมาผิดปกติเมื่อเทียบกับน้ำหนักตัวคุณ น้ำหนักที่เปลี่ยนช่วงแรกส่วนใหญ่คือน้ำและไกลโคเจน ซึ่งแทบไม่มีพลังงาน ควรใช้ 21–28 วัน',
-    'calib.steady':          'กลับมาดูทุกสองสัปดาห์ เมื่อน้ำหนักตัวเปลี่ยน ค่าคงน้ำหนักก็เลื่อนตาม ตัวเลขนี้จึงปรับไปเรื่อย ๆ',
-    'calib.title':           'เป้าหมายแคลอรีแบบปรับตัว <span class="sub-note">· คำนวณย้อนกลับจากที่คุณกินเทียบกับน้ำหนักที่เปลี่ยน · ดู “ตัวเลขเหล่านี้มาจากไหน” ในหน้าตั้งค่า</span>',
-    'calib.tomaintain':      'เพื่อคงน้ำหนัก',
-    'calib.trend':           'แนวโน้มน้ำหนัก',
-    'calib.window':          'ช่วงเวลา',
-    'cd.add':                '+ เพิ่มคาร์ดิโอ',
-    'cd.empty1':             'ยังไม่มีคาร์ดิโอในรายการ',
-    'cd.empty2':             'เพิ่มสิ่งที่คุณทำจริง — ใส่ชื่อและเวลาที่ทำตามปกติ',
-    'cd.title':              'คาร์ดิโอ <span class="sub-note">· <span id="cdDate">—</span> · ทุกการติ๊กและทุกเวลาบันทึกเอง</span>',
-    'cdx.edit':              'แก้ไขคาร์ดิโอ',
-    'cdx.mins':              'ระยะเวลาปกติ · นาที',
-    'cdx.new':               'คาร์ดิโอใหม่',
-    'cdx.note':              'ปุ่มเริ่มจะนับถอยหลังจากค่านี้ นาทีที่บันทึกยังแก้ได้ ถ้าครั้งนั้นทำนานหรือสั้นกว่าปกติก็แก้ง่าย',
-    'cdx.ph.name':           'วิ่ง',
-    'chart.7day':            '7 วัน {n}',
-    'chart.abs':             'ค่า {unit} จริง ไม่ได้เทียบดัชนี',
-    'chart.avg':             'เฉลี่ย',
-    'chart.best':            'ดีที่สุด {n}',
-    'chart.chips':           'ทุกท่าที่บันทึกจะขึ้นมาเป็นปุ่มตรงนี้',
-    'chart.empty.nosess':    'ยังไม่มีการเล่นท่านี้',
-    'chart.empty.pick':      'แตะท่าด้านบนเพื่อแสดงกราฟ',
-    'chart.empty.size':      'บันทึกรอบวัดเพื่อสร้างกราฟขนาดตัว',
-    'chart.empty.str':       'บันทึกสักเซ็ตเพื่อสร้างกราฟ',
-    'chart.empty.weight':    'บันทึกน้ำหนักเพื่อเริ่มกราฟ',
-    'chart.empty.window':    'ไม่มีข้อมูลในช่วงนี้',
-    'chart.indexed':         '<b>ดัชนี</b> · แต่ละท่าเริ่มที่ 100 จากครั้งแรกที่บันทึก ท่าที่น้ำหนักต่างกันมากจึงใช้แกนเดียวกันได้ เส้นฐานไม่ขึ้นกับช่วงเวลา 30 วันกับทั้งหมดจึงตรงกัน เลือกท่าเดียวถ้าอยากเห็นค่า kg, ครั้ง, หรือวินาทีจริง',
-    'chart.max':             'เลือกได้สูงสุด 8 ท่า — ปิดสักท่าก่อน',
-    'chart.nosel':           'ยังไม่ได้เลือกท่า',
-    'chart.size':            'แนวโน้มขนาดร่างกาย <span class="sub-note">· เทียบครั้งแรก = 100 · ค่า cm ล่าสุดในคำอธิบาย</span>',
-    'chart.str':             'แนวโน้มความแข็งแรง <span class="sub-note">· แตะท่าเพื่อแสดงกราฟ · ได้สูงสุด 8 ท่า</span>',
-    'chart.weight':          'แนวโน้มน้ำหนัก',
-    'coach.confirm':         'น้ำหนักเดิม ทุกเซ็ตถึง {max} แล้ว ทำได้แบบนี้อีก {left} วันฝึกจะเพิ่มน้ำหนัก',
-    'coach.first':           'ครั้งแรก: หาน้ำหนักที่ทำได้ {min}–{max} {unit}',
-    'coach.floor':           'น้ำหนักเดิม ทำทุกเซ็ตให้ได้อย่างน้อย {aim} ก่อน (ครั้งก่อน {last})',
-    'coach.next':            'ครั้งถัดไป',
-    'coach.reps':            'น้ำหนักเดิม ทุกเซ็ตอย่างน้อย {aim} ครั้ง (ครั้งก่อน {last})',
-    'coach.secs':            'ค้างทุกเซ็ตอย่างน้อย {aim} วินาที (ครั้งก่อน {last})',
-    'coach.top':             'ทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว ขยับช่วงขึ้นหรือกำหนดการเพิ่มน้ำหนัก',
-    'coach.up':              'เพิ่ม {step} kg เพราะทุกเซ็ตถึง {max} ติดกัน {n} วันฝึกแล้ว',
-    'col.bg':                'พื้นหลังหน้า',
-    'col.brass':             'สีเน้น',
-    'col.brass-bright':      'สีเน้นสว่าง',
-    'col.gold':              'สีไฮไลต์',
-    'col.good':              'ดี',
-    'col.ink':               'ตัวอักษรหลัก',
-    'col.ink-dim':           'ตัวอักษรรอง',
-    'col.ink-faint':         'ตัวอักษรจาง',
-    'col.line':              'เส้นขอบ',
-    'col.line-soft':         'เส้นจาง',
-    'col.on-accent':         'ตัวอักษรบนไฮไลต์',
-    'col.on-bg':             'ตัวอักษรบนพื้นหน้า',
-    'col.orange':            'ปุ่ม',
-    'col.panel':             'พื้นหลังการ์ด',
-    'col.panel-2':           'พื้นหลังช่องกรอก',
-    'col.rust':              'แย่',
-    'col.sage':              'เพิ่มขึ้น',
-    'col.warn':              'เตือน',
-    'coll.add':              '+ เพิ่มท่าเข้าคลัง',
-    'coll.addbelow':         'เพิ่มท่าได้ที่ด้านล่าง',
-    'coll.builtin':          'ท่ามาตรฐาน',
-    'coll.empty':            'คลังยังว่างอยู่',
-    'coll.hidden':           'ซ่อนอยู่',
-    'coll.indays':           'อยู่ในวัน {days}',
-    'coll.never':            'ยังไม่เคยบันทึก',
-    'coll.nomus':            'ยังไม่ได้ระบุกล้ามเนื้อ',
-    'coll.search':           'ค้นหาในคลัง',
-    'coll.sessions':         'บันทึกแล้ว {n} ครั้ง',
-    'coll.title':            'คลังท่าฝึก <span class="sub-note">· คลังที่ทุกวันหยิบไปใช้ · เพิ่มตรงนี้ไม่ได้แปลว่าเพิ่มเข้าวันนี้</span>',
-    'coll.yours':            'ท่าของคุณ',
-    'day.fri':               'วันศุกร์',
-    'day.lbl':               'วัน',
-    'day.mon':               'วันจันทร์',
-    'day.next':              'พรุ่งนี้',
-    'day.prev':              'เมื่อวาน',
-    'day.rest':              'พัก',
-    'day.restlower':         'พัก',
-    'day.sat':               'วันเสาร์',
-    'day.short.fri':         'ศ',
-    'day.short.mon':         'จ',
-    'day.short.sat':         'ส',
-    'day.short.sun':         'อา',
-    'day.short.thu':         'พฤ',
-    'day.short.tue':         'อ',
-    'day.short.wed':         'พ',
-    'day.sun':               'วันอาทิตย์',
-    'day.thu':               'วันพฤหัสบดี',
-    'day.today':             'วันนี้',
-    'day.tue':               'วันอังคาร',
-    'day.wed':               'วันพุธ',
-    'disc':                  '<b>ตัวเลขทั้งหมดนี้เป็นค่าประมาณสำหรับติดตามการฝึกของคุณเอง ไม่ใช่คำแนะนำทางการแพทย์หรือโภชนาการ</b> ทุกสูตรในนี้คือค่าเฉลี่ยของประชากรที่นำมาใช้กับคนคนเดียว และทุกสูตรอาจไม่ถูกต้องสำหรับคุณ ไม่มีสิ่งใดในแอปนี้เป็นการวินิจฉัย การรักษา หรือใช้แทนแพทย์หรือนักกำหนดอาหารวิชาชีพได้ หากคุณตั้งครรภ์ อายุต่ำกว่า 18 ปี มีโรคประจำตัวหรือภาวะการกินผิดปกติ หรือใช้ยาที่ได้รับผลจากอาหาร ให้ปรึกษาผู้เชี่ยวชาญที่มีคุณวุฒิก่อนทำตามตัวเลขใด ๆ ในนี้ คุณเป็นผู้รับผิดชอบต่อการเอามันไปใช้เองD265:D268',
-    'done.n':                'ทำแล้ว {n}',
-    'eq.back_ext':           'เบาะแบ็คเอ็กซ์เทนชัน',
-    'eq.bands':              'ยางยืดออกกำลังกาย',
-    'eq.barbell':            'บาร์เบล',
-    'eq.bench':              'ม้านั่ง',
-    'eq.cable':              'เครื่องเคเบิล',
-    'eq.dip_bars':           'บาร์ดิป',
-    'eq.dumbbells':          'ดัมเบล',
-    'eq.ez_bar':             'บาร์ EZ',
-    'eq.kettlebell':         'เคตเทิลเบล',
-    'eq.leg_curl':           'เครื่องเลกเคิร์ล',
-    'eq.leg_ext':            'เครื่องเลกเอ็กซ์เทนชัน',
-    'eq.leg_press':          'เครื่องเลกเพรส',
-    'eq.pullup_bar':         'บาร์โหน',
-    'eq.rack':               'แร็คสควอท',
-    'eq.rings':              'ห่วงยิมนาสติก',
-    'ex.added':              'เพิ่มแล้ว',
-    'ex.defaultnote':        'ท่าที่เพิ่มเอง',
-    'ex.droptip':            'เอาออกจากวันนี้',
-    'ex.movement':           'ท่า',
-    'ex.pinned':             'ปักไว้',
-    'ex.pintip':             'กดเพื่อเก็บท่านี้ไว้ในทุกวัน{day}',
-    'ex.resttip':            'เริ่มจับเวลาพัก',
-    'ex.set':                'เซ็ต',
-    'ex.unpintip':           'ปักไว้กับวันนี้แล้ว — กดเพื่อเอาออก',
-    'f.addtip':              'บวกมื้อถัดไปเข้ากับยอดรวม',
-    'f.height':              'ส่วนสูง (cm)',
-    'f.kcal':                'พลังงาน (kcal)',
-    'f.prot':                'โปรตีน (g)',
-    'f.weight':              'น้ำหนัก (kg)',
-    'fld.name':              'ชื่อ',
-    'font.bold.name':        'ภาษาไทยมีฟอนต์เดียว',
-    'font.bold.note':        'ภาษาไทยมีฟอนต์เดียว',
-    'font.cyber.name':       'ภาษาไทยมีฟอนต์เดียว',
-    'font.cyber.note':       'ภาษาไทยมีฟอนต์เดียว',
-    'font.min.name':         'ภาษาไทยมีฟอนต์เดียว',
-    'font.min.note':         'ภาษาไทยมีฟอนต์เดียว',
-    'font.zen.name':         'ภาษาไทยมีฟอนต์เดียว',
-    'font.zen.note':         'ภาษาไทยมีฟอนต์เดียว',
-    'goal.custom':           'กำหนดเอง',
-    'goal.endurance':        'เน้นอึด',
-    'goal.off':              'ปิด',
-    'goal.size':             'เน้นกล้าม',
-    'goal.strength':         'เน้นแรง',
-    'grp.core':              'กลางลำตัว',
-    'grp.legs':              'ขา',
-    'grp.other':             'อื่น ๆ',
-    'grp.pull':              'ดึง',
-    'grp.push':              'ผลัก',
-    'guide.add':             '+ เพิ่ม',
-    'guide.all.off':         'เฉพาะที่ยิมมี',
-    'guide.all.on':          'แสดงทั้งหมด',
-    'guide.also':            'และ {list}',
-    'guide.alsoworks':       'ช่วยฝึก{name}ด้วย',
-    'guide.band':            'เป้าหมาย',
-    'guide.band.unit':       'เซ็ตต่อสัปดาห์ต่อกล้ามเนื้อ',
-    'guide.bodyweight':      'บอดี้เวท',
-    'guide.browse.title':    'เลือกตามกล้ามเนื้อ <span class="sub-note">· เพิ่มท่าที่ชอบ · คุณเลือกวันเอง</span>',
-    'guide.count':           '{n} ท่าสำหรับ{name}',
-    'guide.in':              'อยู่ในคลังแล้ว',
-    'guide.mute':            'ปิดเตือน',
-    'guide.needs':           'ต้องใช้ {list}',
-    'guide.none':            'ยังไม่มีท่าสำหรับ{name}จากอุปกรณ์ที่ยิมคุณมี เปิด แสดงทั้งหมด เพื่อดูว่าต้องใช้อะไร',
-    'guide.novol':           'ยังไม่มีการบันทึกใน 7 วันที่ผ่านมา',
-    'guide.rec.more':        'ยังมีอีก {n} กล้ามเนื้อที่น้อยกว่าเป้า ดูครบทุกกล้ามได้ใน เซ็ตต่อกล้ามเนื้อ ด้านบน',
-    'guide.rec.none':        'ทุกกล้ามเนื้อที่ไม่ได้ปิดเตือนอยู่ในเป้าแล้วสัปดาห์นี้',
-    'guide.rec.nothing':     'ยังไม่มีท่าที่ฝึกกล้ามนี้เป็นหลักจากอุปกรณ์ที่ยิมคุณมี ลองเปิด แสดงทั้งหมด ในส่วนเลือกตามกล้ามเนื้อ',
-    'guide.rec.of':          '{name} · {n} จาก {lo} เซ็ต',
-    'guide.rec.title':       'แนะนำ <span class="sub-note">· สำหรับกล้ามเนื้อที่ยังน้อยกว่าเป้า จากอุปกรณ์ที่ยิมคุณมี</span>',
-    'guide.st.high':         'มากไป',
-    'guide.st.low':          'น้อยไป',
-    'guide.st.muted':        'ปิดเตือน',
-    'guide.st.ok':           'พอดี',
-    'guide.unmute':          'เปิดเตือน',
-    'guide.untagged':        'ยังไม่ถูกนับ เพราะยังไม่ได้ระบุกล้ามเนื้อ: {list} ระบุได้ที่ ออกกำลัง → คลังท่าฝึก',
-    'guide.vol.title':       'เซ็ตต่อกล้ามเนื้อ <span class="sub-note">· 7 วันที่ผ่านมา · กล้ามหลักนับเต็มเซ็ต กล้ามรองนับครึ่ง</span>',
-    'gym.count':             'อุปกรณ์เท่านี้ทำได้ {n} จาก {total} ท่าในคู่มือ',
-    'gym.intro':             'ติ๊กอุปกรณ์ที่คุณมี แล้วคู่มือจะแนะนำเฉพาะท่าที่ทำได้จริง ท่าบอดี้เวทแสดงเสมอ',
-    'gym.own':               'อุปกรณ์อื่นของคุณ',
-    'gym.own.note':          'บันทึกไว้ว่ามีอะไรอีก คู่มือจับคู่ได้เฉพาะรายการด้านบน',
-    'gym.ph':                'สเลด, เชือกแบทเทิล…',
-    'gym.title':             'ยิมของฉัน <span class="sub-note">· อุปกรณ์ที่คุณใช้ได้</span>',
-    'gym.unset':             'ยังไม่ได้ติ๊กอะไร คู่มือจึงแสดงทุกท่า',
-    'gym.uses':              '{n} ท่า',
-    'hist.date':             'วันที่',
-    'hist.day':              'วัน',
-    'hist.empty':            'ยังไม่มีข้อมูลที่บันทึกไว้ บันทึกวันแรกได้ที่หน้าร่างกายหรือหน้าฝึก',
-    'hist.mob':              'ยืดเส้น',
-    'hist.title':            'ประวัติ',
-    'lib.air_squat':         'Bodyweight squat',
-    'lib.back_ext':          'Back extension',
-    'lib.back_squat':        'Back squat',
-    'lib.band_curl':         'Band curl',
-    'lib.band_lat_raise':    'Band lateral raise',
-    'lib.band_pull_apart':   'Band pull-apart',
-    'lib.bb_bench':          'Barbell bench press',
-    'lib.bb_curl':           'Barbell curl',
-    'lib.bb_incline':        'Incline barbell press',
-    'lib.bb_row':            'Barbell row',
-    'lib.bb_shrug':          'Barbell shrug',
-    'lib.bench_dip':         'Bench dip',
-    'lib.cable_crunch':      'Cable crunch',
-    'lib.cable_curl':        'Cable curl',
-    'lib.cable_fly':         'Cable fly',
-    'lib.cable_lat_raise':   'Cable lateral raise',
-    'lib.cable_row':         'Seated cable row',
-    'lib.calf_raise':        'Standing calf raise',
-    'lib.cg_bench':          'Close-grip bench press',
-    'lib.chinup':            'Chin-up',
-    'lib.crunch':            'Crunch',
-    'lib.db_bench':          'Dumbbell bench press',
-    'lib.db_calf_raise':     'Dumbbell calf raise',
-    'lib.db_curl':           'Dumbbell curl',
-    'lib.db_fly':            'Dumbbell fly',
-    'lib.db_incline':        'Incline dumbbell press',
-    'lib.db_oh_ext':         'Overhead dumbbell extension',
-    'lib.db_ohp':            'Dumbbell shoulder press',
-    'lib.db_rdl':            'Dumbbell Romanian deadlift',
-    'lib.db_row':            'One-arm dumbbell row',
-    'lib.db_shrug':          'Dumbbell shrug',
-    'lib.dead_bug':          'Dead bug',
-    'lib.dead_hang':         'Dead hang',
-    'lib.deadlift':          'Deadlift',
-    'lib.diamond_pushup':    'Diamond push-up',
-    'lib.dip':               'Bar dip',
-    'lib.ez_curl':           'EZ-bar curl',
-    'lib.face_pull':         'Face pull',
-    'lib.farmer_carry':      'Farmer\'s carry',
-    'lib.front_raise':       'Dumbbell front raise',
-    'lib.front_squat':       'Front squat',
-    'lib.glute_bridge':      'Glute bridge',
-    'lib.goblet_squat':      'Goblet squat',
-    'lib.good_morning':      'Good morning',
-    'lib.hammer_curl':       'Hammer curl',
-    'lib.hanging_leg_raise': 'Hanging leg raise',
-    'lib.hip_thrust':        'Barbell hip thrust',
-    'lib.hollow_hold':       'Hollow hold',
-    'lib.kb_press':          'Kettlebell press',
-    'lib.kb_swing':          'Kettlebell swing',
-    'lib.lat_pulldown':      'Lat pulldown',
-    'lib.lat_raise':         'Dumbbell lateral raise',
-    'lib.leg_curl':          'Leg curl',
-    'lib.leg_ext':           'Leg extension',
-    'lib.leg_press':         'Leg press',
-    'lib.lunge':             'Dumbbell lunge',
-    'lib.nordic':            'Nordic curl',
-    'lib.ohp':               'Overhead press',
-    'lib.pike_pushup':       'Pike push-up',
-    'lib.pistol':            'Pistol squat',
-    'lib.plank':             'Plank',
-    'lib.pullup':            'Pull-up',
-    'lib.pushdown':          'Triceps pushdown',
-    'lib.pushup':            'Push-up',
-    'lib.rdl':               'Romanian deadlift',
-    'lib.rear_fly':          'Reverse dumbbell fly',
-    'lib.ring_dip':          'Ring dip',
-    'lib.ring_pullup':       'Ring pull-up',
-    'lib.ring_pushup':       'Ring push-up',
-    'lib.ring_row':          'Ring row',
-    'lib.seated_calf':       'Seated calf raise',
-    'lib.side_plank':        'Side plank',
-    'lib.skull_crusher':     'Skull crusher',
-    'lib.split_squat':       'Bulgarian split squat',
-    'lib.step_up':           'Dumbbell step-up',
-    'lib.superman':          'Superman hold',
-    'lib.upright_row':       'Upright row',
-    'lib.wrist_curl':        'Wrist curl',
-    'load.bwkg':             'น้ำหนักตัว +kg',
-    'load.seconds':          'วินาที',
-    'load.stages':           '{n} ระดับ',
-    'log.addmove':           '+ เพิ่มท่า',
-    'log.beeptip':           'ส่งเสียงเมื่อจับเวลาจบ',
-    'log.restnote':          '{day} — พักเต็มวัน ไม่ออกกำลัง',
-    'log.restnote2':         'น้ำหนักและอาหารอยู่ในหน้าร่างกาย ส่วนยืดเส้นและคาร์ดิโอจะบันทึกตัวเองไปเรื่อย ๆ',
-    'log.restnote3':         'ฝึกไปแล้ว ? เพิ่มท่าด้านล่างได้เลย',
-    'log.sec':               'วิ',
-    'log.session':           'รูปแบบวัน',
-    'log.startrest':         'จับเวลา',
-    'log.title':             'เซ็ตการฝึก <span class="sub-note">· น้ำหนัก × ครั้ง</span>',
-    'm.arm':                 'กล้ามแข็ง (เบ่งกล้าม)',
-    'm.calf':                'น่อง',
-    'm.chest':               'อก',
-    'm.forearm':             'แขนท่อนล่าง',
-    'm.hips':                'สะโพก',
-    'm.neck':                'คอ',
-    'm.shoulders':           'ไหล่',
-    'm.thigh':               'ต้นขา',
-    'm.waist':               'เอว',
-    'meth.adapt.b':          'เมื่อมีข้อมูลราวสองสัปดาห์ แอปจะเลิกใช้ค่าพื้นฐานแล้วหันมาวัดจริง โดยลากเส้นตรงผ่านน้ำหนักที่ชั่งไว้เพื่อหาแนวโน้มเป็น kg ต่อวัน แล้วเทียบกับค่าเฉลี่ยที่กินในช่วงเดียวกัน: <b>ค่าคงน้ำหนัก = ค่าเฉลี่ยที่กิน − (แนวโน้ม × 7,700)</b> ตัวเลข 7,700 kcal ต่อ kg เป็นค่าประมาณมาตรฐานของเนื้อเยื่อร่างกาย และเป็นแค่ค่าประมาณเท่านั้น น้ำหนักที่เปลี่ยนช่วงแรกส่วนใหญ่คือน้ำและไกลโคเจนซึ่งแทบไม่มีพลังงาน ช่วงเวลาสั้น ๆ จึงคลาดเคลื่อนมาก ด้วยเหตุนี้ 14 วันจึงเป็นขั้นต่ำ 21–28 วันจะให้ผลดีกว่า และแอปจะเตือนเมื่อไม่ไว้ใจช่วงเวลานั้น ความแม่นยำยังขึ้นกับการบันทึกอาหารที่ซื่อสัตย์และครบถ้วนทั้งหมด',
-    'meth.adapt.h':          'ค่าคงน้ำหนักแบบปรับตัว · วัดจริง ไม่ใช่ใช้ค่าพื้นฐาน',
-    'meth.age.b':            'อายุกรอกเป็นตัวเลขโดยตรง ไม่ใช่ปีเกิด จึงไม่ต้องเดาว่าวันเกิดผ่านไปแล้วหรือยัง ระบบเก็บวันที่คุณตั้งไว้ด้วยและเดินหน้าเอง ค่าประมาณจึงไม่เก่าไปเงียบ ๆ แก้ได้ทุกเมื่อ <br><br>ตัวคูณกิจกรรมอยู่ระหว่าง 1.2 ถึง 1.9 ทุกแอปอธิบายว่า "สัปดาห์ละ 1–3 ครั้ง" โดยไม่เคยบอกว่าหนึ่งครั้งคืออะไร แอปนี้จึงใช้ชั่วโมงที่ออกแรงจริง และตัดสินความหนักจากว่าคุณยังพูดได้แค่ไหน — คุยได้เป็นเรื่องเป็นราวคือเบา ตอบได้แค่ประโยคสั้น ๆ คือปานกลาง แทบพูดไม่ออกคือหนัก นับงานและชีวิตประจำวันด้วย ไม่ใช่แค่เวลาในยิม ถ้าอยู่กึ่งกลางระหว่างสองระดับให้เลือกระดับต่ำกว่า การประเมินสูงเกินไปคือความผิดพลาดที่พบบ่อยที่สุด และมีผลแค่กับค่าประมาณเริ่มต้นเท่านั้น',
-    'meth.age.h':            'อายุและกิจกรรม',
-    'meth.bf.b':             'ประมาณจากรอบวัดร่างกาย ไม่ได้วัดโดยตรง <b>ชาย:</b> 495 ÷ (1.0324 − 0.19077 × log₁₀(เอว − คอ) + 0.15456 × log₁₀(ส่วนสูง)) − 450 <b>หญิง:</b> 495 ÷ (1.29579 − 0.35004 × log₁₀(เอว + สะโพก − คอ) + 0.22100 × log₁₀(ส่วนสูง)) − 450 รอบวัดทุกค่าเป็นเซนติเมตร เผยแพร่โดย Hodgdon และ Beckett (1984) สำหรับกองทัพเรือสหรัฐ โดยทั่วไปต่างจากผล DEXA ราว ±3–4 จุดเปอร์เซ็นต์ และเชื่อถือได้กว่าเมื่อใช้ติดตามการเปลี่ยนแปลงตามเวลา มากกว่าใช้ดูค่าครั้งเดียว จะไม่แสดงอะไรจนกว่าจะบันทึกรอบวัดที่สูตรต้องใช้ครบทุกค่า',
-    'meth.bf.h':             'ไขมันในร่างกาย · วิธีวัดรอบตัวของ US Navy',
-    'meth.bmr.b':            'อัตราขณะพัก = 10 × น้ำหนัก(kg) + 6.25 × ส่วนสูง(cm) − 5 × อายุ แล้ว <b>+5</b> สำหรับชาย หรือ <b>−161</b> สำหรับหญิง จากนั้นคูณด้วยตัวคูณกิจกรรม 1.2 ถึง 1.9 ตามปริมาณการฝึก Mifflin-St Jeor (1990) เป็นสมการที่วงการโภชนาการใช้มากที่สุด และเป็นค่าเฉลี่ยของประชากร อัตราขณะพักของแต่ละคนต่างจากค่านี้ราว ±10% และมากกว่านั้นถ้าผอมมาก หนักมาก หรืออายุมาก',
-    'meth.bmr.h':            'ค่าประมาณพลังงานเริ่มต้น · Mifflin-St Jeor',
-    'meth.coach.b':          'แต่ละท่ากำหนดช่วงจำนวนครั้งได้ เลือก เน้นแรง เน้นกล้าม หรือ เน้นอึด เพื่อใช้ช่วงมาตรฐาน หรือตั้งเอง ระบบจะดูการเล่นท่านั้นครั้งล่าสุด ที่น้ำหนักหนักที่สุดของวันนั้น เซ็ตวอร์มอัพจึงไม่ถูกนับ <br><br><b>เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก โดยใช้เป้าเดียวกันทุกเซ็ต</b> ที่น้ำหนักเดิม ระบบจะขอให้ทุกเซ็ตทำได้มากกว่าเซ็ตที่ทำได้น้อยที่สุดครั้งก่อนอีก 1 ครั้ง และอยู่ในช่วงที่ตั้งไว้ เช่น ครั้งก่อนได้ 9, 8, 9 ครั้งหน้าคือทุกเซ็ตอย่างน้อย 9 การเล่นหลายเซ็ตที่น้ำหนักเดียวกันควรมีเป้าเป็นตัวเลขเดียว และเซ็ตที่อ่อนที่สุดคือสิ่งที่กั้นคุณไว้จากน้ำหนักถัดไป เซ็ตที่ทำได้เกินเป้าถือว่านำหน้าอยู่แล้ว ไม่ได้ถูกขอให้ทำน้อยลง เมื่อทุกเซ็ตหลักทำได้ถึงค่าสูงสุด<b>ติดกันสองวันฝึก</b> จึงเพิ่มน้ำหนักตามที่ตั้งไว้ แล้วเป้าจะเริ่มใหม่จากค่าต่ำสุด ทำได้ครบเพียงวันเดียวจะได้ลองซ้ำที่น้ำหนักเดิมก่อน เพราะวันที่ดีวันเดียวอาจมาจากการนอนหลับดี มากกว่าความแข็งแรงที่เพิ่มขึ้นจริง <br><br>ถ้ามีเซ็ตที่ทำได้ต่ำกว่าค่าต่ำสุดของช่วง น้ำหนักจะคงเดิมและเป้าหมายคือค่าต่ำสุด ท่าค้างนิ่งจะเพิ่มทีละ 5 วินาที ถ้าตั้งการเพิ่มน้ำหนักเป็นศูนย์ จะเพิ่มแค่จำนวนครั้ง และเมื่อถึงค่าสูงสุดจะแนะนำให้ขยับช่วงขึ้น <br><br>ตัวเลขที่แนะนำเป็นแค่ตัวจางในช่อง สิ่งที่คุณพิมพ์คือสิ่งที่ถูกบันทึก และคำแนะนำไม่ถูกเก็บไว้ ระบบคำนวณจากประวัติใหม่ทุกครั้ง การแก้ไขวันฝึกที่ผ่านมาจึงเปลี่ยนคำแนะนำไปด้วย',
-    'meth.coach.h':          'คำแนะนำครั้งถัดไป · เพิ่มจำนวนครั้งก่อน แล้วค่อยเพิ่มน้ำหนัก',
-    'meth.prot.b':           'งานวิจัยสนับสนุนราว <b>1.6–2.2 g ต่อน้ำหนักตัว 1 kg</b> สำหรับคนที่ฝึกสม่ำเสมอ โดยใช้ค่าสูงกว่าเมื่อกำลังลดน้ำหนัก <br><br><b>มวลไร้ไขมันเป็นฐานที่ดีกว่า และแอปจะใช้ทุกครั้งที่ทำได้</b> เนื้อเยื่อไขมันไม่ต้องการโปรตีน การคิดจากน้ำหนักตัวทั้งหมดจึงประเมินความต้องการสูงเกินไปสำหรับคนที่มีไขมันมาก — ที่ 120 kg และไขมัน 33% น้ำหนักตัว × 2.2 ได้ 260 g ขณะที่มวลไร้ไขมัน × 2.6 ได้ 210 g และ 210 g คือตัวเลขที่ตรงความจริง มวลไร้ไขมันคำนวณย้อนจากน้ำหนักและค่าประมาณไขมัน: มวลไร้ไขมัน = น้ำหนัก × (1 − %ไขมัน) <br><br>ข้อติดขัดคือค่าไขมันเองก็เป็นค่าประมาณ มวลไร้ไขมันจึงรับความคลาดเคลื่อน ±3–4 จุดมาด้วย — คิดเป็นโปรตีนราว ±8 g ซึ่งน้อยกว่าส่วนต่างระหว่างสองฐาน สรุปคือ <b>ใช้มวลไร้ไขมันเมื่อรู้เปอร์เซ็นต์ไขมัน และใช้น้ำหนักตัวเมื่อไม่รู้</b> โดยแอปจะแสดงเสมอว่าใช้ฐานไหน ทั้งสองค่าจะเข้าใกล้กันเมื่อคุณผอมลง ความต่างสำคัญที่สุดเมื่อไขมันสูง',
-    'meth.prot.h':           'โปรตีนขั้นต่ำ · น้ำหนักตัวหรือมวลไร้ไขมัน',
-    'meth.rec.b':            'สถิติคำนวณจากประวัติใหม่ทุกครั้งและไม่ถูกเก็บไว้ วันที่แก้ไขหรือลบไปแล้วจึงไม่ทิ้งสถิติที่ล้าสมัยไว้ ท่าที่ใช้น้ำหนักจะเก็บเซ็ตที่หนักที่สุดและ 1RM โดยประมาณที่ดีที่สุด ท่าบอดี้เวทจะเก็บจำนวนครั้งมากที่สุดและน้ำหนักที่เพิ่มมากที่สุด ท่าค้างนิ่งจะเก็บเวลาที่นานที่สุด <br><br>1RM โดยประมาณใช้<b>สูตร Epley: น้ำหนัก × (1 + จำนวนครั้ง ÷ 30)</b> และใช้กับเซ็ต 1 ถึง 12 ครั้งเท่านั้น เกินราวสิบสองครั้งสูตรจะคลาดเคลื่อนมาก เซ็ตยี่สิบครั้งจึงบอกอะไรเกี่ยวกับการยกครั้งเดียวได้น้อย เซ็ตในช่วงเน้นอึดยังนับเป็นเซ็ตที่หนักที่สุดได้ แต่ไม่นำมาประมาณ 1RM การยกครั้งเดียวนับเป็นน้ำหนักนั้นเลย <br><br>การเล่นท่านั้นครั้งแรกยังไม่นับเป็นสถิติ เพราะยังไม่มีสถิติเดิมให้ทำลาย',
-    'meth.rec.h':            'สถิติ · 1RM โดยประมาณ',
-    'meth.target.b':         'เป้าหมาย = ค่าคงน้ำหนัก + (เป้า kg ต่อสัปดาห์ × 7,700 ÷ 7) เป้าหมาย −0.5 kg ต่อสัปดาห์เท่ากับขาดดุลราว 550 kcal ต่อวัน แอปจะไม่แนะนำต่ำกว่า 1,500 kcal สำหรับชาย หรือ 1,200 สำหรับหญิง ไม่ว่าการคำนวณจะออกมาเท่าไร เพราะการกินให้ได้สารอาหารครบต่ำกว่านั้นทำได้ยากหากไม่มีผู้ดูแล',
-    'meth.target.h':         'เป้าหมายต่อวัน · ตามอัตราที่คุณเลือก',
-    'meth.title':            'ตัวเลขเหล่านี้มาจากไหน',
-    'metric.reps':           'จำนวนครั้งรวม',
-    'metric.time':           'เวลาที่กล้ามเนื้อรับแรง',
-    'metric.volume':         'ปริมาณรวมต่อครั้ง',
-    'mob.add':               '+ เพิ่มท่ายืด',
-    'mob.edittip':           'เปลี่ยนชื่อ แก้เวลา หรือลบ',
-    'mob.empty1':            'ยังไม่มีท่ายืดในรายการ',
-    'mob.empty2':            'เพิ่มท่าที่คุณทำจริง — ใส่ชื่อและเวลา',
-    'mob.hint.done':         'ยืดเส้น · {summary} — บันทึกไว้ในหน้าฝึก',
-    'mob.hint.none':         'ยืดเส้นมีการ์ดของตัวเองในหน้าฝึก และบันทึกเองไปเรื่อย ๆ',
-    'mob.holdn':             'ค้าง {n} วิ',
-    'mob.lead':              'ตั้งท่าให้พร้อมก่อน',
-    'mob.nohold':            'ยังไม่ได้ตั้งเวลาค้าง',
-    'mob.noreps':            'ยังไม่ได้ตั้งจำนวนครั้ง',
-    'mob.repsn':             '{n} ครั้ง',
-    'mob.straight':          'เริ่มเลย',
-    'mob.ticktip':           'ทำเสร็จแล้ว',
-    'mob.title':             'ยืดเส้น <span class="sub-note">· <span id="mobDate">—</span> · ทุกการติ๊กและทุกเวลาบันทึกเอง</span>',
-    'mon.apr':               'เมษายน',
-    'mon.aug':               'สิงหาคม',
-    'mon.dec':               'ธันวาคม',
-    'mon.feb':               'กุมภาพันธ์',
-    'mon.jan':               'มกราคม',
-    'mon.jul':               'กรกฎาคม',
-    'mon.jun':               'มิถุนายน',
-    'mon.mar':               'มีนาคม',
-    'mon.may':               'พฤษภาคม',
-    'mon.nov':               'พฤศจิกายน',
-    'mon.oct':               'ตุลาคม',
-    'mon.sep':               'กันยายน',
-    'msg.addedthat':         'เพิ่มอันนั้นให้แล้ว',
-    'msg.already':           '{name} อยู่ในคลังอยู่แล้ว',
-    'msg.badname':           'ชื่อนั้นไม่มีตัวอักษรหรือตัวเลขเลย',
-    'msg.cleared':           'ล้างการบันทึก {n} ครั้งแล้ว',
-    'msg.colreset':          'คืนค่าสีแล้ว',
-    'msg.created':           'สร้าง {name} แล้ว — บันทึกเซ็ตแล้วค่อยกดบันทึก',
-    'msg.createdcoll':       'เพิ่ม {name} เข้าคลังแล้ว — เลือกใช้ได้จากทุกวัน',
-    'msg.deleteq':           'ลบ?',
-    'msg.enterage':          'กรอกอายุระหว่าง 10 ถึง 120',
-    'msg.enterfloor':        'กรอกค่าขั้นต่ำระหว่าง 30 ถึง 400 g',
-    'msg.entertarget':       'กรอกเป้าหมายเป็น kcal',
-    'msg.exadded':           'เพิ่ม {name} แล้ว — บันทึกเซ็ตแล้วค่อยกดบันทึก',
-    'msg.floorset':          'ตั้งโปรตีนขั้นต่ำเป็น {n} g แล้ว',
-    'msg.hidden':            'ซ่อน {name} แล้ว — ประวัติเก่ายังแสดงอยู่',
-    'msg.hidden.short':      'ซ่อน {name} แล้ว',
-    'msg.loadfail.del':      'โหลดข้อมูลไม่สำเร็จ — จะไม่ลบ',
-    'msg.loadfail.read':     'อ่านข้อมูลที่บันทึกไว้ไม่ได้ — ตรวจสอบพื้นที่จัดเก็บ และอย่าเพิ่งบันทึกทับ',
-    'msg.loadfail.save':     'โหลดข้อมูลไม่สำเร็จ — จะไม่บันทึก เพื่อไม่ให้เขียนทับของเดิม',
-    'msg.needhold':          'ตั้งเวลาค้างให้ท่ายืดนั้นก่อน',
-    'msg.needname':          'ตั้งชื่อก่อน',
-    'msg.needweight':        'บันทึกน้ำหนักตัวก่อน',
-    'msg.nothingtosave':     'ยังไม่มีอะไรให้บันทึกในวันนี้',
-    'msg.onlist':            'อันนั้นอยู่ในรายการแล้ว',
-    'msg.pickdate':          'เลือกวันที่ก่อน',
-    'msg.pinned':            'ปัก {name} ไว้กับวัน{day} แล้ว',
-    'msg.preset':            'ใช้ชุดสี {name} แล้ว',
-    'msg.rebuilt':           'สร้าง {n} ท่าขึ้นใหม่จากประวัติของคุณ',
-    'msg.recalcd':           'คำนวณใหม่ {n} วัน',
-    'msg.recoverednote':     'กู้คืนจากประวัติของคุณ',
-    'msg.removed':           'ลบ {name} แล้ว',
-    'msg.renamed':           'เปลี่ยนชื่อเป็น {name} แล้ว',
-    'msg.saved':             'บันทึกแล้ว',
-    'msg.savefail':          'บันทึกไม่ได้ — พื้นที่จัดเก็บปฏิเสธการเขียน',
-    'msg.savefail.ex':       'บันทึกท่านี้ไม่ได้ — พื้นที่จัดเก็บปฏิเสธการเขียน',
-    'msg.sexset':            'ตั้งสูตรไขมันเป็น{sex}แล้ว',
-    'msg.shown':             '{name} กลับมาในรายการเลือกแล้ว',
-    'msg.shown.short':       'แสดง {name} อีกครั้งแล้ว',
-    'msg.targetset':         'ตั้งเป้า · {n} kcal',
-    'mus.abs':               'หน้าท้อง',
-    'mus.back':              'หลัง',
-    'mus.biceps':            'หน้าแขน',
-    'mus.calves':            'น่อง',
-    'mus.chest':             'อก',
-    'mus.delt_front':        'ไหล่หน้า',
-    'mus.delt_rear':         'ไหล่หลัง',
-    'mus.delt_side':         'ไหล่ข้าง',
-    'mus.forearms':          'ปลายแขน',
-    'mus.glutes':            'ก้น',
-    'mus.hamstrings':        'ต้นขาหลัง',
-    'mus.lower_back':        'หลังล่าง',
-    'mus.quads':             'ต้นขาหน้า',
-    'mus.traps':             'บ่า',
-    'mus.triceps':           'หลังแขน',
-    'nav.body':              'ภาพรวม',
-    'nav.guide':             'คู่มือ',
-    'nav.gym':               'ยิมของฉัน',
-    'nav.history':           'ประวัติ',
-    'nav.settings':          'ตั้งค่า',
-    'nav.workout':           'ออกกำลัง',
-    'nomatch':               'ไม่พบสิ่งที่ตรงกับ "{q}"',
-    'nothingyet':            'ยังไม่ได้บันทึกอะไรในวันนี้',
-    'notreversible':         'ย้อนกลับไม่ได้',
-    'pre.bold':              'สีเข้ม',
-    'pre.cyber':             'ไซเบอร์',
-    'pre.min':               'มินิมอล',
-    'pre.tact':              'แทคติคอล',
-    'pre.zen':               'เซน',
-    'prof.activity':         'กิจกรรม · ชั่วโมงการออกกำลังจริงต่อสัปดาห์ รวมงานและชีวิตประจำวันด้วย',
-    'prof.actweek':          'ของการฝึกจริงต่อสัปดาห์',
-    'prof.age':              'อายุ',
-    'prof.female':           'หญิง',
-    'prof.male':             'ชาย',
-    'prof.manual':           'ตั้งค่าขั้นต่ำเอง',
-    'prof.protpick':         'โปรตีน · เลือกข้อที่ตรงกับสิ่งที่คุณทำอยู่ตอนนี้',
-    'prof.sex':              'เพศ · ใช้กับทั้งสองสูตร',
-    'prof.title':            'โปรไฟล์ &amp; โปรตีน <span class="sub-note">· สูตรไขมันในร่างกายและโปรตีนขั้นต่ำต่อวัน</span>',
-    'prof.years':            'ปี',
-    'prog.7reps':            'จำนวนครั้ง 7 วัน: {n}',
-    'prog.7time':            'เวลา 7 วัน: {n} วิ',
-    'prog.7vol':             'ปริมาณรวม 7 วัน: {n} kg',
-    'prog.empty':            'ยังไม่มีท่าในแผนปัจจุบัน',
-    'prog.last':             'ล่าสุด',
-    'prog.notlogged':        'ยังไม่ได้บันทึก',
-    'prog.title':            'ความคืบหน้าน้ำหนักการยก <span class="sub-note">· เฉพาะแผนปัจจุบัน</span>',
-    'prot.basis.bw':         'คิดจากน้ำหนักตัว บันทึกรอบเอวและรอบคอแล้วจะเปลี่ยนไปใช้มวลไร้ไขมัน ซึ่งแม่นยำกว่า',
-    'prot.basis.lean':       'คิดจากมวลไร้ไขมัน ({kg} kg ที่ไขมัน {bf}%) ซึ่งเป็นฐานที่ยุติธรรมกว่าเมื่อรู้เปอร์เซ็นต์ไขมันแล้ว — มวลไขมันไม่ต้องการโปรตีน',
-    'prot.byhand':           'ตั้งเอง',
-    'prot.cut.name':         'กำลังลดน้ำหนัก',
-    'prot.cut.note':         'กินต่ำกว่าพลังงานที่ใช้ ต้องการโปรตีนสูงสุดในกรณีนี้ เพราะเป็นสิ่งที่กันไม่ให้น้ำหนักที่ลดหายไปเกิดจากกล้ามเนื้อหาย และทำให้อิ่มทั้งที่แคลอรีน้อยลง นี่เป็นกรณีเดียวที่กินมากขึ้นแล้วช่วยได้จริง',
-    'prot.followsrate':      'เป้าหมายอิงตามอัตราต่อสัปดาห์ที่เลือกไว้ด้านบน',
-    'prot.gain.name':        'กำลังเพิ่มน้ำหนัก',
-    'prot.gain.note':        'กินเกินพลังงานใช้ ต้องการโปรตีนต่ำที่สุดในสามข้อ เพราะแคลอรีส่วนเกินปกป้องกล้ามเนื้ออยู่แล้ว — เกินจุดนี้ไป โปรตีนที่เพิ่มไม่ได้ช่วยอะไร มีแต่ไปเบียดคาร์โบไฮเดรตที่เป็นเชื้อเพลิงของการฝึก',
-    'prot.goalis':           'เป้าหมาย: {goal}',
-    'prot.hold.name':        'คงน้ำหนัก',
-    'prot.hold.note':        'น้ำหนักคงที่ ฝึกเพื่อรักษาหรือค่อย ๆ สร้างสิ่งที่มีอยู่ กินโปรตีนสูงพอที่จะใช้ประโยชน์จากการฝึกได้เต็มที่ โดยไม่เบียดอาหารอย่างอื่นจนหมด',
-    'prot.isfloor':          '✓ ขั้นต่ำคือ {g} g',
-    'prot.nofloor':          'บันทึกน้ำหนักตัวแล้วระบบจะแนะนำค่าขั้นต่ำให้ ระหว่างนี้จะคงไว้ที่ {g}',
-    'prot.now':              'ตอนนี้ {g} g',
-    'prot.perkg':            '{n} g ต่อ{basis} 1 kg',
-    'prot.shown':            '{basis} {kg} kg × {perkg} g/kg',
-    'prot.suggest':          'แนะนำขั้นต่ำ {g} ต่อวัน',
-    'prot.usefloor':         'ใช้ {g} g เป็นขั้นต่ำ',
-    'rec.best':              'ดีสุด',
-    'rec.bwreps':            'มากสุด',
-    'rec.e1rm':              '1RM ประมาณ',
-    'rec.heavy':             'หนักสุด',
-    'rec.hold':              'นานสุด',
-    'rec.new':               'สถิติใหม่: {list}',
-    'removed':               'ถูกลบแล้ว',
-    'rest.alarm.cardio':     'คาร์ดิโอครบแล้ว · {name}',
-    'rest.alarm.rest':       'พักครบแล้ว — เซ็ตต่อไป',
-    'rest.alarm.stretch':    'ยืดครบแล้ว · {name}',
-    'rest.beep':             'เสียง',
-    'rest.done':             'พักครบแล้ว — เซ็ตต่อไป',
-    'rest.getready':         'ตั้งท่าให้พร้อม',
-    'rest.held':             'ค้างไป {n} วิ',
-    'rest.pause':            'หยุดชั่วคราว',
-    'rest.rest':             'พัก',
-    'rest.resume':           'ไปต่อ',
-    'rest.silent':           'เงียบ',
-    'sh.addcoll':            'เพิ่มเข้าคลัง',
-    'sh.bw':                 'น้ำหนักตัว +kg',
-    'sh.catalogue':          'คลังท่ามาตรฐาน',
-    'sh.coach':              'โค้ช · คำแนะนำสำหรับครั้งถัดไป',
-    'sh.coach.bad':          'ใส่ช่วงให้ครบทั้งสองค่า ค่าน้อยก่อน',
-    'sh.coach.from':         'ตั้งแต่',
-    'sh.coach.off':          'ปิดอยู่ แต่ละครั้งเริ่มจากน้ำหนักของครั้งก่อนเหมือนเดิม',
-    'sh.coach.on':           '{min}–{max} {unit} เมื่อทุกเซ็ตถึง {max} ติดกัน {n} วันฝึก น้ำหนักจะเพิ่ม {step} kg แล้วเริ่มใหม่จากค่าต่ำสุด',
-    'sh.coach.reps':         'ครั้ง',
-    'sh.coach.repsonly':     '{min}–{max} {unit} ไม่เพิ่มน้ำหนัก เมื่อทุกเซ็ตถึง {max} ติดกัน {n} วันฝึก จะแนะนำให้ขยับช่วงขึ้น',
-    'sh.coach.secs':         'วินาที',
-    'sh.coach.step':         'เพิ่มทีละ · kg',
-    'sh.coach.to':           'ถึง',
-    'sh.countsas':           'นับเป็น',
-    'sh.createadd':          'สร้างและเพิ่ม',
-    'sh.del.builtin':        'ซ่อนออกจากรายการเลือก ท่ามาตรฐานลบทิ้งถาวรไม่ได้',
-    'sh.del.clears':         'จะล้างการบันทึก {n} ครั้งของ {name} และ',
-    'sh.del.custom':         'ลบท่านี้ทิ้ง',
-    'sh.del.removes':        'จะลบ {name} — ยังไม่มีการบันทึกไว้เลย — และ',
-    'sh.loading':            'รูปแบบน้ำหนัก',
-    'sh.manage':             'จัดการ',
-    'sh.muscles':            'กล้ามเนื้อ · แตะครั้งเดียวคือกล้ามหลัก สองครั้งคือกล้ามรอง',
-    'sh.new':                'ท่าใหม่',
-    'sh.note':               'โน้ต · แสดงใต้ชื่อ',
-    'sh.ph.name':            'ยกดัมบ์เบลออกข้าง',
-    'sh.ph.note':            '12–20 · ต่อข้าง',
-    'sh.ph.short':           'ยกข้าง',
-    'sh.pin':                'ปัก {day}',
-    'sh.pintip':             'เพิ่มและเก็บไว้ในทุกวัน{day}',
-    'sh.search':             'ค้นหาท่า',
-    'sh.secs':               'วินาที',
-    'sh.short':              'ชื่อย่อ · ใช้ในกราฟและประวัติ',
-    'sh.startload':          'น้ำหนักเริ่มต้น · kg',
-    'sh.tapnew':             'แตะ ท่าใหม่ เพื่อสร้างขึ้นมา',
-    'sh.title.add':          'เพิ่มท่า',
-    'sh.title.manage':       'จัดการท่า',
-    'sh.title.new':          'ท่าใหม่',
-    'sh.yours':              'ท่าของคุณ',
-    'stat.bf':               'ไขมันในร่างกาย <span class="sub-note">· ค่าประมาณ · ใช้วิธีวัดของ US Navy</span>',
-    'stat.bf.calc':          '· ค่าประมาณ · วิธีวัดรอบตัวของ US Navy',
-    'stat.bf.manual':        '· ค่าที่คุณกรอกเอง',
-    'stat.bw':               'น้ำหนักตัว',
-    'stat.energy':           'พลังงาน',
-    'stat.last':             'บันทึกล่าสุด',
-    'stat.lastsub':          'วันที่บันทึกข้อมูลล่าสุด',
-    'stat.none':             'ยังไม่มีข้อมูล',
-    'stat.nutr':             'โภชนาการ · 7 วันล่าสุด',
-    'stat.prot':             'โปรตีน',
-    'stat.protdays':         'จำนวนวันที่กินถึง {n} g',
-    'stat.targetn':          'เป้า {n} · บันทึกแล้ว {logged}/7',
-    'sx.counts':             'นับด้วย',
-    'sx.del.clears':         'จะลบ {name} และล้างออกจากวันที่บันทึกไว้ {n} วัน',
-    'sx.del.removes':        'จะลบ {name} ยังไม่มีการบันทึกไว้เลย',
-    'sx.edit':               'แก้ไขท่ายืด',
-    'sx.hold':               'ค้าง · วินาที',
-    'sx.mode.reps':          'ครั้ง',
-    'sx.mode.sec':           'วินาที',
-    'sx.new':                'ท่ายืดใหม่',
-    'sx.note':               'ตัวจับเวลาจะนับถอยหลัง เวลาที่บันทึกจึงเป็นเวลาที่คุณค้างจริง ไม่ต้องกดหยุดช้าแล้วมาแก้ทีหลัง',
-    'sx.note.reps':          'นับจำนวน ไม่จับเวลา — ติ๊กแล้วพิมพ์จำนวนที่ทำจริง ท่าแบบนี้ไม่มีนับถอยหลัง',
-    'sx.ph.name':            'แฮมสตริง',
-    'sx.reps':               'จำนวนครั้ง',
-    'sync.backup':           'บันทึกไฟล์สำรอง',
-    'sync.claude':           'คัดลอกไปให้ Claude วิเคราะห์',
-    'sync.emptyfile':        'ไฟล์นั้นว่างเปล่า',
-    'sync.export':           'ส่งออกข้อมูล',
-    'sync.fileloaded':       'โหลด {name} แล้ว {n} อักขระ ตอนนี้กดโหลดข้อมูลที่นำเข้า — สองครั้งเพื่อยืนยัน',
-    'sync.fromfile':         'นำเข้าจากไฟล์',
-    'sync.import':           'นำเข้าข้อมูล',
-    'sync.imported':         'นำเข้า {n} รายการแล้ว',
-    'sync.load':             'โหลดข้อมูลที่นำเข้า',
-    'sync.noentries':        'รูปแบบไม่ตรง — ไม่พบรายการในข้อมูลนั้น',
-    'sync.noload':           'ไม่มีอะไรให้โหลด — เลือกไฟล์หรือวางข้อมูลก่อน',
-    'sync.noreport':         'ยังไม่มีข้อมูลให้รายงาน — บันทึกสักสองสามวันก่อน',
-    'sync.nothing':          'ยังไม่มีข้อมูลที่บันทึกไว้ — ไม่มีอะไรให้ส่งออก',
-    'sync.nothingyet':       'ยังไม่มีอะไรให้ส่งออก',
-    'sync.notvalid':         'ไม่ใช่ข้อมูลส่งออกที่ถูกต้อง — ข้อมูลที่วางมามักถูกตัดทิ้ง ใช้นำเข้าจากไฟล์แทน',
-    'sync.pastehere':        'วางข้อมูลที่ส่งออกไว้ตรงนี้ แล้วกดโหลด',
-    'sync.readfail':         'อ่านไฟล์นั้นไม่ได้',
-    'sync.readn':            'อ่านได้ {n} จาก {seen} รายการ แตะโหลดอีกครั้งเพื่อแทนที่ {have} รายการในเครื่องนี้',
-    'sync.reportready':      'รายงานพร้อมแล้ว ({n} อักขระ) วางลงในแชท Claude ได้เลย ถ้าคัดลอกไม่ติด: กดค้างที่กล่อง → เลือกทั้งหมด → คัดลอก',
-    'sync.saved':            'บันทึก {name} แล้ว',
-    'sync.savedto':          'บันทึกลง Downloads แล้ว · {path}',
-    'sync.tapreplace':       'แตะอีกครั้งเพื่อแทนที่ {a} → {b}',
-    'sync.timedout':         'หมดเวลายืนยัน — แตะโหลดอีกครั้ง',
-    'sync.tip':              '<b>เส้นทางไฟล์ — ไม่ใช้คลิปบอร์ด</b> <b>บันทึกไฟล์สำรอง</b> จะเขียนไฟล์ .json (ลงโฟลเดอร์ Downloads บนมือถือ) ที่อุปกรณ์อีกเครื่อง: <b>นำเข้าจากไฟล์</b> เลือกไฟล์ แล้วกด <b>โหลดข้อมูลที่นำเข้า</b> สองครั้งเพื่อยืนยัน<br><b>เส้นทางวาง:</b> <b>ส่งออกข้อมูล</b> → คัดลอกจากกล่อง → <b>นำเข้าข้อมูล</b> ที่อีกเครื่อง → วาง → <b>โหลด</b> สองครั้ง วิธีนี้เปราะบางบนมือถือ ข้อมูลยาว ๆ จะถูกคลิปบอร์ดตัดทิ้ง<br>ทั้งสองวิธีจะเขียนทับข้อมูลของเครื่องนั้น<br>ท่าที่คุณสร้างเองจะไปกับไฟล์สำรองด้วย ประวัติที่อีกเครื่องจึงยังอ่านออก ระบบจะรวมเข้าด้วยกัน ไม่ได้แทนที่ — การนำเข้าไฟล์เก่าจึงลบท่าที่เครื่องนี้ยังต้องใช้ไม่ได้',
-    'sync.title':            'ซิงก์ระหว่างอุปกรณ์',
-    'sync.writefail':        'เขียนไฟล์ไม่ได้',
-    'theme.every':           'ทุกสี · แตะช่องสีเพื่อเปลี่ยน',
-    'theme.font':            'รูปแบบตัวอักษร',
-    'theme.presets':         'ชุดสีสำเร็จ',
-    'theme.reset':           'คืนค่าสีเริ่มต้น',
-    'theme.title':           'รูปลักษณ์ <span class="sub-note">· ฟอนต์และสี บันทึกไว้ในเครื่องนี้</span>',
-    'unit.reps':             'ครั้ง'
-  }
 };
 
 /* ---------- init ---------- */
@@ -5901,6 +5339,8 @@ const LANG = {
   $("volHi").addEventListener('change', volBandSet);
   $("browseAll").onclick=()=>{ guideAll=!guideAll; drawGuide(); };
   $("gymAdd").onclick=gymAddOwn;
+  $("bakNow").onclick=bakFromNudge;
+  $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };   // until the app is next opened
   $("gymName").addEventListener('keydown', e=>{ if(e.key==='Enter') gymAddOwn(); });
   // rest timer
   document.querySelectorAll('#segRest button').forEach(b=>b.onclick=()=>setRestPreset(+b.dataset.s));
@@ -5933,9 +5373,8 @@ const LANG = {
      Granted silently where it is supported and ignored where it is not; the backup file remains
      the real safety net, which is what the Sync card says. */
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
-  await loadLang();    // before applyLang, so the first paint is already in the chosen language
   await loadTheme();   // first, so the app never flashes the default colours before the chosen ones
-  await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio(); await loadGym();
+  await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio(); await loadGym(); await loadBackupDate();
   await load(); await loadSettings();
   // the collection ships empty, so rebuild definitions for anything the history already references
   const rec=await recoverMovements(); await recoverStretches(); await recoverCardio();

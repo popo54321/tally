@@ -3,8 +3,6 @@
 Training tracker. Bodyweight, food, lifts, girths, mobility and cardio — with an adaptive calorie
 target worked out from your own logs rather than a formula.
 
-**English and ไทย.** Switch in the header; the choice sticks.
-
 ## Use it
 
 Open the link on your phone, then add it to your home screen. It runs full screen with no browser
@@ -26,6 +24,7 @@ That cuts both ways: **nothing is backed up for you.**
 
 - **Settings → Sync Between Devices → Save backup file** writes a `.json` you can keep anywhere.
 - Do that every few weeks, and before changing phone, clearing your browser, or deleting the app.
+  The app reminds you when one is due.
 - To move to another device: **Save backup file** on the old one, **Import from file** on the new
   one, then **Load imported data** twice to confirm.
 
@@ -34,5 +33,5 @@ it. Adding it to your home screen makes that far less likely, and a backup file 
 
 ## Licence
 
-The bundled typefaces are Archivo, Bangers, JetBrains Mono and Noto Sans Thai, all under the
+The bundled typefaces are Archivo, Bangers and JetBrains Mono, all under the
 SIL Open Font Licence.
