@@ -1,12 +1,4 @@
-/* Tally service worker — build 6022cf10ac03
-   The whole app is one HTML file plus three fonts, so everything is precached on install and the
-   app runs with no network at all afterwards. That is the point: a training log you cannot open
-   on a bad connection is worse than useless in a gym basement.
-
-   The page is served cache-first and refreshed in the background, so a launch is instant and the
-   next launch picks up a new build. skipWaiting + clients.claim mean an update lands without the
-   user having to close every tab. */
-const CACHE='tally-6022cf10ac03';
+const CACHE='tally-f689fa4f4444';
 const ASSETS=[
   "./",
   "./index.html",
@@ -20,9 +12,6 @@ const ASSETS=[
 ];
 
 self.addEventListener('install', function(e){
-  // cache:'reload' precaches from the network, never from the browser's own HTTP cache. GitHub Pages
-  // sends max-age=600, so without it a release installed within ten minutes of a visit could store
-  // the previous page under the new cache name - and go on serving it as the new build.
   e.waitUntil(caches.open(CACHE).then(function(c){
     return c.addAll(ASSETS.map(function(u){ return new Request(u, {cache:'reload'}); }));
   }).then(function(){ return self.skipWaiting(); }));
@@ -37,7 +26,7 @@ self.addEventListener('activate', function(e){
 self.addEventListener('fetch', function(e){
   var req=e.request;
   if(req.method!=='GET') return;
-  if(new URL(req.url).origin!==self.location.origin) return;   // never touch anything off-origin
+  if(new URL(req.url).origin!==self.location.origin) return;
   e.respondWith(
     caches.match(req).then(function(hit){
       var net=fetch(req).then(function(res){
@@ -46,8 +35,8 @@ self.addEventListener('fetch', function(e){
           caches.open(CACHE).then(function(c){ c.put(req, copy); });
         }
         return res;
-      }).catch(function(){ return hit; });                      // offline: whatever we have
-      return hit || net;                                        // cached first, refreshed behind it
+      }).catch(function(){ return hit; });
+      return hit || net;
     })
   );
 });
