@@ -1,0 +1,12 @@
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+keystore/
+Keys/
+*password*
+.env
+.env.*
+android/build/

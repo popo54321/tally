@@ -1,0 +1,76 @@
+name: Release APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version name, the same as APP_VERSION in index.html, for example 5.6'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Version
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then VN="$INPUT_VERSION"; else VN="${GITHUB_REF_NAME#v}"; fi
+          [[ "$VN" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || { echo "not a version name: $VN" >&2; exit 1; }
+          VC=$(tr -d '[:space:]' < android/app/version-code)
+          [[ "$VC" =~ ^[0-9]+$ ]] || { echo "android/app/version-code is not a number" >&2; exit 1; }
+          echo "name=$VN" >> "$GITHUB_OUTPUT"
+          echo "code=$VC" >> "$GITHUB_OUTPUT"
+
+      - name: Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;34.0.0" "platforms;android-34" > /dev/null
+
+      - name: Build and sign
+        working-directory: android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.TALLY_KEYSTORE_BASE64 }}
+          KEYSTORE_PASS: ${{ secrets.TALLY_KEYSTORE_PASSWORD }}
+          VC: ${{ steps.v.outputs.code }}
+          VN: ${{ steps.v.outputs.name }}
+        run: |
+          [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASS" ] || { echo "set the TALLY_KEYSTORE_BASE64 and TALLY_KEYSTORE_PASSWORD secrets" >&2; exit 1; }
+          export KEYSTORE="$RUNNER_TEMP/tally.keystore"
+          trap 'rm -f "$KEYSTORE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | tr -d ' \r\n' | base64 -d > "$KEYSTORE"
+          PAGE=../index.html bash build.sh "$VC" "$VN"
+
+      - name: Certificate
+        env:
+          VN: ${{ steps.v.outputs.name }}
+        run: |
+          {
+            echo '```'
+            "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "android/build/tally-pro-$VN.apk"
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VN: ${{ steps.v.outputs.name }}
+        run: |
+          APK="android/build/tally-pro-$VN.apk"
+          if gh release view "v$VN" > /dev/null 2>&1; then
+            gh release upload "v$VN" "$APK" --clobber
+          else
+            gh release create "v$VN" "$APK" --title "Tally $VN" --target "$GITHUB_SHA" \
+              --notes "Tally Pro $VN, signed with the same key as every earlier build. Install it over the Tally Pro you have: your data stays."
+          fi
