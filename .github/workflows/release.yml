@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version name, the same as APP_VERSION in index.html, for example 5.6'
-        required: true
+        description: 'Version name. Leave empty to build the version the web app is on'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -29,6 +30,7 @@ jobs:
           INPUT_VERSION: ${{ inputs.version }}
         run: |
           if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then VN="$INPUT_VERSION"; else VN="${GITHUB_REF_NAME#v}"; fi
+          [ -n "$VN" ] || VN=$(sed -n "s/^const APP_VERSION = '\([^']*\)';.*/\1/p" index.html)
           [[ "$VN" =~ ^[0-9]+\.[0-9]+(\.[0-9]+)?$ ]] || { echo "not a version name: $VN" >&2; exit 1; }
           VC=$(tr -d '[:space:]' < android/app/version-code)
           [[ "$VC" =~ ^[0-9]+$ ]] || { echo "android/app/version-code is not a number" >&2; exit 1; }
