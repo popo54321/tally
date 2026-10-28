@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-zHszHqrkASX21yBbXmprw5qRT35WrTMSFQI6OLQt3HY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-Q4EZ4eZxF7RC1GLLxqcrBAWmBayuJMfXJIPxkzZyRyg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -132,6 +132,8 @@
   .mchip.s{border-color:var(--brass);border-style:dashed;color:var(--ink)}
   .mchip.on{background:var(--brass);border-color:var(--brass);color:#fff}
   .volband{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:2px 0 12px}
+  .volpre{margin:-4px 0 10px}
+  .volhelp{margin:0 0 12px}
   .volband input{width:56px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:7px 6px;font-family:var(--font-mono);font-size:13px;text-align:center}
   .volgrp{font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--txt-faint);margin:14px 0 2px}
   .volrow{display:grid;grid-template-columns:minmax(0,7.2em) minmax(30px,1fr) 2.6em 4.6em 4.4em;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line-soft)}
@@ -715,6 +717,8 @@
     <div class="card col-12" id="cardVol">
       <div class="lbl" data-i18n-html="guide.vol.title">Sets per Muscle <span class="sub-note">· last 7 days · a primary muscle counts the set, a secondary counts half</span></div>
       <div class="volband"><span data-i18n="guide.band">Aim for</span><input type="number" id="volLo" min="0" max="99" inputmode="numeric"><span>–</span><input type="number" id="volHi" min="1" max="100" inputmode="numeric"><span data-i18n="guide.band.unit">sets a week per muscle</span></div>
+      <div class="muschips volpre" id="volPre"></div>
+      <div class="sxnote volhelp" id="volHelp"></div>
       <div id="volWrap"></div>
       <div class="sxnote" id="volNote"></div>
     </div>
@@ -1017,7 +1021,7 @@
 </div>
 
 <script>
-const APP_VERSION = '5.6';
+const APP_VERSION = '5.7';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -1157,6 +1161,7 @@ const MUSCLE_KEYS = MUSCLES.map(m=>m.key);
 const muscleList = (a, cap) => Array.isArray(a) ? [...new Set(a.filter(k=>MUSCLE_KEYS.indexOf(k)>=0))].slice(0,cap) : [];
 const muscleGrp = k => { const m=MUSCLES.find(x=>x.key===k); return m ? m.grp : 'other'; };
 const VOL_LO = 10, VOL_HI = 20;
+const VOL_PRESETS = [{key:'start',lo:6,hi:10}, {key:'build',lo:VOL_LO,hi:VOL_HI}, {key:'keep',lo:4,hi:8}];
 function volBand(s){
   const lo=parseInt(s && s.volLo,10), hi=parseInt(s && s.volHi,10);
   return (isNaN(lo) || isNaN(hi) || lo<0 || hi>100 || lo>=hi) ? {lo:VOL_LO, hi:VOL_HI} : {lo:lo, hi:hi};
@@ -1376,6 +1381,18 @@ function normPlan(p){
   });
   return out;
 }
+let planSets = {};
+const PLAN_SETS_DEF = 3;
+function normPlanSets(p){
+  const out={};
+  if(!p || typeof p!=='object') return out;
+  DAYS.forEach(d=>{
+    const m=p[d.key]; if(!m || typeof m!=='object') return;
+    Object.keys(m).forEach(k=>{ const n=parseInt(m[k],10); if(exByKey(k) && n>=1 && n<=20) (out[d.key]||(out[d.key]={}))[k]=n; });
+  });
+  return out;
+}
+const plannedSets = (dayKey, key) => (planSets[dayKey] && planSets[dayKey][key]) || null;
 function sessionEx(dayKey){
   return (planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
 }
@@ -1788,7 +1805,8 @@ async function persistExEdits(){
 }
 async function loadPlan(){
   planExtras={};
-  try{ const v=await STORE.get(PKEY); if(v) planExtras=normPlan(JSON.parse(v)); }
+  planSets={};
+  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); planExtras=normPlan(p); planSets=normPlanSets(p && p.sets); } }
   catch(e){ console.error('plan read failed',e); }
 }
 async function loadStretches(){
@@ -1859,8 +1877,13 @@ async function recoverCardio(){
   await persistCardio();
   return seen.size;
 }
+const planObject = () => Object.assign({}, planExtras, {sets:planSets});
 async function persistPlan(){
-  try{ await STORE.set(PKEY, JSON.stringify(planExtras)); return true; }
+  Object.keys(planSets).forEach(d=>{
+    Object.keys(planSets[d]).forEach(k=>{ if((planExtras[d]||[]).indexOf(k)<0) delete planSets[d][k]; });
+    if(!Object.keys(planSets[d]).length) delete planSets[d];
+  });
+  try{ await STORE.set(PKEY, JSON.stringify(planObject())); return true; }
   catch(e){ console.error('plan save failed',e); return false; }
 }
 
@@ -2011,6 +2034,7 @@ function appendExBlock(wrap, ex, dayKey){
   block.querySelector('.addset').onclick=()=>{
     const rows=$("sets-"+ex.key).querySelectorAll('.setrow');
     addSetRow(ex, rows.length ? rows[rows.length-1].querySelector('.kg').value : ex.def, '');
+    rememberSets(ex);
   };
   block.querySelector('.exdrop').onclick=()=>dropMovement(ex.key, dayKey);
   block.querySelector('.xtag').onclick=()=>togglePin(ex.key, dayKey);
@@ -2035,10 +2059,12 @@ function prefillEx(ex, dayKey, cur){
   const sameDay = cur && cur.lifts && cur.lifts[ex.key];
   if(sameDay && sameDay.length){ sameDay.forEach(s=>addSetRow(ex, s.kg, s.reps)); return; }
   const plan=coachNext(ex, sessionsBefore(ex.key, $("fDate").value));
+  const n=plannedSets(dayKey, ex.key)||PLAN_SETS_DEF;
+  if(plan && plan.kind==='first'){ for(let i=0;i<n;i++) addSetRow(ex, plan.load, '', plan.targets[0]); return; }
   if(plan){ plan.targets.forEach(r=>addSetRow(ex, plan.load, '', r)); return; }
   const last=lastSessionOf(ex.key, dayKey);
   if(last && last.length) last.forEach(s=>addSetRow(ex, s.kg, ''));
-  else addSetRow(ex, ex.def, '');
+  else for(let i=0;i<n;i++) addSetRow(ex, ex.def, '');
 }
 function buildExForm(cur, dayKey){
   const wrap=$("exWrap"); wrap.innerHTML='';
@@ -2081,8 +2107,16 @@ function addSetRow(ex, loadVal, reps, aim){
     <button class="rmrest" title="${esc(t('ex.resttip'))}" aria-label="${esc(t('ex.resttip'))}">⏱</button>
     <button class="rmset" title="${esc(t('btn.remove'))}" aria-label="${esc(t('btn.remove'))}">✕</button>`;
   row.querySelector('.rmrest').onclick=()=>startRest(null, ex.short||ex.name);
-  row.querySelector('.rmset').onclick=()=>{ row.remove(); renumber(ex); };
+  row.querySelector('.rmset').onclick=()=>{ row.remove(); renumber(ex); rememberSets(ex); };
   box.appendChild(row); renumber(ex);
+}
+async function rememberSets(ex){
+  const dayKey=$("fDay").value, box=$("sets-"+ex.key);
+  if(!box || (planExtras[dayKey]||[]).indexOf(ex.key)<0) return;
+  const n=box.querySelectorAll('.setrow').length;
+  if(n<1 || plannedSets(dayKey, ex.key)===n) return;
+  (planSets[dayKey]||(planSets[dayKey]={}))[ex.key]=n;
+  await persistPlan(); drawGuide();
 }
 function renumber(ex){ const box=$("sets-"+ex.key); if(box) box.querySelectorAll('.setrow').forEach((r,i)=>r.querySelector('.setn').textContent=i+1); }
 function readExForm(){
@@ -2792,7 +2826,7 @@ function weekVolume(){
     if(i<todayIdx) return;
     sessionEx(d.key).forEach(k=>{
       if(i===todayIdx && cur && liftsOf(cur,k).length) return;
-      const ex=exByKey(k), last=lastSessionOf(k), n=last ? last.length : 3;
+      const ex=exByKey(k), last=lastSessionOf(k), n=last ? last.length : (plannedSets(d.key,k)||PLAN_SETS_DEF);
       (ex.prim||[]).forEach(m=>{ if(m in plan) plan[m]+=n; });
       (ex.sec||[]).forEach(m=>{ if(m in plan) plan[m]+=n/2; });
     });
@@ -2815,6 +2849,9 @@ function drawGuide(){
   const stOf=k=>weekState(k, w, lo, hi, mute);
   [["volLo",lo],["volHi",hi]].forEach(([id,v])=>{ const el=$(id); if(el && document.activeElement!==el) el.value=v; });
   const pct=v=>Math.min(100, v/hi*100);
+  const pre=VOL_PRESETS.find(x=>x.lo===lo && x.hi===hi);
+  $("volPre").innerHTML=VOL_PRESETS.map(x=>`<button type="button" class="mchip${x===pre?' on':''}" data-band="${x.lo}-${x.hi}">${esc(t('guide.pre.'+x.key))} ${x.lo}–${x.hi}</button>`).join('');
+  $("volHelp").innerHTML=esc(t(pre ? 'guide.pre.'+pre.key+'.note' : 'guide.pre.custom.note'))+'<br><br>'+esc(t('guide.help'));
 
   wrap.innerHTML=['push','pull','legs','core'].map(g=>`<div class="volgrp">${esc(groupName(g))}</div>`
     + MUSCLES.filter(m=>m.grp===g).map(m=>{
@@ -2871,6 +2908,10 @@ async function volMuteToggle(k){
   const m=settings.volMute||(settings.volMute=[]), i=m.indexOf(k);
   if(i>=0) m.splice(i,1); else m.push(k);
   await persistSettings(); render();
+}
+async function volBandPick(v){
+  const [lo,hi]=v.split('-').map(Number);
+  settings.volLo=lo; settings.volHi=hi; await persistSettings(); render();
 }
 async function volBandSet(){
   const lo=parseInt($("volLo").value,10), hi=parseInt($("volHi").value,10);
@@ -3663,7 +3704,7 @@ const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); r
 
 function exportObject(extra){
   return Object.assign({app:'tally', version:4, exportedAt:new Date().toISOString(),
-    entries, settings, exercises:customEx, plan:planExtras, stretches:stretches, exEdits:exEdits, cardio:cardios,
+    entries, settings, exercises:customEx, plan:planObject(), stretches:stretches, exEdits:exEdits, cardio:cardios,
     theme:theme, gym:gym}, extra||{});
 }
 function exportPayload(){ return JSON.stringify(exportObject()); }
@@ -3909,7 +3950,7 @@ async function applyImport(data){
   if(Array.isArray(data.cardio)){ const bk=new Map(cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
   if(data.theme && typeof data.theme==='object'){ theme=normTheme(data.theme); await persistTheme(); }
   if(data.gym && typeof data.gym==='object'){ gym=normGym(data.gym); await persistGym(); }
-  if(data.plan && typeof data.plan==='object'){ planExtras=normPlan(data.plan); await persistPlan(); }
+  if(data.plan && typeof data.plan==='object'){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); await persistPlan(); }
   if(data.settings && typeof data.settings==='object'){ settings=normSettings(data.settings); await persistSettings(); }
   await persist();
   fillForm($("fDate").value); render();
@@ -4241,6 +4282,14 @@ const LANG = {
     'guide.alsoworks':       'Also works {name}',
     'guide.band':            'Aim for',
     'guide.band.unit':       'sets a week per muscle',
+    'guide.help':            'Count only hard sets — ones that finish within two or three reps of failing. The solid bar is what you have logged since Sunday; the faint bar adds what your pinned sessions still have to come. Under the range, a muscle is unlikely to grow much; over it, extra sets mostly add tiredness.',
+    'guide.pre.build':       'Building',
+    'guide.pre.build.note':  'Building: the range most people grow best on once they train steadily. Move here after six months or so, or when progress on Starting out stalls.',
+    'guide.pre.custom.note': 'Your own range. Tap a preset to go back to one.',
+    'guide.pre.keep':        'Maintaining',
+    'guide.pre.keep.note':   'Maintaining: enough to hold the muscle you have through a busy patch or while cutting hard. Not enough to keep building.',
+    'guide.pre.start':       'Starting out',
+    'guide.pre.start.note':  'Starting out: right for your first months of lifting. New muscles grow on far less work, and recovering well matters more than doing lots.',
     'guide.bodyweight':      'Bodyweight',
     'guide.browse.title':    'Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span>',
     'guide.count':           '{n} for {name}',
@@ -4263,7 +4312,7 @@ const LANG = {
     'guide.st.track':        'On track',
     'guide.unmute':          'Unmute',
     'guide.untagged':        'Not counted, because no muscles are set: {list}. Set them in Workout → Workout Collection.',
-    'guide.vol.title':       'Sets per Muscle <span class="sub-note">· this week, Sunday to Saturday · a primary muscle counts the set, a secondary counts half · the faint bar is what your plan adds by Saturday</span>',
+    'guide.vol.title':       'Sets per Muscle <span class="sub-note">· this week, Sunday to Saturday · a primary muscle counts the set, a secondary counts half</span>',
     'gym.count':             'With this you can do {n} of the {total} exercises in the Guide.',
     'gym.intro':             'Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.',
     'gym.own':               'Your own equipment',
@@ -4770,8 +4819,8 @@ const LANG = {
     if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
     if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
-  $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick]'); if(!b) return; const d=b.dataset;
-    if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute);
+  $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band]'); if(!b) return; const d=b.dataset;
+    if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute); else if(d.band) volBandPick(d.band);
     else { guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
   $("gymWrap").onclick=ev=>{ const b=ev.target.closest('[data-eq]'); if(b) gymToggle(b.dataset.eq); };
   $("gymOwn").onclick=ev=>{ const b=ev.target.closest('[data-gdel]'); if(b) gymDelOwn(b.dataset.gdel); };
