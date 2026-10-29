@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-xuY2GQngR/K1zM2t9qCuecLHkzWRqnqMWYI1aFeus2Q='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-rhcAKCW0ony0t3V0lrqhkLEvczvL2PM+ocy4IwukrUY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -773,6 +773,19 @@
   </div>
 
   <div class="grid page" id="pg-settings">
+    <div class="card col-12" id="cardDonate">
+      <div class="lbl" data-i18n-html="don.title">Support Tally <span class="sub-note">· free for everyone, always</span></div>
+      <div class="sxnote" data-i18n="don.body">Tally is free for everyone, with no account and nothing sent anywhere. If it helps your training and you would like to keep it going, you can chip in. It is entirely optional and changes nothing in the app.</div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="donKofi" href="https://ko-fi.com/popo54321" target="_blank" rel="noopener" data-i18n="don.kofi">Donate on Ko-fi</a>
+        <span class="donsub" data-i18n="don.kofi.sub">International · card or PayPal</span>
+      </div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="donThai" href="https://ezdn.app/popo54321" target="_blank" rel="noopener" data-i18n="don.thai">Donate on EasyDonate</a>
+        <span class="donsub" data-i18n="don.thai.sub">In Thailand · PromptPay and Thai banks</span>
+      </div>
+    </div>
+
     <div class="card col-12" id="cardInstall" style="display:none">
       <div class="lbl" data-i18n="inst.title">Install on This Device</div>
       <div class="sxnote" id="instHow"></div>
@@ -884,19 +897,6 @@
         condition or an eating disorder, or taking medication affected by diet, speak to a
         qualified professional before acting on any number here. You are responsible for what you
         do with it.
-      </div>
-    </div>
-
-    <div class="card col-12" id="cardDonate">
-      <div class="lbl" data-i18n-html="don.title">Support Tally <span class="sub-note">· free for everyone, always</span></div>
-      <div class="sxnote" data-i18n="don.body">Tally is free for everyone, with no account and nothing sent anywhere. If it helps your training and you would like to keep it going, you can chip in. It is entirely optional and changes nothing in the app.</div>
-      <div class="donrow">
-        <a class="ghostbtn donbtn" id="donKofi" href="https://ko-fi.com/popo54321" target="_blank" rel="noopener" data-i18n="don.kofi">Donate on Ko-fi</a>
-        <span class="donsub" data-i18n="don.kofi.sub">International · card or PayPal</span>
-      </div>
-      <div class="donrow">
-        <a class="ghostbtn donbtn" id="donThai" href="https://ezdn.app/popo54321" target="_blank" rel="noopener" data-i18n="don.thai">Donate on EasyDonate</a>
-        <span class="donsub" data-i18n="don.thai.sub">In Thailand · PromptPay and Thai banks</span>
       </div>
     </div>
 
@@ -1052,7 +1052,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.1';
+const APP_VERSION = '6.2';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
