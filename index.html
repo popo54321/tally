@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-EQRn9vf5zk2uTJxdHozy0unQkthG2gvyz/a5f3UEj90='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-cobBAhD8g5ajBH96tdbnIW0xTssry304QDP1l0J5iJE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1055,7 +1055,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.3';
+const APP_VERSION = '6.4';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -2626,11 +2626,11 @@ function prefillEx(ex, dayKey, cur){
   const sameDay = cur && cur.lifts && cur.lifts[ex.key];
   if(sameDay && sameDay.length){ sameDay.forEach(s=>addSetRow(ex, s.kg, s.reps)); return; }
   const plan=coachNext(ex, sessionsBefore(ex.key, $("fDate").value));
-  const n=plannedSets(dayKey, ex.key)||PLAN_SETS_DEF;
-  if(plan && plan.kind==='first'){ for(let i=0;i<n;i++) addSetRow(ex, plan.load, '', plan.targets[0]); return; }
+  const want=plannedSets(dayKey, ex.key), n=want||PLAN_SETS_DEF;
+  if(plan && (want || plan.kind==='first')){ for(let i=0;i<n;i++) addSetRow(ex, plan.load, '', plan.targets[Math.min(i, plan.targets.length-1)]); return; }
   if(plan){ plan.targets.forEach(r=>addSetRow(ex, plan.load, '', r)); return; }
   const last=lastSessionOf(ex.key, dayKey);
-  if(last && last.length) last.forEach(s=>addSetRow(ex, s.kg, ''));
+  if(last && last.length){ const k=want||last.length; for(let i=0;i<k;i++) addSetRow(ex, last[Math.min(i, last.length-1)].kg, ''); }
   else for(let i=0;i<n;i++) addSetRow(ex, ex.def, '');
 }
 function buildExForm(cur, dayKey){
@@ -3397,7 +3397,7 @@ function weekVolume(){
     if(i<todayIdx) return;
     sessionEx(d.key).forEach(k=>{
       if(i===todayIdx && cur && liftsOf(cur,k).length) return;
-      const ex=exByKey(k), last=lastSessionOf(k), n=last ? last.length : (plannedSets(d.key,k)||PLAN_SETS_DEF);
+      const ex=exByKey(k), last=lastSessionOf(k), n=plannedSets(d.key,k) || (last ? last.length : PLAN_SETS_DEF);
       (ex.prim||[]).forEach(m=>{ if(m in plan) plan[m]+=n; });
       (ex.sec||[]).forEach(m=>{ if(m in plan) plan[m]+=n/2; });
     });
