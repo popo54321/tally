@@ -1,5 +1,7 @@
 package com.bodyandiron.traininglog;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.webkit.WebResourceRequest;
@@ -43,7 +45,18 @@ final class AssetClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest req) {
         Uri u = req.getUrl();
-        return u == null || !MainActivity.HOST.equals(u.getHost());
+        if (u == null) return true;
+        if (MainActivity.HOST.equals(u.getHost())) return false;
+        String scheme = u.getScheme();
+        if ("https".equals(scheme) || "http".equals(scheme)) {
+            Intent open = new Intent(Intent.ACTION_VIEW, u);
+            open.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                view.getContext().startActivity(open);
+            } catch (ActivityNotFoundException e) {
+            }
+        }
+        return true;
     }
 
     private static WebResourceResponse notFound() {
