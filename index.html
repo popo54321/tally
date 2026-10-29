@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-kH67n3CQ1nbO4fjId7vTjmsAT9MnHild/DOqt+Vo4Ow='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-EQRn9vf5zk2uTJxdHozy0unQkthG2gvyz/a5f3UEj90='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -641,6 +641,7 @@
         <button class="mt-set" id="setManualBtn" data-i18n="btn.set">Set</button>
         <span class="mt-current" id="mtCurrent"></span>
       </div>
+      <div class="sxnote protown" data-i18n="calib.ownnote">The recommended number comes from your own logs, but the method behind it is a general one that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.</div>
     </div>
 
     <div class="card col-12" id="cardProfile">
@@ -4132,12 +4133,11 @@ function drawCalibration(){
   document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(settings.calPeriod)));
   document.querySelectorAll('#segRate button').forEach(b=>b.classList.toggle('on', b.dataset.r===String(settings.calRate)));
   const out=$("calibOut");
-  const r=calRecommend(), c=r.c, NEED=CAL_NEED;
+  const r=calRecommend(), c=r.c;
   if(r.target==null){
     const need=[];
-    if(c.weighIns<NEED.weighIns) need.push(tf('calib.need.weighins',{n:'<b>'+c.weighIns+'/'+NEED.weighIns+'</b>'}));
-    if(c.kcalDays<NEED.kcalDays) need.push(tf('calib.need.kcaldays',{n:'<b>'+c.kcalDays+'/'+NEED.kcalDays+'</b>'}));
-    if(c.spanDays<NEED.span && c.weighIns>=2) need.push(tf('calib.need.span',{n:'<b>'+c.spanDays+'/'+NEED.span+'</b>'}));
+    need.push(tf('calib.need.weighins',{n:'<b>'+Math.min(c.weighIns,2)+'/2</b>'}));
+    need.push(tf('calib.need.kcaldays',{n:'<b>'+Math.min(c.kcalDays,1)+'/1</b>'}));
     out.innerHTML=`<div class="calib-need">${t('calib.need.head')}<br><br>
       ${tf('calib.need.sofar',{list:need.length?need.join(' · '):'—'})}<br>
       ${t('calib.need.keep')}
@@ -4718,6 +4718,7 @@ const LANG = {
     'calib.need.trend':      'Current weight trend: {kg}.',
     'calib.need.weighins':   '{n} weigh-ins',
     'calib.overwindow':      'over the window',
+    'calib.ownnote':         'The recommended number comes from your own logs, but the method behind it is a general one that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.',
     'calib.partial':         'Window not full yet: your data covers {d} of the {p} days. This is the estimate from what is there, and it settles as the window fills.',
     'calib.partialtag':      'window not full yet',
     'calib.rec':             'Recommended intake',
