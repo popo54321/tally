@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-8L2fW+4qLO7Wca1VsoW1NQ2ScguGv9fOKQRb6Y78UCQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RImExQFGnF1LxL1R3E+9XOv3u15SPRjsXfMILDI6apU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -174,7 +174,9 @@
   .browsectl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 0}
   .browseeq{width:auto;flex:1 1 170px;margin:0;padding:9px 10px;font-size:12px}
   .browsehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 2px;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim)}
-  .gymgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0 4px}
+  .gymgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:8px 0 4px}
+  .gymgrp{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:var(--font-mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-dim);margin:18px 0 0;padding-bottom:6px;border-bottom:1px solid var(--line-soft)}
+  .gymgrp span{letter-spacing:.3px;text-transform:none;color:var(--txt-faint)}
   .gymitem{display:flex;align-items:center;gap:9px;text-align:left;background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:8px;
     padding:10px;cursor:pointer;color:var(--ink-dim);font-size:13px;font-family:var(--font-body)}
   .gymitem .box{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--line);flex:none}
@@ -751,7 +753,7 @@
     <div class="card col-12" id="cardGym">
       <div class="lbl" data-i18n-html="gym.title">My Gym <span class="sub-note">· what you can train with</span></div>
       <div class="sxnote" data-i18n="gym.intro">Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.</div>
-      <div class="gymgrid" id="gymWrap"></div>
+      <div id="gymWrap"></div>
       <div class="sxnote" id="gymCount"></div>
       <div class="lbl" style="margin-top:24px" data-i18n="gym.own">Your own equipment</div>
       <div class="sxnote" data-i18n="gym.own.note">A record of what else you have. The Guide only matches the list above.</div>
@@ -1166,6 +1168,13 @@ const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullu
                'cable','leg_press','leg_curl','leg_ext','back_ext','bands',
                'smith','trap_bar','landmine','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','ghd','box','parallettes','ab_wheel','sled',
                'plates','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','ssb','glute_machine','ab_machine','seated_calf_m','med_ball','sandbag','suspension','stability_ball','climb_rope','wrist_roller','gripper'];
+
+const EQUIP_GROUPS = [
+  {key:'free', items:['barbell','dumbbells','kettlebell','ez_bar','trap_bar','ssb','plates','med_ball','sandbag']},
+  {key:'machine', items:['cable','smith','leg_press','leg_curl','leg_ext','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','glute_machine','ab_machine','seated_calf_m']},
+  {key:'station', items:['bench','rack','pullup_bar','dip_bars','back_ext','ghd','box','landmine','climb_rope','sled']},
+  {key:'small', items:['rings','suspension','bands','parallettes','ab_wheel','stability_ball','wrist_roller','gripper']}
+];
 
 const LIB = [
   {key:'bb_bench',        p:['chest'],                          s:['delt_front','triceps'],               eq:['barbell','bench','rack'], ld:'kg'},
@@ -1764,7 +1773,13 @@ const LIB = [
 const libByKey = k => LIB.find(l=>l.key===k);
 const lvTag = lv => lv ? `<span class="lvtag lv${lv}">${esc(t('lv.'+lv))}</span>` : '';
 const exLv = ex => { const l=ex && ex.lib ? libByKey(ex.lib) : null; return l ? l.lv : null; };
-const byLevel = (a,b) => (a.lv||0)-(b.lv||0);
+const byName = (a,b) => String(a).localeCompare(String(b), undefined, {sensitivity:'base', numeric:true});
+const libOrder = (a,b) => (a.lv||0)-(b.lv||0) || byName(t('lib.'+a.key), t('lib.'+b.key));
+const exOrder = (a,b) => (exLv(a)||0)-(exLv(b)||0) || byName(a.name, b.name);
+function bwSplit(list, lvOf, rowFn, hdCls){
+  const w=list.filter(x=>!lvOf(x)), b=list.filter(x=>lvOf(x));
+  return w.map(rowFn).join('') + (b.length ? `<div class="${hdCls}">${esc(t('lib.bwhead'))}</div>`+b.map(rowFn).join('') : '');
+}
 const qWords = x => { const w=String(x||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); return w.concat(w.slice(1).map((v,i)=>w[i]+v)); };
 const qMatch = (q, text) => { const h=qWords(text); return String(q||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(p=>h.some(w=>w.indexOf(p)===0)); };
 const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
@@ -2714,7 +2729,7 @@ function shRenderList(){
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t('btn.add'))}</button>
       </div>`;
   };
-  const pool = CATALOGUE.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key)));
+  const pool = CATALOGUE.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key))).sort(exOrder);
   const lrow=l=>{
     const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.bodyweight');
     return `<div class="sh-row${ok?'':' off'}">
@@ -2724,11 +2739,11 @@ function shRenderList(){
       </div>`;
   };
   const found = (q && !shManaging) ? LIB.filter(l=>!libLive(l) && qMatch(q, t('lib.'+l.key)+' '+l.p.concat(l.s).map(k=>t('mus.'+k)).join(' ')+(l.lv?' '+t('lv.'+l.lv):'')))
-    .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || byLevel(a,b)).slice(0,60) : [];
-  const libPart = found.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+found.map(lrow).join('')
+    .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || libOrder(a,b)).slice(0,60) : [];
+  const libPart = found.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+bwSplit(found, l=>l.lv, lrow, 'sh-grp')
     : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}</div>` : '';
   box.innerHTML = (pool.length || found.length)
-    ? (pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+pool.map(row).join('') : '')+libPart
+    ? (pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+bwSplit(pool, exLv, row, 'sh-grp') : '')+libPart
     : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}<br>${esc(t('sh.tapnew'))}</div>`
     : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`+libPart;
 
@@ -3196,7 +3211,7 @@ function drawColl(){
   const wrap=$("collWrap"); if(!wrap) return;
   const q=($("collSearch")?$("collSearch").value:'').trim().toLowerCase();
   const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
-  const pool=CATALOGUE.filter(hit);
+  const pool=CATALOGUE.filter(hit).sort(exOrder);
   const row=ex=>{
     const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
     const inDays=DAYS.filter(d=>sessionEx(d.key).indexOf(ex.key)>=0).map(d=>dayShort(d.key));
@@ -3210,7 +3225,7 @@ function drawColl(){
       <button type="button" class="collbtn${ex.retired?' on':''}" data-cret="${esc(ex.key)}">${esc(t(ex.retired?'btn.show':'btn.hide'))}</button>
     </div>`;
   };
-  wrap.innerHTML = pool.length ? `<div class="collgrp">${esc(t('coll.yours'))}</div>`+pool.map(row).join('')
+  wrap.innerHTML = pool.length ? `<div class="collgrp">${esc(t('coll.yours'))}</div>`+bwSplit(pool, exLv, row, 'collgrp')
     : `<div class="collempty">${esc(q ? tf('nomatch',{q:q}) : t('coll.empty'))}<br>${esc(t('coll.addbelow'))}</div>`;
 
 }
@@ -3378,7 +3393,7 @@ function drawGuide(){
   const show=l=>guideAll || libUsable(l);
   const eqHit=l=>!guideEq || (guideEq==='none' ? !l.eq.length : l.eq.indexOf(guideEq)>=0);
   const prim=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), sec=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
-  const pool=guideMode==='s' ? sec : prim, list=pool.filter(eqHit).sort(byLevel);
+  const pool=guideMode==='s' ? sec : prim, list=pool.filter(eqHit).sort(libOrder);
   $("browseMode").innerHTML=['p','s'].map(m=>`<button type="button" class="${m===guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:(m==='s'?sec:prim).filter(eqHit).length}))}</button>`).join('');
   const eqN=q=>pool.filter(l=>q==='none' ? !l.eq.length : l.eq.indexOf(q)>=0).length;
   const eqOpts=['none'].concat(EQUIP).filter(q=>q===guideEq || eqN(q)>0);
@@ -3388,7 +3403,7 @@ function drawGuide(){
   const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
   const mn=t('mus.'+guideMus);
   $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : 'guide.count', list.length, {name:mn});
-  $("browseWrap").innerHTML = list.length ? list.map(libRow).join('')
+  $("browseWrap").innerHTML = list.length ? bwSplit(list, l=>l.lv, libRow, 'reclbl')
     : `<div class="restnote">${esc(guideEq ? t('guide.none.eq') : tf(guideMode==='s' ? 'guide.none.s' : 'guide.none',{name:mn}))}</div>`;
 }
 async function libToCollection(k){
@@ -3426,10 +3441,15 @@ async function volBandSet(){
 
 function drawGym(){
   const wrap=$("gymWrap"); if(!wrap) return;
-  wrap.innerHTML=EQUIP.map(q=>{
+  const item=q=>{
     const on=gym.have.indexOf(q)>=0, n=LIB.filter(l=>l.eq.indexOf(q)>=0).length;
     return `<button type="button" class="gymitem${on?' on':''}" data-eq="${q}"><span class="box"></span>`
       + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tn('gym.uses',n))}</span></span></button>`;
+  };
+  wrap.innerHTML=EQUIP_GROUPS.map(g=>{
+    const have=g.items.filter(q=>gym.have.indexOf(q)>=0).length;
+    return `<div class="gymgrp">${esc(t('gym.grp.'+g.key))}<span>${esc(tf('gym.grp.have',{n:have, total:g.items.length}))}</span></div>`
+      + `<div class="gymgrid">${g.items.slice().sort((a,b)=>byName(t('eq.'+a), t('eq.'+b))).map(item).join('')}</div>`;
   }).join('');
   $("gymCount").textContent = gym.set ? tf('gym.count',{n:LIB.filter(l=>libAvailable(l, gym.have)).length, total:LIB.length}) : t('gym.unset');
   $("gymOwn").innerHTML = gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
@@ -4870,6 +4890,11 @@ const LANG = {
     'guide.untagged':        'Not counted, because no muscles are set: {list}. Set them in Workout → Workout Collection.',
     'guide.vol.title':       'Sets per Muscle <span class="sub-note">· this week, Sunday to Saturday · a primary muscle counts the set, a secondary counts half</span>',
     'gym.count':             'With this you can do {n} of the {total} exercises in the Guide.',
+    'gym.grp.free':          'Free weights',
+    'gym.grp.have':          '{n} of {total} ticked',
+    'gym.grp.machine':       'Machines and cables',
+    'gym.grp.small':         'Bodyweight and small kit',
+    'gym.grp.station':       'Benches, racks and stations',
     'gym.intro':             'Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.',
     'gym.own':               'Your own equipment',
     'gym.own.note':          'A record of what else you have. The Guide only matches the list above.',
@@ -4886,6 +4911,7 @@ const LANG = {
     'hist.more':             'Show {n} older days',
     'hist.more.1':           'Show 1 older day',
     'hist.title':            'History',
+    'lib.bwhead':            'Bodyweight · easiest first',
     'lib.air_squat':         'Bodyweight squat',
     'lib.back_ext':          'Back extension',
     'lib.back_squat':        'Back squat',
