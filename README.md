@@ -5,14 +5,19 @@ target worked out from your own logs rather than a formula.
 
 ## Use it
 
-Open the link on your phone, then add it to your home screen. It runs full screen with no browser
-bars, works with no signal, and behaves like any other app.
+Open **https://popo54321.github.io/tally/** on your phone, then add it to your home screen. It runs
+full screen with no browser bars, works with no signal, and behaves like any other app.
 
-- **iPhone / iPad** — open in **Safari**, tap **Share**, then **Add to Home Screen**.
-  It has to be Safari; other browsers on iOS cannot install it.
-- **Android** — open in Chrome, tap the **⋮** menu, then **Install app** or **Add to Home screen**.
-  There is also a native Android build if you would rather have that.
+- **Android** — tap **Install** on the banner, or in Settings. If neither shows, use Chrome's **⋮**
+  menu, then **Install app** or **Add to Home screen**.
+- **iPhone / iPad** — tap **Share**, then **Add to Home Screen**. Safari always works; on iOS 16.4
+  and later Chrome and Edge can do it too. The home-screen app keeps its own data, separate from the
+  browser, so if you have already logged in the browser, save a backup file and import it there.
 - **Laptop** — it just works in the browser. Install it from the address bar if you want.
+
+There is also a native Android app, Tally Pro: download the `.apk` from the
+[latest release](https://github.com/popo54321/tally/releases/latest) and install it over any
+earlier version. Your data stays.
 
 ## Your data
 
@@ -30,6 +35,11 @@ That cuts both ways: **nothing is backed up for you.**
 
 On iPhone in particular, Safari can clear a site's storage if you go a long stretch without opening
 it. Adding it to your home screen makes that far less likely, and a backup file makes it harmless.
+
+## Support
+
+Tally is free for everyone. If it helps your training, you can chip in on
+[Ko-fi](https://ko-fi.com/popo54321) or, in Thailand, on [EasyDonate](https://ezdn.app/popo54321).
 
 ## Licence
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-cobBAhD8g5ajBH96tdbnIW0xTssry304QDP1l0J5iJE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-VO1tU4PZaGUWqmVfwR+8SFLShDAXcAB8tWFmEAVEXqM='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1055,7 +1055,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.4';
+const APP_VERSION = '6.5';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -2022,7 +2022,7 @@ const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
 function calcVal(v){
   const s=String(v==null?'':v).replace(/\s+/g,'');
   if(!s) return null;
-  const tok=s.match(/\d+\.?\d*|\.\d+|[+\-*\/]/g);
+  const tok=s.match(/\d+\.?\d*|\.\d+|[+\-*/]/g);
   if(!tok || tok.join('')!==s) return null;
   const flat=[];
   for(let i=0;i<tok.length;i++){
@@ -2045,17 +2045,17 @@ function calcVal(v){
 function calcHint(id){
   const el=$(id), out=$(id+'Sum'); if(!el||!out) return;
   const raw=el.value.trim(), v=calcVal(raw);
-  out.textContent = (v!=null && /[+*\/-]/.test(raw.slice(1))) ? '= '+v : '';
+  out.textContent = (v!=null && /[+*/-]/.test(raw.slice(1))) ? '= '+v : '';
 }
 function calcSettle(id){
   const el=$(id); if(!el) return;
   const v=calcVal(el.value);
-  if(v!=null && /[+*\/-]/.test(el.value.trim().slice(1))) el.value=v;
+  if(v!=null && /[+*/-]/.test(el.value.trim().slice(1))) el.value=v;
   calcHint(id);
 }
 function calcAdd(id){
   const el=$(id); if(!el) return;
-  el.value = el.value.trim().replace(/[+*\/-]$/,'') + '+';
+  el.value = el.value.trim().replace(/[+*/-]$/,'') + '+';
   el.focus();
   try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){}
   calcHint(id);
@@ -4522,6 +4522,7 @@ async function loadImport(){
   smsg(tn('sync.imported',entries.length));
   flash(tn('sync.imported',entries.length));
 }
+const isObj = x => !!x && typeof x==='object' && !Array.isArray(x);
 async function applyImport(data){
   entries=normEntries(data.entries);
   if(Array.isArray(data.exercises)){
@@ -4536,12 +4537,12 @@ async function applyImport(data){
     stretches=[...byKey.values()];
     await persistStretches();
   }
-  if(data.exEdits && typeof data.exEdits==='object'){ exEdits=Object.assign(exEdits, normExEdits(data.exEdits)); await persistExEdits(); }
+  if(isObj(data.exEdits)){ exEdits=Object.assign(exEdits, normExEdits(data.exEdits)); await persistExEdits(); }
   if(Array.isArray(data.cardio)){ const bk=new Map(cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
-  if(data.theme && typeof data.theme==='object'){ theme=normTheme(data.theme); await persistTheme(); }
-  if(data.gym && typeof data.gym==='object'){ gym=normGym(data.gym); await persistGym(); }
-  if(data.plan && typeof data.plan==='object'){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); await persistPlan(); }
-  if(data.settings && typeof data.settings==='object'){ settings=normSettings(data.settings); await persistSettings(); }
+  if(isObj(data.theme)){ theme=normTheme(data.theme); await persistTheme(); }
+  if(isObj(data.gym)){ gym=normGym(data.gym); await persistGym(); }
+  if(isObj(data.plan)){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); await persistPlan(); }
+  if(isObj(data.settings)){ settings=normSettings(data.settings); await persistSettings(); }
   await persist();
   fillForm($("fDate").value); render();
 }
@@ -4661,8 +4662,6 @@ const LANG = {
     'bak.nudge.never':       'You have not saved a backup yet, and everything you log lives only on this device.',
     'bak.today':             'Last backup file saved today.',
     'bak.yesterday':         'Last backup file saved yesterday.',
-    'basis.bw':              'bodyweight',
-    'basis.lean':            'lean mass',
     'bf.female':             'Female Navy formula: needs waist, hips and neck. Body fat stays blank until all three are logged on a day.',
     'bf.male':               'Male Navy formula: needs waist and neck.',
     'bmr.drift':             'Age has advanced from the {age} you entered; correct it here if that is wrong.',
@@ -4714,7 +4713,6 @@ const LANG = {
     'calib.need.kcaldays':   '{n} days with kcal',
     'calib.need.keep':       'Keep logging weight (most days) and kcal. The estimate appears as soon as it can be worked out, and firms up over about two weeks.',
     'calib.need.sofar':      'Have so far: {list}.',
-    'calib.need.span':       '{n} days of span',
     'calib.need.trend':      'Current weight trend: {kg}.',
     'calib.need.weighins':   '{n} weigh-ins',
     'calib.overwindow':      'over the window',
