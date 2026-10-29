@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-rhcAKCW0ony0t3V0lrqhkLEvczvL2PM+ocy4IwukrUY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-kH67n3CQ1nbO4fjId7vTjmsAT9MnHild/DOqt+Vo4Ow='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,6 +193,7 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
+  .protown{margin:8px 0 10px}
   .donrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px}
   a.donbtn{display:inline-block;min-width:17em;text-align:center;text-decoration:none;border-color:var(--brass);color:var(--brass-bright);font-weight:600}
   .donsub{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);line-height:1.6}
@@ -667,6 +668,7 @@
         <button class="mt-set" id="setProtBtn" data-i18n="btn.set">Set</button>
         <span class="mt-current" id="mpCurrent"></span>
       </div>
+      <div class="sxnote protown" data-i18n="prot.ownnote">These numbers are a general guide that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.</div>
       <div class="sxnote" id="bfNote"></div>
     </div>
 
@@ -1052,7 +1054,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.2';
+const APP_VERSION = '6.3';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -5744,6 +5746,7 @@ const LANG = {
     'prot.aim':               'Aim for {g} a day',
     'prot.auto':              'automatic',
     'prot.okfrom':            'anything from {g} g is fine',
+    'prot.ownnote':          'These numbers are a general guide that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.',
     'prot.relax':             'You do not need to hit it every day. A day around {ok} g is perfectly fine, and a lower one now and then changes nothing. What counts is how most of your weeks go.',
     'prot.useauto':           'Go back to {g} g',
     'prot.why.female':        'The amount that covers nearly every woman who trains, whatever her size. Nothing to work out.',
