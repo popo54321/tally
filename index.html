@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-Gug85Lu2bhZb/b8s+PUF+g/bk31hD5meVhMtq/EixiY='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-ncx6EgAC9hOfObvVcAxAy0qPfLTsLAowEWG55AeOF1E='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -836,7 +836,7 @@
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
-          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 9, 8, 9 means at least 9 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Strength (3–6 or 6–8 reps) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>
@@ -939,7 +939,7 @@
         <div class="field"><label for="shDef" data-i18n="sh.startload">Starting load · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shDef" placeholder="0"></div>
         <div class="field"><label data-i18n="sh.coach">Coaching · what the next session suggests</label>
           <div class="seg segwrap" id="shGoal">
-            <button type="button" data-g="off" data-i18n="goal.off">Off</button><button type="button" data-g="strength" data-i18n="goal.strength">Strength</button><button type="button" data-g="size" data-i18n="goal.size">Size</button><button type="button" data-g="endurance" data-i18n="goal.endurance">Endurance</button><button type="button" data-g="custom" data-i18n="goal.custom">Custom</button>
+            <button type="button" data-g="off" data-i18n="goal.off">Off</button><button type="button" data-g="strength" data-i18n="goal.strength">Strength 3–6</button><button type="button" data-g="strength2" data-i18n="goal.strength2">Strength 6–8</button><button type="button" data-g="endurance" data-i18n="goal.endurance">Endurance 15–20</button><button type="button" data-g="custom" data-i18n="goal.custom">Custom</button>
           </div>
           <div class="coachgrid" id="shRangeRow">
             <div class="field"><label for="shMin" data-i18n="sh.coach.from">From</label><input type="number" min="1" inputmode="numeric" id="shMin"></div>
@@ -1779,7 +1779,7 @@ function muscleVolume(days, exOf){
 
 const GOALS = [
   {key:'strength',  min:3,  max:6},
-  {key:'size',      min:8,  max:12},
+  {key:'strength2', min:6,  max:8},
   {key:'endurance', min:15, max:20}
 ];
 const goalOfRange = (mn,mx) => {
@@ -4792,10 +4792,10 @@ const LANG = {
     'font.zen.name':         'Zen',
     'font.zen.note':         'Serif headings, softer and calmer. Suits mobility and steady work.',
     'goal.custom':           'Custom',
-    'goal.endurance':        'Endurance',
+    'goal.endurance':        'Endurance 15–20',
     'goal.off':              'Off',
-    'goal.size':             'Size',
-    'goal.strength':         'Strength',
+    'goal.strength':         'Strength 3–6',
+    'goal.strength2':        'Strength 6–8',
     'grp.core':              'Core',
     'grp.legs':              'Legs',
     'grp.other':             'Other',
@@ -5481,7 +5481,7 @@ const LANG = {
     'meth.bf.h':             'Body fat · US Navy girth method',
     'meth.bmr.b':            'Resting rate = 10 × weight(kg) + 6.25 × height(cm) − 5 × age, then <b>+5</b> for men or <b>−161</b> for women. Multiplied by an activity factor of 1.2 to 1.9 depending on how much you train. Mifflin-St Jeor (1990) is the equation most dietetic practice uses, and is a population average: individual resting rates vary by roughly ±10% around it, more if you are very lean, very heavy, or older.',
     'meth.bmr.h':            'Starting energy estimate · Mifflin-St Jeor',
-    'meth.coach.b':          'Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 9, 8, 9 means at least 9 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
+    'meth.coach.b':          'Each movement can carry a rep range: pick Strength (3–6 or 6–8 reps) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
     'meth.coach.h':          'Next-session suggestions · patient double progression',
     'meth.prot.b':           '<b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.',
     'meth.prot.h':           'Protein · one number, no maths',
