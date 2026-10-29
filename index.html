@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RImExQFGnF1LxL1R3E+9XOv3u15SPRjsXfMILDI6apU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-ap72Ht4DAc3qLimhZXNM1I9ElfRo3fJlgZr46iQwjCA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Tally">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <script>
 (function(){
@@ -192,6 +192,7 @@
   .baknudge{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:2px solid var(--warn);border-radius:10px;
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
+  .instnudge{border-color:var(--brass)}
   .bakskip{background:none;border:none;color:var(--txt-faint);font-family:var(--font-mono);font-size:11px;cursor:pointer;padding:8px 6px;min-height:34px}
   .bakline{font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin:8px 0 2px}
   .appver{font-family:var(--font-mono);font-size:11px;letter-spacing:.4px;color:var(--on-bg);text-align:center;padding:6px 0 2px}
@@ -508,6 +509,11 @@
     <div class="title"><span class="sub" data-i18n="app.sub">Training &amp; Body Log</span>Tally</div>
   </header>
 
+  <div class="baknudge instnudge" id="instNudge" style="display:none">
+    <span id="instText"></span>
+    <button type="button" class="ghostbtn" id="instNow" data-i18n="inst.now">Install</button>
+    <button type="button" class="bakskip" id="instLater" data-i18n="bak.later">Not now</button>
+  </div>
   <div class="baknudge" id="bakNudge" style="display:none">
     <span id="bakNudgeText"></span>
     <button type="button" class="ghostbtn" id="bakNow" data-i18n="bak.now">Save backup</button>
@@ -763,6 +769,11 @@
   </div>
 
   <div class="grid page" id="pg-settings">
+    <div class="card col-12" id="cardInstall" style="display:none">
+      <div class="lbl" data-i18n="inst.title">Install on This Device</div>
+      <div class="sxnote" id="instHow"></div>
+      <button type="button" class="ghostbtn" id="instBtn" style="margin-top:10px" data-i18n="inst.now">Install</button>
+    </div>
     <div class="card col-12">
       <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
       <div class="syncrow">
@@ -1024,7 +1035,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.0';
+const APP_VERSION = '6.1';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3272,6 +3283,37 @@ function drawReview(){
 
 const BACKUP_DAYS = 14;
 let lastBackup=null, bakSnoozed=false;
+let instPrompt=null;
+const INST_SNOOZE='tally:instSnooze';
+const instIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const instDone = () => !!window.AndroidFile || location.protocol==='file:' || navigator.standalone===true
+  || !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches);
+function instSnoozed(){ try{ const v=+localStorage.getItem(INST_SNOOZE); return !!v && Date.now()-v<30*864e5; }catch(e){ return false; } }
+function drawInstall(){
+  const done=instDone(), can=!done && (!!instPrompt || instIOS);
+  const nudge=$("instNudge");
+  if(nudge){
+    nudge.style.display = (can && !instSnoozed()) ? '' : 'none';
+    $("instText").textContent = t(instIOS ? 'inst.nudge.ios' : 'inst.nudge');
+    $("instNow").style.display = instPrompt ? '' : 'none';
+  }
+  const card=$("cardInstall");
+  if(card){
+    card.style.display = done ? 'none' : '';
+    $("instHow").textContent = t(instIOS ? 'inst.ios' : instPrompt ? 'inst.android' : 'inst.manual');
+    $("instBtn").style.display = instPrompt ? '' : 'none';
+  }
+}
+async function instGo(){
+  if(!instPrompt) return;
+  const p=instPrompt; instPrompt=null;
+  p.prompt();
+  try{ await p.userChoice; }catch(e){}
+  drawInstall();
+}
+function instLater(){ try{ localStorage.setItem(INST_SNOOZE, String(Date.now())); }catch(e){} drawInstall(); }
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); instPrompt=e; drawInstall(); });
+window.addEventListener('appinstalled', ()=>{ instPrompt=null; drawInstall(); flash(t('inst.done')); });
 async function loadBackupDate(){
   try{ const v=await STORE.get(BKEY); lastBackup=(typeof v==='string' && validDate(v)) ? v : null; }catch(e){ lastBackup=null; }
 }
@@ -3775,7 +3817,7 @@ const stalePages = new Set();
 function drawPage(k){ if(stalePages.delete(k)) PAGE_DRAW[k](); }
 function stale(k){ stalePages.add(k); if(k===curPage) drawPage(k); }
 function render(){
-  drawSched(); drawBackup(); syncChartSegs();
+  drawSched(); drawBackup(); drawInstall(); syncChartSegs();
   PAGES.forEach(p=>stalePages.add(p));
   drawPage(curPage);
 }
@@ -4911,6 +4953,14 @@ const LANG = {
     'hist.more':             'Show {n} older days',
     'hist.more.1':           'Show 1 older day',
     'hist.title':            'History',
+    'inst.android':          'Puts Tally on your home screen and in your app list. It opens full screen like any other app, works with no signal, and keeps the same data as this browser.',
+    'inst.done':             'Tally installed. Open it from your home screen.',
+    'inst.ios':              'Tap Share (the square with an arrow), scroll down and tap Add to Home Screen. Tally then opens full screen like any other app and works with no signal. On iPhone the home-screen app keeps its own data, separate from this browser: if you have logged here already, save a backup file first and import it in the installed app.',
+    'inst.manual':           'Use your browser menu: in Chrome on Android, ⋮ then Install app or Add to Home screen; on a computer, the install icon at the right of the address bar.',
+    'inst.now':              'Install',
+    'inst.nudge':            'Add Tally to your home screen: it opens like an app, full screen, and works with no signal.',
+    'inst.nudge.ios':        'Add Tally to your home screen: tap Share (the square with an arrow), then Add to Home Screen. Details in Settings.',
+    'inst.title':            'Install on This Device',
     'lib.bwhead':            'Bodyweight · easiest first',
     'lib.air_squat':         'Bodyweight squat',
     'lib.back_ext':          'Back extension',
@@ -5904,6 +5954,7 @@ const LANG = {
   $("gymAdd").onclick=gymAddOwn;
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
+  $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
   $("histMore").onclick=()=>{ histShown+=HIST_PAGE; drawHistory(); };
   $("histBody").onclick=ev=>{ const b=ev.target.closest('.del'); if(b) removeEntry(b.dataset.d, b); };
   $("undoBtn").onclick=undoImport;

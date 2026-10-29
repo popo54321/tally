@@ -1,9 +1,12 @@
-const CACHE='tally-2e09d2cbc182';
+const CACHE='tally-4d22936bc884';
 const ASSETS=[
   "./",
   "./index.html",
   "./manifest.webmanifest",
   "./icon-192.png",
+  "./icon-512.png",
+  "./icon-maskable-512.png",
+  "./apple-touch-icon.png",
   "./icon.svg",
   "./icon-maskable.svg",
   "./fonts/Archivo.woff2",
