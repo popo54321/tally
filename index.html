@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-zuoJ44hmq/TY4rEY3cYgnboxigABntm31VPd/SqOjto='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-u8RNrtk82awXe+ikh8xCr3F6rDQXLfFQQ2H3zEzansw='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -171,6 +171,8 @@
   .lvtag.lv5{color:var(--rust)}
   .sh-row.off .nm{color:var(--txt-faint)}
   .libin{font-family:var(--font-mono);font-size:10.5px;color:var(--good);white-space:nowrap}
+  .browsectl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 0}
+  .browseeq{width:auto;flex:1 1 170px;margin:0;padding:9px 10px;font-size:12px}
   .browsehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 2px;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim)}
   .gymgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0 4px}
   .gymitem{display:flex;align-items:center;gap:9px;text-align:left;background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:8px;
@@ -738,6 +740,7 @@
     <div class="card col-12" id="cardBrowse">
       <div class="lbl" data-i18n-html="guide.browse.title">Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span></div>
       <div class="muschips" id="browseMus"></div>
+      <div class="browsectl"><div class="seg" id="browseMode"></div><select id="browseEq" class="daysel browseeq" data-i18n-title="guide.eq.title" title="Filter by equipment" aria-label="Filter by equipment"></select></div>
       <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll" data-i18n="guide.all.on">Show everything</button></div>
       <div id="browseWrap"></div>
     </div>
@@ -1018,7 +1021,7 @@
 </div>
 
 <script>
-const APP_VERSION = '5.8';
+const APP_VERSION = '5.9';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3289,7 +3292,7 @@ function drawVersion(){
   }).catch(()=>{});
 }
 
-let guideMus=null, guideAll=false;
+let guideMus=null, guideAll=false, guideMode='p', guideEq='';
 const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
 function libOwned(l){
   const nm=t('lib.'+l.key).toLowerCase();
@@ -3372,13 +3375,20 @@ function drawGuide(){
   if(!guideMus || MUSCLE_KEYS.indexOf(guideMus)<0) guideMus = low.length ? low[0].key : 'chest';
   $("browseMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${m.key===guideMus?' on':''}" data-pick="${m.key}">${esc(t('mus.'+m.key))}</button>`).join('');
   const show=l=>guideAll || libUsable(l);
-  const first=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)).sort(byLevel), also=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l)).sort(byLevel);
+  const eqHit=l=>!guideEq || (guideEq==='none' ? !l.eq.length : l.eq.indexOf(guideEq)>=0);
+  const prim=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), sec=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
+  const pool=guideMode==='s' ? sec : prim, list=pool.filter(eqHit).sort(byLevel);
+  $("browseMode").innerHTML=['p','s'].map(m=>`<button type="button" class="${m===guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:(m==='s'?sec:prim).filter(eqHit).length}))}</button>`).join('');
+  const eqN=q=>pool.filter(l=>q==='none' ? !l.eq.length : l.eq.indexOf(q)>=0).length;
+  const eqOpts=['none'].concat(EQUIP).filter(q=>q===guideEq || eqN(q)>0);
+  $("browseEq").innerHTML=`<option value="">${esc(tf('guide.eq.any',{n:pool.length}))}</option>`
+    + eqOpts.map(q=>`<option value="${q}"${q===guideEq?' selected':''}>${esc(tf('guide.eq.item',{name:t(q==='none'?'guide.eq.none':'eq.'+q), n:eqN(q)}))}</option>`).join('');
+  $("browseEq").value=guideEq;
   const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
   const mn=t('mus.'+guideMus);
-  $("browseCount").textContent=tf('guide.count',{n:first.length+also.length, name:mn});
-  $("browseWrap").innerHTML = (first.length || also.length)
-    ? first.map(libRow).join('') + (also.length ? `<div class="reclbl">${esc(tf('guide.alsoworks',{name:mn}))}</div>`+also.map(libRow).join('') : '')
-    : `<div class="restnote">${esc(tf('guide.none',{name:mn}))}</div>`;
+  $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : 'guide.count', list.length, {name:mn});
+  $("browseWrap").innerHTML = list.length ? list.map(libRow).join('')
+    : `<div class="restnote">${esc(guideEq ? t('guide.none.eq') : tf(guideMode==='s' ? 'guide.none.s' : 'guide.none',{name:mn}))}</div>`;
 }
 async function libToCollection(k){
   const l=libByKey(k); if(!l) return null;
@@ -4805,7 +4815,6 @@ const LANG = {
     'guide.all.off':         'Only what my gym has',
     'guide.all.on':          'Show everything',
     'guide.also':            'also {list}',
-    'guide.alsoworks':       'Also works {name}',
     'guide.band':            'Aim for',
     'guide.band.unit':       'sets a week per muscle',
     'guide.help':            'Count only hard sets — ones that finish within two or three reps of failing. The solid bar is what you have logged since Sunday; the faint bar adds what your pinned sessions still have to come. Under the range, a muscle is unlikely to grow much; over it, extra sets mostly add tiredness.',
@@ -4818,11 +4827,22 @@ const LANG = {
     'guide.pre.start.note':  'Starting out: right for your first months of lifting. New muscles grow on far less work, and recovering well matters more than doing lots.',
     'guide.bodyweight':      'Bodyweight',
     'guide.browse.title':    'Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span>',
-    'guide.count':           '{n} for {name}',
+    'guide.count':           '{n} that train {name} directly',
+    'guide.count.1':         '1 that trains {name} directly',
+    'guide.count.s':         '{n} that also work {name}',
+    'guide.count.s.1':       '1 that also works {name}',
+    'guide.eq.any':          'Any equipment ({n})',
+    'guide.eq.item':         '{name} ({n})',
+    'guide.eq.none':         'No equipment',
+    'guide.eq.title':        'Filter by equipment',
     'guide.in':              'In collection',
+    'guide.mode.p':          'Main target · {n}',
+    'guide.mode.s':          'Also works · {n}',
     'guide.mute':            'Mute',
     'guide.needs':           'needs {list}',
     'guide.none':            'Nothing in your gym trains {name}. Turn on Show everything to see what would.',
+    'guide.none.eq':         'Nothing here uses that equipment. Pick Any equipment to see the rest.',
+    'guide.none.s':          'Nothing in your gym works {name} on the side. Turn on Show everything to see what would.',
     'guide.novol':           'Nothing logged this week yet.',
     'guide.rec.more':        '{n} more under your range; every muscle is listed in Sets per Muscle above.',
     'guide.rec.none':        'Every muscle you have not muted is in range this week, or will be with the rest of your plan.',
@@ -5844,6 +5864,7 @@ const LANG = {
   $("volLo").addEventListener('change', volBandSet);
   $("volHi").addEventListener('change', volBandSet);
   $("browseAll").onclick=()=>{ guideAll=!guideAll; drawGuide(); };
+  $("browseEq").onchange=()=>{ guideEq=$("browseEq").value; drawGuide(); };
   $("gymAdd").onclick=gymAddOwn;
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
@@ -5861,8 +5882,9 @@ const LANG = {
     if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
     if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.libadd) shLibPick(d.libadd,false); else if(d.libpin) shLibPick(d.libpin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
-  $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band]'); if(!b) return; const d=b.dataset;
+  $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band],[data-mode]'); if(!b) return; const d=b.dataset;
     if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute); else if(d.band) volBandPick(d.band);
+    else if(d.mode){ guideMode=d.mode; drawGuide(); }
     else { guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
   $("gymWrap").onclick=ev=>{ const b=ev.target.closest('[data-eq]'); if(b) gymToggle(b.dataset.eq); };
   $("gymOwn").onclick=ev=>{ const b=ev.target.closest('[data-gdel]'); if(b) gymDelOwn(b.dataset.gdel); };
