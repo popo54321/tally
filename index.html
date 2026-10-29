@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-u8RNrtk82awXe+ikh8xCr3F6rDQXLfFQQ2H3zEzansw='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-8L2fW+4qLO7Wca1VsoW1NQ2ScguGv9fOKQRb6Y78UCQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -228,6 +228,7 @@
   .calib-note{font-family:var(--font-mono);font-size:11px;color:var(--warn);line-height:1.55;margin-bottom:16px}
   .calib-need{font-family:var(--font-mono);font-size:12.5px;color:var(--ink-dim);line-height:1.7;padding:18px;background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px}
   .calib-need b{color:var(--brass-bright)}
+  .calib-remark{padding:12px 14px;font-size:11.5px;margin-bottom:14px;border-left:3px solid var(--warn)}
   .apply{background:var(--brass);color:#fff;border:3px solid var(--line);border-radius:11px;padding:11px 20px;font-family:var(--font-body);font-weight:800;font-size:13px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:.1s;box-shadow:4px 4px 0 var(--line)}
   .apply:hover{filter:brightness(1.07)}.apply:active{transform:translate(4px,4px);box-shadow:0 0 0 var(--line)}
   .apply.done{background:var(--panel);color:var(--good);border:3px solid var(--good);cursor:default;box-shadow:4px 4px 0 var(--good)}
@@ -1021,7 +1022,7 @@
 </div>
 
 <script>
-const APP_VERSION = '5.9';
+const APP_VERSION = '6.0';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3218,7 +3219,7 @@ function drawReview(){
   const grid=$("revGrid"); if(!grid) return;
   const today=localDate(), start=weekStart(today), todayIdx=new Date(today+'T12:00:00').getDay();
   const wk=entries.filter(e=>e.date>=start && e.date<=today), ptg=protTarget(), pok=protOk(), tgt=settings.kcalTarget;
-  const done=wk.filter(trained), planned=sessionTarget(), rec=calRecommend().target;
+  const done=wk.filter(trained), planned=sessionTarget(), cr=calRecommend(), rec=cr.enough ? cr.target : null;
   const plannedSoFar=DAYS.filter((d,i)=>i<=todayIdx && sessionEx(d.key).length).length;
   const recs=[];
   CATALOGUE.forEach(ex=>{
@@ -4042,7 +4043,9 @@ const kcalTargetFor = tdee => Math.round(Math.max(kcalFloor(), tdee+settings.cal
 function calRecommend(){
   const c=calcCalibration(entriesInWindow());
   const enough = c.tdee!=null && c.spanDays>=CAL_NEED.span && c.weighIns>=CAL_NEED.weighIns && c.kcalDays>=CAL_NEED.kcalDays;
-  return {c:c, target: enough ? kcalTargetFor(c.tdee) : null, floored: enough && c.tdee+settings.calRate*KCAL_PER_KG/7<kcalFloor()};
+  const has = c.tdee!=null;
+  return {c:c, enough:enough, partial: has && c.spanDays<settings.calPeriod,
+          target: has ? kcalTargetFor(c.tdee) : null, floored: has && c.tdee+settings.calRate*KCAL_PER_KG/7<kcalFloor()};
 }
 function drawCalibration(){
   document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(settings.calPeriod)));
@@ -4065,16 +4068,20 @@ function drawCalibration(){
   const bwNow=lastNumOf(e=>e.weight);
   const perKg = bwNow ? c.tdee/bwNow : null;
   const shaky = (perKg!=null && (perKg<16 || perKg>60)) || c.spanDays<21;
+  const meta=v=>'<b style="color:var(--brass-bright)">'+v+'</b>';
+  const remark = !r.enough ? tf('calib.early',{d:meta(c.spanDays), w:meta(c.weighIns), k:meta(c.kcalDays)})
+               : r.partial ? tf('calib.partial',{d:meta(c.spanDays), p:meta(settings.calPeriod)}) : '';
   const goalLbl = settings.calRate!==0 ? tf('calib.for',{rate:(settings.calRate>0?'+':'−')+Math.abs(settings.calRate)+' kg/wk'}) : t('calib.tomaintain');
   out.innerHTML=`
     <div class="calib-grid">
-      <div class="cstat head"><div class="cs-lbl">${t('calib.rec')}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored?' · '+t('calib.floored'):''}</div></div>
+      <div class="cstat head"><div class="cs-lbl">${t('calib.rec')}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored?' · '+t('calib.floored'):''}${r.partial?' · '+t('calib.partialtag'):''}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.est')}</div><div class="cs-val">${tdeeR}<span>kcal</span></div><div class="cs-sub">${t('calib.esttdee')}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.avg')}</div><div class="cs-val">${meanR}<span>kcal</span></div><div class="cs-sub">${t('calib.overwindow')}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.trend')}</div><div class="cs-val">${fmtSigned(kgWk,'',2)}<span>kg/wk</span></div><div class="cs-sub">${t(roundTo(kgWk,2)<0?'calib.losing':roundTo(kgWk,2)>0?'calib.gaining':'calib.flat')}</div></div>
     </div>
     <div class="calib-meta">${tf('calib.meta',{w:'<b style="color:var(--brass-bright)">'+c.weighIns+'</b>', k:'<b style="color:var(--brass-bright)">'+c.kcalDays+'</b>', d:'<b style="color:var(--brass-bright)">'+c.spanDays+'</b>'})}</div>
-    <div class="calib-note">${t(shaky?'calib.shaky':'calib.steady')}</div>
+    ${remark?`<div class="calib-need calib-remark">${remark}</div>`:''}
+    ${r.enough?`<div class="calib-note">${t(shaky?'calib.shaky':'calib.steady')}</div>`:''}
     <button class="apply${settings.kcalTarget===target?' done':''}" id="applyBtn">${settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
   $("applyBtn").onclick=applyTarget;
 }
@@ -4607,6 +4614,7 @@ const LANG = {
     'btn.start':             'Start',
     'btn.tapagain':          'Tap again to remove',
     'calib.applied':         '✓ Applied · {n} kcal',
+    'calib.early':           'Early estimate: only {d} days of data so far ({w} weigh-ins, {k} days with kcal). Expect it to move a lot until there are about two weeks of both.',
     'calib.apply':           'Apply {n} kcal as my target',
     'calib.avg':             'Avg intake logged',
     'calib.current':         'current: {n} kcal',
@@ -4621,14 +4629,16 @@ const LANG = {
     'calib.maintain':        'Maintain',
     'calib.manual':          'Set target manually',
     'calib.meta':            'Measured from {w} weigh-ins and {k} kcal-logged days across {d} days: average intake minus your weight trend × 7,700 kcal/kg. Accurate only if the intake logging is.',
-    'calib.need.head':       'Not enough data in this window to estimate maintenance reliably.',
+    'calib.need.head':       'Not enough to estimate yet: it needs at least two weigh-ins on different days, with kcal logged in between.',
     'calib.need.kcaldays':   '{n} days with kcal',
-    'calib.need.keep':       'Keep logging weight (most days) and kcal — once there are ~2 weeks of both, a target appears here.',
+    'calib.need.keep':       'Keep logging weight (most days) and kcal. The estimate appears as soon as it can be worked out, and firms up over about two weeks.',
     'calib.need.sofar':      'Have so far: {list}.',
     'calib.need.span':       '{n} days of span',
     'calib.need.trend':      'Current weight trend: {kg}.',
     'calib.need.weighins':   '{n} weigh-ins',
     'calib.overwindow':      'over the window',
+    'calib.partial':         'Window not full yet: your data covers {d} of the {p} days. This is the estimate from what is there, and it settles as the window fills.',
+    'calib.partialtag':      'window not full yet',
     'calib.rec':             'Recommended intake',
     'calib.shaky':           'Treat this one with caution — either the window is short or the result is unusual for your bodyweight. Early weight change is mostly water and glycogen, which carry almost no energy. Prefer 28 days or longer.',
     'calib.steady':          'Re-check every couple of weeks; as bodyweight moves, maintenance drifts with it, so this keeps adjusting.',
