@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-Q4EZ4eZxF7RC1GLLxqcrBAWmBayuJMfXJIPxkzZyRyg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-utapmw+yjOf7GFlvvzSvep1eoTdZBQ2ou/LQu1g+Z3c='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -575,7 +575,7 @@
       <div class="lbl" data-i18n="stat.nutr">Nutrition · last 7 days</div>
       <div class="metric"><div class="name"><span data-i18n="stat.energy">Energy</span><span id="mKcalTarget">no target set</span></div>
         <div class="val"><span class="pill" id="mKcal">—</span></div></div>
-      <div class="metric"><div class="name"><span data-i18n="stat.prot">Protein</span><span id="lProt">days hitting the floor</span></div>
+      <div class="metric"><div class="name"><span data-i18n="stat.prot">Protein</span><span id="lProt">average a day</span></div>
         <div class="val"><span class="pill" id="mProt">—</span><span class="dot no" id="dProt"></span></div></div>
       <div class="metric"><div class="name"><span data-i18n="stat.last">Last logged</span><span data-i18n="stat.lastsub">most recent entry</span></div>
         <div class="val"><span class="pill" id="mToday">—</span></div></div>
@@ -617,7 +617,7 @@
     </div>
 
     <div class="card col-12" id="cardProfile">
-      <div class="lbl" data-i18n-html="prof.title">Profile &amp; Protein <span class="sub-note">· body-fat formula and daily protein floor</span></div>
+      <div class="lbl" data-i18n-html="prof.title">Profile &amp; Protein <span class="sub-note">· body-fat formula and daily protein</span></div>
       <div class="calib-controls">
         <div><div class="ctl-lbl" data-i18n="prof.sex">Sex · for both formulas</div>
           <div class="seg" id="segSex">
@@ -633,12 +633,10 @@
       <div class="picknote" id="actNote"></div>
       <div class="helpbox" id="actHelp"></div>
       <div id="bmrOut"></div>
-      <div class="ctl-lbl" style="margin-top:16px" data-i18n="prof.protpick">Protein · pick the one that matches what you are doing now</div>
-      <div class="seg segwrap" id="segProtGoal"></div>
-      <div class="picknote" id="protPick"></div>
+      <div class="ctl-lbl" style="margin-top:16px" data-i18n="prof.prot">Protein · a day</div>
       <div id="protOut"></div>
       <div class="manual-target">
-        <label for="manualProt" data-i18n="prof.manual">Set floor manually</label>
+        <label for="manualProt" data-i18n="prof.manual">Set your own</label>
         <input type="number" min="30" max="400" step="5" inputmode="numeric" id="manualProt" placeholder="g">
         <button class="mt-set" id="setProtBtn" data-i18n="btn.set">Set</button>
         <span class="mt-current" id="mpCurrent"></span>
@@ -823,19 +821,8 @@
             adequately below that is difficult without supervision.</div>
         </div>
         <div class="method">
-          <div class="m-h" data-i18n="meth.prot.h">Protein floor · bodyweight or lean mass</div>
-          <div class="m-b" data-i18n-html="meth.prot.b">Around <b>1.6–2.2 g per kg of bodyweight</b> is what the research supports
-            for people training regularly, the higher end while losing weight.
-            <br><br><b>Lean mass is the better basis, and the app uses it whenever it can.</b> Fat
-            tissue carries no protein requirement, so scaling by total bodyweight overstates the
-            need for anyone carrying more of it — at 120 kg and 33% fat, bodyweight × 2.2 asks for
-            260 g while lean mass × 2.6 asks for 210 g, and 210 g is the honest number. Lean mass is
-            worked back from your weight and body-fat estimate: lean = weight × (1 − fat%).
-            <br><br>The catch is that the body-fat figure is itself an estimate, so lean mass
-            inherits its ±3–4 point error — about ±8 g of protein, which is smaller than the
-            difference between the two bases. So: <b>lean mass when body fat is known, bodyweight
-            when it is not</b>, and the app always shows which one it used. The two converge as you
-            get leaner; the choice matters most at higher body fat.</div>
+          <div class="m-h" data-i18n="meth.prot.h">Protein · one number, no maths</div>
+          <div class="m-b" data-i18n-html="meth.prot.b"><b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
@@ -1021,7 +1008,7 @@
 </div>
 
 <script>
-const APP_VERSION = '5.7';
+const APP_VERSION = '5.8';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -1034,14 +1021,7 @@ const GKEY = "tally:gym:v1";
 const BKEY = "tally:backup:v1";
 const KCAL_PER_KG = 7700;
 const kcalFloor = () => settings.sex==='female' ? 1200 : 1500;
-const DEF_PROT = 140;
-const PROT_PER_KG = [
-  {key:'cut',  perKg:2.2, perLbm:2.6},
-  {key:'hold', perKg:1.8, perLbm:2.2},
-  {key:'gain', perKg:1.6, perLbm:2.0}
-];
-const protName = k => t('prot.'+k+'.name');
-const protNote = k => t('prot.'+k+'.note');
+const PROT_BY_SEX = {female:100, male:140}, PROT_UNSET = 120, PROT_OK = 0.75;
 const DEF_TARGET = 2000;
 const CAL_RATES = [-0.5, -0.25, 0, 0.25, 0.5];
 const CAL_PERIODS = [14, 21, 28];
@@ -1409,7 +1389,9 @@ function effAge(){
   const yrs=Math.floor((dnum(localDate())-dnum(settings.ageSet))/365.25);
   return Math.min(120, settings.age + Math.max(0,yrs));
 }
-const protFloor = () => settings.protFloor || DEF_PROT;
+const protAuto = () => PROT_BY_SEX[settings.sex] || PROT_UNSET;
+const protTarget = () => settings.protFloor || protAuto();
+const protOk = () => Math.round(protTarget()*PROT_OK/5)*5;
 function normSettings(s){
   s = (s && typeof s==='object') ? s : {};
   const k=parseFloat(s.kcalTarget), band=volBand(s);
@@ -1422,9 +1404,13 @@ function normSettings(s){
     restSec: (isNaN(r)||r<10||r>900) ? DEF_REST : r,
     restSound: (s.restSound==null) ? true : !!s.restSound,
     mobLead: ([0,5,10].indexOf(parseInt(s.mobLead,10))>=0) ? parseInt(s.mobLead,10) : 5,
-    sex: (s.sex==='female') ? 'female' : 'male',
-    protFloor: (function(){ const p=parseInt(s.protFloor,10); return (isNaN(p)||p<30||p>400)?DEF_PROT:p; })(),
-    protPerKg: (function(){ const p=parseFloat(s.protPerKg); return (isNaN(p)||p<0.5||p>4)?null:p; })(),
+    sex: (s.sex==='female' || s.sex==='male') ? s.sex : null,
+    protFloor: (function(){
+      const p=parseInt(s.protFloor,10);
+      if(isNaN(p)||p<30||p>400) return null;
+      if('protPerKg' in s && (parseFloat(s.protPerKg)>0 || p===140)) return null;
+      return p;
+    })(),
     age: (function(){ const a=parseInt(s.age,10); return (isNaN(a)||a<10||a>120)?null:a; })(),
     ageSet: (typeof s.ageSet==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s.ageSet)) ? s.ageSet : null,
     activity: (ACTIVITY.some(a=>a.key===s.activity)) ? s.activity : 'mod',
@@ -1603,7 +1589,7 @@ async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','protPerKg','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
+const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
@@ -2557,20 +2543,6 @@ async function toggleRestSound(){
   if(settings.restSound){ audioWake(); beep(1); }
 }
 
-function protSuggest(){
-  const w=lastNumOf(e=>e.weight);
-  if(w==null) return null;
-  const goal = settings.calRate<0 ? 'cut' : settings.calRate>0 ? 'gain' : 'hold';
-  const row = PROT_PER_KG.find(r=>r.key===goal) || PROT_PER_KG[1];
-  const bf = lastNumOf(e=>e.bf);
-  if(bf!=null && bf>0 && bf<70){
-    const lbm = w*(1-bf/100);
-    return {basis:'lean mass', mass:lbm, weight:w, bf:bf, perKg:row.perLbm, goal:row.key,
-            grams:Math.round(lbm*row.perLbm/5)*5};
-  }
-  return {basis:'bodyweight', mass:w, weight:w, bf:null, perKg:row.perKg, goal:row.key,
-          grams:Math.round(w*row.perKg/5)*5};
-}
 function profileTDEE(){
   const w=lastNumOf(e=>e.weight), h=lastNumOf(e=>e.height);
   const age=effAge();
@@ -2622,61 +2594,30 @@ async function setAge(){
   await persistSettings(); render();
 }
 function drawProtein(){
-  const s=protSuggest();
-  const cur=protFloor();
-  const seg=$("segProtGoal");
-  const useLbm = !!(s && s.basis==='lean mass');
-  if(seg){
-    seg.innerHTML=PROT_PER_KG.map(r=>{
-      const v=useLbm?r.perLbm:r.perKg;
-      return `<button type="button" data-p="${v}" data-k="${r.key}">${esc(protName(r.key))}<i>${v} g/kg</i></button>`;
-    }).join('');
-    seg.querySelectorAll('button').forEach(b=>b.onclick=()=>applyProtein(parseFloat(b.dataset.p)));
-  }
-  const goalNow = settings.calRate<0 ? 'cut' : settings.calRate>0 ? 'gain' : 'hold';
-  let pickKey=goalNow;
-  if(settings.protPerKg!=null){
-    const match=PROT_PER_KG.find(r=>Math.abs((useLbm?r.perLbm:r.perKg)-settings.protPerKg)<0.01);
-    if(match) pickKey=match.key;
-  }
-  const pr=PROT_PER_KG.find(r=>r.key===pickKey)||PROT_PER_KG[1];
-  const pn=$("protPick");
-  if(pn) pn.innerHTML=`<b>${esc(protName(pr.key))} · ${tf('prot.perkg',{n:(useLbm?pr.perLbm:pr.perKg), basis:t(useLbm?'basis.lean':'basis.bw')})}</b> — ${esc(protNote(pr.key))}`;
-  if(seg) seg.querySelectorAll('button').forEach(b=>
-    b.classList.toggle('on', settings.protPerKg!=null && Math.abs(parseFloat(b.dataset.p)-settings.protPerKg)<0.01));
+  const tg=protTarget(), ok=protOk(), own=settings.protFloor!=null;
   const out=$("protOut");
   if(out){
-    if(!s){
-      out.innerHTML=`<div class="calib-meta">${tf('prot.nofloor',{g:'<b style="color:var(--brass-bright)">'+cur+' g</b>'})}</div>`;
-    }else{
-      const same = Math.abs(s.grams-cur)<1;
-      const shown = tf('prot.shown',{kg:s.mass.toFixed(1), basis:t(s.basis==='lean mass'?'basis.lean':'basis.bw'), perkg:s.perKg});
-      out.innerHTML=`<div class="calib-line">${tf('prot.suggest',{g:'<b>'+s.grams+' g</b>'})}`
-        +`<span class="calib-sub">${shown} · ${tf('prot.goalis',{goal:esc(protName(s.goal).toLowerCase())})}</span></div>`
-        +`<div class="calib-meta">${s.basis==='lean mass'
-            ? tf('prot.basis.lean',{kg:s.weight.toFixed(1), bf:s.bf.toFixed(1)})
-            : tf('prot.basis.bw',{girths:bfNeedsText()})} ${t('prot.followsrate')}</div>`
-        +`<button class="apply${same?' done':''}" id="applyProtBtn">${same?tf('prot.isfloor',{g:cur}):tf('prot.usefloor',{g:s.grams})}</button>`;
-      const b=$("applyProtBtn"); if(b) b.onclick=()=>applyProtein(s.perKg);
-    }
+    const why = own ? tf('prot.why.own',{g:protAuto()}) : t(settings.sex ? 'prot.why.'+settings.sex : 'prot.why.unset');
+    out.innerHTML=`<div class="calib-line">${tf('prot.aim',{g:'<b>'+tg+' g</b>'})}<span class="calib-sub">${esc(tf('prot.okfrom',{g:ok}))}</span></div>`
+      +`<div class="calib-meta">${esc(why)}</div>`
+      +`<div class="calib-meta">${esc(tf('prot.relax',{ok:ok}))}</div>`
+      +(own ? `<button class="apply" id="protAutoBtn">${esc(tf('prot.useauto',{g:protAuto()}))}</button>` : '');
+    const b=$("protAutoBtn"); if(b) b.onclick=protUseAuto;
   }
-  const mp=$("mpCurrent"); if(mp) mp.textContent=tf('prot.now',{g:cur})+(settings.protPerKg?(' · '+settings.protPerKg+' g/kg'):' · '+t('prot.byhand'));
+  const mp=$("mpCurrent"); if(mp) mp.textContent=t(own ? 'prot.byhand' : 'prot.auto');
   document.querySelectorAll('#segSex button').forEach(b=>b.classList.toggle('on', b.dataset.s===settings.sex));
   const bn=$("bfNote");
   if(bn) bn.textContent = t(settings.sex==='female' ? 'bf.female' : 'bf.male');
 }
-async function applyProtein(perKg){
-  const s=protSuggest();
-  if(!s){ flash(t('msg.needweight'),true); return; }
-  settings.protPerKg=perKg;
-  settings.protFloor=Math.round(s.mass*perKg/5)*5;
+async function protUseAuto(){
+  settings.protFloor=null;
   await persistSettings(); render();
-  flash(tf('msg.floorset',{n:settings.protFloor}));
+  flash(tf('msg.protauto',{n:protTarget()}));
 }
 async function setProtManual(){
   const v=num($("manualProt").value);
   if(v==null||v<30||v>400){ flash(t('msg.enterfloor'),true); return; }
-  settings.protFloor=Math.round(v); settings.protPerKg=null;
+  settings.protFloor=Math.round(v);
   $("manualProt").value='';
   await persistSettings(); render();
   flash(tf('msg.floorset',{n:settings.protFloor}));
@@ -2695,7 +2636,7 @@ async function setSex(sx){
   if(n) await persist();
   render();
   bfModeSet(bfMode(), false);
-  flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(n?(' · '+tn('msg.recalcd',n)):''));
+  flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(settings.protFloor==null?(' · '+tf('msg.protauto',{n:protTarget()})):'')+(n?(' · '+tn('msg.recalcd',n)):''));
 }
 
 function drawColl(){
@@ -2724,7 +2665,7 @@ function drawColl(){
 function drawReview(){
   const grid=$("revGrid"); if(!grid) return;
   const today=localDate(), start=weekStart(today), todayIdx=new Date(today+'T12:00:00').getDay();
-  const wk=entries.filter(e=>e.date>=start && e.date<=today), floor=protFloor(), tgt=settings.kcalTarget;
+  const wk=entries.filter(e=>e.date>=start && e.date<=today), ptg=protTarget(), pok=protOk(), tgt=settings.kcalTarget;
   const done=wk.filter(trained), planned=sessionTarget(), rec=calRecommend().target;
   const plannedSoFar=DAYS.filter((d,i)=>i<=todayIdx && sessionEx(d.key).length).length;
   const recs=[];
@@ -2736,7 +2677,7 @@ function drawReview(){
   const wp=entries.filter(e=>e.weight!=null), dW=weekTrendChange(wp,start), wIn=wp.some(e=>e.date>=start);
   const kd=wk.filter(e=>e.kcal!=null), pd=wk.filter(e=>e.prot!=null);
   const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+e.kcal,0)/kd.length) : null;
-  const pHit=pd.filter(e=>e.prot>=floor).length;
+  const pAvg=pd.length ? Math.round(pd.reduce((a,e)=>a+e.prot,0)/pd.length) : null;
   const w=weekVolume(), mv=w.vol, mute=settings.volMute||[], lo=settings.volLo, hi=settings.volHi;
   const tagged=MUSCLE_KEYS.some(k=>mv[k]>0);
   const cnt={ok:0, track:0, low:0, sofar:0, high:0, muted:0};
@@ -2747,13 +2688,13 @@ function drawReview(){
     + cell(t('rev.records'), String(recs.length), recs.length ? recs.slice(0,3).join(', ')+(recs.length>3?' …':'') : t('rev.norecs'))
     + cell(t('rev.weight'), dW==null ? '—' : fmtSigned(dW)+'<span>kg</span>', t(dW!=null ? 'rev.trendwk' : wIn ? 'rev.notrend' : 'rev.noweigh'))
     + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tf('rev.kcalsub',{target:tgt.toLocaleString(), n:kd.length}))
-    + cell(t('rev.protein'), pd.length ? pHit+`<span>/ ${pd.length}</span>` : '—', tf('rev.protsub',{floor:floor}))
+    + cell(t('rev.protein'), pAvg==null ? '—' : pAvg+'<span>g</span>', tf('rev.protsub',{target:ptg, ok:pok, n:pd.length}))
     + cell(t('rev.muscles'), tagged ? String(cnt.ok) : '—', tagged ? tf('rev.mussub',{track:cnt.track, under:cnt.low+cnt.sofar, over:cnt.high, muted:cnt.muted}) : t('rev.nomus'));
   const gap=tagged ? MUSCLES.find(m=>w.proj[m.key]===0 && mute.indexOf(m.key)<0) : null;
   let one;
   if(!wk.length) one=t('rev.one.empty');
   else if(plannedSoFar && done.length<plannedSoFar) one=tf('rev.one.sessions',{n:done.length, planned:plannedSoFar});
-  else if(pd.length>=3 && pHit*2<pd.length) one=tf('rev.one.protein',{hit:pHit, n:pd.length, floor:floor});
+  else if(pd.length>=3 && pAvg<pok) one=tf('rev.one.protein',{avg:pAvg, ok:pok});
   else if(rec!=null && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
   else if(kd.length>=4 && Math.abs(kAvg-tgt)>tgt*0.1) one=tf(kAvg>tgt?'rev.one.over':'rev.one.under',{avg:kAvg.toLocaleString(), target:tgt.toLocaleString()});
   else if(gap) one=tf('rev.one.muscle',{name:t('mus.'+gap.key)});
@@ -3273,10 +3214,10 @@ function drawBodyStats(){
   const kcalAvg=kE.length?Math.round(kE.reduce((s,e)=>s+e.kcal,0)/kE.length):null;
   $("mKcal").textContent=kcalAvg!=null?kcalAvg+' kcal':'—';
   $("mKcalTarget").textContent=tf('stat.targetn',{n:settings.kcalTarget, logged:kE.length});
-  const protHit=pE.filter(e=>e.prot>=protFloor()).length;
-  $("mProt").textContent=pE.length?protHit+' / 7':'—';
-  const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protdays',{n:protFloor()});
-  setDot("dProt",protHit,7,5);
+  const protAvg=pE.length?Math.round(pE.reduce((s,e)=>s+e.prot,0)/pE.length):null;
+  $("mProt").textContent=protAvg!=null?protAvg+' g':'—';
+  const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protavg',{target:protTarget(), ok:protOk()});
+  setDot("dProt",protAvg==null?0:protAvg,protOk(),Math.round(protOk()*0.8));
   $("mToday").textContent=entries.length?fmtDM(entries[entries.length-1].date):'—';
 }
 function fmtDelta(lbl, d, unit){
@@ -3786,19 +3727,18 @@ function buildClaudeReport(){
   L.push('Calibration window selected: '+periodLabel(settings.calPeriod));
   L.push('Chart window selected: '+periodLabel(chartPeriod));
   L.push('Calorie target currently set: '+settings.kcalTarget+' kcal/day');
-  L.push('Protein floor (daily): '+protFloor()+' g');
+  L.push('Protein target (daily): '+protTarget()+' g, '+(settings.protFloor!=null?'set by hand':'automatic for '+(settings.sex||'sex not set'))+'; anything from '+protOk()+' g counts as fine');
   L.push('');
   L.push('--- HOW THESE NUMBERS WERE DERIVED ---');
   L.push('All figures below are estimates from population formulas, not measurements. Not medical advice.');
   const bfMan=entries.filter(e=>e.bfSrc==='manual').length;
-  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+settings.sex+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.'
+  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+(settings.sex||'male')+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.'
     + (bfMan?(' NOTE: '+bfMan+' entr'+(bfMan===1?'y was':'ies were')+' entered by hand instead (scale, DEXA or calipers) and are not girth estimates.'):''));
   const pt=profileTDEE();
-  if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+settings.sex+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
+  if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+(settings.sex||'male')+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
   L.push('Adaptive maintenance: least-squares weight trend over the window x 7700 kcal/kg, subtracted from mean logged intake. Short windows are distorted by water and glycogen.');
   L.push('Daily target: maintenance + (goal kg/week x 7700 / 7), floored at '+kcalFloor()+' kcal.');
-  const psr=protSuggest();
-  if(psr) L.push('Protein floor: '+psr.mass.toFixed(1)+' kg '+psr.basis+' x '+psr.perKg+' g/kg.');
+  L.push('Protein: one fixed daily target, 100 g for women and 140 g for men (120 g until sex is set). That is about 1.6 g/kg of a healthy weight for nearly every height; 75% of it matches the 1.2 g/kg low end of current guidelines.');
   const planLine=DAYS.map(d=>{
     const ks=sessionEx(d.key);
     return cap(d.key)+' '+(ks.length?ks.map(k=>{const x=exByKey(k);return x?x.short:k;}).join(' + '):'rest');
@@ -3826,10 +3766,10 @@ function buildClaudeReport(){
   const pAll=entries.filter(e=>e.prot!=null);
   const protMean=pAll.length?Math.round(pAll.reduce((s,e)=>s+e.prot,0)/pAll.length):null;
   let lowP=null; pAll.forEach(e=>{ if(lowP==null||e.prot<lowP.prot) lowP=e; });
-  const wkP=wk.filter(e=>e.prot!=null), wkPhit=wkP.filter(e=>e.prot>=protFloor()).length;
+  const wkP=wk.filter(e=>e.prot!=null), wkPhit=wkP.filter(e=>e.prot>=protOk()).length;
   const wkK=wk.filter(e=>e.kcal!=null), wkKmean=wkK.length?Math.round(wkK.reduce((s,e)=>s+e.kcal,0)/wkK.length):null;
   L.push('--- PROTEIN & ADHERENCE ---');
-  L.push('Protein floor hit (\u2265'+protFloor()+' g), last 7 days: '+wkPhit+' / '+wkP.length+' logged');
+  L.push('Protein at or above the fine level (\u2265'+protOk()+' g), last 7 days: '+wkPhit+' / '+wkP.length+' logged');
   L.push('Mean protein (all logged): '+(protMean!=null?protMean+' g':'n/a')+'    Lowest: '+(lowP?lowP.prot+' g on '+lowP.date+' \u2190 the limiter':'n/a'));
   L.push('Mean energy, last 7 days: '+(wkKmean!=null?wkKmean+' kcal':'n/a'));
   const sess=wk.filter(e=>trained(e)).length;
@@ -4022,7 +3962,8 @@ async function saveEntry(){
   const ok=await persist(); render();
   if(ok){
     const rec=recordsNewOn(date);
-    flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):''))));
+    const pn = fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
+    flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):'')))+pn);
   }
   fillBody(date);
   if($("exportBox").classList.contains('show')) $("exportBox").value=exportPayload();
@@ -4438,8 +4379,8 @@ const LANG = {
     'meth.bmr.h':            'Starting energy estimate · Mifflin-St Jeor',
     'meth.coach.b':          'Each movement can carry a rep range: pick Strength, Size or Endurance for the conventional bands, or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 9, 8, 9 means at least 9 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
     'meth.coach.h':          'Next-session suggestions · patient double progression',
-    'meth.prot.b':           'Around <b>1.6–2.2 g per kg of bodyweight</b> is what the research supports for people training regularly, the higher end while losing weight. <br><br><b>Lean mass is the better basis, and the app uses it whenever it can.</b> Fat tissue carries no protein requirement, so scaling by total bodyweight overstates the need for anyone carrying more of it — at 120 kg and 33% fat, bodyweight × 2.2 asks for 260 g while lean mass × 2.6 asks for 210 g, and 210 g is the honest number. Lean mass is worked back from your weight and body-fat estimate: lean = weight × (1 − fat%). <br><br>The catch is that the body-fat figure is itself an estimate, so lean mass inherits its ±3–4 point error — about ±8 g of protein, which is smaller than the difference between the two bases. So: <b>lean mass when body fat is known, bodyweight when it is not</b>, and the app always shows which one it used. The two converge as you get leaner; the choice matters most at higher body fat.',
-    'meth.prot.h':           'Protein floor · bodyweight or lean mass',
+    'meth.prot.b':           '<b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.',
+    'meth.prot.h':           'Protein · one number, no maths',
     'meth.rec.b':            'Records are read off your history every time and never stored, so a corrected or deleted day cannot leave a stale best behind. Loaded lifts keep the heaviest set and the best estimated one-rep max; bodyweight lifts keep the most reps and the heaviest added weight; holds keep the longest. <br><br>Estimated one-rep max uses <b>Epley: weight × (1 + reps ÷ 30)</b>, and only for sets of 1 to 12 reps. Past about twelve the formula drifts badly, so a set of twenty says little about a single: endurance-range sets still count towards the heaviest set, just not towards the estimate. A single counts as its own weight. <br><br>A first session sets no records, because there is nothing yet to beat.',
     'meth.rec.h':            'Records · estimated one-rep max',
     'meth.target.b':         'Target = maintenance + (goal kg per week × 7,700 ÷ 7). A goal of −0.5 kg per week is a deficit of about 550 kcal a day. The app will not suggest below 1,500 kcal for men or 1,200 for women, whatever the arithmetic produces, because eating adequately below that is difficult without supervision.',
@@ -4485,10 +4426,14 @@ const LANG = {
     'msg.createdcoll':       '{name} added to the collection — pick it from any day',
     'msg.deleteq':           'delete?',
     'msg.enterage':          'Enter an age between 10 and 120',
-    'msg.enterfloor':        'Enter a floor between 30 and 400 g',
+    'msg.enterfloor':        'Enter a number between 30 and 400 g',
     'msg.entertarget':       'Enter a target in kcal',
     'msg.exadded':           '{name} added — log the sets, then save',
-    'msg.floorset':          'Protein floor set to {n} g',
+    'msg.floorset':          'Protein target set to {n} g',
+    'msg.prot.hit':           'protein {g} g, on target',
+    'msg.prot.low':           'protein {g} g, a bit low today. That is fine now and then',
+    'msg.prot.ok':            'protein {g} g, that is fine',
+    'msg.protauto':           'protein back to {n} g a day',
     'msg.hidden':            '{name} hidden — old logs still show it',
     'msg.hidden.short':      '{name} hidden',
     'msg.loadfail.del':      'Data failed to load — not deleting',
@@ -4497,7 +4442,6 @@ const LANG = {
     'msg.needhold':          'Give that stretch a hold time first',
     'msg.needmins':          'Give that session a target time first',
     'msg.needname':          'Give it a name first',
-    'msg.needweight':        'Log a bodyweight first',
     'msg.nothingtosave':     'Nothing to save on this day yet',
     'msg.onlist':            'That one is already on the list',
     'msg.pickdate':          'Pick a date',
@@ -4551,10 +4495,10 @@ const LANG = {
     'prof.age':              'Age',
     'prof.female':           'Female',
     'prof.male':             'Male',
-    'prof.manual':           'Set floor manually',
-    'prof.protpick':         'Protein · pick the one that matches what you are doing now',
+    'prof.manual':           'Set your own',
+    'prof.prot':              'Protein · a day',
     'prof.sex':              'Sex · for both formulas',
-    'prof.title':            'Profile &amp; Protein <span class="sub-note">· body-fat formula and daily protein floor</span>',
+    'prof.title':            'Profile &amp; Protein <span class="sub-note">· body-fat formula and daily protein</span>',
     'prof.years':            'years',
     'prog.7reps':            '7-day reps: {n}',
     'prog.7time':            '7-day time: {n}s',
@@ -4563,24 +4507,16 @@ const LANG = {
     'prog.last':             'last',
     'prog.notlogged':        'not logged yet',
     'prog.title':            'Lift Progression <span class="sub-note">· current plan only</span>',
-    'prot.basis.bw':         'Based on bodyweight. Log {girths} and this switches to lean mass, which is more accurate.',
-    'prot.basis.lean':       'Based on lean mass ({kg} kg at {bf}% fat), which is the fairer basis once body fat is known — fat mass carries no protein requirement.',
     'prot.byhand':           'set by hand',
-    'prot.cut.name':         'Losing',
-    'prot.cut.note':         'Eating in a deficit. Protein is highest here because it is what stops the weight you lose coming out of muscle, and because it keeps you full on fewer calories. This is the one case where going higher genuinely helps.',
-    'prot.followsrate':      'The goal follows the weekly rate selected above.',
-    'prot.gain.name':        'Gaining',
-    'prot.gain.note':        'Eating in a surplus. The lowest of the three, because the extra calories already protect muscle — beyond roughly this point, more protein adds nothing and just displaces the carbohydrate fuelling your sessions.',
-    'prot.goalis':           'goal: {goal}',
-    'prot.hold.name':        'Maintain',
-    'prot.hold.note':        'Weight steady, training to keep or slowly build what you have. Comfortably above the amount needed to make full use of your training, without crowding out other food.',
-    'prot.isfloor':          '✓ Floor is {g} g',
-    'prot.nofloor':          'Log a bodyweight and this suggests a floor for you. Until then it stays at {g}.',
-    'prot.now':              'now {g} g',
-    'prot.perkg':            '{n} g per kg of {basis}',
-    'prot.shown':            '{kg} kg {basis} × {perkg} g/kg',
-    'prot.suggest':          'Suggested floor {g} a day',
-    'prot.usefloor':         'Use {g} g as my floor',
+    'prot.aim':               'Aim for {g} a day',
+    'prot.auto':              'automatic',
+    'prot.okfrom':            'anything from {g} g is fine',
+    'prot.relax':             'You do not need to hit it every day. A day around {ok} g is perfectly fine, and a lower one now and then changes nothing. What counts is how most of your weeks go.',
+    'prot.useauto':           'Go back to {g} g',
+    'prot.why.female':        'The amount that covers nearly every woman who trains, whatever her size. Nothing to work out.',
+    'prot.why.male':          'The amount that covers nearly every man who trains, whatever his size. Nothing to work out.',
+    'prot.why.own':           'Your own number. The automatic one for you is {g} g.',
+    'prot.why.unset':         'Pick Male or Female above for your number: 100 g for women, 140 g for men. Until then it sits in between.',
     'rec.best':              'Best',
     'rec.bwreps':            'Most',
     'rec.e1rm':              'est. 1RM',
@@ -4616,13 +4552,13 @@ const LANG = {
     'rev.one.muscle':        '{name} has no sets this week and none planned. The Guide has exercises for it — or mute it there if that is deliberate.',
     'rev.one.ok':            'Nothing stands out. The same again next week is the plan.',
     'rev.one.over':          'You averaged {avg} kcal a day against a {target} target — more than a tenth over.',
-    'rev.one.protein':       'Protein reached your {floor} g floor on only {hit} of {n} logged days.',
+    'rev.one.protein':       'Protein averaged {avg} g a day, under the {ok} g that counts as fine. One more protein-rich portion a day closes the gap.',
     'rev.one.sessions':      'You have trained on {n} of the {planned} days your plan has had so far this week. The missing sessions matter more than anything else.',
     'rev.one.target':        'Your data now puts the calorie target at {rec}; yours is set to {target}. Apply the new one on the Body page.',
     'rev.one.under':         'You averaged {avg} kcal a day against a {target} target — more than a tenth under.',
     'rev.planned':           'of the days your plan trains this week',
     'rev.protein':           'Protein',
-    'rev.protsub':           'days at or over {floor} g',
+    'rev.protsub':           'a day on average · aim {target} g, {ok} g+ is fine · {n} days logged',
     'rev.records':           'Records',
     'rev.sessions':          'Sessions',
     'rev.title':             'This Week <span class="sub-note">· Sunday to Saturday, so far, and the one thing most worth changing</span>',
@@ -4677,7 +4613,7 @@ const LANG = {
     'stat.none':             'No entries yet',
     'stat.nutr':             'Nutrition · last 7 days',
     'stat.prot':             'Protein',
-    'stat.protdays':         'days at or above {n} g',
+    'stat.protavg':           'average a day · aim {target} g, {ok} g+ is fine',
     'stat.targetn':          'target {n} · {logged}/7 logged',
     'sx.counts':             'Counted in',
     'sx.edit':               'Edit stretch',
