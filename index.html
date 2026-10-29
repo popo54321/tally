@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-/ADIQ97DXyImBmtcBAJdSqh4K8hiNDyzFMHhShOJqms='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-cpkzjZe4tzXc/jZFDb0CYEgG0gzDVAKGRyCOFe/YRLE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -164,6 +164,12 @@
   .librow .libname{flex:1;min-width:0;font-size:14px;color:var(--ink)}
   .librow .libname .sub{display:block;font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);margin-top:3px;line-height:1.5}
   .librow.off .libname{color:var(--txt-faint)}
+  .lvtag{display:inline-block;font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:1px 5px;border-radius:4px;margin-left:6px;vertical-align:1px;border:1px solid currentColor;color:var(--ink-dim);white-space:nowrap}
+  .lvtag.lv1,.lvtag.lv2{color:var(--good)}
+  .lvtag.lv3{color:var(--brass-bright)}
+  .lvtag.lv4{color:var(--warn)}
+  .lvtag.lv5{color:var(--rust)}
+  .sh-row.off .nm{color:var(--txt-faint)}
   .libin{font-family:var(--font-mono);font-size:10.5px;color:var(--good);white-space:nowrap}
   .browsehead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 2px;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim)}
   .gymgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0 4px}
@@ -327,6 +333,11 @@
   .sh-row{display:flex;align-items:center;gap:7px;border:1px solid var(--line-soft);border-radius:8px;background:var(--panel-2);padding:8px 9px;margin-bottom:6px}
   .sh-row .nm{flex:1;min-width:0;font-family:var(--font-mono);font-size:12.5px;color:var(--ink)}
   .sh-row .nm span{display:block;font-size:9.5px;color:var(--txt-faint);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .sh-row .nm span.lvtag{display:inline-block;font-size:9px;margin:0 0 0 6px;overflow:visible;vertical-align:1px;color:var(--ink-dim)}
+  .sh-row .nm span.lvtag.lv1,.sh-row .nm span.lvtag.lv2{color:var(--good)}
+  .sh-row .nm span.lvtag.lv3{color:var(--brass-bright)}
+  .sh-row .nm span.lvtag.lv4{color:var(--warn)}
+  .sh-row .nm span.lvtag.lv5{color:var(--rust)}
   .sh-add{background:var(--brass);color:#fff;border:2px solid var(--line);border-radius:7px;font-family:var(--font-body);font-weight:800;font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:9px 12px;cursor:pointer;flex:none;min-height:40px}
   .sh-add.ghost{background:var(--panel);color:var(--ink-dim)}
   .sh-pin{background:var(--panel);border:2px solid var(--line);border-radius:7px;color:var(--txt-faint);font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:9px 9px;cursor:pointer;flex:none;min-height:40px}
@@ -1148,7 +1159,8 @@ function volBand(s){
 
 
 const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullup_bar','dip_bars','rings',
-               'cable','leg_press','leg_curl','leg_ext','back_ext','bands'];
+               'cable','leg_press','leg_curl','leg_ext','back_ext','bands',
+               'smith','trap_bar','landmine','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','ghd','box','parallettes','ab_wheel','sled'];
 
 const LIB = [
   {key:'bb_bench',        p:['chest'],                          s:['delt_front','triceps'],               eq:['barbell','bench','rack'], ld:'kg'},
@@ -1157,14 +1169,14 @@ const LIB = [
   {key:'db_incline',      p:['chest'],                          s:['delt_front','triceps'],               eq:['dumbbells','bench'],      ld:'kg'},
   {key:'db_fly',          p:['chest'],                          s:['delt_front'],                         eq:['dumbbells','bench'],      ld:'kg'},
   {key:'cable_fly',       p:['chest'],                          s:['delt_front'],                         eq:['cable'],                  ld:'kg'},
-  {key:'pushup',          p:['chest'],                          s:['delt_front','triceps','abs'],         eq:[],                         ld:'bw'},
-  {key:'ring_pushup',     p:['chest'],                          s:['delt_front','triceps','abs'],         eq:['rings'],                  ld:'bw'},
-  {key:'dip',             p:['chest','triceps'],                s:['delt_front'],                         eq:['dip_bars'],               ld:'bw'},
-  {key:'ring_dip',        p:['chest','triceps'],                s:['delt_front'],                         eq:['rings'],                  ld:'bw'},
+  {key:'pushup',          p:['chest'],                          s:['delt_front','triceps','abs'],         eq:[],                         ld:'bw', lv:2},
+  {key:'ring_pushup',     p:['chest'],                          s:['delt_front','triceps','abs'],         eq:['rings'],                  ld:'bw', lv:3},
+  {key:'dip',             p:['chest','triceps'],                s:['delt_front'],                         eq:['dip_bars'],               ld:'bw', lv:3},
+  {key:'ring_dip',        p:['chest','triceps'],                s:['delt_front'],                         eq:['rings'],                  ld:'bw', lv:4},
   {key:'ohp',             p:['delt_front'],                     s:['delt_side','triceps'],                eq:['barbell','rack'],         ld:'kg'},
   {key:'db_ohp',          p:['delt_front'],                     s:['delt_side','triceps'],                eq:['dumbbells'],              ld:'kg'},
   {key:'kb_press',        p:['delt_front'],                     s:['delt_side','triceps'],                eq:['kettlebell'],             ld:'kg'},
-  {key:'pike_pushup',     p:['delt_front'],                     s:['delt_side','triceps'],                eq:[],                         ld:'bw'},
+  {key:'pike_pushup',     p:['delt_front'],                     s:['delt_side','triceps'],                eq:[],                         ld:'bw', lv:3},
   {key:'front_raise',     p:['delt_front'],                     s:[],                                     eq:['dumbbells'],              ld:'kg'},
   {key:'lat_raise',       p:['delt_side'],                      s:['traps'],                              eq:['dumbbells'],              ld:'kg'},
   {key:'cable_lat_raise', p:['delt_side'],                      s:[],                                     eq:['cable'],                  ld:'kg'},
@@ -1174,16 +1186,16 @@ const LIB = [
   {key:'skull_crusher',   p:['triceps'],                        s:[],                                     eq:['ez_bar','bench'],         ld:'kg'},
   {key:'db_oh_ext',       p:['triceps'],                        s:[],                                     eq:['dumbbells'],              ld:'kg'},
   {key:'cg_bench',        p:['triceps'],                        s:['chest','delt_front'],                 eq:['barbell','bench','rack'], ld:'kg'},
-  {key:'diamond_pushup',  p:['triceps'],                        s:['chest','delt_front'],                 eq:[],                         ld:'bw'},
-  {key:'bench_dip',       p:['triceps'],                        s:['delt_front'],                         eq:['bench'],                  ld:'bw'},
-  {key:'pullup',          p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['pullup_bar'],             ld:'bw'},
-  {key:'chinup',          p:['back','biceps'],                  s:['forearms'],                           eq:['pullup_bar'],             ld:'bw'},
-  {key:'ring_pullup',     p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['rings'],                  ld:'bw'},
+  {key:'diamond_pushup',  p:['triceps'],                        s:['chest','delt_front'],                 eq:[],                         ld:'bw', lv:3},
+  {key:'bench_dip',       p:['triceps'],                        s:['delt_front'],                         eq:['bench'],                  ld:'bw', lv:2},
+  {key:'pullup',          p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['pullup_bar'],             ld:'bw', lv:3},
+  {key:'chinup',          p:['back','biceps'],                  s:['forearms'],                           eq:['pullup_bar'],             ld:'bw', lv:3},
+  {key:'ring_pullup',     p:['back'],                           s:['biceps','delt_rear','forearms'],      eq:['rings'],                  ld:'bw', lv:3},
   {key:'lat_pulldown',    p:['back'],                           s:['biceps','delt_rear'],                 eq:['cable'],                  ld:'kg'},
   {key:'bb_row',          p:['back'],                           s:['delt_rear','biceps','lower_back'],    eq:['barbell'],                ld:'kg'},
   {key:'db_row',          p:['back'],                           s:['delt_rear','biceps'],                 eq:['dumbbells','bench'],      ld:'kg'},
   {key:'cable_row',       p:['back'],                           s:['delt_rear','biceps'],                 eq:['cable'],                  ld:'kg'},
-  {key:'ring_row',        p:['back'],                           s:['delt_rear','biceps'],                 eq:['rings'],                  ld:'bw'},
+  {key:'ring_row',        p:['back'],                           s:['delt_rear','biceps'],                 eq:['rings'],                  ld:'bw', lv:2},
   {key:'bb_shrug',        p:['traps'],                          s:['forearms'],                           eq:['barbell'],                ld:'kg'},
   {key:'db_shrug',        p:['traps'],                          s:['forearms'],                           eq:['dumbbells'],              ld:'kg'},
   {key:'face_pull',       p:['delt_rear'],                      s:['traps'],                              eq:['cable'],                  ld:'kg'},
@@ -1197,40 +1209,322 @@ const LIB = [
   {key:'band_curl',       p:['biceps'],                         s:['forearms'],                           eq:['bands'],                  ld:'bw'},
   {key:'wrist_curl',      p:['forearms'],                       s:[],                                     eq:['dumbbells'],              ld:'kg'},
   {key:'farmer_carry',    p:['forearms','traps'],               s:['abs'],                                eq:['dumbbells'],              ld:'sec'},
-  {key:'dead_hang',       p:['forearms'],                       s:['back'],                               eq:['pullup_bar'],             ld:'sec'},
+  {key:'dead_hang',       p:['forearms'],                       s:['back'],                               eq:['pullup_bar'],             ld:'sec', lv:1},
   {key:'back_squat',      p:['quads','glutes'],                 s:['hamstrings','lower_back','abs'],      eq:['barbell','rack'],         ld:'kg'},
   {key:'front_squat',     p:['quads'],                          s:['glutes','abs','lower_back'],          eq:['barbell','rack'],         ld:'kg'},
   {key:'goblet_squat',    p:['quads','glutes'],                 s:['abs'],                                eq:['dumbbells'],              ld:'kg'},
   {key:'leg_press',       p:['quads','glutes'],                 s:['hamstrings'],                         eq:['leg_press'],              ld:'kg'},
   {key:'split_squat',     p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells','bench'],      ld:'kg'},
   {key:'lunge',           p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells'],              ld:'kg'},
-  {key:'pistol',          p:['quads','glutes'],                 s:['hamstrings','abs'],                   eq:[],                         ld:'bw'},
+  {key:'pistol',          p:['quads','glutes'],                 s:['hamstrings','abs'],                   eq:[],                         ld:'bw', lv:4},
   {key:'leg_ext',         p:['quads'],                          s:[],                                     eq:['leg_ext'],                ld:'kg'},
   {key:'step_up',         p:['quads','glutes'],                 s:['hamstrings'],                         eq:['dumbbells','bench'],      ld:'kg'},
-  {key:'air_squat',       p:['quads','glutes'],                 s:[],                                     eq:[],                         ld:'bw'},
+  {key:'air_squat',       p:['quads','glutes'],                 s:[],                                     eq:[],                         ld:'bw', lv:1},
   {key:'rdl',             p:['hamstrings','glutes'],            s:['lower_back','forearms'],              eq:['barbell'],                ld:'kg'},
   {key:'db_rdl',          p:['hamstrings','glutes'],            s:['lower_back','forearms'],              eq:['dumbbells'],              ld:'kg'},
   {key:'leg_curl',        p:['hamstrings'],                     s:['calves'],                             eq:['leg_curl'],               ld:'kg'},
-  {key:'nordic',          p:['hamstrings'],                     s:[],                                     eq:[],                         ld:'bw'},
+  {key:'nordic',          p:['hamstrings'],                     s:[],                                     eq:[],                         ld:'bw', lv:4},
   {key:'deadlift',        p:['hamstrings','glutes','lower_back'], s:['back','traps','forearms','quads'],  eq:['barbell'],                ld:'kg'},
   {key:'hip_thrust',      p:['glutes'],                         s:['hamstrings','quads'],                 eq:['barbell','bench'],        ld:'kg'},
-  {key:'glute_bridge',    p:['glutes'],                         s:['hamstrings'],                         eq:[],                         ld:'bw'},
+  {key:'glute_bridge',    p:['glutes'],                         s:['hamstrings'],                         eq:[],                         ld:'bw', lv:1},
   {key:'kb_swing',        p:['glutes','hamstrings'],            s:['lower_back','abs'],                   eq:['kettlebell'],             ld:'kg'},
-  {key:'calf_raise',      p:['calves'],                         s:[],                                     eq:[],                         ld:'bw'},
+  {key:'calf_raise',      p:['calves'],                         s:[],                                     eq:[],                         ld:'bw', lv:1},
   {key:'db_calf_raise',   p:['calves'],                         s:[],                                     eq:['dumbbells'],              ld:'kg'},
   {key:'seated_calf',     p:['calves'],                         s:[],                                     eq:['dumbbells','bench'],      ld:'kg'},
-  {key:'plank',           p:['abs'],                            s:['delt_front'],                         eq:[],                         ld:'sec'},
-  {key:'side_plank',      p:['abs'],                            s:[],                                     eq:[],                         ld:'sec'},
-  {key:'hanging_leg_raise', p:['abs'],                          s:['forearms'],                           eq:['pullup_bar'],             ld:'bw'},
-  {key:'crunch',          p:['abs'],                            s:[],                                     eq:[],                         ld:'bw'},
+  {key:'plank',           p:['abs'],                            s:['delt_front'],                         eq:[],                         ld:'sec', lv:2},
+  {key:'side_plank',      p:['abs'],                            s:[],                                     eq:[],                         ld:'sec', lv:2},
+  {key:'hanging_leg_raise', p:['abs'],                          s:['forearms'],                           eq:['pullup_bar'],             ld:'bw', lv:3},
+  {key:'crunch',          p:['abs'],                            s:[],                                     eq:[],                         ld:'bw', lv:1},
   {key:'cable_crunch',    p:['abs'],                            s:[],                                     eq:['cable'],                  ld:'kg'},
-  {key:'dead_bug',        p:['abs'],                            s:[],                                     eq:[],                         ld:'bw'},
-  {key:'hollow_hold',     p:['abs'],                            s:[],                                     eq:[],                         ld:'sec'},
-  {key:'back_ext',        p:['lower_back'],                     s:['glutes','hamstrings'],                eq:['back_ext'],               ld:'bw'},
-  {key:'superman',        p:['lower_back'],                     s:['glutes'],                             eq:[],                         ld:'sec'},
-  {key:'good_morning',    p:['lower_back','hamstrings'],        s:['glutes'],                             eq:['barbell','rack'],         ld:'kg'}
+  {key:'dead_bug',        p:['abs'],                            s:[],                                     eq:[],                         ld:'bw', lv:1},
+  {key:'hollow_hold',     p:['abs'],                            s:[],                                     eq:[],                         ld:'sec', lv:3},
+  {key:'back_ext',        p:['lower_back'],                     s:['glutes','hamstrings'],                eq:['back_ext'],               ld:'bw', lv:2},
+  {key:'superman',        p:['lower_back'],                     s:['glutes'],                             eq:[],                         ld:'sec', lv:1},
+  {key:'good_morning',    p:['lower_back','hamstrings'],        s:['glutes'],                             eq:['barbell','rack'],         ld:'kg'},
+  {key:'bb_decline',     p:['chest'],                           s:['triceps','delt_front'],               eq:['barbell','bench','rack'],  ld:'kg'},
+  {key:'db_decline',     p:['chest'],                           s:['triceps','delt_front'],               eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'bb_floor_press', p:['chest','triceps'],                 s:['delt_front'],                         eq:['barbell','rack'],          ld:'kg'},
+  {key:'db_floor_press', p:['chest','triceps'],                 s:['delt_front'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'smith_bench',    p:['chest'],                           s:['triceps','delt_front'],               eq:['smith','bench'],           ld:'kg'},
+  {key:'smith_incline',  p:['chest'],                           s:['delt_front','triceps'],               eq:['smith','bench'],           ld:'kg'},
+  {key:'machine_chest',  p:['chest'],                           s:['triceps','delt_front'],               eq:['machine_press'],           ld:'kg'},
+  {key:'pec_deck_fly',   p:['chest'],                           s:['delt_front'],                         eq:['pec_deck'],                ld:'kg'},
+  {key:'incline_db_fly', p:['chest'],                           s:['delt_front'],                         eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'low_cable_fly',  p:['chest'],                           s:['delt_front'],                         eq:['cable'],                   ld:'kg'},
+  {key:'high_cable_fly', p:['chest'],                           s:['delt_front'],                         eq:['cable'],                   ld:'kg'},
+  {key:'db_pullover',    p:['chest','back'],                    s:['triceps'],                            eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'landmine_press', p:['delt_front','chest'],              s:['triceps','abs'],                      eq:['barbell','landmine'],      ld:'kg'},
+  {key:'kb_floor_press', p:['chest','triceps'],                 s:['delt_front'],                         eq:['kettlebell'],              ld:'kg'},
+  {key:'band_chest_press', p:['chest'],                           s:['triceps','delt_front'],               eq:['bands'],                   ld:'bw'},
+  {key:'band_fly',       p:['chest'],                           s:['delt_front'],                         eq:['bands'],                   ld:'bw'},
+  {key:'wall_pushup',    p:['chest'],                           s:['delt_front','triceps'],               eq:[],                          ld:'bw', lv:1},
+  {key:'incline_pushup', p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:1},
+  {key:'knee_pushup',    p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:1},
+  {key:'wide_pushup',    p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:2},
+  {key:'decline_pushup', p:['chest','delt_front'],              s:['triceps','abs'],                      eq:[],                          ld:'bw', lv:3},
+  {key:'deficit_pushup', p:['chest'],                           s:['delt_front','triceps','abs'],         eq:['parallettes'],             ld:'bw', lv:3},
+  {key:'clap_pushup',    p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:4},
+  {key:'archer_pushup',  p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:4},
+  {key:'pseudo_planche_pu', p:['chest','delt_front'],              s:['triceps','abs','biceps'],             eq:[],                          ld:'bw', lv:4},
+  {key:'one_arm_pushup', p:['chest'],                           s:['delt_front','triceps','abs'],         eq:[],                          ld:'bw', lv:5},
+  {key:'ring_fly',       p:['chest'],                           s:['delt_front','abs'],                   eq:['rings'],                   ld:'bw', lv:4},
+  {key:'straight_bar_dip', p:['chest','triceps'],                 s:['delt_front'],                         eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'arnold_press',   p:['delt_front','delt_side'],          s:['triceps'],                            eq:['dumbbells'],               ld:'kg'},
+  {key:'seated_db_ohp',  p:['delt_front'],                      s:['delt_side','triceps'],                eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'smith_ohp',      p:['delt_front'],                      s:['delt_side','triceps'],                eq:['smith','bench'],           ld:'kg'},
+  {key:'machine_ohp',    p:['delt_front'],                      s:['delt_side','triceps'],                eq:['machine_shoulder'],        ld:'kg'},
+  {key:'push_press',     p:['delt_front'],                      s:['delt_side','triceps','quads'],        eq:['barbell','rack'],          ld:'kg'},
+  {key:'z_press',        p:['delt_front'],                      s:['delt_side','triceps','abs'],          eq:['barbell','rack'],          ld:'kg'},
+  {key:'cable_front_raise', p:['delt_front'],                      s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'plate_front_raise', p:['delt_front'],                      s:['traps'],                              eq:['barbell'],                 ld:'kg'},
+  {key:'lean_lat_raise', p:['delt_side'],                       s:[],                                     eq:['dumbbells'],               ld:'kg'},
+  {key:'seated_lat_raise', p:['delt_side'],                       s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'db_y_raise',     p:['delt_side','traps'],               s:['delt_rear'],                          eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'cable_y_raise',  p:['delt_side'],                       s:['traps'],                              eq:['cable'],                   ld:'kg'},
+  {key:'kb_upright_row', p:['delt_side','traps'],               s:['biceps'],                             eq:['kettlebell'],              ld:'kg'},
+  {key:'cable_upright_row', p:['delt_side','traps'],               s:['biceps'],                             eq:['cable'],                   ld:'kg'},
+  {key:'band_ohp',       p:['delt_front'],                      s:['delt_side','triceps'],                eq:['bands'],                   ld:'bw'},
+  {key:'kb_windmill',    p:['abs','delt_front'],                s:['glutes','hamstrings'],                eq:['kettlebell'],              ld:'kg'},
+  {key:'kb_halo',        p:['delt_front','delt_side'],          s:['abs','traps'],                        eq:['kettlebell'],              ld:'kg'},
+  {key:'elevated_pike',  p:['delt_front'],                      s:['delt_side','triceps'],                eq:['bench'],                   ld:'bw', lv:3},
+  {key:'wall_walk',      p:['delt_front'],                      s:['delt_side','triceps','abs'],          eq:[],                          ld:'bw', lv:3},
+  {key:'wall_hs_hold',   p:['delt_front'],                      s:['delt_side','triceps','abs'],          eq:[],                          ld:'sec', lv:3},
+  {key:'wall_hspu',      p:['delt_front','triceps'],            s:['delt_side','traps'],                  eq:[],                          ld:'bw', lv:4},
+  {key:'handstand_hold', p:['delt_front'],                      s:['delt_side','abs','forearms'],         eq:[],                          ld:'sec', lv:4},
+  {key:'hspu',           p:['delt_front','triceps'],            s:['delt_side','traps','abs'],            eq:[],                          ld:'bw', lv:5},
+  {key:'planche_lean',   p:['delt_front'],                      s:['chest','abs','biceps'],               eq:[],                          ld:'sec', lv:3},
+  {key:'tuck_planche',   p:['delt_front'],                      s:['chest','abs','biceps'],               eq:['parallettes'],             ld:'sec', lv:4},
+  {key:'straddle_planche', p:['delt_front'],                      s:['chest','abs','biceps'],               eq:['parallettes'],             ld:'sec', lv:5},
+  {key:'full_planche',   p:['delt_front'],                      s:['chest','abs','biceps'],               eq:['parallettes'],             ld:'sec', lv:5},
+  {key:'ytw_raise',      p:['delt_rear','traps'],               s:['delt_side'],                          eq:[],                          ld:'bw', lv:1},
+  {key:'scap_pushup',    p:['delt_front'],                      s:['chest'],                              eq:[],                          ld:'bw', lv:1},
+  {key:'oh_cable_ext',   p:['triceps'],                         s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'rope_pushdown',  p:['triceps'],                         s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'one_arm_pushdown', p:['triceps'],                         s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'db_kickback',    p:['triceps'],                         s:[],                                     eq:['dumbbells'],               ld:'kg'},
+  {key:'cable_kickback', p:['triceps'],                         s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'jm_press',       p:['triceps'],                         s:['chest'],                              eq:['barbell','bench','rack'],  ld:'kg'},
+  {key:'ez_oh_ext',      p:['triceps'],                         s:[],                                     eq:['ez_bar'],                  ld:'kg'},
+  {key:'db_skull_crusher', p:['triceps'],                         s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'tate_press',     p:['triceps'],                         s:['chest'],                              eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'smith_cg_bench', p:['triceps'],                         s:['chest','delt_front'],                 eq:['smith','bench'],           ld:'kg'},
+  {key:'band_pushdown',  p:['triceps'],                         s:[],                                     eq:['bands'],                   ld:'bw'},
+  {key:'bw_tri_ext',     p:['triceps'],                         s:['abs'],                                eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'ring_tri_ext',   p:['triceps'],                         s:['abs'],                                eq:['rings'],                   ld:'bw', lv:3},
+  {key:'korean_dip',     p:['triceps','delt_front'],            s:['chest'],                              eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'bench_dip_feet_up', p:['triceps'],                         s:['delt_front','chest'],                 eq:['bench'],                   ld:'bw', lv:3},
+  {key:'pendlay_row',    p:['back'],                            s:['delt_rear','biceps','lower_back'],    eq:['barbell'],                 ld:'kg'},
+  {key:'yates_row',      p:['back'],                            s:['biceps','delt_rear','lower_back'],    eq:['barbell'],                 ld:'kg'},
+  {key:'tbar_row',       p:['back'],                            s:['delt_rear','biceps','lower_back'],    eq:['barbell','landmine'],      ld:'kg'},
+  {key:'meadows_row',    p:['back'],                            s:['delt_rear','biceps'],                 eq:['barbell','landmine'],      ld:'kg'},
+  {key:'cs_db_row',      p:['back'],                            s:['delt_rear','biceps'],                 eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'seal_row',       p:['back'],                            s:['delt_rear','biceps'],                 eq:['barbell','bench'],         ld:'kg'},
+  {key:'kb_row',         p:['back'],                            s:['delt_rear','biceps'],                 eq:['kettlebell'],              ld:'kg'},
+  {key:'one_arm_cable_row', p:['back'],                            s:['delt_rear','biceps'],                 eq:['cable'],                   ld:'kg'},
+  {key:'wide_cable_row', p:['back','delt_rear'],                s:['traps','biceps'],                     eq:['cable'],                   ld:'kg'},
+  {key:'cg_pulldown',    p:['back'],                            s:['biceps'],                             eq:['cable'],                   ld:'kg'},
+  {key:'one_arm_pulldown', p:['back'],                            s:['biceps'],                             eq:['cable'],                   ld:'kg'},
+  {key:'straight_arm_pd', p:['back'],                            s:['triceps'],                            eq:['cable'],                   ld:'kg'},
+  {key:'smith_row',      p:['back'],                            s:['delt_rear','biceps'],                 eq:['smith'],                   ld:'kg'},
+  {key:'band_row',       p:['back'],                            s:['delt_rear','biceps'],                 eq:['bands'],                   ld:'bw'},
+  {key:'band_pulldown',  p:['back'],                            s:['biceps'],                             eq:['bands'],                   ld:'bw'},
+  {key:'rack_pull',      p:['back','traps'],                    s:['lower_back','glutes','forearms'],     eq:['barbell','rack'],          ld:'kg'},
+  {key:'scap_pullup',    p:['back'],                            s:['traps','forearms'],                   eq:['pullup_bar'],              ld:'bw', lv:2},
+  {key:'inverted_row',   p:['back'],                            s:['delt_rear','biceps'],                 eq:['pullup_bar'],              ld:'bw', lv:2},
+  {key:'table_row',      p:['back'],                            s:['delt_rear','biceps'],                 eq:[],                          ld:'bw', lv:2},
+  {key:'neg_pullup',     p:['back'],                            s:['biceps','forearms'],                  eq:['pullup_bar'],              ld:'bw', lv:2},
+  {key:'band_pullup',    p:['back'],                            s:['biceps','delt_rear'],                 eq:['pullup_bar','bands'],      ld:'bw', lv:2},
+  {key:'neg_chinup',     p:['back','biceps'],                   s:['forearms'],                           eq:['pullup_bar'],              ld:'bw', lv:2},
+  {key:'wide_pullup',    p:['back'],                            s:['biceps','delt_rear'],                 eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'neutral_pullup', p:['back','biceps'],                   s:['forearms'],                           eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'commando_pullup', p:['back','biceps'],                   s:['abs','forearms'],                     eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'lsit_pullup',    p:['back'],                            s:['abs','biceps'],                       eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'archer_pullup',  p:['back'],                            s:['biceps','delt_rear'],                 eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'typewriter_pullup', p:['back'],                            s:['biceps','delt_rear'],                 eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'bar_muscle_up',  p:['back','chest'],                    s:['triceps','biceps','abs'],             eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'ring_muscle_up', p:['back','chest'],                    s:['triceps','biceps','abs'],             eq:['rings'],                   ld:'bw', lv:5},
+  {key:'one_arm_pullup', p:['back','biceps'],                   s:['forearms','abs'],                     eq:['pullup_bar'],              ld:'bw', lv:5},
+  {key:'tuck_front_lever', p:['back'],                            s:['abs','delt_rear'],                    eq:['pullup_bar'],              ld:'sec', lv:4},
+  {key:'front_lever',    p:['back'],                            s:['abs','delt_rear'],                    eq:['pullup_bar'],              ld:'sec', lv:5},
+  {key:'back_lever',     p:['delt_front','chest'],              s:['back','abs','biceps'],                eq:['rings'],                   ld:'sec', lv:4},
+  {key:'skin_the_cat',   p:['back','delt_front'],               s:['abs','biceps'],                       eq:['rings'],                   ld:'bw', lv:3},
+  {key:'trap_bar_shrug', p:['traps'],                           s:['forearms'],                           eq:['trap_bar'],                ld:'kg'},
+  {key:'cable_shrug',    p:['traps'],                           s:['forearms'],                           eq:['cable'],                   ld:'kg'},
+  {key:'smith_shrug',    p:['traps'],                           s:['forearms'],                           eq:['smith'],                   ld:'kg'},
+  {key:'kb_shrug',       p:['traps'],                           s:['forearms'],                           eq:['kettlebell'],              ld:'kg'},
+  {key:'overhead_carry', p:['delt_front','traps'],              s:['abs','triceps'],                      eq:['dumbbells'],               ld:'sec'},
+  {key:'reverse_pec_deck', p:['delt_rear'],                       s:['traps'],                              eq:['pec_deck'],                ld:'kg'},
+  {key:'cable_rear_fly', p:['delt_rear'],                       s:['traps'],                              eq:['cable'],                   ld:'kg'},
+  {key:'cs_rear_fly',    p:['delt_rear'],                       s:['traps'],                              eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'band_face_pull', p:['delt_rear'],                       s:['traps'],                              eq:['bands'],                   ld:'bw'},
+  {key:'ring_face_pull', p:['delt_rear'],                       s:['traps','back'],                       eq:['rings'],                   ld:'bw', lv:2},
+  {key:'preacher_curl',  p:['biceps'],                          s:[],                                     eq:['ez_bar','bench'],          ld:'kg'},
+  {key:'db_preacher_curl', p:['biceps'],                          s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'incline_db_curl', p:['biceps'],                          s:['forearms'],                           eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'concentration_curl', p:['biceps'],                          s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'spider_curl',    p:['biceps'],                          s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'zottman_curl',   p:['biceps','forearms'],               s:[],                                     eq:['dumbbells'],               ld:'kg'},
+  {key:'reverse_curl',   p:['forearms','biceps'],               s:[],                                     eq:['ez_bar'],                  ld:'kg'},
+  {key:'bayesian_curl',  p:['biceps'],                          s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'rope_hammer_curl', p:['biceps','forearms'],               s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'drag_curl',      p:['biceps'],                          s:['forearms'],                           eq:['barbell'],                 ld:'kg'},
+  {key:'kb_curl',        p:['biceps'],                          s:['forearms'],                           eq:['kettlebell'],              ld:'kg'},
+  {key:'ring_curl',      p:['biceps'],                          s:['forearms'],                           eq:['rings'],                   ld:'bw', lv:3},
+  {key:'bar_bw_curl',    p:['biceps'],                          s:['forearms'],                           eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'reverse_wrist_curl', p:['forearms'],                        s:[],                                     eq:['dumbbells'],               ld:'kg'},
+  {key:'bb_wrist_curl',  p:['forearms'],                        s:[],                                     eq:['barbell','bench'],         ld:'kg'},
+  {key:'suitcase_carry', p:['forearms','abs'],                  s:['traps'],                              eq:['dumbbells'],               ld:'sec'},
+  {key:'kb_farmer_carry', p:['forearms','traps'],                s:['abs'],                                eq:['kettlebell'],              ld:'sec'},
+  {key:'trap_bar_carry', p:['forearms','traps'],                s:['abs','quads'],                        eq:['trap_bar'],                ld:'sec'},
+  {key:'plate_pinch',    p:['forearms'],                        s:[],                                     eq:['barbell'],                 ld:'sec'},
+  {key:'one_arm_hang',   p:['forearms'],                        s:['back'],                               eq:['pullup_bar'],              ld:'sec', lv:4},
+  {key:'towel_hang',     p:['forearms'],                        s:['back'],                               eq:['pullup_bar'],              ld:'sec', lv:3},
+  {key:'active_hang',    p:['back','forearms'],                 s:['traps'],                              eq:['pullup_bar'],              ld:'sec', lv:2},
+  {key:'smith_squat',    p:['quads','glutes'],                  s:['hamstrings'],                         eq:['smith'],                   ld:'kg'},
+  {key:'hack_squat_m',   p:['quads'],                           s:['glutes'],                             eq:['hack_squat'],              ld:'kg'},
+  {key:'box_squat',      p:['quads','glutes'],                  s:['hamstrings','lower_back'],            eq:['barbell','rack','box'],    ld:'kg'},
+  {key:'pause_squat',    p:['quads','glutes'],                  s:['hamstrings','lower_back','abs'],      eq:['barbell','rack'],          ld:'kg'},
+  {key:'zercher_squat',  p:['quads','glutes'],                  s:['abs','lower_back','biceps'],          eq:['barbell','rack'],          ld:'kg'},
+  {key:'db_squat',       p:['quads','glutes'],                  s:['hamstrings'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'kb_goblet_squat', p:['quads','glutes'],                  s:['abs'],                                eq:['kettlebell'],              ld:'kg'},
+  {key:'landmine_squat', p:['quads','glutes'],                  s:['abs'],                                eq:['barbell','landmine'],      ld:'kg'},
+  {key:'bb_lunge',       p:['quads','glutes'],                  s:['hamstrings'],                         eq:['barbell','rack'],          ld:'kg'},
+  {key:'walking_lunge',  p:['quads','glutes'],                  s:['hamstrings'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'reverse_lunge',  p:['glutes','quads'],                  s:['hamstrings'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'bb_split_squat', p:['quads','glutes'],                  s:['hamstrings'],                         eq:['barbell','rack'],          ld:'kg'},
+  {key:'smith_split_squat', p:['quads','glutes'],                  s:['hamstrings'],                         eq:['smith'],                   ld:'kg'},
+  {key:'lateral_lunge',  p:['quads','glutes'],                  s:['hamstrings'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'db_step_up_box', p:['quads','glutes'],                  s:['hamstrings'],                         eq:['dumbbells','box'],         ld:'kg'},
+  {key:'leg_press_1leg', p:['quads','glutes'],                  s:['hamstrings'],                         eq:['leg_press'],               ld:'kg'},
+  {key:'leg_ext_1leg',   p:['quads'],                           s:[],                                     eq:['leg_ext'],                 ld:'kg'},
+  {key:'sled_push',      p:['quads','glutes'],                  s:['calves','abs'],                       eq:['sled'],                    ld:'kg'},
+  {key:'sled_drag',      p:['quads'],                           s:['calves','glutes'],                    eq:['sled'],                    ld:'kg'},
+  {key:'band_squat',     p:['quads','glutes'],                  s:[],                                     eq:['bands'],                   ld:'bw'},
+  {key:'box_sit_squat',  p:['quads','glutes'],                  s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'wall_sit',       p:['quads'],                           s:['glutes'],                             eq:[],                          ld:'sec', lv:1},
+  {key:'bw_reverse_lunge', p:['glutes','quads'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:1},
+  {key:'bw_step_up',     p:['quads','glutes'],                  s:['hamstrings'],                         eq:['box'],                     ld:'bw', lv:1},
+  {key:'bw_lunge',       p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:2},
+  {key:'bw_split_squat', p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:2},
+  {key:'bw_bulgarian',   p:['quads','glutes'],                  s:['hamstrings'],                         eq:['bench'],                   ld:'bw', lv:2},
+  {key:'jump_squat',     p:['quads','glutes'],                  s:['calves'],                             eq:[],                          ld:'bw', lv:2},
+  {key:'jump_lunge',     p:['quads','glutes'],                  s:['calves','hamstrings'],                eq:[],                          ld:'bw', lv:3},
+  {key:'box_jump',       p:['quads','glutes'],                  s:['calves'],                             eq:['box'],                     ld:'bw', lv:2},
+  {key:'broad_jump',     p:['quads','glutes'],                  s:['calves','hamstrings'],                eq:[],                          ld:'bw', lv:2},
+  {key:'cossack_squat',  p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:3},
+  {key:'skater_squat',   p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:3},
+  {key:'assisted_pistol', p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:3},
+  {key:'box_pistol',     p:['quads','glutes'],                  s:['hamstrings'],                         eq:['box'],                     ld:'bw', lv:3},
+  {key:'sissy_squat',    p:['quads'],                           s:['abs'],                                eq:[],                          ld:'bw', lv:3},
+  {key:'shrimp_squat',   p:['quads','glutes'],                  s:['hamstrings'],                         eq:[],                          ld:'bw', lv:4},
+  {key:'dragon_pistol',  p:['quads','glutes'],                  s:['hamstrings','abs'],                   eq:[],                          ld:'bw', lv:5},
+  {key:'stiff_leg_dl',   p:['hamstrings'],                      s:['glutes','lower_back'],                eq:['barbell'],                 ld:'kg'},
+  {key:'sl_db_rdl',      p:['hamstrings','glutes'],             s:['lower_back'],                         eq:['dumbbells'],               ld:'kg'},
+  {key:'kb_rdl',         p:['hamstrings','glutes'],             s:['lower_back'],                         eq:['kettlebell'],              ld:'kg'},
+  {key:'smith_rdl',      p:['hamstrings','glutes'],             s:['lower_back'],                         eq:['smith'],                   ld:'kg'},
+  {key:'cable_pull_through', p:['glutes','hamstrings'],             s:['lower_back'],                         eq:['cable'],                   ld:'kg'},
+  {key:'db_leg_curl',    p:['hamstrings'],                      s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'sl_leg_curl',    p:['hamstrings'],                      s:['calves'],                             eq:['leg_curl'],                ld:'kg'},
+  {key:'band_leg_curl',  p:['hamstrings'],                      s:[],                                     eq:['bands'],                   ld:'bw'},
+  {key:'ghr',            p:['hamstrings'],                      s:['glutes','calves'],                    eq:['ghd'],                     ld:'bw', lv:4},
+  {key:'slider_leg_curl', p:['hamstrings'],                      s:['glutes'],                             eq:[],                          ld:'bw', lv:2},
+  {key:'sl_slider_curl', p:['hamstrings'],                      s:['glutes'],                             eq:[],                          ld:'bw', lv:3},
+  {key:'hamstring_walkout', p:['hamstrings'],                      s:['glutes'],                             eq:[],                          ld:'bw', lv:2},
+  {key:'nordic_neg',     p:['hamstrings'],                      s:[],                                     eq:[],                          ld:'bw', lv:3},
+  {key:'bw_sl_rdl',      p:['hamstrings','glutes'],             s:['lower_back'],                         eq:[],                          ld:'bw', lv:1},
+  {key:'trap_bar_dl',    p:['quads','glutes','hamstrings'],     s:['back','traps','forearms'],            eq:['trap_bar'],                ld:'kg'},
+  {key:'sumo_dl',        p:['glutes','hamstrings','quads'],     s:['back','lower_back','forearms'],       eq:['barbell'],                 ld:'kg'},
+  {key:'deficit_dl',     p:['hamstrings','glutes','lower_back'], s:['back','traps','forearms'],            eq:['barbell'],                 ld:'kg'},
+  {key:'db_deadlift',    p:['hamstrings','glutes'],             s:['lower_back','forearms'],              eq:['dumbbells'],               ld:'kg'},
+  {key:'kb_deadlift',    p:['hamstrings','glutes'],             s:['lower_back','forearms'],              eq:['kettlebell'],              ld:'kg'},
+  {key:'db_hip_thrust',  p:['glutes'],                          s:['hamstrings'],                         eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'smith_hip_thrust', p:['glutes'],                          s:['hamstrings'],                         eq:['smith','bench'],           ld:'kg'},
+  {key:'bb_glute_bridge', p:['glutes'],                          s:['hamstrings'],                         eq:['barbell'],                 ld:'kg'},
+  {key:'cable_kickback_g', p:['glutes'],                          s:['hamstrings'],                         eq:['cable'],                   ld:'kg'},
+  {key:'hip_abduction',  p:['glutes'],                          s:[],                                     eq:['hip_machine'],             ld:'kg'},
+  {key:'hip_adduction',  p:['quads'],                           s:[],                                     eq:['hip_machine'],             ld:'kg'},
+  {key:'cable_abduction', p:['glutes'],                          s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'band_walk',      p:['glutes'],                          s:[],                                     eq:['bands'],                   ld:'bw'},
+  {key:'band_hip_thrust', p:['glutes'],                          s:['hamstrings'],                         eq:['bands'],                   ld:'bw'},
+  {key:'kb_sumo_squat',  p:['glutes','quads'],                  s:['hamstrings'],                         eq:['kettlebell'],              ld:'kg'},
+  {key:'frog_pump',      p:['glutes'],                          s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'donkey_kick',    p:['glutes'],                          s:['hamstrings'],                         eq:[],                          ld:'bw', lv:1},
+  {key:'fire_hydrant',   p:['glutes'],                          s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'clamshell',      p:['glutes'],                          s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'sl_glute_bridge', p:['glutes'],                          s:['hamstrings'],                         eq:[],                          ld:'bw', lv:2},
+  {key:'sl_hip_thrust',  p:['glutes'],                          s:['hamstrings'],                         eq:['bench'],                   ld:'bw', lv:3},
+  {key:'glute_bridge_hold', p:['glutes'],                          s:['hamstrings'],                         eq:[],                          ld:'sec', lv:1},
+  {key:'calf_machine_raise', p:['calves'],                          s:[],                                     eq:['calf_machine'],            ld:'kg'},
+  {key:'leg_press_calf', p:['calves'],                          s:[],                                     eq:['leg_press'],               ld:'kg'},
+  {key:'smith_calf_raise', p:['calves'],                          s:[],                                     eq:['smith'],                   ld:'kg'},
+  {key:'bb_calf_raise',  p:['calves'],                          s:[],                                     eq:['barbell','rack'],          ld:'kg'},
+  {key:'sl_calf_raise',  p:['calves'],                          s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'tib_raise',      p:['calves'],                          s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'pogo_jump',      p:['calves'],                          s:['quads'],                              eq:[],                          ld:'bw', lv:2},
+  {key:'reverse_crunch', p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'bicycle_crunch', p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'lying_leg_raise', p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'bird_dog',       p:['abs','lower_back'],                s:['glutes'],                             eq:[],                          ld:'bw', lv:1},
+  {key:'mountain_climber', p:['abs'],                             s:['delt_front','quads'],                 eq:[],                          ld:'bw', lv:2},
+  {key:'russian_twist',  p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'heel_tap',       p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:1},
+  {key:'flutter_kick',   p:['abs'],                             s:[],                                     eq:[],                          ld:'sec', lv:2},
+  {key:'sit_up',         p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:2},
+  {key:'decline_situp',  p:['abs'],                             s:[],                                     eq:['bench'],                   ld:'bw', lv:3},
+  {key:'v_up',           p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:3},
+  {key:'hollow_rock',    p:['abs'],                             s:[],                                     eq:[],                          ld:'bw', lv:3},
+  {key:'plank_reach',    p:['abs'],                             s:['delt_front'],                         eq:[],                          ld:'bw', lv:2},
+  {key:'rkc_plank',      p:['abs'],                             s:['glutes'],                             eq:[],                          ld:'sec', lv:3},
+  {key:'copenhagen',     p:['abs','quads'],                     s:['glutes'],                             eq:['bench'],                   ld:'sec', lv:3},
+  {key:'bear_crawl',     p:['abs','delt_front'],                s:['quads'],                              eq:[],                          ld:'sec', lv:2},
+  {key:'hanging_knee_raise', p:['abs'],                             s:['forearms'],                           eq:['pullup_bar'],              ld:'bw', lv:2},
+  {key:'toes_to_bar',    p:['abs'],                             s:['back','forearms'],                    eq:['pullup_bar'],              ld:'bw', lv:4},
+  {key:'windshield_wiper', p:['abs'],                             s:['forearms','back'],                    eq:['pullup_bar'],              ld:'bw', lv:5},
+  {key:'tuck_lsit',      p:['abs'],                             s:['triceps','delt_front'],               eq:['parallettes'],             ld:'sec', lv:3},
+  {key:'lsit',           p:['abs'],                             s:['triceps','delt_front','quads'],       eq:['parallettes'],             ld:'sec', lv:4},
+  {key:'vsit',           p:['abs'],                             s:['triceps','delt_front','quads'],       eq:['parallettes'],             ld:'sec', lv:5},
+  {key:'dragon_flag',    p:['abs'],                             s:['lower_back','back'],                  eq:['bench'],                   ld:'bw', lv:5},
+  {key:'human_flag',     p:['abs','delt_side'],                 s:['back','delt_front'],                  eq:['pullup_bar'],              ld:'sec', lv:5},
+  {key:'ab_wheel_knee',  p:['abs'],                             s:['back','delt_front'],                  eq:['ab_wheel'],                ld:'bw', lv:3},
+  {key:'ab_wheel_stand', p:['abs'],                             s:['back','delt_front'],                  eq:['ab_wheel'],                ld:'bw', lv:5},
+  {key:'cable_woodchop', p:['abs'],                             s:['delt_front'],                         eq:['cable'],                   ld:'kg'},
+  {key:'pallof_press',   p:['abs'],                             s:[],                                     eq:['cable'],                   ld:'kg'},
+  {key:'band_pallof',    p:['abs'],                             s:[],                                     eq:['bands'],                   ld:'bw'},
+  {key:'landmine_twist', p:['abs'],                             s:['delt_front'],                         eq:['barbell','landmine'],      ld:'kg'},
+  {key:'weighted_plank', p:['abs'],                             s:['delt_front'],                         eq:['dumbbells'],               ld:'sec'},
+  {key:'db_side_bend',   p:['abs'],                             s:[],                                     eq:['dumbbells'],               ld:'kg'},
+  {key:'weighted_situp', p:['abs'],                             s:[],                                     eq:['dumbbells','bench'],       ld:'kg'},
+  {key:'kb_getup',       p:['abs','delt_front'],                s:['glutes','triceps'],                   eq:['kettlebell'],              ld:'kg'},
+  {key:'reverse_hyper',  p:['lower_back','glutes'],             s:['hamstrings'],                         eq:['bench'],                   ld:'bw', lv:2},
+  {key:'weighted_back_ext', p:['lower_back'],                      s:['glutes','hamstrings'],                eq:['back_ext','dumbbells'],    ld:'kg'},
+  {key:'ghd_back_ext',   p:['lower_back'],                      s:['glutes','hamstrings'],                eq:['ghd'],                     ld:'bw', lv:3},
+  {key:'jefferson_curl', p:['lower_back','hamstrings'],         s:[],                                     eq:['dumbbells','box'],         ld:'kg'},
+  {key:'swimmer',        p:['lower_back'],                      s:['delt_rear','glutes'],                 eq:[],                          ld:'bw', lv:1},
+  {key:'seated_good_morning', p:['lower_back'],                      s:['glutes'],                             eq:['barbell','rack','bench'],  ld:'kg'},
+  {key:'power_clean',    p:['traps','glutes','hamstrings'],     s:['quads','back','delt_front'],          eq:['barbell'],                 ld:'kg'},
+  {key:'hang_clean',     p:['traps','glutes'],                  s:['hamstrings','back','delt_front'],     eq:['barbell'],                 ld:'kg'},
+  {key:'power_snatch',   p:['traps','glutes','delt_front'],     s:['hamstrings','back','quads'],          eq:['barbell'],                 ld:'kg'},
+  {key:'clean_and_jerk', p:['quads','glutes','delt_front'],     s:['traps','triceps','back'],             eq:['barbell'],                 ld:'kg'},
+  {key:'bb_thruster',    p:['quads','delt_front'],              s:['glutes','triceps'],                   eq:['barbell','rack'],          ld:'kg'},
+  {key:'db_thruster',    p:['quads','delt_front'],              s:['glutes','triceps'],                   eq:['dumbbells'],               ld:'kg'},
+  {key:'db_snatch',      p:['glutes','delt_front'],             s:['hamstrings','traps'],                 eq:['dumbbells'],               ld:'kg'},
+  {key:'kb_clean',       p:['glutes','hamstrings'],             s:['traps','forearms'],                   eq:['kettlebell'],              ld:'kg'},
+  {key:'kb_snatch',      p:['glutes','delt_front'],             s:['hamstrings','traps'],                 eq:['kettlebell'],              ld:'kg'},
+  {key:'kb_clean_press', p:['delt_front','glutes'],             s:['triceps','hamstrings'],               eq:['kettlebell'],              ld:'kg'},
+  {key:'kb_1arm_swing',  p:['glutes','hamstrings'],             s:['abs','lower_back','forearms'],        eq:['kettlebell'],              ld:'kg'},
+  {key:'man_maker',      p:['chest','back','quads'],            s:['delt_front','triceps','abs'],         eq:['dumbbells'],               ld:'kg'},
+  {key:'burpee',         p:['quads','chest'],                   s:['delt_front','abs','triceps'],         eq:[],                          ld:'bw', lv:2},
+  {key:'burpee_pullup',  p:['back','quads'],                    s:['chest','biceps','abs'],               eq:['pullup_bar'],              ld:'bw', lv:3},
+  {key:'squat_thrust',   p:['quads','abs'],                     s:['delt_front'],                         eq:[],                          ld:'bw', lv:1},
+  {key:'inchworm',       p:['abs','hamstrings'],                s:['delt_front'],                         eq:[],                          ld:'bw', lv:1},
+  {key:'crab_walk',      p:['triceps','glutes'],                s:['delt_front','abs'],                   eq:[],                          ld:'sec', lv:2}
 ];
 const libByKey = k => LIB.find(l=>l.key===k);
+const lvTag = lv => lv ? `<span class="lvtag lv${lv}">${esc(t('lv.'+lv))}</span>` : '';
+const exLv = ex => { const l=ex && ex.lib ? libByKey(ex.lib) : null; return l ? l.lv : null; };
+const byLevel = (a,b) => (a.lv||0)-(b.lv||0);
+const normQ = x => String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+const qMatch = (q, text) => { const h=normQ(text); return String(q||'').toLowerCase().split(/\s+/).map(normQ).filter(Boolean).every(w=>h.indexOf(w)>=0); };
 const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
 function muscleVolume(days, exOf){
   const vol={}; MUSCLE_KEYS.forEach(k=>vol[k]=0);
@@ -2161,7 +2455,7 @@ function shRenderList(){
   const box=$("shList"), q=($("shSearch").value||'').trim().toLowerCase();
   const dayKey=$("fDay").value;
   const onForm=k=>!!$("sets-"+k);
-  const hit=ex=>!q || (ex.name+' '+ex.short+' '+ex.note).toLowerCase().indexOf(q)>=0;
+  const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
   const row=ex=>{
     const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
     if(shManaging){
@@ -2173,15 +2467,33 @@ function shRenderList(){
       </div>`;
     }
     return `<div class="sh-row">
-        <div class="nm">${esc(ex.name)}<span>${esc(loadDesc(ex))} · ${esc(exNote(ex))}</span></div>
+        <div class="nm">${esc(ex.name)}${lvTag(exLv(ex))}<span>${esc(loadDesc(ex))} · ${esc(exNote(ex))}</span></div>
         <button class="sh-pin${pinned?' on':''}" data-pin="${esc(ex.key)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t('btn.add'))}</button>
       </div>`;
   };
   const pool = CATALOGUE.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key)));
-  box.innerHTML = pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+pool.map(row).join('')
-    : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`;
+  const lrow=l=>{
+    const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.bodyweight');
+    return `<div class="sh-row${ok?'':' off'}">
+        <div class="nm">${esc(t('lib.'+l.key))}${lvTag(l.lv)}<span>${esc(l.p.map(k=>t('mus.'+k)).join(', '))} · ${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>
+        <button class="sh-pin" data-libpin="${l.key}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>
+        <button class="sh-add" data-libadd="${l.key}">${esc(t('btn.add'))}</button>
+      </div>`;
+  };
+  const found = (q && !shManaging) ? LIB.filter(l=>!libLive(l) && qMatch(q, t('lib.'+l.key)+' '+l.p.concat(l.s).map(k=>t('mus.'+k)).join(' ')+(l.lv?' '+t('lv.'+l.lv):'')))
+    .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || byLevel(a,b)).slice(0,60) : [];
+  const libPart = found.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+found.map(lrow).join('')
+    : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}</div>` : '';
+  box.innerHTML = (pool.length || found.length)
+    ? (pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+pool.map(row).join('') : '')+libPart
+    : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}<br>${esc(t('sh.tapnew'))}</div>`
+    : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`+libPart;
 
+}
+async function shLibPick(k, pin){
+  const key=await libToCollection(k);
+  if(key) shPick(key, pin);
 }
 async function shPick(key, pin){
   const dayKey=$("fDay").value;
@@ -2641,7 +2953,7 @@ async function setSex(sx){
 function drawColl(){
   const wrap=$("collWrap"); if(!wrap) return;
   const q=($("collSearch")?$("collSearch").value:'').trim().toLowerCase();
-  const hit=ex=>!q || (ex.name+' '+ex.short+' '+ex.note).toLowerCase().indexOf(q)>=0;
+  const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
   const pool=CATALOGUE.filter(hit);
   const row=ex=>{
     const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
@@ -2753,7 +3065,7 @@ function libRow(l){
   const eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.bodyweight');
   const act=libLive(l) ? `<span class="libin">${esc(t('guide.in'))}</span>`
                        : `<button type="button" class="collbtn" data-add="${l.key}">${esc(t('guide.add'))}</button>`;
-  return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('lib.'+l.key))}`
+  return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('lib.'+l.key))}${lvTag(l.lv)}`
     + `<span class="sub">${esc(mus)}<br>${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>${act}</div>`;
 }
 function weekStart(ds){ const d=new Date((ds||localDate())+'T12:00:00'); d.setDate(d.getDate()-d.getDay()); return localDate(d); }
@@ -2811,7 +3123,8 @@ function drawGuide(){
   const focus=low.slice(0,4);
   $("recWrap").innerHTML = !low.length ? `<div class="restnote">${esc(t('guide.rec.none'))}</div>`
     : focus.map(m=>{
-        const picks=LIB.filter(l=>l.p.indexOf(m.key)>=0 && libUsable(l)).sort((a,b)=>(libLive(a)?1:0)-(libLive(b)?1:0)).slice(0,2);
+        const pool=LIB.filter(l=>l.p.indexOf(m.key)>=0 && libUsable(l)), easy=pool.filter(l=>(l.lv||0)<=3);
+        const picks=(easy.length ? easy : pool).sort((a,b)=>(libLive(a)?1:0)-(libLive(b)?1:0)).slice(0,2);
         const n=vol[m.key], p=w.proj[m.key];
         return `<div class="reclbl">${esc(tf('guide.rec.of',{name:t('mus.'+m.key), n:fmtSetsN(n), lo:lo})+(p>n ? ' · '+tf('guide.rec.plan',{p:fmtSetsN(p)}) : ''))}</div>`
           + (picks.length ? picks.map(libRow).join('') : `<div class="restnote">${esc(t('guide.rec.nothing'))}</div>`);
@@ -2821,7 +3134,7 @@ function drawGuide(){
   if(!guideMus || MUSCLE_KEYS.indexOf(guideMus)<0) guideMus = low.length ? low[0].key : 'chest';
   $("browseMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${m.key===guideMus?' on':''}" data-pick="${m.key}">${esc(t('mus.'+m.key))}</button>`).join('');
   const show=l=>guideAll || libUsable(l);
-  const first=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), also=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
+  const first=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)).sort(byLevel), also=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l)).sort(byLevel);
   const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
   const mn=t('mus.'+guideMus);
   $("browseCount").textContent=tf('guide.count',{n:first.length+also.length, name:mn});
@@ -2829,20 +3142,23 @@ function drawGuide(){
     ? first.map(libRow).join('') + (also.length ? `<div class="reclbl">${esc(tf('guide.alsoworks',{name:mn}))}</div>`+also.map(libRow).join('') : '')
     : `<div class="restnote">${esc(tf('guide.none',{name:mn}))}</div>`;
 }
-async function guideAdd(k){
-  const l=libByKey(k); if(!l) return;
+async function libToCollection(k){
+  const l=libByKey(k); if(!l) return null;
   const have=libOwned(l);
   if(have){
     if(have.retired){ unhide(have.key); await persistExEdits(); }
-    render(); return;
+    return have.key;
   }
   const name=t('lib.'+k);
   const def=normCustomEx({key:cxKeyFor(name), name:name, group:muscleGrp(l.p[0]), def:0,
     added:l.ld==='bw', unit:l.ld==='sec' ? 'sec' : null, prim:l.p, sec:l.s, lib:k});
-  if(!def) return;
+  if(!def) return null;
   customEx.push(def);
-  if(!await persistCatalogue()){ customEx.pop(); rebuildCatalogue(); return; }
-  render();
+  if(!await persistCatalogue()){ customEx.pop(); rebuildCatalogue(); return null; }
+  return def.key;
+}
+async function guideAdd(k){
+  if(await libToCollection(k)) render();
 }
 async function volMuteToggle(k){
   const m=settings.volMute||(settings.volMute=[]), i=m.indexOf(k);
@@ -4181,6 +4497,20 @@ const LANG = {
     'eq.pullup_bar':         'Pull-up bar',
     'eq.rack':               'Squat rack',
     'eq.rings':              'Gymnastic rings',
+    'eq.smith':                'Smith machine',
+    'eq.trap_bar':             'Trap bar',
+    'eq.landmine':             'Landmine',
+    'eq.machine_press':        'Chest press machine',
+    'eq.pec_deck':             'Pec deck',
+    'eq.machine_shoulder':     'Shoulder press machine',
+    'eq.hack_squat':           'Hack squat machine',
+    'eq.hip_machine':          'Hip abductor / adductor',
+    'eq.calf_machine':         'Calf raise machine',
+    'eq.ghd':                  'Glute-ham developer',
+    'eq.box':                  'Plyo box or sturdy step',
+    'eq.parallettes':          'Parallettes',
+    'eq.ab_wheel':             'Ab wheel',
+    'eq.sled':                 'Sled',
     'ex.added':              'added',
     'ex.defaultnote':        'added movement',
     'ex.droptip':            'Remove from this day',
@@ -4347,6 +4677,288 @@ const LANG = {
     'lib.superman':          'Superman hold',
     'lib.upright_row':       'Upright row',
     'lib.wrist_curl':        'Wrist curl',
+    'lv.1':                    'Easy',
+    'lv.2':                    'Beginner',
+    'lv.3':                    'Intermediate',
+    'lv.4':                    'Advanced',
+    'lv.5':                    'Elite',
+    'lib.bb_decline':          'Decline barbell bench press',
+    'lib.db_decline':          'Decline dumbbell press',
+    'lib.bb_floor_press':      'Barbell floor press',
+    'lib.db_floor_press':      'Dumbbell floor press',
+    'lib.smith_bench':         'Smith machine bench press',
+    'lib.smith_incline':       'Smith machine incline press',
+    'lib.machine_chest':       'Machine chest press',
+    'lib.pec_deck_fly':        'Pec deck fly',
+    'lib.incline_db_fly':      'Incline dumbbell fly',
+    'lib.low_cable_fly':       'Low-to-high cable fly',
+    'lib.high_cable_fly':      'High-to-low cable fly',
+    'lib.db_pullover':         'Dumbbell pullover',
+    'lib.landmine_press':      'Landmine press',
+    'lib.kb_floor_press':      'Kettlebell floor press',
+    'lib.band_chest_press':    'Band chest press',
+    'lib.band_fly':            'Band chest fly',
+    'lib.wall_pushup':         'Wall push-up',
+    'lib.incline_pushup':      'Incline push-up',
+    'lib.knee_pushup':         'Knee push-up',
+    'lib.wide_pushup':         'Wide push-up',
+    'lib.decline_pushup':      'Decline push-up',
+    'lib.deficit_pushup':      'Deficit push-up',
+    'lib.clap_pushup':         'Clap push-up',
+    'lib.archer_pushup':       'Archer push-up',
+    'lib.pseudo_planche_pu':   'Pseudo-planche push-up',
+    'lib.one_arm_pushup':      'One-arm push-up',
+    'lib.ring_fly':            'Ring fly',
+    'lib.straight_bar_dip':    'Straight bar dip',
+    'lib.arnold_press':        'Arnold press',
+    'lib.seated_db_ohp':       'Seated dumbbell shoulder press',
+    'lib.smith_ohp':           'Smith machine shoulder press',
+    'lib.machine_ohp':         'Machine shoulder press',
+    'lib.push_press':          'Push press',
+    'lib.z_press':             'Z press',
+    'lib.cable_front_raise':   'Cable front raise',
+    'lib.plate_front_raise':   'Plate front raise',
+    'lib.lean_lat_raise':      'Leaning lateral raise',
+    'lib.seated_lat_raise':    'Seated lateral raise',
+    'lib.db_y_raise':          'Incline Y-raise',
+    'lib.cable_y_raise':       'Cable Y-raise',
+    'lib.kb_upright_row':      'Kettlebell upright row',
+    'lib.cable_upright_row':   'Cable upright row',
+    'lib.band_ohp':            'Band overhead press',
+    'lib.kb_windmill':         'Kettlebell windmill',
+    'lib.kb_halo':             'Kettlebell halo',
+    'lib.elevated_pike':       'Elevated pike push-up',
+    'lib.wall_walk':           'Wall walk',
+    'lib.wall_hs_hold':        'Wall handstand hold',
+    'lib.wall_hspu':           'Wall handstand push-up',
+    'lib.handstand_hold':      'Freestanding handstand',
+    'lib.hspu':                'Freestanding handstand push-up',
+    'lib.planche_lean':        'Planche lean',
+    'lib.tuck_planche':        'Tuck planche',
+    'lib.straddle_planche':    'Straddle planche',
+    'lib.full_planche':        'Full planche',
+    'lib.ytw_raise':           'Prone Y-T-W raise',
+    'lib.scap_pushup':         'Scapular push-up',
+    'lib.oh_cable_ext':        'Overhead cable extension',
+    'lib.rope_pushdown':       'Rope pushdown',
+    'lib.one_arm_pushdown':    'Single-arm cable pushdown',
+    'lib.db_kickback':         'Dumbbell kickback',
+    'lib.cable_kickback':      'Cable triceps kickback',
+    'lib.jm_press':            'JM press',
+    'lib.ez_oh_ext':           'EZ-bar overhead extension',
+    'lib.db_skull_crusher':    'Dumbbell skull crusher',
+    'lib.tate_press':          'Tate press',
+    'lib.smith_cg_bench':      'Smith machine close-grip press',
+    'lib.band_pushdown':       'Band pushdown',
+    'lib.bw_tri_ext':          'Bodyweight triceps extension',
+    'lib.ring_tri_ext':        'Ring triceps extension',
+    'lib.korean_dip':          'Korean dip',
+    'lib.bench_dip_feet_up':   'Feet-elevated bench dip',
+    'lib.pendlay_row':         'Pendlay row',
+    'lib.yates_row':           'Underhand barbell row',
+    'lib.tbar_row':            'T-bar row',
+    'lib.meadows_row':         'Meadows row',
+    'lib.cs_db_row':           'Chest-supported dumbbell row',
+    'lib.seal_row':            'Seal row',
+    'lib.kb_row':              'Kettlebell row',
+    'lib.one_arm_cable_row':   'Single-arm cable row',
+    'lib.wide_cable_row':      'Wide-grip cable row',
+    'lib.cg_pulldown':         'Close-grip pulldown',
+    'lib.one_arm_pulldown':    'Single-arm pulldown',
+    'lib.straight_arm_pd':     'Straight-arm pulldown',
+    'lib.smith_row':           'Smith machine row',
+    'lib.band_row':            'Band row',
+    'lib.band_pulldown':       'Band lat pulldown',
+    'lib.rack_pull':           'Rack pull',
+    'lib.scap_pullup':         'Scapular pull-up',
+    'lib.inverted_row':        'Inverted row',
+    'lib.table_row':           'Table row',
+    'lib.neg_pullup':          'Negative pull-up',
+    'lib.band_pullup':         'Band-assisted pull-up',
+    'lib.neg_chinup':          'Negative chin-up',
+    'lib.wide_pullup':         'Wide-grip pull-up',
+    'lib.neutral_pullup':      'Neutral-grip pull-up',
+    'lib.commando_pullup':     'Commando pull-up',
+    'lib.lsit_pullup':         'L-sit pull-up',
+    'lib.archer_pullup':       'Archer pull-up',
+    'lib.typewriter_pullup':   'Typewriter pull-up',
+    'lib.bar_muscle_up':       'Bar muscle-up',
+    'lib.ring_muscle_up':      'Ring muscle-up',
+    'lib.one_arm_pullup':      'One-arm pull-up',
+    'lib.tuck_front_lever':    'Tuck front lever',
+    'lib.front_lever':         'Front lever',
+    'lib.back_lever':          'Back lever',
+    'lib.skin_the_cat':        'Skin the cat',
+    'lib.trap_bar_shrug':      'Trap bar shrug',
+    'lib.cable_shrug':         'Cable shrug',
+    'lib.smith_shrug':         'Smith machine shrug',
+    'lib.kb_shrug':            'Kettlebell shrug',
+    'lib.overhead_carry':      'Overhead carry',
+    'lib.reverse_pec_deck':    'Reverse pec deck',
+    'lib.cable_rear_fly':      'Cable rear-delt fly',
+    'lib.cs_rear_fly':         'Chest-supported rear fly',
+    'lib.band_face_pull':      'Band face pull',
+    'lib.ring_face_pull':      'Ring face pull',
+    'lib.preacher_curl':       'EZ-bar preacher curl',
+    'lib.db_preacher_curl':    'Dumbbell preacher curl',
+    'lib.incline_db_curl':     'Incline dumbbell curl',
+    'lib.concentration_curl':  'Concentration curl',
+    'lib.spider_curl':         'Spider curl',
+    'lib.zottman_curl':        'Zottman curl',
+    'lib.reverse_curl':        'Reverse curl',
+    'lib.bayesian_curl':       'Bayesian cable curl',
+    'lib.rope_hammer_curl':    'Rope hammer curl',
+    'lib.drag_curl':           'Drag curl',
+    'lib.kb_curl':             'Kettlebell curl',
+    'lib.ring_curl':           'Ring biceps curl',
+    'lib.bar_bw_curl':         'Bodyweight bar curl',
+    'lib.reverse_wrist_curl':  'Reverse wrist curl',
+    'lib.bb_wrist_curl':       'Barbell wrist curl',
+    'lib.suitcase_carry':      'Suitcase carry',
+    'lib.kb_farmer_carry':     'Kettlebell farmer carry',
+    'lib.trap_bar_carry':      'Trap bar carry',
+    'lib.plate_pinch':         'Plate pinch hold',
+    'lib.one_arm_hang':        'One-arm dead hang',
+    'lib.towel_hang':          'Towel hang',
+    'lib.active_hang':         'Active hang',
+    'lib.smith_squat':         'Smith machine squat',
+    'lib.hack_squat_m':        'Hack squat',
+    'lib.box_squat':           'Box squat',
+    'lib.pause_squat':         'Pause squat',
+    'lib.zercher_squat':       'Zercher squat',
+    'lib.db_squat':            'Dumbbell squat',
+    'lib.kb_goblet_squat':     'Kettlebell goblet squat',
+    'lib.landmine_squat':      'Landmine squat',
+    'lib.bb_lunge':            'Barbell lunge',
+    'lib.walking_lunge':       'Walking lunge',
+    'lib.reverse_lunge':       'Reverse lunge',
+    'lib.bb_split_squat':      'Barbell split squat',
+    'lib.smith_split_squat':   'Smith machine split squat',
+    'lib.lateral_lunge':       'Lateral lunge',
+    'lib.db_step_up_box':      'Box step-up',
+    'lib.leg_press_1leg':      'Single-leg leg press',
+    'lib.leg_ext_1leg':        'Single-leg leg extension',
+    'lib.sled_push':           'Sled push',
+    'lib.sled_drag':           'Backward sled drag',
+    'lib.band_squat':          'Band squat',
+    'lib.box_sit_squat':       'Sit-to-stand',
+    'lib.wall_sit':            'Wall sit',
+    'lib.bw_reverse_lunge':    'Bodyweight reverse lunge',
+    'lib.bw_step_up':          'Bodyweight step-up',
+    'lib.bw_lunge':            'Bodyweight walking lunge',
+    'lib.bw_split_squat':      'Bodyweight split squat',
+    'lib.bw_bulgarian':        'Bodyweight Bulgarian split squat',
+    'lib.jump_squat':          'Jump squat',
+    'lib.jump_lunge':          'Jumping lunge',
+    'lib.box_jump':            'Box jump',
+    'lib.broad_jump':          'Broad jump',
+    'lib.cossack_squat':       'Cossack squat',
+    'lib.skater_squat':        'Skater squat',
+    'lib.assisted_pistol':     'Assisted pistol squat',
+    'lib.box_pistol':          'Box pistol squat',
+    'lib.sissy_squat':         'Sissy squat',
+    'lib.shrimp_squat':        'Shrimp squat',
+    'lib.dragon_pistol':       'Dragon pistol squat',
+    'lib.stiff_leg_dl':        'Stiff-leg deadlift',
+    'lib.sl_db_rdl':           'Single-leg dumbbell RDL',
+    'lib.kb_rdl':              'Kettlebell RDL',
+    'lib.smith_rdl':           'Smith machine RDL',
+    'lib.cable_pull_through':  'Cable pull-through',
+    'lib.db_leg_curl':         'Dumbbell leg curl',
+    'lib.sl_leg_curl':         'Single-leg leg curl',
+    'lib.band_leg_curl':       'Band leg curl',
+    'lib.ghr':                 'Glute-ham raise',
+    'lib.slider_leg_curl':     'Slider leg curl',
+    'lib.sl_slider_curl':      'Single-leg slider curl',
+    'lib.hamstring_walkout':   'Hamstring walkout',
+    'lib.nordic_neg':          'Nordic curl negative',
+    'lib.bw_sl_rdl':           'Bodyweight single-leg RDL',
+    'lib.trap_bar_dl':         'Trap bar deadlift',
+    'lib.sumo_dl':             'Sumo deadlift',
+    'lib.deficit_dl':          'Deficit deadlift',
+    'lib.db_deadlift':         'Dumbbell deadlift',
+    'lib.kb_deadlift':         'Kettlebell deadlift',
+    'lib.db_hip_thrust':       'Dumbbell hip thrust',
+    'lib.smith_hip_thrust':    'Smith machine hip thrust',
+    'lib.bb_glute_bridge':     'Barbell glute bridge',
+    'lib.cable_kickback_g':    'Cable glute kickback',
+    'lib.hip_abduction':       'Hip abduction machine',
+    'lib.hip_adduction':       'Hip adduction machine',
+    'lib.cable_abduction':     'Cable hip abduction',
+    'lib.band_walk':           'Banded lateral walk',
+    'lib.band_hip_thrust':     'Banded hip thrust',
+    'lib.kb_sumo_squat':       'Kettlebell sumo squat',
+    'lib.frog_pump':           'Frog pump',
+    'lib.donkey_kick':         'Donkey kick',
+    'lib.fire_hydrant':        'Fire hydrant',
+    'lib.clamshell':           'Clamshell',
+    'lib.sl_glute_bridge':     'Single-leg glute bridge',
+    'lib.sl_hip_thrust':       'Single-leg hip thrust',
+    'lib.glute_bridge_hold':   'Glute bridge hold',
+    'lib.calf_machine_raise':  'Standing calf raise machine',
+    'lib.leg_press_calf':      'Leg press calf raise',
+    'lib.smith_calf_raise':    'Smith machine calf raise',
+    'lib.bb_calf_raise':       'Barbell calf raise',
+    'lib.sl_calf_raise':       'Single-leg calf raise',
+    'lib.tib_raise':           'Tibialis raise',
+    'lib.pogo_jump':           'Pogo jump',
+    'lib.reverse_crunch':      'Reverse crunch',
+    'lib.bicycle_crunch':      'Bicycle crunch',
+    'lib.lying_leg_raise':     'Lying leg raise',
+    'lib.bird_dog':            'Bird dog',
+    'lib.mountain_climber':    'Mountain climber',
+    'lib.russian_twist':       'Russian twist',
+    'lib.heel_tap':            'Heel tap',
+    'lib.flutter_kick':        'Flutter kick',
+    'lib.sit_up':              'Sit-up',
+    'lib.decline_situp':       'Decline sit-up',
+    'lib.v_up':                'V-up',
+    'lib.hollow_rock':         'Hollow rock',
+    'lib.plank_reach':         'Plank shoulder tap',
+    'lib.rkc_plank':           'RKC plank',
+    'lib.copenhagen':          'Copenhagen plank',
+    'lib.bear_crawl':          'Bear crawl',
+    'lib.hanging_knee_raise':  'Hanging knee raise',
+    'lib.toes_to_bar':         'Toes-to-bar',
+    'lib.windshield_wiper':    'Windshield wiper',
+    'lib.tuck_lsit':           'Tuck L-sit',
+    'lib.lsit':                'L-sit',
+    'lib.vsit':                'V-sit',
+    'lib.dragon_flag':         'Dragon flag',
+    'lib.human_flag':          'Human flag',
+    'lib.ab_wheel_knee':       'Ab wheel rollout from knees',
+    'lib.ab_wheel_stand':      'Standing ab wheel rollout',
+    'lib.cable_woodchop':      'Cable woodchop',
+    'lib.pallof_press':        'Pallof press',
+    'lib.band_pallof':         'Band Pallof press',
+    'lib.landmine_twist':      'Landmine rotation',
+    'lib.weighted_plank':      'Weighted plank',
+    'lib.db_side_bend':        'Dumbbell side bend',
+    'lib.weighted_situp':      'Weighted decline sit-up',
+    'lib.kb_getup':            'Turkish get-up',
+    'lib.reverse_hyper':       'Reverse hyperextension',
+    'lib.weighted_back_ext':   'Weighted back extension',
+    'lib.ghd_back_ext':        'GHD back extension',
+    'lib.jefferson_curl':      'Jefferson curl',
+    'lib.swimmer':             'Prone swimmer',
+    'lib.seated_good_morning': 'Seated good morning',
+    'lib.power_clean':         'Power clean',
+    'lib.hang_clean':          'Hang power clean',
+    'lib.power_snatch':        'Power snatch',
+    'lib.clean_and_jerk':      'Clean and jerk',
+    'lib.bb_thruster':         'Barbell thruster',
+    'lib.db_thruster':         'Dumbbell thruster',
+    'lib.db_snatch':           'Dumbbell snatch',
+    'lib.kb_clean':            'Kettlebell clean',
+    'lib.kb_snatch':           'Kettlebell snatch',
+    'lib.kb_clean_press':      'Kettlebell clean and press',
+    'lib.kb_1arm_swing':       'Single-arm kettlebell swing',
+    'lib.man_maker':           'Man maker',
+    'lib.burpee':              'Burpee',
+    'lib.burpee_pullup':       'Burpee pull-up',
+    'lib.squat_thrust':        'Squat thrust',
+    'lib.inchworm':            'Inchworm',
+    'lib.crab_walk':           'Crab walk',
     'load.bwkg':             'bodyweight +kg',
     'load.seconds':          'seconds',
     'log.addmove':           '+ Add movement',
@@ -4599,6 +5211,8 @@ const LANG = {
     'sh.title.manage':       'Manage movements',
     'sh.title.new':          'New movement',
     'sh.yours':              'Your movements',
+    'sh.lib':                'From the library',
+    'sh.libhint':            'Type to search all {n} movements in the library, by name, muscle or level.',
     'stat.bf':               'Body Fat <span class="sub-note">· estimate · US Navy girth method</span>',
     'stat.bf.calc':          '· estimate · US Navy girth method',
     'stat.bf.manual':        '· your own figure',
@@ -4752,7 +5366,7 @@ const LANG = {
   $("collWrap").onclick=ev=>{ const b=ev.target.closest('[data-cedit],[data-cret]'); if(!b) return;
     if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
-    if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
+    if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.libadd) shLibPick(d.libadd,false); else if(d.libpin) shLibPick(d.libpin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
   $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band]'); if(!b) return; const d=b.dataset;
     if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute); else if(d.band) volBandPick(d.band);
     else { guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
