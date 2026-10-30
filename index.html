@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-tcVThLCI1CPCu2+LkxKX9S9qSchF53lcfQu7Pa+Psm0='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-337DfLQ37KmA9OHBzRtW9QvjgGUZSpe21AGViOM+8XA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1068,7 +1068,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.7';
+const APP_VERSION = '6.8';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -1994,6 +1994,7 @@ function normSettings(s){
   if(Array.isArray(s.chartEx)){ sel=[]; s.chartEx.forEach(x=>{ if(typeof x==='string' && x && sel.indexOf(x)<0 && sel.length<MAX_SERIES) sel.push(x); }); }
   return {
     kcalTarget: (isNaN(k)||k<=0) ? DEF_TARGET : Math.round(k),
+    kcalOwn: !!s.kcalOwn,
     chartEx: sel,
     restSec: (isNaN(r)||r<10||r>900) ? DEF_REST : r,
     restSound: (s.restSound==null) ? true : !!s.restSound,
@@ -2183,7 +2184,7 @@ async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','chartEx','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
+const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
@@ -3307,7 +3308,7 @@ function drawReview(){
   if(!wk.length) one=t('rev.one.empty');
   else if(plannedSoFar && done.length<plannedSoFar) one=tf('rev.one.sessions',{n:done.length, planned:plannedSoFar});
   else if(pd.length>=3 && pAvg<pok) one=tf('rev.one.protein',{avg:pAvg, ok:pok});
-  else if(rec!=null && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
+  else if(rec!=null && !settings.kcalOwn && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
   else if(kd.length>=4 && Math.abs(kAvg-tgt)>tgt*0.1) one=tf(kAvg>tgt?'rev.one.over':'rev.one.under',{avg:kAvg.toLocaleString(), target:tgt.toLocaleString()});
   else if(gap) one=tf('rev.one.muscle',{name:t('mus.'+gap.key)});
   else one=t('rev.one.ok');
@@ -4198,7 +4199,7 @@ function drawCalibration(){
     <button class="apply${settings.kcalTarget===target?' done':''}" id="applyBtn">${settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
   $("applyBtn").onclick=applyTarget;
 }
-async function applyTarget(){ const rec=calRecommend().target; if(rec==null) return; settings.kcalTarget=rec; await persistSettings(); render(); }
+async function applyTarget(){ const rec=calRecommend().target; if(rec==null) return; settings.kcalTarget=rec; settings.kcalOwn=false; await persistSettings(); render(); }
 
 function drawProg(){
   const wrap=$("progWrap"); wrap.innerHTML='';
@@ -4375,13 +4376,13 @@ function saveBackupFile(){
 
 function refreshManualTarget(){
   const cur=$("mtCurrent"), inp=$("manualKcal");
-  if(cur) cur.textContent=tf('calib.current',{n:settings.kcalTarget});
+  if(cur) cur.textContent=tf('calib.current',{n:settings.kcalTarget})+(settings.kcalOwn?' · '+t('calib.yours'):'');
   if(inp) inp.placeholder=String(settings.kcalTarget);
 }
 function setManualTarget(){
   const v=num($("manualKcal").value);
   if(v==null||v<=0){ flash(t('msg.entertarget'),true); return; }
-  settings.kcalTarget=Math.round(v);
+  settings.kcalTarget=Math.round(v); settings.kcalOwn=true;
   persistSettings(); $("manualKcal").value=''; render();
   flash(tf('msg.targetset',{n:settings.kcalTarget}));
 }
@@ -4408,7 +4409,7 @@ function buildAiReport(){
   L.push('Selected goal (calibration): '+goalLabel(settings.calRate)+'   [options: \u22120.5 / \u22120.25 / maintain / +0.25 / +0.5]');
   L.push('Calibration window selected: '+periodLabel(settings.calPeriod));
   L.push('Chart window selected: '+periodLabel(chartPeriod));
-  L.push('Calorie target currently set: '+settings.kcalTarget+' kcal/day');
+  L.push('Calorie target currently set: '+settings.kcalTarget+' kcal/day'+(settings.kcalOwn?' (set by hand)':' (from the estimate or default)'));
   L.push('Protein target (daily): '+protTarget()+' g, '+(settings.protFloor!=null?'set by hand':'automatic for '+(settings.sex||'sex not set'))+'; anything from '+protOk()+' g counts as fine');
   L.push('');
   L.push('--- HOW THESE NUMBERS WERE DERIVED ---');
@@ -4758,6 +4759,7 @@ const LANG = {
     'calib.tomaintain':      'to maintain',
     'calib.trend':           'Weight trend',
     'calib.window':          'Window',
+    'calib.yours':           'your own',
     'cd.add':                '+ Add cardio',
     'cd.empty1':             'No cardio on the list.',
     'cd.empty2':             'Add whatever you actually do — a name and how long you usually go for.',
