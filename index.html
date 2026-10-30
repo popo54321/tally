@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-337DfLQ37KmA9OHBzRtW9QvjgGUZSpe21AGViOM+8XA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RYt00eDTvTdNoHtzcXj8apZvi9lgAJbzWPQtwnwB21A='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -358,6 +358,16 @@
   .sh-foot{display:flex;flex:none;gap:9px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)}
   .sh-foot button{flex:1;border:2px solid var(--line);border-radius:9px;padding:12px;font-family:var(--font-body);font-weight:800;font-size:12px;letter-spacing:.4px;text-transform:uppercase;cursor:pointer;background:var(--panel-2);color:var(--ink-dim);min-height:44px}
   .sh-foot .prim{background:var(--orange);color:#fff}
+  .sh.abt{max-width:560px}
+  .abtext h3{font-family:var(--font-display);font-weight:var(--display-weight,400);letter-spacing:var(--display-spacing,1px);font-size:18px;color:var(--ink);margin:16px 0 6px}
+  .abtext p,.abtext li{font-family:var(--font-body);font-size:14.5px;line-height:1.6;color:var(--ink-dim);margin:0 0 8px;max-width:62ch}
+  .abtext b{color:var(--ink)}
+  .abtext ul{padding-left:18px;margin:4px 0 8px}
+  .abtext li{margin-bottom:6px}
+  .ab-sec:first-child h3{margin-top:2px}
+  .ab-sec.key{background:var(--panel-2);border:2px solid var(--brass);border-radius:10px;padding:2px 14px 6px;margin:14px 0}
+  .ab-sec.key h3{color:var(--brass-bright)}
+  .abhint{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);margin-top:10px;line-height:1.5}
   .sh-msg{font-family:var(--font-mono);font-size:11px;color:var(--brass);min-height:14px;margin-top:8px;line-height:1.5}
   .sh-msg.err{color:var(--rust)}
   .sh-empty{font-family:var(--font-mono);font-size:11.5px;color:var(--txt-faint);padding:20px 4px;text-align:center;line-height:1.7}
@@ -916,6 +926,11 @@
       </div>
     </div>
 
+    <div class="card col-12" id="cardAbout">
+      <div class="lbl" data-i18n="about.card">About Tally</div>
+      <div class="abtext" id="abCard"></div>
+    </div>
+
     <div class="col-12 appver" id="appVer"></div>
 
   </div>
@@ -957,6 +972,20 @@
   </div>
 </div>
 
+<div class="shwrap" id="abWrap">
+  <div class="sh abt" role="dialog" aria-modal="true" aria-labelledby="abTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="abTitle" data-i18n="about.title">Welcome to Tally</div>
+      <button type="button" class="sh-x" id="abX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list abtext" id="abText"></div>
+    <div class="abhint" data-i18n="about.hint">You can read this again any time in Settings → About Tally.</div>
+    <div class="sh-foot">
+      <button type="button" id="abNever" data-i18n="about.never">Don’t show again</button>
+      <button type="button" class="prim" id="abOk" data-i18n="about.ok">Got it</button>
+    </div>
+  </div>
+</div>
 <div class="shwrap" id="shWrap">
   <div class="sh" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1">
     <div class="sh-head">
@@ -2740,8 +2769,14 @@ function dlgClose(id){
   if(dlgReturn && document.contains(dlgReturn) && dlgReturn.focus) dlgReturn.focus({preventScroll:true});
   dlgReturn=null;
 }
+const ABOUT_KEY='tally:aboutSeen:v1';
+const aboutHtml = () => ['why','parts','origin','gym','yours'].map(k=>`<section class="ab-sec${k==='parts'?' key':''}">${t('about.'+k)}</section>`).join('');
+function abOpen(){ $("abText").innerHTML=aboutHtml(); $("abText").scrollTop=0; dlgOpen("abWrap"); }
+function abClose(){ dlgClose("abWrap"); }
+async function abNever(){ try{ await STORE.set(ABOUT_KEY,'1'); }catch(e){} abClose(); }
+async function abMaybeShow(){ let seen=null; try{ seen=await STORE.get(ABOUT_KEY); }catch(e){} if(!seen) abOpen(); }
 function tallyBack(){
-  const open=[['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose]]
+  const open=[['abWrap',abClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose]]
     .find(([id])=>{ const el=$(id); return el && el.classList.contains('show'); });
   if(!open) return false;
   open[1](); return true;
@@ -4662,6 +4697,16 @@ function flash(msg,err){
 
 const LANG = {
   en: {
+    'about.card':              'About Tally',
+    'about.gym':               '<h3>Built on the gym floor</h3><p>I use Tally while I train, so it fixes the small things that annoyed me. The stretch timer gives you a few seconds to get into position, then counts down, so you never log the time spent getting into the stretch. The Android version exists because phone browsers won’t ring an alarm with the screen off.</p>',
+    'about.hint':              'You can read this again any time in Settings → About Tally.',
+    'about.never':             'Don’t show again',
+    'about.ok':                'Got it',
+    'about.origin':            '<h3>How it started</h3><p>Tally didn’t start as a fitness app. It started as a simple calorie tracker, just for me.</p><p>Then I wanted to log my workouts in the same place, so I added that. Then I noticed the calorie formulas didn’t match what my scale was telling me, so I made the target adapt to my own logs. Every time something annoyed me, I fixed it: protein, rest timers, stretches, sets per muscle, progression.</p><p>Every feature in Tally is there because I needed it.</p>',
+    'about.parts':             '<h3>Use only the part you need</h3><p>Every part of Tally works on its own and stays quiet when you leave it empty.</p><ul><li><b>Only lifting?</b> Ignore Body &amp; Food completely. Progression, the rest timer and weekly sets per muscle all still work.</li><li><b>Only weight and food?</b> Use it for your weight trend and maintenance estimate and never log a workout.</li><li><b>Girths are optional.</b> Body fat only appears once you log the measurements it needs.</li><li><b>Skip a day, or a month?</b> Skip food at the weekend, or stop measuring for three months, and you just see a dash: —. No streaks, no scores, no guilt.</li></ul>',
+    'about.title':             'Welcome to Tally',
+    'about.why':               '<h3>Why I made Tally</h3><p>I got tired of fitness apps.</p><p>Most of them want everything before they let you do anything. Fifteen screens about your age, sleep and goals before you can log one bicep curl. And if you only use half the app, the other half nags you: red badges, broken streaks, warnings that you’re “off plan”.</p>',
+    'about.yours':             '<h3>Your numbers win</h3><p>Tally’s numbers are suggestions. Yours are the final word.</p><ul><li><b>Calories and protein:</b> the app gives you its estimate. If you have your own number, set it, and the whole app follows yours. The estimate stays on the card in case you want it, but the app won’t push it on you.</li><li><b>Lifts:</b> the target reps show as faint text in the box. Lift less because your shoulder’s tight, or do two extra reps because you feel strong. What you type is what gets saved.</li><li><b>Sets and reps:</b> pick your own weekly set range, mute muscles you don’t train, and set your own rep range for each movement.</li></ul><p>The maths is a second opinion, not a boss. Use it when you want a starting point, and ignore it when you already know what you want.</p>',
     'act.ath.hours':         '10+ hours',
     'act.ath.name':          'Athlete',
     'act.ath.note':          'Twice a day most days, or heavy physical work — building, farming, removals — on top of real training. This is rare. If you are not sure, you are not this.',
@@ -6024,6 +6069,8 @@ const LANG = {
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
+  $("abX").onclick=abClose; $("abOk").onclick=abClose; $("abNever").onclick=abNever;
+  $("abWrap").onclick=ev=>{ if(ev.target===$("abWrap")) abClose(); };
   $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
   $("histMore").onclick=()=>{ histShown+=HIST_PAGE; drawHistory(); };
   $("histBody").onclick=ev=>{ const b=ev.target.closest('.del'); if(b) removeEntry(b.dataset.d, b); };
@@ -6076,7 +6123,7 @@ const LANG = {
   $("restMinus").onclick=()=>restNudge(-15);
   $("restPlus").onclick=()=>restNudge(30);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(restTimer) timerTick(); drawExactNotice(); });
-  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ shClose(); sxClose(); cdClose(); dpClose(); } });
+  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); shClose(); sxClose(); cdClose(); dpClose(); } });
   await purgeOldNamespace();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   await loadTheme();
@@ -6087,7 +6134,9 @@ const LANG = {
   syncRestSegs(); drawExactNotice();
   applyLang();
   fillForm(today); render();
+  $("abCard").innerHTML=aboutHtml();
   if(loadFailed) flash(t('msg.loadfail.read'),true);
+  else abMaybeShow();
  }catch(err){
   console.error('init failed',err);
   const b=document.createElement('div');
