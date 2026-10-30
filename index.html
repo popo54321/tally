@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-2eeV3EF1OnMohAlTHM8LE73PefKOfrk1WJHOLM8Eg20='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-tcVThLCI1CPCu2+LkxKX9S9qSchF53lcfQu7Pa+Psm0='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -796,6 +796,16 @@
       <div class="sxnote" id="instHow"></div>
       <button type="button" class="ghostbtn" id="instBtn" style="margin-top:10px" data-i18n="inst.now">Install</button>
     </div>
+    <div class="card col-12" id="cardUpdate">
+      <div class="lbl" data-i18n="upd.title">Version &amp; Updates</div>
+      <div class="sxnote" id="updNow"></div>
+      <div class="sxnote" id="updHow"></div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
+        <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <span class="donsub" id="updMsg"></span>
+      </div>
+    </div>
     <div class="card col-12">
       <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
       <div class="syncrow">
@@ -1058,7 +1068,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.6';
+const APP_VERSION = '6.7';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3334,6 +3344,25 @@ async function instGo(){
   try{ await p.userChoice; }catch(e){}
   drawInstall();
 }
+function drawUpdate(){
+  const android=!!window.AndroidFile;
+  $("updNow").textContent=tf('upd.now',{v:APP_VERSION});
+  $("updHow").textContent=t(android ? 'upd.android' : 'upd.web');
+  $("updGet").style.display = android ? '' : 'none';
+  $("updCheck").style.display = android ? 'none' : '';
+}
+const updMsg = m => { $("updMsg").textContent=m||''; };
+async function updCheck(){
+  const sw=navigator.serviceWorker;
+  const reg=sw ? await sw.getRegistration().catch(()=>null) : null;
+  if(!reg){ location.reload(); return; }
+  updMsg(t('upd.checking'));
+  let found=false;
+  sw.addEventListener('controllerchange', ()=>{ found=true; updMsg(t('upd.found')); setTimeout(()=>location.reload(), 600); }, {once:true});
+  try{ await reg.update(); }
+  catch(e){ updMsg(t('upd.offline')); return; }
+  setTimeout(()=>{ if(!found && !reg.installing && !reg.waiting) updMsg(t('upd.latest')); }, 4000);
+}
 function instLater(){ try{ localStorage.setItem(INST_SNOOZE, String(Date.now())); }catch(e){} drawInstall(); }
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); instPrompt=e; drawInstall(); });
 window.addEventListener('appinstalled', ()=>{ instPrompt=null; drawInstall(); flash(t('inst.done')); });
@@ -3840,7 +3869,7 @@ const stalePages = new Set();
 function drawPage(k){ if(stalePages.delete(k)) PAGE_DRAW[k](); }
 function stale(k){ stalePages.add(k); if(k===curPage) drawPage(k); }
 function render(){
-  drawSched(); drawBackup(); drawInstall(); syncChartSegs();
+  drawSched(); drawBackup(); drawInstall(); drawUpdate(); syncChartSegs();
   PAGES.forEach(p=>stalePages.add(p));
   drawPage(curPage);
 }
@@ -5904,6 +5933,16 @@ const LANG = {
     'theme.title':           'Appearance <span class="sub-note">· font and colours, saved on this device</span>',
     'unit.min':              'min',
     'unit.reps':             'reps',
+    'upd.android':           'This app never connects to the internet, so it cannot check by itself. The button opens the download page in your browser: if the version there is newer than yours, download the .apk and install it over this one. Your data stays.',
+    'upd.check':             'Check for update',
+    'upd.checking':          'Checking…',
+    'upd.found':             'New version found. Reloading…',
+    'upd.get':               'Get the latest version',
+    'upd.latest':            'You have the latest version.',
+    'upd.now':               'You have Tally {v}.',
+    'upd.offline':           'Could not check. Are you online?',
+    'upd.title':             'Version & Updates',
+    'upd.web':               'The web app updates itself whenever you open it with a connection. Tap below to check right now.',
     'ver.android':           'Android app',
     'ver.app':               'Tally',
     'ver.build':             'build {id}',
@@ -5982,6 +6021,7 @@ const LANG = {
   $("gymAdd").onclick=gymAddOwn;
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
+  $("updCheck").onclick=updCheck;
   $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
   $("histMore").onclick=()=>{ histShown+=HIST_PAGE; drawHistory(); };
   $("histBody").onclick=ev=>{ const b=ev.target.closest('.del'); if(b) removeEntry(b.dataset.d, b); };
