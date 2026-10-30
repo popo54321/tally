@@ -45,8 +45,15 @@ it. Adding it to your home screen makes that far less likely, and a backup file 
 
 ## Support
 
-Tally is free for everyone. If it helps your training, you can chip in on
-[Ko-fi](https://ko-fi.com/popo54321) or, in Thailand, on [EasyDonate](https://ezdn.app/popo54321).
+**Good tools should be accessible.** Tally is free for everyone.
+
+No premium features. No locked functions. No subscription.
+
+If Tally makes your training easier and you want to help keep it available, voluntary contributions
+are appreciated: [Ko-fi](https://ko-fi.com/popo54321), or in Thailand,
+[EasyDonate](https://ezdn.app/popo54321).
+
+**Use it because it's useful. Support it because you believe in it.**
 
 ## Licence
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-eC/K1qRidJlR2lUm4JXFltZzqg6VVRp4bzHCbv3hO7E='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-2eeV3EF1OnMohAlTHM8LE73PefKOfrk1WJHOLM8Eg20='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -194,6 +194,8 @@
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
   .protown{margin:8px 0 10px}
+  .donbody{font-size:12px;line-height:1.7;color:var(--ink-dim)}
+  .donbody b{color:var(--ink)}
   .donrow{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-top:12px}
   a.donbtn{display:inline-block;min-width:17em;text-align:center;text-decoration:none;border-color:var(--brass);color:var(--brass-bright);font-weight:600}
   .donsub{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);line-height:1.6}
@@ -778,7 +780,7 @@
   <div class="grid page" id="pg-settings">
     <div class="card col-12" id="cardDonate">
       <div class="lbl" data-i18n-html="don.title">Support Tally <span class="sub-note">· free for everyone, always</span></div>
-      <div class="sxnote" data-i18n="don.body">Tally is free for everyone, with no account and nothing sent anywhere. If it helps your training and you would like to keep it going, you can chip in. It is entirely optional and changes nothing in the app.</div>
+      <div class="sxnote donbody" data-i18n-html="don.body"><b>Good tools should be accessible.</b> Tally is free for everyone.<br><br>No premium features. No locked functions. No subscription.<br><br>If Tally makes your training easier and you want to help keep it available, voluntary contributions are appreciated.<br><br><b>Use it because it’s useful. Support it because you believe in it.</b></div>
       <div class="donrow">
         <a class="ghostbtn donbtn" id="donKofi" href="https://ko-fi.com/popo54321" target="_blank" rel="noopener" data-i18n="don.kofi">Donate on Ko-fi</a>
         <span class="donsub" data-i18n="don.kofi.sub">International · card or PayPal</span>
@@ -4818,7 +4820,7 @@ const LANG = {
     'del.clears.1':          'Removes {name} and clears it from 1 logged day.',
     'del.removes':           'Removes {name}. Nothing is logged against it.',
     'disc':                  '<b>These are estimates for tracking your own training, not medical or dietary advice.</b> Every formula here is a population average applied to one person, and every one of them can be wrong for you. Nothing in this app is a diagnosis, a treatment, or a substitute for a doctor or a registered dietitian. If you are pregnant, under 18, managing a medical condition or an eating disorder, or taking medication affected by diet, speak to a qualified professional before acting on any number here. You are responsible for what you do with it.',
-    'don.body':              'Tally is free for everyone, with no account and nothing sent anywhere. If it helps your training and you would like to keep it going, you can chip in. It is entirely optional and changes nothing in the app.',
+    'don.body':              '<b>Good tools should be accessible.</b> Tally is free for everyone.<br><br>No premium features. No locked functions. No subscription.<br><br>If Tally makes your training easier and you want to help keep it available, voluntary contributions are appreciated.<br><br><b>Use it because it’s useful. Support it because you believe in it.</b>',
     'don.kofi':              'Donate on Ko-fi',
     'don.kofi.sub':          'International · card or PayPal',
     'don.thai':              'Donate on EasyDonate',
