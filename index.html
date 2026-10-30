@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-VO1tU4PZaGUWqmVfwR+8SFLShDAXcAB8tWFmEAVEXqM='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-eC/K1qRidJlR2lUm4JXFltZzqg6VVRp4bzHCbv3hO7E='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@
 })();
 </script>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tally</title>
+<title>Tally — Your Private Training &amp; Body Log</title>
 <style>
   @font-face{font-family:'Bangers';src:url('fonts/Bangers.woff2') format('woff2');font-weight:400;font-style:normal;font-display:block}
   @font-face{font-family:'Archivo';src:url('fonts/Archivo.woff2') format('woff2');font-weight:100 900;font-style:normal;font-display:block}
@@ -275,9 +275,9 @@
   .mt-set{background:var(--brass);color:#fff;border:2.5px solid var(--line);border-radius:9px;padding:9px 16px;font-family:var(--font-body);font-weight:800;font-size:12px;text-transform:uppercase;cursor:pointer;box-shadow:3px 3px 0 var(--line)}
   .mt-set:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
   .mt-current{font-family:var(--font-mono);font-size:11px;color:var(--brass)}
-  .claudebox{display:none;width:100%;height:150px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);padding:10px 12px;font-family:var(--font-mono);font-size:10.5px;line-height:1.45;resize:vertical;margin-bottom:10px;white-space:pre}
-  .claudebox.show{display:block}
-  .claudebox:focus{outline:none;border-color:var(--brass)}
+  .aibox{display:none;width:100%;height:150px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink-dim);padding:10px 12px;font-family:var(--font-mono);font-size:10.5px;line-height:1.45;resize:vertical;margin-bottom:10px;white-space:pre}
+  .aibox.show{display:block}
+  .aibox:focus{outline:none;border-color:var(--brass)}
   .datebtn{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:11px 12px;font-family:var(--font-mono);font-size:14px;text-align:left;cursor:pointer}
   .datebtn:focus{outline:none;border-color:var(--brass)}
   .dpwrap{display:none;position:fixed;inset:0;z-index:50;background:rgba(20,20,48,.55);align-items:center;justify-content:center;padding:18px}
@@ -511,7 +511,7 @@
 <div class="wrap">
 
   <header>
-    <div class="title"><span class="sub" data-i18n="app.sub">Training &amp; Body Log</span>Tally</div>
+    <div class="title"><span class="sub" data-i18n="app.sub">Your Private Training &amp; Body Log</span>Tally</div>
   </header>
 
   <div class="baknudge instnudge" id="instNudge" style="display:none">
@@ -621,7 +621,7 @@
     </div>
 
     <div class="card col-12">
-      <div class="lbl" data-i18n-html="calib.title">Adaptive Calorie Target <span class="sub-note">· maintenance back-calculated from your own intake vs. weight change · see “Where these numbers come from” on the Settings page</span></div>
+      <div class="lbl" data-i18n-html="calib.title">Adaptive Calorie Target <span class="sub-note">· maintenance estimate calibrated from your food logs and weight trend · see “Where these numbers come from” on the Settings page</span></div>
       <div class="calib-controls">
         <div><div class="ctl-lbl" data-i18n="calib.window">Window</div>
           <div class="seg" id="segPeriod">
@@ -810,9 +810,9 @@
       <button class="loadbtn" id="loadBtn" data-i18n="sync.load">Load imported data</button>
       <button class="ghostbtn" id="undoBtn" style="display:none;margin-bottom:10px"></button>
       <div class="syncrow" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)">
-        <button class="ghostbtn" id="claudeBtn" data-i18n="sync.claude">Copy for Claude analysis</button>
+        <button class="ghostbtn" id="aiBtn" data-i18n="sync.ai">Copy for your AI to analyse</button>
       </div>
-      <textarea id="claudeBox" class="claudebox" readonly></textarea>
+      <textarea id="aiBox" class="aibox" readonly></textarea>
       <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
     </div>
 
@@ -850,9 +850,10 @@
             ±10% around it, more if you are very lean, very heavy, or older.</div>
         </div>
         <div class="method">
-          <div class="m-h" data-i18n="meth.adapt.h">Adaptive maintenance · measured, not predicted</div>
-          <div class="m-b" data-i18n-html="meth.adapt.b">Once there are about two weeks of data, the app stops predicting and
-            measures. It fits a straight line through your weigh-ins to get a trend in kg per day,
+          <div class="m-h" data-i18n="meth.adapt.h">Adaptive Maintenance Estimate</div>
+          <div class="m-b" data-i18n-html="meth.adapt.b">Your calorie maintenance estimate, continuously calibrated using your actual food logs and
+            weight trend. Once there are about two weeks of data, the app stops relying on a formula and
+            works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day,
             and compares it with your average logged intake over the same span:
             <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is
             the standard approximation for body tissue. It is only an approximation: early weight
@@ -1055,7 +1056,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.5';
+const APP_VERSION = '6.6';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -4363,7 +4364,7 @@ function weeklySlope(list){
   let nu=0,de=0; p.forEach(q=>{nu+=(q.t-tb)*(q.w-wb);de+=(q.t-tb)**2;});
   return de>0?(nu/de)*7:null;
 }
-function buildClaudeReport(){
+function buildAiReport(){
   const gen=localDate();
   const weighed=entries.filter(e=>e.weight!=null);
   const first=entries.length?entries[0].date:'n/a', last=entries.length?entries[entries.length-1].date:'n/a';
@@ -4479,10 +4480,10 @@ function buildClaudeReport(){
   L.push('=== END REPORT ===');
   return L.join('\n');
 }
-function copyForClaude(){
+function copyForAi(){
   if(!entries.length){ smsg(t('sync.noreport'),true); return; }
-  const box=$("claudeBox");
-  const text=buildClaudeReport();
+  const box=$("aiBox");
+  const text=buildAiReport();
   box.value=text; box.classList.add('show'); box.focus(); box.select();
   const done=function(n){ smsg(tf('sync.reportready',{n:n})); };
   try{
@@ -4648,12 +4649,12 @@ const LANG = {
     'acth.hard.h':           'How hard is hard',
     'acth.hour.b':           'Only the time you are actually working. Ninety minutes at the gym with half of it spent resting, queueing and on your phone is about forty-five minutes of training.',
     'acth.hour.h':           'What counts as an hour',
-    'acth.lower.b':          'Overshooting here is the most common mistake, and it inflates the calorie target. It only affects the starting estimate anyway — once you have a fortnight of weight and food logged, the app measures your real maintenance and this stops mattering.',
+    'acth.lower.b':          'Overshooting here is the most common mistake, and it inflates the calorie target. It only affects the starting estimate anyway — once you have a fortnight of weight and food logged, the app estimates your maintenance from your own logs and this stops mattering.',
     'acth.lower.h':          'Torn between two? Take the lower',
     'acth.week.b':           'Your job and daily life matter more than the gym does. Someone on their feet all day who never trains burns more than a desk worker who lifts three times a week.',
     'acth.week.h':           'Count your whole week',
     'and':                   ' and ',
-    'app.sub':               'Training & Body Log',
+    'app.sub':               'Your Private Training & Body Log',
     'bak.ago':               'Last backup file saved {n} days ago.',
     'bak.later':             'Not now',
     'bak.never':             'No backup file saved on this device yet.',
@@ -4699,7 +4700,7 @@ const LANG = {
     'calib.avg':             'Avg intake logged',
     'calib.current':         'current: {n} kcal',
     'calib.est':             'Est. maintenance',
-    'calib.esttdee':         'your true TDEE',
+    'calib.esttdee':         'calibrated from your logs',
     'calib.flat':            'flat',
     'calib.floored':         'floored',
     'calib.for':             'for {rate}',
@@ -4722,7 +4723,7 @@ const LANG = {
     'calib.rec':             'Recommended intake',
     'calib.shaky':           'Treat this one with caution — either the window is short or the result is unusual for your bodyweight. Early weight change is mostly water and glycogen, which carry almost no energy. Prefer 28 days or longer.',
     'calib.steady':          'Re-check every couple of weeks; as bodyweight moves, maintenance drifts with it, so this keeps adjusting.',
-    'calib.title':           'Adaptive Calorie Target <span class="sub-note">· maintenance back-calculated from your own intake vs. weight change · see “Where these numbers come from” on the Settings page</span>',
+    'calib.title':           'Adaptive Calorie Target <span class="sub-note">· maintenance estimate calibrated from your food logs and weight trend · see “Where these numbers come from” on the Settings page</span>',
     'calib.tomaintain':      'to maintain',
     'calib.trend':           'Weight trend',
     'calib.window':          'Window',
@@ -5603,8 +5604,8 @@ const LANG = {
     'm.shoulders':           'Shoulders',
     'm.thigh':               'Thigh',
     'm.waist':               'Waist',
-    'meth.adapt.b':          'Once there are about two weeks of data, the app stops predicting and measures. It fits a straight line through your weigh-ins to get a trend in kg per day, and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Accuracy also depends entirely on your intake logging being honest and complete.',
-    'meth.adapt.h':          'Adaptive maintenance · measured, not predicted',
+    'meth.adapt.b':          'Your calorie maintenance estimate, continuously calibrated using your actual food logs and weight trend. Once there are about two weeks of data, the app stops relying on a formula and works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day, and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Accuracy also depends entirely on your intake logging being honest and complete.',
+    'meth.adapt.h':          'Adaptive Maintenance Estimate',
     'meth.age.b':            'Age is entered directly rather than as a year of birth, so there is no guessing whether a birthday has passed. It is stored with the date you set it and advances on its own, so the estimate does not quietly go stale — correct it any time. <br><br>Activity multipliers run 1.2 to 1.9. Every app describes these as "1–3 sessions a week" without ever saying what a session is, so this one gives hours of actual working time and judges effort by whether you can still talk — full conversation is easy, short sentences is moderate, barely a word is hard. Count your job and daily life too, not just the gym. If you are between two levels take the lower one: overshooting here is the commonest mistake, and it only affects the starting estimate anyway.',
     'meth.age.h':            'Age and activity',
     'meth.bf.b':             'Estimated from body measurements, not measured directly. <b>Male:</b> 495 ÷ (1.0324 − 0.19077 × log₁₀(waist − neck) + 0.15456 × log₁₀(height)) − 450. <b>Female:</b> 495 ÷ (1.29579 − 0.35004 × log₁₀(waist + hips − neck) + 0.22100 × log₁₀(height)) − 450. All girths in centimetres. Published by Hodgdon and Beckett (1984) for the US Navy. Typical agreement with a DEXA scan is around ±3–4 percentage points, and it is more reliable for tracking change over time than for any single reading. Nothing is shown until every measurement the formula needs has been logged.',
@@ -5863,7 +5864,7 @@ const LANG = {
     'sx.ph.name':            'Hamstring',
     'sx.reps':               'Reps · how many',
     'sync.backup':           'Save backup file',
-    'sync.claude':           'Copy for Claude analysis',
+    'sync.ai':               'Copy for your AI to analyse',
     'sync.emptyfile':        'That file is empty',
     'sync.export':           'Export data',
     'sync.fileloaded':       '{name} loaded, {n} chars. Now tap Load imported data — twice, to confirm.',
@@ -5881,7 +5882,7 @@ const LANG = {
     'sync.pastehere':        'Paste exported data here, then press Load.',
     'sync.readfail':         'Could not read that file',
     'sync.readn':            'Read {n} of {seen} entries. Tap Load again to replace the {have} on this device.',
-    'sync.reportready':      'Report ready ({n} chars). Paste it into a Claude chat. If nothing copied: long-press the box → Select all → Copy.',
+    'sync.reportready':      'Report ready ({n} chars). Paste it into a chat with any AI assistant. If nothing copied: long-press the box → Select all → Copy.',
     'sync.saved':            'Saved {name}',
     'sync.savedto':          'Saved to Downloads · {path}',
     'sync.tapreplace':       'Tap again to replace {a} → {b}',
@@ -5927,7 +5928,7 @@ const LANG = {
   $("fileBtn").onclick=pickFile;
   $("backupBtn").onclick=saveBackupFile;
   $("importFile").onchange=onFilePicked;
-  $("claudeBtn").onclick=copyForClaude;
+  $("aiBtn").onclick=copyForAi;
   $("setManualBtn").onclick=setManualTarget;
   $("setProtBtn").onclick=setProtManual;
   document.querySelectorAll('#segSex button').forEach(b=>b.onclick=()=>setSex(b.dataset.s));

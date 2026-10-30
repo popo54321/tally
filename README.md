@@ -1,7 +1,14 @@
-# Tally
+# Tally — Your Private Training & Body Log
 
-Training tracker. Bodyweight, food, lifts, girths, mobility and cardio — with an adaptive calorie
-target worked out from your own logs rather than a formula.
+**Free for everyone, for good.** No account, no ads, no subscription, no premium tier.
+
+Tally is a self-calculating ledger. You write down what you eat, what you weigh and what you lift,
+and it does the maths for you: a maintenance calorie estimate calibrated from your own food logs and
+weight trend, a daily protein target, next-session suggestions for every lift, and weekly sets per
+muscle. The goal is simple: nobody should need a stack of expensive subscriptions just to record
+their training and see what it means.
+
+Bodyweight, food, lifts, girths, mobility and cardio, all in one place, all on your own device.
 
 ## Use it
 
