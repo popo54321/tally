@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RYt00eDTvTdNoHtzcXj8apZvi9lgAJbzWPQtwnwB21A='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-QPSjvfjSHTnXcZZDPlv7lb4iwwHUhMBzKKu84L/dEMU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -880,8 +880,7 @@
             <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is
             the standard approximation for body tissue. It is only an approximation: early weight
             change is largely water and glycogen, which carry almost no energy, so short windows
-            overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Accuracy also depends
-            entirely on your intake logging being honest and complete.</div>
+            overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.target.h">Daily target · your goal rate</div>
@@ -1097,7 +1096,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.8';
+const APP_VERSION = '6.9';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -2770,7 +2769,7 @@ function dlgClose(id){
   dlgReturn=null;
 }
 const ABOUT_KEY='tally:aboutSeen:v1';
-const aboutHtml = () => ['why','parts','origin','gym','yours'].map(k=>`<section class="ab-sec${k==='parts'?' key':''}">${t('about.'+k)}</section>`).join('');
+const aboutHtml = () => ['why','parts','logging','origin','gym','yours'].map(k=>`<section class="ab-sec${k==='parts'?' key':''}">${t('about.'+k)}</section>`).join('');
 function abOpen(){ $("abText").innerHTML=aboutHtml(); $("abText").scrollTop=0; dlgOpen("abWrap"); }
 function abClose(){ dlgClose("abWrap"); }
 async function abNever(){ try{ await STORE.set(ABOUT_KEY,'1'); }catch(e){} abClose(); }
@@ -4700,9 +4699,10 @@ const LANG = {
     'about.card':              'About Tally',
     'about.gym':               '<h3>Built on the gym floor</h3><p>I use Tally while I train, so it fixes the small things that annoyed me. The stretch timer gives you a few seconds to get into position, then counts down, so you never log the time spent getting into the stretch. The Android version exists because phone browsers won’t ring an alarm with the screen off.</p>',
     'about.hint':              'You can read this again any time in Settings → About Tally.',
+    'about.logging':           '<h3>You don’t have to log perfectly</h3><p>Almost everyone gets their calories wrong. Some people eyeball portions, some forget the oil, some guess high to be safe. Most apps treat that as your problem.</p><p>But I noticed something: people are wrong in the <i>same way</i> every time. If you think your usual plate of rice is 200 kcal when it’s really 300, you’ll log it as 200 every single time, because that’s how you see that food. Your mistakes repeat, food by food.</p><p>Tally doesn’t need your numbers to be accurate. It just needs them to be consistent. It compares what you log with what your scale actually does, and works out your maintenance in <i>your</i> numbers. If your logs run low, your target comes out low too, and it still works, because you’ll log low against it the same way.</p><p>So eyeball it, guess, round it off. Just keep logging your foods the way you always do. If you change how you log, like buying a food scale or starting to count the oil, give it a couple of weeks to catch up.</p>',
     'about.never':             'Don’t show again',
     'about.ok':                'Got it',
-    'about.origin':            '<h3>How it started</h3><p>Tally didn’t start as a fitness app. It started as a simple calorie tracker, just for me.</p><p>Then I wanted to log my workouts in the same place, so I added that. Then I noticed the calorie formulas didn’t match what my scale was telling me, so I made the target adapt to my own logs. Every time something annoyed me, I fixed it: protein, rest timers, stretches, sets per muscle, progression.</p><p>Every feature in Tally is there because I needed it.</p>',
+    'about.origin':            '<h3>How it started</h3><p>Tally didn’t start as a fitness app. It started as a simple calorie tracker, just for me.</p><p>Then I wanted to log my workouts in the same place, so I added that. Then I noticed the calorie formulas didn’t match what my scale was telling me, and my own logging wasn’t perfect either, so I made the target learn from both. Every time something annoyed me, I fixed it: protein, rest timers, stretches, sets per muscle, progression.</p><p>Every feature in Tally is there because I needed it.</p>',
     'about.parts':             '<h3>Use only the part you need</h3><p>Every part of Tally works on its own and stays quiet when you leave it empty.</p><ul><li><b>Only lifting?</b> Ignore Body &amp; Food completely. Progression, the rest timer and weekly sets per muscle all still work.</li><li><b>Only weight and food?</b> Use it for your weight trend and maintenance estimate and never log a workout.</li><li><b>Girths are optional.</b> Body fat only appears once you log the measurements it needs.</li><li><b>Skip a day, or a month?</b> Skip food at the weekend, or stop measuring for three months, and you just see a dash: —. No streaks, no scores, no guilt.</li></ul>',
     'about.title':             'Welcome to Tally',
     'about.why':               '<h3>Why I made Tally</h3><p>I got tired of fitness apps.</p><p>Most of them want everything before they let you do anything. Fifteen screens about your age, sleep and goals before you can log one bicep curl. And if you only use half the app, the other half nags you: red badges, broken streaks, warnings that you’re “off plan”.</p>',
@@ -5682,7 +5682,7 @@ const LANG = {
     'm.shoulders':           'Shoulders',
     'm.thigh':               'Thigh',
     'm.waist':               'Waist',
-    'meth.adapt.b':          'Your calorie maintenance estimate, continuously calibrated using your actual food logs and weight trend. Once there are about two weeks of data, the app stops relying on a formula and works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day, and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Accuracy also depends entirely on your intake logging being honest and complete.',
+    'meth.adapt.b':          'Your calorie maintenance estimate, continuously calibrated using your actual food logs and weight trend. Once there are about two weeks of data, the app stops relying on a formula and works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day, and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.',
     'meth.adapt.h':          'Adaptive Maintenance Estimate',
     'meth.age.b':            'Age is entered directly rather than as a year of birth, so there is no guessing whether a birthday has passed. It is stored with the date you set it and advances on its own, so the estimate does not quietly go stale — correct it any time. <br><br>Activity multipliers run 1.2 to 1.9. Every app describes these as "1–3 sessions a week" without ever saying what a session is, so this one gives hours of actual working time and judges effort by whether you can still talk — full conversation is easy, short sentences is moderate, barely a word is hard. Count your job and daily life too, not just the gym. If you are between two levels take the lower one: overshooting here is the commonest mistake, and it only affects the starting estimate anyway.',
     'meth.age.h':            'Age and activity',
