@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-QPSjvfjSHTnXcZZDPlv7lb4iwwHUhMBzKKu84L/dEMU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-3zZKbecRM7AOUNSYBJFXDc1W7cLyt7ChCzkp0yP6VSE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -381,6 +381,21 @@
   .exchip .sw{width:11px;height:11px;border-radius:3px;border:1.5px solid var(--line);background:transparent;flex:none}
   .exchip:hover{color:var(--ink)}
   .exchip.on{border-color:var(--line);color:var(--ink);background:var(--panel);box-shadow:2px 2px 0 var(--line-soft)}
+  .chartpick{margin-top:8px}
+  .chartpick select{width:100%;margin-bottom:8px;font-size:13px;padding:9px 10px}
+  .chartdetail{border:1px solid var(--line-soft);border-radius:9px;background:var(--panel-2);padding:8px 12px}
+  .cdrow{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:5px 0;border-bottom:1px solid var(--line-soft);font-family:var(--font-mono);font-size:12px;color:var(--ink-dim)}
+  .cdrow:last-child{border-bottom:none}
+  .cdrow b{color:var(--ink);font-weight:600;text-align:right}
+  .cdrow i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;font-style:normal}
+  .cdrow small{display:block;font-size:10px;color:var(--txt-faint);font-weight:400}
+  .cdnone{font-family:var(--font-mono);font-size:11.5px;color:var(--txt-faint);padding:4px 0}
+  .chartwrap svg.pickable{cursor:pointer}
+  .chmark{stroke:var(--brass);stroke-width:1.6;stroke-dasharray:4 4;pointer-events:none}
+  .foldhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer}
+  .foldbtn{flex:none;background:var(--panel-2);border:2px solid var(--line);border-radius:8px;color:var(--ink);font-size:13px;line-height:1;padding:6px 10px;cursor:pointer;min-height:32px;min-width:38px}
+  .card.folded > :not(.foldhead){display:none}
+  .card.folded .foldhead .lbl{margin-bottom:0}
   .chartnote{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);margin-top:9px;line-height:1.65}
   .chartnote b{color:var(--ink-dim);font-weight:500}
 
@@ -621,15 +636,17 @@
     </div>
 
     <div class="card col-12">
-      <div class="lbl" data-i18n-html="chart.weight">Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in</span></div>
-      <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
+      <div class="lbl" data-i18n-html="chart.weight">Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in · tap the chart for a day</span></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
       <div class="chartwrap"><svg id="wChart" viewBox="0 0 760 300"></svg></div>
+      <div class="chartpick" data-chart="wChart"></div>
     </div>
 
     <div class="card col-12">
-      <div class="lbl" data-i18n-html="chart.size">Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend</span></div>
-      <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
+      <div class="lbl" data-i18n-html="chart.size">Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend · tap the chart for a day</span></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
       <div class="chartwrap"><svg id="bodyChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="bodyChart"></div>
     </div>
 
     <div class="card col-12">
@@ -743,11 +760,30 @@
     </div>
 
     <div class="card col-12" id="cardStr">
-      <div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span></div>
-      <div class="chartwin"><div class="seg chartseg"><button data-p="30">30 d</button><button data-p="90">90 d</button><button data-p="all">All</button></div></div>
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once · tap the chart for a day</span></div><button type="button" class="foldbtn" data-fold="str" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
       <div class="exchips" id="strPick"></div>
       <div class="chartwrap"><svg id="strChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="strChart"></div>
       <div class="chartnote" id="strNote"></div>
+    </div>
+
+    <div class="card col-12" id="cardSxTrend">
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.sx">Mobility Trend <span class="sub-note">· seconds held, or reps for counted stretches · tap the chart for a day</span></div><button type="button" class="foldbtn" data-fold="sx" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="sxPick"></div>
+      <div class="chartwrap"><svg id="sxChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="sxChart"></div>
+      <div class="chartnote" id="sxNote"></div>
+    </div>
+
+    <div class="card col-12" id="cardCdTrend">
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.cd">Cardio Trend <span class="sub-note">· minutes per session · tap the chart for a day</span></div><button type="button" class="foldbtn" data-fold="cd" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="cdPick"></div>
+      <div class="chartwrap"><svg id="cdChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="cdChart"></div>
+      <div class="chartnote" id="cdNote"></div>
     </div>
 
   </div>
@@ -1096,7 +1132,7 @@
 </div>
 
 <script>
-const APP_VERSION = '6.9';
+const APP_VERSION = '7.0';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -2019,11 +2055,16 @@ function normSettings(s){
   const k=parseFloat(s.kcalTarget), band=volBand(s);
   const r=parseInt(s.restSec,10);
   let sel=null;
-  if(Array.isArray(s.chartEx)){ sel=[]; s.chartEx.forEach(x=>{ if(typeof x==='string' && x && sel.indexOf(x)<0 && sel.length<MAX_SERIES) sel.push(x); }); }
+  const keyList = a => { if(!Array.isArray(a)) return null; const o=[]; a.forEach(x=>{ if(typeof x==='string' && x && o.indexOf(x)<0 && o.length<200) o.push(x); }); return o; };
+  sel=keyList(s.chartEx);
+  const fold={}; if(s.chartFold && typeof s.chartFold==='object') ['str','sx','cd'].forEach(k=>{ if(typeof s.chartFold[k]==='boolean') fold[k]=s.chartFold[k]; });
   return {
     kcalTarget: (isNaN(k)||k<=0) ? DEF_TARGET : Math.round(k),
     kcalOwn: !!s.kcalOwn,
     chartEx: sel,
+    chartSx: keyList(s.chartSx),
+    chartCd: keyList(s.chartCd),
+    chartFold: fold,
     restSec: (isNaN(r)||r<10||r>900) ? DEF_REST : r,
     restSound: (s.restSound==null) ? true : !!s.restSound,
     mobLead: ([0,5,10].indexOf(parseInt(s.mobLead,10))>=0) ? parseInt(s.mobLead,10) : 5,
@@ -2212,7 +2253,7 @@ async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
+const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','chartSx','chartCd','chartFold','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
@@ -2361,7 +2402,7 @@ async function setThemeColor(v,c){
 }
 function repaintCharts(){
   drawWeight(entries.filter(e=>e.weight!=null));
-  drawStrength(); drawBody();
+  drawStrength(); drawSxTrend(); drawCdTrend(); drawBody();
 }
 async function applyPreset(k){
   const p=THEME_PRESETS.find(x=>x.key===k); if(!p) return;
@@ -3894,7 +3935,7 @@ function fillBody(date){
 
 const PAGE_DRAW = {
   body:     () => { drawBodyStats(); drawWeight(entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
-  workout:  () => { drawStrength(); drawProg(); drawColl(); },
+  workout:  () => { drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
   guide:    () => drawGuide(),
   gym:      () => drawGym(),
   settings: () => { drawTheme(); drawUndo(); drawVersion(); },
@@ -3985,7 +4026,7 @@ function drawWeight(weighed){
   const svg=$("wChart"), W=760,H=300,padL=46,padR=22,padT=16,padB=34;
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
-  if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; return; }
+  if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; chartRecord('wChart', []); return; }
   const ws=weighed.map(e=>e.weight), wt=weighed.map(e=>trOf.get(e.date));
   let yMin=Math.min(...ws,...wt), yMax=Math.max(...ws,...wt);
   if(yMin===yMax){ yMin-=1; yMax+=1; }
@@ -4015,6 +4056,7 @@ function drawWeight(weighed){
   const le=weighed[n-1], lt=trOf.get(le.date);
   g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" style="fill:${C.ink};font-size:13px">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
   svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient></defs>`+g;
+  chartRecord('wChart', weighed.map(e=>e.date), d=>xTo(dnum(d)), y0, y1, {trend:trOf});
 }
 
 function drawMultiLine(svgId, series, opts){
@@ -4024,7 +4066,7 @@ function drawMultiLine(svgId, series, opts){
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   series=series.filter(s=>s.points.length);
-  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${esc(opts.empty||'')}</text>`; return; }
+  if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${esc(opts.empty||'')}</text>`; chartRecord(svgId, []); return; }
   let allD=[]; series.forEach(s=>s.points.forEach(p=>allD.push(dnum(p.date))));
   const dMin=Math.min(...allD), dMax=Math.max(...allD);
   const xTo=d=>dMin===dMax?(x0+x1)/2:x0+(dnum(d)-dMin)/(dMax-dMin)*(x1-x0);
@@ -4053,7 +4095,77 @@ function drawMultiLine(svgId, series, opts){
     }
   });
   svg.innerHTML=g;
+  const dates=[...new Set(series.flatMap(s=>s.points.map(p=>p.date)))].sort();
+  chartRecord(svgId, dates, xTo, y0, y1);
 }
+
+const CHART={}, CHART_DAY={}, CHART_DETAIL={};
+const fmtDay = ds => dayShort(weekdayKey(ds))+' '+fmtDMY(ds);
+const cdRow = (k, v, sub, col) => `<div class="cdrow"><span>${col?`<i style="background:${col}"></i>`:''}${esc(k)}</span><b>${esc(v)}${sub?`<small>${esc(sub)}</small>`:''}</b></div>`;
+function chartRecord(id, dates, xOf, y0, y1, extra){ CHART[id]=Object.assign({dates:dates||[], xOf:xOf, y0:y0, y1:y1}, extra||{}); chartPickDraw(id); }
+function chartPickDraw(id){
+  const st=CHART[id], box=document.querySelector(`.chartpick[data-chart="${id}"]`), svg=$(id);
+  if(!st || !box || !svg) return;
+  svg.classList.toggle('pickable', st.dates.length>0);
+  if(!st.dates.length){ box.style.display='none'; return; }
+  box.style.display='';
+  if(!box.firstElementChild){
+    box.innerHTML=`<select class="daysel" aria-label="${esc(t('chart.pickday'))}"></select><div class="chartdetail"></div>`;
+    box.firstElementChild.onchange=ev=>{ CHART_DAY[id]=ev.target.value; chartPickDraw(id); };
+  }
+  let d=CHART_DAY[id];
+  if(st.dates.indexOf(d)<0) d=CHART_DAY[id]=st.dates[st.dates.length-1];
+  box.firstElementChild.innerHTML=st.dates.slice().reverse().map(x=>`<option value="${x}"${x===d?' selected':''}>${esc(fmtDay(x))}</option>`).join('');
+  box.lastElementChild.innerHTML=(CHART_DETAIL[id] ? CHART_DETAIL[id](d) : '') || `<div class="cdnone">${esc(t('chart.d.none'))}</div>`;
+  let m=svg.querySelector('.chmark');
+  if(!m){ m=document.createElementNS('http://www.w3.org/2000/svg','line'); m.setAttribute('class','chmark'); svg.appendChild(m); }
+  const x=st.xOf(d).toFixed(1);
+  m.setAttribute('x1',x); m.setAttribute('x2',x); m.setAttribute('y1',st.y0); m.setAttribute('y2',st.y1);
+}
+function chartTap(id, ev){
+  const st=CHART[id], svg=$(id); if(!st || !st.dates.length || !svg.getScreenCTM) return;
+  const pt=svg.createSVGPoint(); pt.x=ev.clientX; pt.y=ev.clientY;
+  const x=pt.matrixTransform(svg.getScreenCTM().inverse()).x;
+  let best=st.dates[0], bd=Infinity;
+  st.dates.forEach(d=>{ const dd=Math.abs(st.xOf(d)-x); if(dd<bd){ bd=dd; best=d; } });
+  CHART_DAY[id]=best; chartPickDraw(id);
+}
+const entryOn = d => entries.find(e=>e.date===d);
+function prevWith(d, get){ for(let i=entries.length-1;i>=0;i--){ const e=entries[i]; if(e.date<d && get(e)!=null) return e; } return null; }
+CHART_DETAIL.wChart = d => {
+  const e=entryOn(d); if(!e) return '';
+  const tr=CHART.wChart.trend && CHART.wChart.trend.get(d), pv=prevWith(d, x=>x.weight);
+  let h=cdRow(t('chart.d.weight'), e.weight.toFixed(1)+' kg');
+  if(tr!=null) h+=cdRow(t('chart.d.trend'), tr.toFixed(1)+' kg');
+  if(pv) h+=cdRow(tf('chart.d.since',{date:fmtDM(pv.date)}), fmtSigned(e.weight-pv.weight,' kg',1));
+  if(e.bf!=null) h+=cdRow(t('chart.d.bf'), e.bf.toFixed(1)+'%');
+  if(e.kcal!=null) h+=cdRow(t('chart.d.kcal'), e.kcal.toLocaleString()+' kcal');
+  if(e.prot!=null) h+=cdRow(t('chart.d.prot'), e.prot+' g');
+  return h;
+};
+CHART_DETAIL.bodyChart = d => {
+  const e=entryOn(d); if(!e || !e.meas) return '';
+  return MEAS.filter(m=>e.meas[m.key]!=null).map(m=>{
+    const v=e.meas[m.key], pv=prevWith(d, x=>x.meas && x.meas[m.key]);
+    return cdRow(t('m.'+m.key).replace(/\s*\(.*\)$/,''), v.toFixed(1)+' cm', pv ? tf('chart.d.since.v',{v:fmtSigned(v-pv.meas[m.key],' cm',1), date:fmtDM(pv.date)}) : '');
+  }).join('');
+};
+CHART_DETAIL.strChart = d => {
+  const e=entryOn(d); if(!e || !e.lifts) return '';
+  const sel=chartSelection(), bwFallback=lastNumOf(x=>x.weight)||BW_FALLBACK;
+  return Object.keys(e.lifts).map(k=>({k, ex:exByKey(k)})).filter(o=>o.ex).sort((a,b)=>{
+    const ia=sel.indexOf(a.k), ib=sel.indexOf(b.k); return (ia<0?99:ia)-(ib<0?99:ib) || byName(a.ex.name,b.ex.name);
+  }).map(o=>{
+    const m=sessionMetric(o.ex, e.lifts[o.k], e.weight!=null?e.weight:bwFallback), i=sel.indexOf(o.k);
+    const u=m.unit==='kg'?' kg':m.unit==='sec'?' s':' reps';
+    return cdRow(o.ex.name, fmtSets(o.k, e.lifts[o.k]), t(m.lbl)+' '+Math.round(m.val).toLocaleString()+u, i>=0?LINE_COLORS[i%LINE_COLORS.length]:'');
+  }).join('');
+};
+const logRows = (log, nameOf, unitOf, sel) => Object.keys(log||{}).map(k=>({k, n:nameOf(k)})).sort((a,b)=>{
+    const ia=sel.indexOf(a.k), ib=sel.indexOf(b.k); return (ia<0?99:ia)-(ib<0?99:ib) || byName(a.n,b.n);
+  }).map(o=>{ const v=log[o.k], i=sel.indexOf(o.k); return cdRow(o.n, v ? v+' '+unitOf(o.k) : t('chart.d.done'), '', i>=0?LINE_COLORS[i%LINE_COLORS.length]:''); }).join('');
+CHART_DETAIL.sxChart = d => { const e=entryOn(d); return e && e.mob ? logRows(e.mob, sxName, k=>sxIsReps(stretchByKey(k)) ? t('unit.reps') : 's', logSelection('chartSx', sxAvail())) : ''; };
+CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, ()=>t('unit.min'), logSelection('chartCd', cdAvail())) : ''; };
 
 const BW_FALLBACK = 70;
 function exVolume(ex, sets, bw){
@@ -4090,7 +4202,7 @@ function buildAbsSeries(key){
 function chartCandidates(){
   const plan=planKeys();
   const lastAt=k=>{ for(let i=entries.length-1;i>=0;i--) if(liftsOf(entries[i],k).length) return entries[i].date; return ''; };
-  return CATALOGUE.filter(ex=>entries.some(e=>liftsOf(e,ex.key).length)).sort((a,b)=>{
+  return CATALOGUE.filter(ex=>entries.some(e=>inChartWin(e.date) && liftsOf(e,ex.key).length)).sort((a,b)=>{
     const pa=plan.indexOf(a.key), pb=plan.indexOf(b.key);
     if(pa>=0 && pb>=0) return pa-pb;
     if(pa>=0) return -1;
@@ -4102,16 +4214,17 @@ function chartSelection(){
   const avail=chartCandidates().map(e=>e.key);
   const saved=settings.chartEx;
   if(saved==null) return avail.filter(k=>planKeys().indexOf(k)>=0).slice(0,MAX_SERIES);
-  return saved.filter(k=>avail.indexOf(k)>=0);
+  return saved.filter(k=>avail.indexOf(k)>=0).slice(0,MAX_SERIES);
 }
 async function toggleChartEx(key){
-  const sel=chartSelection().slice(), i=sel.indexOf(key);
-  if(i>=0) sel.splice(i,1);
+  const avail=chartCandidates().map(e=>e.key);
+  const all=settings.chartEx==null ? chartSelection().slice() : settings.chartEx.slice(), i=all.indexOf(key);
+  if(i>=0) all.splice(i,1);
   else{
-    if(sel.length>=MAX_SERIES){ $("strNote").textContent=t('chart.max'); return; }
-    sel.push(key);
+    if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $("strNote").textContent=t('chart.max'); return; }
+    all.push(key);
   }
-  settings.chartEx=sel; await persistSettings(); drawStrength();
+  settings.chartEx=all; await persistSettings(); drawStrength();
 }
 function absSummary(a){
   const sess=exSessions(a.ex.key), last=sess[sess.length-1];
@@ -4125,10 +4238,11 @@ function absSummary(a){
 }
 function drawStrength(){
   const avail=chartCandidates(), sel=chartSelection(), note=$("strNote"), pick=$("strPick");
+  chartFoldDraw('str', entries.some(trained));
   pick.innerHTML=avail.map(ex=>{
     const i=sel.indexOf(ex.key), on=i>=0;
     return `<button type="button" class="exchip${on?' on':''}" data-k="${esc(ex.key)}" aria-pressed="${on}">`+
-      `<i class="sw" style="background:${on?LINE_COLORS[i%LINE_COLORS.length]:'transparent'}"></i>${esc(ex.short)}</button>`;
+      `<i class="sw" style="background:${on?LINE_COLORS[i%LINE_COLORS.length]:'transparent'}"></i>${esc(ex.name)}</button>`;
   }).join('');
 
   if(!avail.length){
@@ -4149,6 +4263,56 @@ function drawStrength(){
   drawMultiLine('strChart', windowSeries(buildStrengthSeries(sel)),
     {legend:false, refLine:100, fmt:v=>v.toFixed(0), empty:t('chart.empty.window')});
   note.innerHTML=t('chart.indexed');
+}
+
+const sxName = k => { const s=stretchByKey(k); return s ? s.name : prettyKey(k); };
+const cdName = k => { const c=cardioByKey(k); return c ? c.name : prettyKey(k); };
+function logAvail(field){
+  const last={};
+  entries.forEach(e=>{ if(inChartWin(e.date) && e[field]) Object.keys(e[field]).forEach(k=>{ last[k]=e.date; }); });
+  return Object.keys(last).sort((a,b)=>last[b].localeCompare(last[a]));
+}
+const sxAvail = () => logAvail('mob'), cdAvail = () => logAvail('cardio');
+function logSelection(setting, avail){
+  const saved=settings[setting];
+  return (saved==null ? avail : saved.filter(k=>avail.indexOf(k)>=0)).slice(0,MAX_SERIES);
+}
+async function toggleLogChip(setting, key, avail, redraw, noteId){
+  const all=settings[setting]==null ? avail.slice(0,MAX_SERIES) : settings[setting].slice(), i=all.indexOf(key);
+  if(i>=0) all.splice(i,1);
+  else{
+    if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $(noteId).textContent=t('chart.max'); return; }
+    all.push(key);
+  }
+  settings[setting]=all; await persistSettings(); redraw();
+}
+function drawLogTrend(o){
+  const avail=o.avail(), sel=logSelection(o.setting, avail);
+  $(o.pick).innerHTML=avail.map(k=>{
+    const i=sel.indexOf(k), on=i>=0;
+    return `<button type="button" class="exchip${on?' on':''}" data-k="${esc(k)}" aria-pressed="${on}">`+
+      `<i class="sw" style="background:${on?LINE_COLORS[i%LINE_COLORS.length]:'transparent'}"></i>${esc(o.name(k))}</button>`;
+  }).join('');
+  const series=sel.map((k,i)=>({name:o.name(k), color:LINE_COLORS[i%LINE_COLORS.length],
+    points:entries.filter(e=>inChartWin(e.date) && e[o.field] && e[o.field][k]>0).map(e=>({date:e.date, val:e[o.field][k]}))}));
+  drawMultiLine(o.svg, series, {legend:false, fmt:v=>v.toFixed(0), empty:t(!avail.length ? o.empty : !sel.length ? 'chart.empty.pick' : 'chart.empty.window')});
+  $(o.note).textContent = !avail.length ? '' : !sel.length ? t('chart.nosel') : t(o.noteKey);
+  chartFoldDraw(o.fold, entries.some(e=>e[o.field]));
+}
+const drawSxTrend = () => drawLogTrend({field:'mob', setting:'chartSx', avail:sxAvail, name:sxName, pick:'sxPick', svg:'sxChart', note:'sxNote', fold:'sx', empty:'chart.empty.sx', noteKey:'chart.sxnote'});
+const drawCdTrend = () => drawLogTrend({field:'cardio', setting:'chartCd', avail:cdAvail, name:cdName, pick:'cdPick', svg:'cdChart', note:'cdNote', fold:'cd', empty:'chart.empty.cd', noteKey:'chart.cdnote'});
+const FOLD_CARD = {str:'cardStr', sx:'cardSxTrend', cd:'cardCdTrend'};
+function chartFoldDraw(k, hasAny){
+  const folded = (k in settings.chartFold) ? settings.chartFold[k] : !hasAny;
+  const card=$(FOLD_CARD[k]); if(!card) return;
+  card.classList.toggle('folded', folded);
+  const b=card.querySelector('.foldbtn'); b.textContent=folded?'▸':'▾'; b.setAttribute('aria-expanded', String(!folded));
+  b.title=t(folded?'chart.unfold':'chart.fold'); b.setAttribute('aria-label', b.title);
+}
+async function chartFoldToggle(k){
+  const card=$(FOLD_CARD[k]);
+  settings.chartFold=Object.assign({}, settings.chartFold, {[k]:!card.classList.contains('folded')});
+  await persistSettings(); chartFoldDraw(k, true);
 }
 
 const MEAS=['neck','shoulders','chest','arm','forearm','waist','hips','thigh','calf'].map(key=>({key}));
@@ -4820,20 +4984,38 @@ const LANG = {
     'chart.abs':             'absolute {unit}, not indexed',
     'chart.avg':             'avg',
     'chart.best':            'best {n}',
+    'chart.cd':                'Cardio Trend <span class="sub-note">· minutes per session · tap the chart for a day</span>',
+    'chart.cdnote':            'Minutes per day for each type. Only types done in this window are listed.',
     'chart.chips':           'Every movement you log turns up here as a chip.',
+    'chart.d.bf':              'Body fat',
+    'chart.d.done':            'done',
+    'chart.d.kcal':            'Energy',
+    'chart.d.none':            'Nothing logged that day.',
+    'chart.d.prot':            'Protein',
+    'chart.d.since':           'Change since {date}',
+    'chart.d.since.v':         '{v} since {date}',
+    'chart.d.trend':           'Trend',
+    'chart.d.weight':          'Weight',
+    'chart.empty.cd':          'log some cardio to build this',
     'chart.empty.nosess':    'no sessions for that movement',
     'chart.empty.pick':      'tap a movement above to plot it',
     'chart.empty.size':      'log measurements to build the size trend',
     'chart.empty.str':       'log a set to build this',
+    'chart.empty.sx':          'tick a stretch to build this',
     'chart.empty.weight':    'log a weight to start the trend',
     'chart.empty.window':    'nothing in this window',
-    'chart.indexed':         '<b>Indexed</b> · each movement starts at 100 on its own first logged session, so movements with very different loads share one axis. The baseline ignores the window, so 30 d and All agree. Select one movement on its own for absolute kg, reps or seconds.',
+    'chart.fold':              'Hide this chart',
+    'chart.indexed':         '<b>Indexed</b> · each movement starts at 100 on its own first logged session, so movements with very different loads share one axis. The baseline ignores the window, so every window agrees. Select one movement on its own for absolute kg, reps or seconds.',
     'chart.max':             'Eight at once is the limit — untap one first.',
     'chart.nosel':           'Nothing selected.',
-    'chart.size':            'Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend</span>',
-    'chart.str':             'Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once</span>',
+    'chart.pickday':           'Pick a date',
+    'chart.size':            'Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend · tap the chart for a day</span>',
+    'chart.str':             'Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once · tap the chart for a day</span>',
+    'chart.sx':                'Mobility Trend <span class="sub-note">· seconds held, or reps for counted stretches · tap the chart for a day</span>',
+    'chart.sxnote':            'Seconds held per day, or reps for counted stretches. Only stretches done in this window are listed.',
     'chart.trend':           'trend',
-    'chart.weight':          'Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in</span>',
+    'chart.unfold':            'Show this chart',
+    'chart.weight':          'Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in · tap the chart for a day</span>',
     'coach.confirm':         'same weight, every set reached {max}; {left} more like that and it goes up',
     'coach.first':           'first session: find a weight you can do for {min}–{max} {unit}',
     'coach.floor':           'same weight, get every set to at least {aim} first (last time {last})',
@@ -6093,6 +6275,10 @@ const LANG = {
   $("gymWrap").onclick=ev=>{ const b=ev.target.closest('[data-eq]'); if(b) gymToggle(b.dataset.eq); };
   $("gymOwn").onclick=ev=>{ const b=ev.target.closest('[data-gdel]'); if(b) gymDelOwn(b.dataset.gdel); };
   $("strPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleChartEx(b.dataset.k); };
+  $("sxPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleLogChip('chartSx', b.dataset.k, sxAvail(), drawSxTrend, 'sxNote'); };
+  $("cdPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleLogChip('chartCd', b.dataset.k, cdAvail(), drawCdTrend, 'cdNote'); };
+  ['wChart','bodyChart','strChart','sxChart','cdChart'].forEach(id=>$(id).addEventListener('click', ev=>chartTap(id, ev)));
+  document.querySelectorAll('.foldhead').forEach(h=>h.onclick=()=>chartFoldToggle(h.querySelector('.foldbtn').dataset.fold));
   $("sched").onclick=ev=>{ const el=ev.target.closest('.day'); if(!el) return;
     $("fDay").value=el.dataset.day; buildExForm(entries.find(e=>e.date===$("fDate").value), el.dataset.day); };
   $("dpGrid").onclick=ev=>{ const b=ev.target.closest('[data-d]'); if(b) dpPick(b.dataset.d); };
