@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-bMmSbZqzm8GmouOiJGO4jRuN5lk3OvDycSUoV2fk9t8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-PTcEb5PyL1J2ubugvgy0nJiLWfC0oW3kEfvOCaKEf8Y='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -418,6 +418,7 @@
   .mobrow:last-of-type{border-bottom:none}
   .mobtick{width:30px;height:30px;flex:none;border:2px solid var(--line);border-radius:8px;background:var(--panel-2);color:transparent;cursor:pointer;font-size:15px;line-height:1;padding:0}
   .mobrow.done .mobtick{background:var(--good);color:#fff}
+  .mobrow.part .mobtick{background:var(--warn);color:#fff;border-color:var(--warn)}
   .mobname{flex:1;min-width:110px;font-size:13.5px;color:var(--ink-dim)}
   .mobrow.done .mobname{color:var(--ink)}
   .mobname span{display:block;font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);margin-top:2px}
@@ -1178,7 +1179,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.5';
+const APP_VERSION = '7.6';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3990,9 +3991,9 @@ async function setMobLog(key, total, sets){
 function toggleMob(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.mob && (key in cur.mob));
-  if(on) return setMobLog(key, null);
-  const s=stretchByKey(key), n=(s && s.sets) || 1;
-  return setMobLog(key, (s?sxTarget(s):0)*n, n);
+  const s=stretchByKey(key), n=(s && s.sets) || 1, per=s ? sxTarget(s) : 0, done=on ? mobSetsOf(cur,key) : 0;
+  if(on && done>=n) return setMobLog(key, null);
+  return setMobLog(key, (on ? cur.mob[key] : 0)+per, done+1);
 }
 function mobSetAdd(key, amount){
   const cur=entries.find(e=>e.date===$("fDate").value);
@@ -4011,8 +4012,9 @@ function mobRowHtml(s, mob, gone, ms){
   const base = tgt ? (reps ? tn('mob.repsn',tgt) : tf('mob.holdn',{n:tgt})) : t(reps?'mob.noreps':'mob.nohold');
   const sub = base + (sets>1 ? ' × '+tn('mob.setsn',sets) : '') + (on && sets>1 ? ' · '+tf('mob.setsof',{n:done, of:sets}) : '');
   const go = (!reps && s.secs) ? '<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>' : '';
-  return `<div class="mobrow${on?' done':''}" data-k="${esc(s.key)}">
-    <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
+  const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
+  return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(s.key)}">
+    <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
     <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="${tgt||0}" value="${on?Math.round(mob[s.key]/done):''}" aria-label="${esc(t(reps?'sx.reps':'sx.hold'))}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${go}
@@ -4077,9 +4079,9 @@ async function setCardioLog(key, total, sets){
 function toggleCardio(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.cardio && (key in cur.cardio));
-  if(on) return setCardioLog(key, null);
-  const c=cardioByKey(key), n=(c && c.sets) || 1;
-  return setCardioLog(key, (c?c.mins:0)*n, n);
+  const c=cardioByKey(key), n=(c && c.sets) || 1, per=c ? (c.mins||0) : 0, done=on ? cdSetsOf(cur,key) : 0;
+  if(on && done>=n) return setCardioLog(key, null);
+  return setCardioLog(key, (on ? cur.cardio[key] : 0)+per, done+1);
 }
 function cdSetAdd(key, mins){
   const cur=entries.find(e=>e.date===$("fDate").value);
@@ -4100,8 +4102,9 @@ function startCardioTimer(key){
 function cdRowHtml(c, log, gone, ms){
   const on=(c.key in log), sets=c.sets||1, done=on ? ((ms && ms[c.key]) || 1) : 0;
   const sub=(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget')) + (sets>1 ? ' × '+tn('mob.setsn',sets) : '') + (on && sets>1 ? ' · '+tf('mob.setsof',{n:done, of:sets}) : '');
-  return `<div class="mobrow${on?' done':''}" data-k="${esc(c.key)}">
-    <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
+  const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
+  return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(c.key)}">
+    <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
     <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planCd,c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="${c.mins||0}" value="${on?Math.round(log[c.key]/done):''}" aria-label="${esc(t('cdx.mins'))}"><span class="mobu">${esc(t('unit.min'))}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
@@ -6387,6 +6390,7 @@ const LANG = {
     'mob.setsof':              '{n} of {of} done',
     'mob.straight':          'Straight in',
     'mob.ticktip':           'Mark done',
+    'mob.ticktip.set':         'Tick off one set',
     'mob.title':             'Mobility <span class="sub-note">· <span id="mobDate">—</span> · every tick and time saves itself</span>',
     'mon.apr':               'April',
     'mon.aug':               'August',
