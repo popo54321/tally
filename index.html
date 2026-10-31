@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-rl865hwKrJr/EdyOJ3viED0ry99+9EFkX04JIOxDdi8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RBCiQARkSv86XOENBa4CMdtpDyUxJCjbKWmemPhDiS8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,7 +193,9 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
-  .fastbtn{margin:2px 0 12px}
+  .fastbtn{margin:2px 0 6px}
+  .ghostbtn.fastbtn.on,.ghostbtn.fastbtn.on:hover{border-color:var(--brass);background:var(--brass);color:#fff;font-weight:600}
+  .fastnote{margin:0 0 12px}
   .cdnokcal{margin:-2px 0 12px}
   .mchip.sxw.miss{border-color:var(--warn);color:var(--warn)}
   #sxWeek{margin:6px 0 10px}
@@ -597,7 +599,8 @@
           <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fProt" placeholder="g"><button type="button" class="addbtn" id="fProtAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
           <div class="calcsum" id="fProtSum"></div></div>
       </div>
-      <button type="button" class="ghostbtn fastbtn" id="fastBtn" data-i18n="f.fast">Fasting day · log 0 kcal</button>
+      <button type="button" class="ghostbtn fastbtn" id="fastBtn" aria-pressed="false">Mark as fasting day</button>
+      <div class="sxnote fastnote" data-i18n="f.fast.note">On a fasting day, whatever you log still counts. If you log nothing, the day counts as 0 instead of being treated as forgotten.</div>
       <div class="mobhint" id="mobHint"></div>
 
       <div class="lbl" style="margin-top:24px;margin-bottom:4px" data-i18n-html="body.meas">Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span></div>
@@ -2371,6 +2374,7 @@ function normEntry(e){
   o.bfSrc=(e.bfSrc==='manual' && o.bf!=null)?'manual':null;
   o.kcal=e.kcal!=null?nn(e.kcal):null;
   o.prot=e.prot!=null?nn(e.prot):null;
+  if(e.fast===true) o.fast=true;
   const tally=x=>{
     if(!x || typeof x!=='object') return null;
     const out={};
@@ -2411,7 +2415,7 @@ function normEntries(list){
 }
 function mergeDay(a, b){
   const o=Object.assign({}, a);
-  ['day','weight','height','kcal','prot'].forEach(k=>{ if(b[k]!=null) o[k]=b[k]; });
+  ['day','weight','height','kcal','prot','fast'].forEach(k=>{ if(b[k]!=null) o[k]=b[k]; });
   if(b.bf!=null){ o.bf=b.bf; o.bfSrc=b.bfSrc; }
   ['mob','cardio','meas','lifts'].forEach(k=>{ if(b[k] && Object.keys(b[k]).length) o[k]=Object.assign({}, a[k]||{}, b[k]); });
   [['mob','mobSets'],['cardio','cardioSets']].forEach(([f,sf])=>{ if(!b[f]) return; const ms=Object.assign({}, a[sf]||{}); Object.keys(b[f]).forEach(k=>{ if(b[sf] && b[sf][k]) ms[k]=b[sf][k]; else delete ms[k]; }); o[sf]=ms; });
@@ -3631,9 +3635,9 @@ function drawReview(){
     if(before.length && inWk.length && recordsBeaten(ex, recordsOf(ex,before), recordsOf(ex,inWk)).length) recs.push(ex.short||ex.name);
   });
   const wp=entries.filter(e=>e.weight!=null), dW=weekTrendChange(wp,start), wIn=wp.some(e=>e.date>=start);
-  const kd=wk.filter(e=>e.kcal!=null), pd=wk.filter(e=>e.prot!=null);
-  const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+e.kcal,0)/kd.length) : null;
-  const pAvg=pd.length ? Math.round(pd.reduce((a,e)=>a+e.prot,0)/pd.length) : null;
+  const kd=wk.filter(e=>kcalOf(e)!=null), pd=wk.filter(e=>protOf(e)!=null);
+  const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+kcalOf(e),0)/kd.length) : null;
+  const pAvg=pd.length ? Math.round(pd.reduce((a,e)=>a+protOf(e),0)/pd.length) : null;
   const w=weekVolume(), mv=w.vol, mute=settings.volMute||[], lo=settings.volLo, hi=settings.volHi;
   const tagged=MUSCLE_KEYS.some(k=>mv[k]>0);
   const cnt={ok:0, track:0, low:0, sofar:0, high:0, muted:0};
@@ -3959,6 +3963,20 @@ function dayEntry(){
   }
   return e;
 }
+const kcalOf = e => e.kcal!=null ? e.kcal : (e.fast ? 0 : null);
+const protOf = e => e.prot!=null ? e.prot : (e.fast ? 0 : null);
+async function toggleFast(){
+  const e=dayEntry(); if(!e) return;
+  if(e.fast) delete e.fast; else e.fast=true;
+  await persist(); render(); drawFast();
+  flash(t(e.fast?'msg.fast.on':'msg.fast.off'));
+}
+function drawFast(){
+  const b=$("fastBtn"); if(!b) return;
+  const cur=entries.find(e=>e.date===$("fDate").value), on=!!(cur && cur.fast);
+  b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
+  b.textContent=t(on?'f.fast.on':'f.fast');
+}
 const mobSetsOf = (e, k) => (e && e.mobSets && e.mobSets[k]) || 1;
 async function setMobLog(key, total, sets){
   const e=dayEntry(); if(!e) return;
@@ -4267,6 +4285,7 @@ function dpRender(){
 function fillForm(date){
   drawSched();
   const f=fillBody(date);
+  drawFast();
   buildExForm(f.cur, f.dayKey);
   drawMob(); drawCardio();
 }
@@ -4322,16 +4341,11 @@ function drawBodyStats(){
     $("bfNow").innerHTML=lbf.bf.toFixed(1)+'<small>%</small>';
     $("bfDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.bf,7),'%') + fmtDelta(t('stat.d30'),deltaOf(e=>e.bf,30),'%');
   }
-  const last7=[6,5,4,3,2,1,0].map(daysAgo);
-  const avg7=get=>{
-    const first=(entries.find(e=>get(e)!=null)||{}).date; if(!first) return {avg:null, days:0, logged:0};
-    const days=last7.filter(d=>d>=first); if(!days.length) return {avg:null, days:0, logged:0};
-    const vals=days.map(d=>{ const e=entryOn(d); return e ? get(e) : null; });
-    return {avg:Math.round(vals.reduce((a,v)=>a+(v||0),0)/days.length), days:days.length, logged:vals.filter(v=>v!=null).length};
-  };
-  const k7=avg7(e=>e.kcal), p7=avg7(e=>e.prot), kcalAvg=k7.avg, protAvg=p7.avg;
+  const wk7=entries.filter(e=>within7(e.date));
+  const avg7=get=>{ const v=wk7.map(get).filter(x=>x!=null); return {avg:v.length ? Math.round(v.reduce((a,x)=>a+x,0)/v.length) : null, logged:v.length}; };
+  const k7=avg7(kcalOf), p7=avg7(protOf), kcalAvg=k7.avg, protAvg=p7.avg;
   $("mKcal").textContent=kcalAvg!=null?kcalAvg+' kcal':'—';
-  $("mKcalTarget").textContent=tf('stat.targetn',{n:settings.kcalTarget, logged:k7.logged, days:k7.days||7});
+  $("mKcalTarget").textContent=tf('stat.targetn',{n:settings.kcalTarget, logged:k7.logged});
   $("mProt").textContent=protAvg!=null?protAvg+' g':'—';
   const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protavg',{target:protTarget(), ok:protOk()});
   setDot("dProt",protAvg==null?0:protAvg,protOk(),Math.round(protOk()*0.8));
@@ -4531,7 +4545,7 @@ CHART_DETAIL.wChart = d => {
   if(tr!=null) h+=cdRow(t('chart.d.trend'), tr.toFixed(1)+' kg');
   if(pv) h+=cdRow(tf('chart.d.since',{date:fmtDM(pv.date)}), fmtSigned(e.weight-pv.weight,' kg',1));
   if(e.bf!=null) h+=cdRow(t('chart.d.bf'), e.bf.toFixed(1)+'%');
-  if(e.kcal!=null) h+=cdRow(t('chart.d.kcal'), e.kcal.toLocaleString()+' kcal');
+  if(kcalOf(e)!=null) h+=cdRow(t('chart.d.kcal'), kcalOf(e).toLocaleString()+' kcal', e.fast ? t('chart.d.fast') : '');
   if(e.prot!=null) h+=cdRow(t('chart.d.prot'), e.prot+' g');
   return h;
 };
@@ -4728,7 +4742,7 @@ function entriesInWindow(){
 }
 function calcCalibration(win){
   const wd=win.filter(e=>e.weight!=null).map(e=>({t:dnum(e.date),w:e.weight})).sort((a,b)=>a.t-b.t);
-  const kdAll=win.filter(e=>e.kcal!=null).map(e=>e.kcal);
+  const kdAll=win.filter(e=>kcalOf(e)!=null).map(kcalOf);
   const out={weighIns:wd.length,kcalDays:kdAll.length,spanDays:0,slope:null,meanK:null,tdee:null};
   if(wd.length>=2){
     const firstT=wd[0].t, lastT=wd[wd.length-1].t;
@@ -4736,7 +4750,7 @@ function calcCalibration(win){
     const n=wd.length,tbar=wd.reduce((s,p)=>s+p.t,0)/n,wbar=wd.reduce((s,p)=>s+p.w,0)/n;
     let nu=0,de=0; wd.forEach(p=>{nu+=(p.t-tbar)*(p.w-wbar);de+=(p.t-tbar)**2;});
     if(de>0) out.slope=nu/de;
-    const kdAlign=win.filter(e=>e.kcal!=null && dnum(e.date)>=firstT && dnum(e.date)<=lastT-1).map(e=>e.kcal);
+    const kdAlign=win.filter(e=>kcalOf(e)!=null && dnum(e.date)>=firstT && dnum(e.date)<=lastT-1).map(kcalOf);
     if(kdAlign.length) out.meanK=kdAlign.reduce((s,k)=>s+k,0)/kdAlign.length;
   }else if(kdAll.length){
     out.meanK=kdAll.reduce((s,k)=>s+k,0)/kdAll.length;
@@ -4847,7 +4861,7 @@ function drawHistory(){
     <td>${d?esc(dayShort(d)):'·'}</td>
     <td class="w">${e.weight!=null?e.weight.toFixed(1):'·'}</td>
     <td>${e.bf!=null?e.bf.toFixed(1):'·'}</td>
-    <td>${e.kcal!=null?e.kcal:'·'}</td>
+    <td>${e.kcal!=null?e.kcal:e.fast?esc(t('hist.fast')):'·'}</td>
     <td>${e.prot!=null?e.prot:'·'}</td>
     <td>${mobCell(e)}</td>
     <td><button class="del" data-d="${e.date}" title="${esc(t('hist.del'))}" aria-label="${esc(t('hist.del'))}">✕</button></td></tr>`;
@@ -4928,13 +4942,6 @@ function doExport(){
   if(box.classList.contains('show')){ box.classList.remove('show'); return; }
   box.value = entries.length ? exportPayload() : t('sync.nothing');
   box.classList.add('show'); box.focus(); box.select();
-}
-let fastArmed=null;
-function fastReset(){ if(fastArmed) clearTimeout(fastArmed); fastArmed=null; $("fastBtn").textContent=t('f.fast'); }
-function fastDay(){
-  const cur=entries.find(e=>e.date===$("fDate").value), had=cur && cur.kcal>0 ? cur.kcal : 0;
-  if(had && !fastArmed){ $("fastBtn").textContent=tf('f.fast.replace',{n:had.toLocaleString()}); fastArmed=setTimeout(fastReset, 4000); return; }
-  fastReset(); $("fKcal").value='0'; $("fProt").value='0'; saveEntry();
 }
 function smsg(msg,err){ const m=$("syncMsg"); if(!m) return; m.textContent=msg||''; m.className='syncmsg'+(err?' err':''); }
 function pickFile(){ smsg(''); $("importFile").click(); }
@@ -5048,7 +5055,7 @@ function buildAiReport(){
   const protMean=pAll.length?Math.round(pAll.reduce((s,e)=>s+e.prot,0)/pAll.length):null;
   let lowP=null; pAll.forEach(e=>{ if(lowP==null||e.prot<lowP.prot) lowP=e; });
   const wkP=wk.filter(e=>e.prot!=null), wkPhit=wkP.filter(e=>e.prot>=protOk()).length;
-  const wkK=wk.filter(e=>e.kcal!=null), wkKmean=wkK.length?Math.round(wkK.reduce((s,e)=>s+e.kcal,0)/wkK.length):null;
+  const wkK=wk.filter(e=>kcalOf(e)!=null), wkKmean=wkK.length?Math.round(wkK.reduce((s,e)=>s+kcalOf(e),0)/wkK.length):null;
   L.push('--- PROTEIN & ADHERENCE ---');
   L.push('Protein at or above the fine level (\u2265'+protOk()+' g), last 7 days: '+wkPhit+' / '+wkP.length+' logged');
   L.push('Mean protein (all logged): '+(protMean!=null?protMean+' g':'n/a')+'    Lowest: '+(lowP?lowP.prot+' g on '+lowP.date+' \u2190 the limiter':'n/a'));
@@ -5094,8 +5101,9 @@ function buildAiReport(){
   L.push('');
   L.push('--- DATA QUALITY FLAGS ---');
   const flags=[];
-  const fasts=entries.filter(e=>e.kcal===0).map(e=>e.date);
-  if(fasts.length) L.push('Fasting days (logged as 0 kcal, real data, not errors): '+fasts.join(', '));
+  const fasts=entries.filter(e=>e.fast).map(e=>e.date+' ('+(e.kcal!=null?e.kcal+' kcal':'nothing logged, counted as 0')+')');
+  if(fasts.length) L.push('Fasting days, marked by the user (real data, not errors): '+fasts.join(', '));
+  L.push('Low-calorie days are taken as logged. A day with no food logged and no fasting mark is left out of averages, not counted as 0.');
   entries.forEach(e=>{ const w=weekdayKey(e.date); if(e.day&&e.day!==w) flags.push(e.date+': tagged \''+e.day+'\' but that date is '+w+' - counts toward the wrong weekly pattern'); });
   const dsince=d=>d?Math.round(dnum(gen)-dnum(d)):null;
   const lastW=weighed.length?weighed[weighed.length-1].date:null;
@@ -5237,7 +5245,7 @@ async function saveEntry(){
     kcal:pick(fkcal,prev.kcal), prot:pick(fprot,prev.prot),
     meas, lifts
   }));
-  const hasData = !!entry && (entry.weight!=null||entry.kcal!=null||entry.prot!=null||!!entry.mob||!!entry.cardio||!!entry.meas||Object.keys(entry.lifts).length>0);
+  const hasData = !!entry && (entry.fast||entry.weight!=null||entry.kcal!=null||entry.prot!=null||!!entry.mob||!!entry.cardio||!!entry.meas||Object.keys(entry.lifts).length>0);
   if(!hasData){ flash(t('msg.nothingtosave'),true); return; }
   const i=entries.findIndex(e=>e.date===date);
   if(i>=0) entries[i]=entry; else entries.push(entry);
@@ -5245,7 +5253,7 @@ async function saveEntry(){
   const ok=await persist(); render();
   if(ok){
     const rec=recordsNewOn(date);
-    const pn = (entry.kcal===0 && !entry.prot) ? ' · '+t('msg.fastday') : fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
+    const pn = fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
     flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):'')))+pn);
   }
   fillBody(date);
@@ -5422,6 +5430,7 @@ const LANG = {
     'chart.chips':           'Every movement you log turns up here as a chip.',
     'chart.d.bf':              'Body fat',
     'chart.d.done':            'done',
+    'chart.d.fast':            'fasting day',
     'chart.d.kcal':            'Energy',
     'chart.d.none':            'Nothing logged that day.',
     'chart.d.prot':            'Protein',
@@ -5594,8 +5603,9 @@ const LANG = {
     'ex.set':                'set',
     'ex.unpintip':           'Pinned to this session — tap to unpin',
     'f.addtip':              'Add the next meal to the total',
-    'f.fast':                  'Fasting day · log 0 kcal',
-    'f.fast.replace':        'Tap again to replace {n} kcal with a fasting day',
+    'f.fast':                  'Mark as fasting day',
+    'f.fast.note':             'On a fasting day, whatever you log still counts. If you log nothing, the day counts as 0 instead of being treated as forgotten.',
+    'f.fast.on':               '✓ Fasting day · tap to unmark',
     'f.height':              'Height (cm)',
     'f.kcal':                'Energy (kcal)',
     'f.prot':                'Protein (g)',
@@ -5698,6 +5708,7 @@ const LANG = {
     'hist.day':              'Day',
     'hist.del':              'Delete this day',
     'hist.empty':            'No entries logged yet. Log your first day on the Body or Workout page.',
+    'hist.fast':               'fast',
     'hist.mob':              'Mobility',
     'hist.more':             'Show {n} older days',
     'hist.more.1':           'Show 1 older day',
@@ -6402,7 +6413,8 @@ const LANG = {
     'msg.enterfloor':        'Enter a number between 30 and 400 g',
     'msg.entertarget':       'Enter a target in kcal',
     'msg.exadded':           '{name} added — log the sets, then save',
-    'msg.fastday':             'fasting day logged',
+    'msg.fast.off':            'Fasting mark removed',
+    'msg.fast.on':             'Marked as a fasting day',
     'msg.floorset':          'Protein target set to {n} g',
     'msg.prot.hit':           'protein {g} g, on target',
     'msg.prot.low':           'protein {g} g, a bit low today. That is fine now and then',
@@ -6592,7 +6604,7 @@ const LANG = {
     'stat.nutr':             'Nutrition · today and 6 days before',
     'stat.prot':             'Protein',
     'stat.protavg':           'average a day · aim {target} g, {ok} g+ is fine',
-    'stat.targetn':          'target {n} · {logged}/{days} days logged',
+    'stat.targetn':          'target {n} · {logged}/7 days logged',
     'sx.counts':             'Counted in',
     'sx.edit':               'Edit stretch',
     'sx.hold':               'Hold · seconds',
@@ -6836,7 +6848,7 @@ const LANG = {
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
-  $("fastBtn").onclick=fastDay;
+  $("fastBtn").onclick=toggleFast;
   $("abX").onclick=abClose; $("abOk").onclick=abClose; $("abNever").onclick=abNever;
   $("abWrap").onclick=ev=>{ if(ev.target===$("abWrap")) abClose(); };
   $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
