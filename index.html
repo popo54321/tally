@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-3zZKbecRM7AOUNSYBJFXDc1W7cLyt7ChCzkp0yP6VSE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-j41JXlg6iVmzMNZRjkHUZax6Qfqrm1etd+K3EUkAmbo='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,6 +193,9 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
+  .mchip.sxw.miss{border-color:var(--warn);color:var(--warn)}
+  #sxWeek{margin:6px 0 10px}
+  .mobname .mobpin{margin-left:6px;vertical-align:1px}
   .protown{margin:8px 0 10px}
   .donbody{font-size:12px;line-height:1.7;color:var(--ink-dim)}
   .donbody b{color:var(--ink)}
@@ -797,6 +800,11 @@
       <div id="volWrap"></div>
       <div class="sxnote" id="volNote"></div>
     </div>
+    <div class="card col-12" id="cardSxWeek">
+      <div class="lbl" data-i18n-html="guide.sx.title">Stretched This Week <span class="sub-note">· Sunday to Saturday · tap a muscle to browse its stretches</span></div>
+      <div class="muschips" id="sxWeek"></div>
+      <div class="sxnote" id="sxWeekNote"></div>
+    </div>
     <div class="card col-12" id="cardRec">
       <div class="lbl" data-i18n-html="guide.rec.title">Recommended <span class="sub-note">· for muscles under your range, with what your gym has</span></div>
       <div id="recWrap"></div>
@@ -807,6 +815,10 @@
       <div class="browsectl"><div class="seg" id="browseMode"></div><select id="browseEq" class="daysel browseeq" data-i18n-title="guide.eq.title" title="Filter by equipment" aria-label="Filter by equipment"></select></div>
       <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll" data-i18n="guide.all.on">Show everything</button></div>
       <div id="browseWrap"></div>
+    </div>
+    <div class="card col-12" id="cardCdLib">
+      <div class="lbl" data-i18n-html="guide.cd.title">Cardio <span class="sub-note">· add what you like · you choose the day</span></div>
+      <div id="cdLibWrap"></div>
     </div>
   </div>
 
@@ -1021,6 +1033,17 @@
     </div>
   </div>
 </div>
+<div class="shwrap" id="kpWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="kpTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="kpTitle"></div>
+      <button type="button" class="sh-x" id="kpX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <input type="text" class="sh-search" id="kpSearch" autocomplete="off">
+    <div class="sh-list" id="kpList"></div>
+    <div class="sh-foot"><button type="button" class="prim" id="kpNew"></button></div>
+  </div>
+</div>
 <div class="shwrap" id="shWrap">
   <div class="sh" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1">
     <div class="sh-head">
@@ -1088,6 +1111,7 @@
         </div>
       </div>
       <div class="field"><label for="sxSecs" id="sxNumLabel" data-i18n="sx.hold">Hold · seconds</label><input type="number" min="0" max="3600" step="5" inputmode="numeric" id="sxSecs" placeholder="45"></div>
+      <div class="field"><label data-i18n="sx.mus">Stretches · muscles</label><div class="muschips" id="sxMus"></div></div>
       <div class="sxnote" id="sxNote" data-i18n="sx.note">The timer counts this down, so the time recorded is the time you actually held — no stopping the clock late and correcting it afterwards.</div>
     </div>
     <div class="sh-foot">
@@ -1275,13 +1299,15 @@ function volBand(s){
 const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullup_bar','dip_bars','rings',
                'cable','leg_press','leg_curl','leg_ext','back_ext','bands',
                'smith','trap_bar','landmine','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','ghd','box','parallettes','ab_wheel','sled',
-               'plates','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','ssb','glute_machine','ab_machine','seated_calf_m','med_ball','sandbag','suspension','stability_ball','climb_rope','wrist_roller','gripper'];
+               'plates','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','ssb','glute_machine','ab_machine','seated_calf_m','med_ball','sandbag','suspension','stability_ball','climb_rope','wrist_roller','gripper',
+               'treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball'];
 
 const EQUIP_GROUPS = [
   {key:'free', items:['barbell','dumbbells','kettlebell','ez_bar','trap_bar','ssb','plates','med_ball','sandbag']},
   {key:'machine', items:['cable','smith','leg_press','leg_curl','leg_ext','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','glute_machine','ab_machine','seated_calf_m']},
   {key:'station', items:['bench','rack','pullup_bar','dip_bars','back_ext','ghd','box','landmine','climb_rope','sled']},
-  {key:'small', items:['rings','suspension','bands','parallettes','ab_wheel','stability_ball','wrist_roller','gripper']}
+  {key:'small', items:['rings','suspension','bands','parallettes','ab_wheel','stability_ball','wrist_roller','gripper']},
+  {key:'cardio', items:['treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball']}
 ];
 
 const LIB = [
@@ -1878,7 +1904,108 @@ const LIB = [
   {key:'db_clean_press', p:['delt_front','glutes'],             s:['triceps','hamstrings'],               eq:['dumbbells'],               ld:'kg'},
   {key:'burpee_box_over', p:['quads','chest'],                   s:['glutes','abs','calves'],              eq:['box'],                     ld:'bw', lv:3}
 ];
+const SX_LIB = [
+  {key:'doorway_chest', mus:['chest','delt_front'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'wall_pec', mus:['chest'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'roller_chest', mus:['chest','delt_front'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'bench_pec', mus:['chest','back'], eq:['bench'], mode:'sec', tgt:30, lv:2},
+  {key:'behind_clasp', mus:['delt_front','chest'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'shoulder_ext', mus:['delt_front','chest'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'cross_body', mus:['delt_rear','delt_side'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'sleeper', mus:['delt_rear'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'thread_needle', mus:['delt_rear','traps','back'], eq:[], mode:'reps', tgt:8, lv:1},
+  {key:'arm_circles', mus:['delt_side','delt_front'], eq:[], mode:'reps', tgt:15, lv:1},
+  {key:'band_dislocate', mus:['delt_front','chest','delt_rear'], eq:['bands'], mode:'reps', tgt:10, lv:2},
+  {key:'oh_triceps', mus:['triceps'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'strap_triceps', mus:['triceps','delt_front'], eq:['stretch_strap'], mode:'sec', tgt:30, lv:2},
+  {key:'childs_pose', mus:['back','lower_back'], eq:[], mode:'sec', tgt:45, lv:1},
+  {key:'wall_lat', mus:['back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'passive_hang', mus:['back','forearms'], eq:['pullup_bar'], mode:'sec', tgt:30, lv:2},
+  {key:'cat_cow', mus:['back','lower_back'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'open_book', mus:['back','chest'], eq:[], mode:'reps', tgt:8, lv:1},
+  {key:'roll_lats', mus:['back'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'roll_upper', mus:['back','traps'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'upper_trap', mus:['traps'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'levator', mus:['traps'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'chin_tuck', mus:['traps'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'neck_rotation', mus:['traps'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'wall_biceps', mus:['biceps','chest'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'wrist_flexor', mus:['forearms'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'wrist_extensor', mus:['forearms'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'ball_forearm', mus:['forearms'], eq:['massage_ball'], mode:'sec', tgt:60, lv:1},
+  {key:'standing_quad', mus:['quads'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'side_quad', mus:['quads'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'kneel_hipflex', mus:['quads'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'couch', mus:['quads'], eq:[], mode:'sec', tgt:45, lv:3},
+  {key:'roll_quads', mus:['quads'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'lizard', mus:['quads','glutes','hamstrings'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'standing_ham', mus:['hamstrings'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'seated_fold', mus:['hamstrings','lower_back'], eq:[], mode:'sec', tgt:45, lv:1},
+  {key:'strap_ham', mus:['hamstrings'], eq:['stretch_strap'], mode:'sec', tgt:30, lv:1},
+  {key:'roll_hams', mus:['hamstrings'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'butterfly', mus:['hamstrings','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'frog', mus:['hamstrings','glutes'], eq:[], mode:'sec', tgt:45, lv:2},
+  {key:'pancake', mus:['hamstrings','lower_back'], eq:[], mode:'sec', tgt:45, lv:3},
+  {key:'front_split', mus:['hamstrings','quads'], eq:[], mode:'sec', tgt:30, lv:4},
+  {key:'middle_split', mus:['hamstrings','glutes'], eq:[], mode:'sec', tgt:30, lv:4},
+  {key:'pigeon', mus:['glutes'], eq:[], mode:'sec', tgt:45, lv:2},
+  {key:'figure_four', mus:['glutes'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'seated_glute', mus:['glutes','lower_back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'hip_9090', mus:['glutes'], eq:[], mode:'reps', tgt:8, lv:2},
+  {key:'ball_glute', mus:['glutes'], eq:['massage_ball'], mode:'sec', tgt:60, lv:1},
+  {key:'worlds_greatest', mus:['quads','glutes','hamstrings'], eq:[], mode:'reps', tgt:6, lv:2},
+  {key:'deep_squat', mus:['glutes','calves'], eq:[], mode:'sec', tgt:45, lv:2},
+  {key:'happy_baby', mus:['glutes','lower_back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'hip_circles', mus:['glutes'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'wall_calf', mus:['calves'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'step_calf', mus:['calves'], eq:['box'], mode:'sec', tgt:30, lv:1},
+  {key:'soleus', mus:['calves'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'down_dog', mus:['calves','hamstrings','back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'ankle_rock', mus:['calves'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'roll_calves', mus:['calves'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'cobra', mus:['abs','lower_back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'side_bend', mus:['abs','back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'ball_backbend', mus:['abs','chest'], eq:['stability_ball'], mode:'sec', tgt:30, lv:1},
+  {key:'full_bridge', mus:['abs','delt_front','quads'], eq:[], mode:'sec', tgt:20, lv:4},
+  {key:'knees_chest', mus:['lower_back','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'spinal_twist', mus:['lower_back','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'seated_twist', mus:['lower_back','back'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'scorpion', mus:['lower_back','chest','glutes'], eq:[], mode:'reps', tgt:6, lv:2}
+];
+const CD_LIB = [
+  {key:'walk', eq:[], mins:30},
+  {key:'incline_walk', eq:['treadmill'], mins:30},
+  {key:'run', eq:[], mins:30},
+  {key:'treadmill', eq:['treadmill'], mins:30},
+  {key:'sprints', eq:[], mins:20},
+  {key:'hike', eq:[], mins:60},
+  {key:'ruck', eq:[], mins:45},
+  {key:'stair_walk', eq:[], mins:15},
+  {key:'cycle', eq:['bicycle'], mins:45},
+  {key:'bike', eq:['exercise_bike'], mins:30},
+  {key:'spin', eq:['exercise_bike'], mins:45},
+  {key:'air_bike', eq:['air_bike'], mins:15},
+  {key:'row', eq:['rower'], mins:20},
+  {key:'elliptical', eq:['elliptical'], mins:30},
+  {key:'stairs', eq:['stair_climber'], mins:20},
+  {key:'ski', eq:['ski_erg'], mins:15},
+  {key:'swim', eq:['pool'], mins:30},
+  {key:'skip', eq:['jump_rope'], mins:10},
+  {key:'hiit', eq:[], mins:20},
+  {key:'boxing', eq:['punch_bag'], mins:20},
+  {key:'shadow_box', eq:[], mins:15},
+  {key:'ropes', eq:['battle_ropes'], mins:10},
+  {key:'sled', eq:['sled'], mins:15},
+  {key:'dance', eq:[], mins:30},
+  {key:'yoga', eq:[], mins:30},
+  {key:'team', eq:[], mins:60},
+  {key:'racket', eq:[], mins:60},
+  {key:'martial', eq:[], mins:60}
+];
 const libByKey = k => LIB.find(l=>l.key===k);
+const sxLibByKey = k => SX_LIB.find(l=>l.key===k);
+const cdLibByKey = k => CD_LIB.find(l=>l.key===k);
+const ALL_LIBS = () => LIB.concat(SX_LIB, CD_LIB);
 const lvTag = lv => lv ? `<span class="lvtag lv${lv}">${esc(t('lv.'+lv))}</span>` : '';
 const exLv = ex => { const l=ex && ex.lib ? libByKey(ex.lib) : null; return l ? l.lv : null; };
 const byName = (a,b) => String(a).localeCompare(String(b), undefined, {sensitivity:'base', numeric:true});
@@ -1960,7 +2087,7 @@ function normCardio(x){
   const name=String(x.name==null?'':x.name).trim().slice(0,40);
   if(!name) return null;
   const m=parseInt(x.mins,10);
-  return { key, name, mins:(isNaN(m)||m<0||m>600)?0:m, retired:!!x.retired };
+  return { key, name, mins:(isNaN(m)||m<0||m>600)?0:m, lib:(typeof x.lib==='string' && cdLibByKey(x.lib)) ? x.lib : null, retired:!!x.retired };
 }
 function cdKeyFor(name){
   let base='cd_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
@@ -1984,6 +2111,8 @@ function normStretch(x){
     secs:(isNaN(s)||s<0||s>3600)?0:s,
     reps:(isNaN(r)||r<0||r>999)?0:r,
     unit:(x.unit==='reps')?'reps':null,
+    mus:muscleList(x.mus,4),
+    lib:(typeof x.lib==='string' && sxLibByKey(x.lib)) ? x.lib : null,
     retired:!!x.retired };
 }
 const sxIsReps = s => !!(s && s.unit==='reps');
@@ -2456,7 +2585,8 @@ async function persistExEdits(){
 async function loadPlan(){
   planExtras={};
   planSets={};
-  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); planExtras=normPlan(p); planSets=normPlanSets(p && p.sets); } }
+  planRaw=null;
+  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); planRaw=p; planExtras=normPlan(p); planSets=normPlanSets(p && p.sets); } }
   catch(e){ console.error('plan read failed',e); }
 }
 async function loadStretches(){
@@ -2527,7 +2657,20 @@ async function recoverCardio(){
   await persistCardio();
   return seen.size;
 }
-const planObject = () => Object.assign({}, planExtras, {sets:planSets});
+let planSx = {}, planCd = {}, planRaw = null;
+const sxToday = {}, cdToday = {};
+function normDayLists(p, exists){
+  const out={};
+  if(!isObj(p)) return out;
+  DAYS.forEach(d=>{ const a=p[d.key]; if(!Array.isArray(a)) return; const keep=[]; a.forEach(k=>{ if(typeof k==='string' && exists(k) && keep.indexOf(k)<0) keep.push(k); }); if(keep.length) out[d.key]=keep; });
+  return out;
+}
+function everyDay(keys){ const o={}; if(keys.length) DAYS.forEach(d=>{ o[d.key]=keys.slice(); }); return o; }
+function planLogsInit(p){
+  planSx = (p && p.sx!==undefined) ? normDayLists(p.sx, stretchByKey) : everyDay(activeStretches().map(x=>x.key));
+  planCd = (p && p.cd!==undefined) ? normDayLists(p.cd, cardioByKey) : everyDay(activeCardio().map(x=>x.key));
+}
+const planObject = () => Object.assign({}, planExtras, {sets:planSets, sx:planSx, cd:planCd});
 async function persistPlan(){
   Object.keys(planSets).forEach(d=>{
     Object.keys(planSets[d]).forEach(k=>{ if((planExtras[d]||[]).indexOf(k)<0) delete planSets[d][k]; });
@@ -2816,10 +2959,69 @@ function abClose(){ dlgClose("abWrap"); }
 async function abNever(){ try{ await STORE.set(ABOUT_KEY,'1'); }catch(e){} abClose(); }
 async function abMaybeShow(){ let seen=null; try{ seen=await STORE.get(ABOUT_KEY); }catch(e){} if(!seen) abOpen(); }
 function tallyBack(){
-  const open=[['abWrap',abClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose]]
+  const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose]]
     .find(([id])=>{ const el=$(id); return el && el.classList.contains('show'); });
   if(!open) return false;
   open[1](); return true;
+}
+let kpKind='sx', sxPinDay=null, cdPinDay=null;
+const kpCfg = k => k==='sx'
+  ? {lib:SX_LIB, mine:activeStretches, plan:planSx, today:sxToday, libName:l=>t('sxlib.'+l.key), owned:sxOwned, fromLib:sxFromLib, draw:()=>drawMob(), log:'mob'}
+  : {lib:CD_LIB, mine:activeCardio,    plan:planCd, today:cdToday, libName:l=>t('cdlib.'+l.key), owned:cdOwned, fromLib:cdFromLib, draw:()=>drawCardio(), log:'cardio'};
+function kpOpen(kind){
+  kpKind=kind;
+  $("kpTitle").textContent=t(kind==='sx'?'kp.title.sx':'kp.title.cd');
+  $("kpNew").textContent=t(kind==='sx'?'sx.new':'cdx.new');
+  $("kpSearch").value=''; $("kpSearch").placeholder=t(kind==='sx'?'kp.search.sx':'kp.search.cd');
+  kpRender(); dlgOpen("kpWrap");
+}
+function kpClose(){ dlgClose("kpWrap"); }
+const sxSub = l => (l.mode==='reps' ? tn('mob.repsn',l.tgt) : tf('mob.holdn',{n:l.tgt}));
+function kpRender(){
+  const c=kpCfg(kpKind), q=$("kpSearch").value.trim(), dayKey=$("fDay").value;
+  const cur=entries.find(e=>e.date===$("fDate").value), log=(cur && cur[c.log]) || {};
+  const shown=new Set(dayLogKeys(c.plan, c.today, log));
+  const pinBtn=(attr,k)=>`<button class="sh-pin" ${attr}="${esc(k)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>`;
+  const mine=c.mine().filter(x=>!shown.has(x.key) && (!q || qMatch(q, x.name))).sort((a,b)=>byName(a.name,b.name));
+  const mineRow=x=>`<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(kpKind==='sx' ? (sxTarget(x) ? (sxIsReps(x)?tn('mob.repsn',sxTarget(x)):tf('mob.holdn',{n:sxTarget(x)})) : t('mob.nohold')) : (x.mins?tf('cd.target',{n:x.mins}):t('cd.notarget')))}</span></div>${pinBtn('data-kpin',x.key)}<button class="sh-add" data-kadd="${esc(x.key)}">${esc(t('btn.add'))}</button></div>`;
+  const lib=c.lib.filter(l=>!c.owned(l) && (!q || qMatch(q, c.libName(l)+' '+(l.mus||[]).map(m=>t('mus.'+m)).join(' ')+(l.lv?' '+t('lv.'+l.lv):''))))
+    .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || (a.lv||0)-(b.lv||0) || byName(c.libName(a),c.libName(b)));
+  const libRowK=l=>{ const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.noeq');
+    const sub=kpKind==='sx' ? l.mus.map(m=>t('mus.'+m)).join(', ')+' · '+sxSub(l) : tf('cd.target',{n:l.mins});
+    return `<div class="sh-row${ok?'':' off'}"><div class="nm">${esc(c.libName(l))}${kpKind==='sx'?lvTag(l.lv):''}<span>${esc(sub)} · ${esc(ok?eq:tf('guide.needs',{list:eq}))}</span></div>${pinBtn('data-lpin',l.key)}<button class="sh-add" data-ladd="${esc(l.key)}">${esc(t('btn.add'))}</button></div>`; };
+  $("kpList").innerHTML = (mine.length ? `<div class="sh-grp">${esc(t(kpKind==='sx'?'kp.mine.sx':'kp.mine.cd'))}</div>`+mine.map(mineRow).join('') : '')
+    + (lib.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+lib.map(libRowK).join('') : '')
+    || `<div class="sh-empty">${esc(q?tf('nomatch',{q:q}):t('kp.empty'))}</div>`;
+}
+async function kpPick(key, pin){
+  const c=kpCfg(kpKind), dayKey=$("fDay").value, date=$("fDate").value;
+  if(pin){ const l=c.plan[dayKey]||(c.plan[dayKey]=[]); if(l.indexOf(key)<0) l.push(key); await persistPlan(); }
+  else (c.today[date]||(c.today[date]=[])).push(key);
+  kpClose(); c.draw();
+  const x=kpKind==='sx'?stretchByKey(key):cardioByKey(key);
+  flash(pin ? tf('msg.pinned',{name:x?x.name:'', day:dayShort(dayKey)}) : tf('msg.exadded',{name:x?x.name:''}));
+}
+async function kpLibPick(libKey, pin){ const key=await kpCfg(kpKind).fromLib(libKey); if(key) kpPick(key, pin); }
+function kpNew(){ kpClose(); if(kpKind==='sx'){ sxPinDay=$("fDay").value; sxOpen(null); } else { cdPinDay=$("fDay").value; cdOpen(null); } }
+const sxOwned = l => stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
+const cdOwned = l => cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;
+async function sxFromLib(k){
+  const l=sxLibByKey(k); if(!l) return null;
+  const have=sxOwned(l);
+  if(have){ if(have.retired){ have.retired=false; await persistStretches(); } return have.key; }
+  const name=t('sxlib.'+k), reps=l.mode==='reps';
+  const x=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null, secs:reps?0:l.tgt, reps:reps?l.tgt:0, mus:l.mus, lib:k});
+  if(!x) return null;
+  stretches.push(x); await persistStretches(); return x.key;
+}
+async function cdFromLib(k){
+  const l=cdLibByKey(k); if(!l) return null;
+  const have=cdOwned(l);
+  if(have){ if(have.retired){ have.retired=false; await persistCardio(); } return have.key; }
+  const name=t('cdlib.'+k);
+  const x=normCardio({key:cdKeyFor(name), name:name, mins:l.mins, lib:k});
+  if(!x) return null;
+  cardios.push(x); await persistCardio(); return x.key;
 }
 function shOpen(){
   shManaging=false; shMsg('');
@@ -3486,6 +3688,45 @@ function libOwned(l){
 }
 const libLive = l => { const o=libOwned(l); return !!o && !o.retired; };
 const libUsable = l => !gym.set || libAvailable(l, gym.have);
+function sxLibRow(l){
+  const ok=libUsable(l), have=sxOwned(l);
+  const eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.noeq');
+  const act=(have && !have.retired) ? `<span class="libin">${esc(t('guide.in.sx'))}</span>` : `<button type="button" class="collbtn" data-sxadd="${l.key}">${esc(t('guide.add'))}</button>`;
+  return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('sxlib.'+l.key))}${lvTag(l.lv)}`
+    + `<span class="sub">${esc(l.mus.map(k=>t('mus.'+k)).join(', '))} · ${esc(sxSub(l))}<br>${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>${act}</div>`;
+}
+function drawCdLib(){
+  const wrap=$("cdLibWrap"); if(!wrap) return;
+  const show=l=>guideAll || libUsable(l);
+  const list=CD_LIB.slice().sort((a,b)=>(show(b)?1:0)-(show(a)?1:0) || byName(t('cdlib.'+a.key),t('cdlib.'+b.key)));
+  wrap.innerHTML=list.map(l=>{
+    const ok=libUsable(l), have=cdOwned(l), eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.noeq');
+    const act=(have && !have.retired) ? `<span class="libin">${esc(t('guide.in.sx'))}</span>` : `<button type="button" class="collbtn" data-cdadd="${l.key}">${esc(t('guide.add'))}</button>`;
+    return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('cdlib.'+l.key))}<span class="sub">${esc(tf('cd.target',{n:l.mins}))} · ${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>${act}</div>`;
+  }).join('');
+}
+function drawSxWeek(){
+  const wrap=$("sxWeek"); if(!wrap) return;
+  const start=weekStart(), today=localDate(), cnt={}, plain=new Set();
+  MUSCLE_KEYS.forEach(k=>cnt[k]=0);
+  entries.filter(e=>e.date>=start && e.date<=today && e.mob).forEach(e=>Object.keys(e.mob).forEach(k=>{
+    const st=stretchByKey(k); if(!st) return;
+    if(!st.mus || !st.mus.length){ plain.add(st.name); return; }
+    st.mus.forEach(m=>{ if(m in cnt) cnt[m]++; });
+  }));
+  const vol=weekVolume().vol;
+  const missed=MUSCLES.filter(m=>vol[m.key]>0 && !cnt[m.key]);
+  wrap.innerHTML=MUSCLES.map(m=>{
+    const n=cnt[m.key], miss=vol[m.key]>0 && !n;
+    return `<button type="button" class="mchip sxw${n?' on':''}${miss?' miss':''}" data-sxmus="${m.key}">${esc(t('mus.'+m.key))}${n?' · '+n:''}</button>`;
+  }).join('');
+  const bits=[];
+  if(missed.length) bits.push(tf('guide.sx.missed',{list:missed.map(m=>t('mus.'+m.key)).join(', ')}));
+  else if(Object.values(cnt).some(Boolean)) bits.push(t('guide.sx.allgood'));
+  else bits.push(t('guide.sx.none'));
+  if(plain.size) bits.push(tf('guide.sx.plain',{list:[...plain].join(', ')}));
+  $("sxWeekNote").textContent=bits.join(' ');
+}
 function libRow(l){
   const ok=libUsable(l);
   const mus=l.p.map(k=>t('mus.'+k)).join(', ') + (l.s.length ? ' · '+tf('guide.also',{list:l.s.map(k=>t('mus.'+k)).join(', ')}) : '');
@@ -3563,8 +3804,10 @@ function drawGuide(){
   const show=l=>guideAll || libUsable(l);
   const eqHit=l=>!guideEq || (guideEq==='none' ? !l.eq.length : l.eq.indexOf(guideEq)>=0);
   const prim=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), sec=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
-  const pool=guideMode==='s' ? sec : prim, list=pool.filter(eqHit).sort(libOrder);
-  $("browseMode").innerHTML=['p','s'].map(m=>`<button type="button" class="${m===guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:(m==='s'?sec:prim).filter(eqHit).length}))}</button>`).join('');
+  const sxs=SX_LIB.filter(l=>l.mus.indexOf(guideMus)>=0 && show(l));
+  const pools={p:prim, s:sec, x:sxs}, pool=pools[guideMode]||prim;
+  const list=pool.filter(eqHit).sort(guideMode==='x' ? (a,b)=>a.lv-b.lv || byName(t('sxlib.'+a.key),t('sxlib.'+b.key)) : libOrder);
+  $("browseMode").innerHTML=['p','s','x'].map(m=>`<button type="button" class="${m===guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:pools[m].filter(eqHit).length}))}</button>`).join('');
   const eqN=q=>pool.filter(l=>q==='none' ? !l.eq.length : l.eq.indexOf(q)>=0).length;
   const eqOpts=['none'].concat(EQUIP).filter(q=>q===guideEq || eqN(q)>0);
   $("browseEq").innerHTML=`<option value="">${esc(tf('guide.eq.any',{n:pool.length}))}</option>`
@@ -3572,9 +3815,10 @@ function drawGuide(){
   $("browseEq").value=guideEq;
   const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
   const mn=t('mus.'+guideMus);
-  $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : 'guide.count', list.length, {name:mn});
-  $("browseWrap").innerHTML = list.length ? bwSplit(list, l=>l.lv, libRow, 'reclbl')
-    : `<div class="restnote">${esc(guideEq ? t('guide.none.eq') : tf(guideMode==='s' ? 'guide.none.s' : 'guide.none',{name:mn}))}</div>`;
+  $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : guideMode==='x' ? 'guide.count.x' : 'guide.count', list.length, {name:mn});
+  $("browseWrap").innerHTML = list.length ? (guideMode==='x' ? list.map(sxLibRow).join('') : bwSplit(list, l=>l.lv, libRow, 'reclbl'))
+    : `<div class="restnote">${esc(guideEq ? t('guide.none.eq') : tf(guideMode==='s' ? 'guide.none.s' : guideMode==='x' ? 'guide.none.x' : 'guide.none',{name:mn}))}</div>`;
+  drawSxWeek(); drawCdLib();
 }
 async function libToCollection(k){
   const l=libByKey(k); if(!l) return null;
@@ -3612,7 +3856,7 @@ async function volBandSet(){
 function drawGym(){
   const wrap=$("gymWrap"); if(!wrap) return;
   const item=q=>{
-    const on=gym.have.indexOf(q)>=0, n=LIB.filter(l=>l.eq.indexOf(q)>=0).length;
+    const on=gym.have.indexOf(q)>=0, n=ALL_LIBS().filter(l=>l.eq.indexOf(q)>=0).length;
     return `<button type="button" class="gymitem${on?' on':''}" data-eq="${q}"><span class="box"></span>`
       + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tn('gym.uses',n))}</span></span></button>`;
   };
@@ -3621,7 +3865,7 @@ function drawGym(){
     return `<div class="gymgrp">${esc(t('gym.grp.'+g.key))}<span>${esc(tf('gym.grp.have',{n:have, total:g.items.length}))}</span></div>`
       + `<div class="gymgrid">${g.items.slice().sort((a,b)=>byName(t('eq.'+a), t('eq.'+b))).map(item).join('')}</div>`;
   }).join('');
-  $("gymCount").textContent = gym.set ? tf('gym.count',{n:LIB.filter(l=>libAvailable(l, gym.have)).length, total:LIB.length}) : t('gym.unset');
+  $("gymCount").textContent = gym.set ? tf('gym.count',{n:ALL_LIBS().filter(l=>libAvailable(l, gym.have)).length, total:ALL_LIBS().length}) : t('gym.unset');
   $("gymOwn").innerHTML = gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
     + `<button type="button" class="collbtn" data-gdel="${esc(o.key)}" aria-label="${esc(t('btn.remove'))}">✕</button></div>`).join('');
 
@@ -3671,26 +3915,39 @@ function mobRowHtml(s, mob, gone){
   const go = (!reps && s.secs) ? '<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>' : '';
   return `<div class="mobrow${on?' done':''}" data-k="${esc(s.key)}">
     <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
-    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':''}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="0" value="${on?mob[s.key]:''}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span>
     ${go}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
   </div>`;
 }
+function unpinLog(plan, key){ Object.keys(plan).forEach(d=>{ plan[d]=plan[d].filter(k=>k!==key); if(!plan[d].length) delete plan[d]; }); }
+function dayLogKeys(plan, today, log){
+  const dayKey=$("fDay").value, date=$("fDate").value;
+  return [...new Set([...(plan[dayKey]||[]), ...(today[date]||[]), ...Object.keys(log)])];
+}
+const logPinned = (plan, key) => (plan[$("fDay").value]||[]).indexOf(key)>=0;
+async function toggleLogPin(kind, key){
+  const plan=kind==='sx'?planSx:planCd, dayKey=$("fDay").value, list=plan[dayKey]||(plan[dayKey]=[]), i=list.indexOf(key);
+  if(i>=0){ list.splice(i,1); if(!list.length) delete plan[dayKey]; const today=kind==='sx'?sxToday:cdToday, date=$("fDate").value; (today[date]||(today[date]=[])).push(key); }
+  else list.push(key);
+  await persistPlan(); if(kind==='sx') drawMob(); else drawCardio();
+}
+const pinTag = (pinned, dayKey) => `<button type="button" class="xtag mobpin${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`;
 function drawMob(){
   const wrap=$("mobWrap"); if(!wrap) return;
   const date=$("fDate").value;
   const cur=entries.find(e=>e.date===date);
   const mob=(cur && cur.mob)?cur.mob:{};
   const dd=$("mobDate"); if(dd) dd.textContent=fmtDMY(date);
-  const list=activeStretches();
-  const orphan=Object.keys(mob).filter(k=>!list.some(s=>s.key===k));
+  const keys=dayLogKeys(planSx, sxToday, mob);
+  const list=keys.map(stretchByKey).filter(s=>s && !s.retired);
+  const orphan=keys.filter(k=>!list.some(s=>s.key===k) && (k in mob));
   if(!list.length && !orphan.length){
-    wrap.innerHTML='<div class="mobempty">'+esc(t('mob.empty1'))+'<br>'+esc(t('mob.empty2'))+'</div>';
+    wrap.innerHTML='<div class="mobempty">'+esc(t(activeStretches().length?'mob.empty.day':'mob.empty1'))+'<br>'+esc(tf('mob.empty.add',{day:dayName($("fDay").value)}))+'</div>';
   }else{
     wrap.innerHTML = list.map(s=>mobRowHtml(s,mob,false)).join('')
       + orphan.map(k=>mobRowHtml({key:k, name:(stretchByKey(k)||{name:k}).name, secs:0, reps:0, unit:null}, mob, true)).join('');
-
   }
   const n=Object.keys(mob).length;
   let secs=0, reps=0;
@@ -3732,7 +3989,7 @@ function cdRowHtml(c, log, gone){
   const on=(c.key in log);
   return `<div class="mobrow${on?' done':''}" data-k="${esc(c.key)}">
     <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':''}<span>${esc(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget'))}</span></div>
+    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planCd,c.key), $("fDay").value)}<span>${esc(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget'))}</span></div>
     <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="${on?log[c.key]:''}"><span class="mobu">${esc(t('unit.min'))}</span>
     ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
@@ -3744,14 +4001,14 @@ function drawCardio(){
   const cur=entries.find(e=>e.date===date);
   const log=(cur && cur.cardio)?cur.cardio:{};
   const dd=$("cdDate"); if(dd) dd.textContent=fmtDMY(date);
-  const list=activeCardio();
-  const orphan=Object.keys(log).filter(k=>!list.some(c=>c.key===k));
+  const keys=dayLogKeys(planCd, cdToday, log);
+  const list=keys.map(cardioByKey).filter(c=>c && !c.retired);
+  const orphan=keys.filter(k=>!list.some(c=>c.key===k) && (k in log));
   if(!list.length && !orphan.length){
-    wrap.innerHTML='<div class="mobempty">'+esc(t('cd.empty1'))+'<br>'+esc(t('cd.empty2'))+'</div>';
+    wrap.innerHTML='<div class="mobempty">'+esc(t(activeCardio().length?'cd.empty.day':'cd.empty1'))+'<br>'+esc(tf('cd.empty.add',{day:dayName($("fDay").value)}))+'</div>';
   }else{
     wrap.innerHTML = list.map(c=>cdRowHtml(c,log,false)).join('')
       + orphan.map(k=>cdRowHtml({key:k, name:(cardioByKey(k)||{name:prettyKey(k)}).name, mins:0}, log, true)).join('');
-
   }
   const n=Object.keys(log).length;
   const mins=Object.keys(log).reduce((a,k)=>a+(log[k]||0),0);
@@ -3771,13 +4028,13 @@ function cdOpen(key){
   cdMsg(''); dlgOpen("cdWrapSheet");
   if(!c) $("cdName").focus();
 }
-function cdClose(){ dlgClose("cdWrapSheet"); cdResetDel(); cdMsg(''); cdEditing=null; }
+function cdClose(){ dlgClose("cdWrapSheet"); cdPinDay=null; cdResetDel(); cdMsg(''); cdEditing=null; }
 async function cdSave(){
   const name=$("cdName").value.trim();
   if(!name){ cdMsg(t('msg.needname'),true); $("cdName").focus(); return; }
   if(cdEditing){
     const c=cardioByKey(cdEditing); if(!c){ cdClose(); return; }
-    const upd=normCardio({key:c.key, name:name, mins:$("cdMins").value, retired:c.retired});
+    const upd=normCardio({key:c.key, name:name, mins:$("cdMins").value, lib:c.lib, retired:c.retired});
     if(!upd){ cdMsg(t('msg.badname'),true); return; }
     Object.assign(c, upd);
   }else{
@@ -3785,6 +4042,7 @@ async function cdSave(){
     const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
     cardios.push(c);
+    if(cdPinDay){ (planCd[cdPinDay]||(planCd[cdPinDay]=[])).push(c.key); await persistPlan(); }
   }
   const ok=await persistCardio();
   if(!ok){ cdMsg(t('msg.savefail'),true); return; }
@@ -3803,6 +4061,7 @@ async function cdDelete(){
   }
   cdResetDel();
   cardios=cardios.filter(x=>x.key!==c.key);
+  unpinLog(planCd, c.key); await persistPlan();
   entries.forEach(e=>{ if(e.cardio && (c.key in e.cardio)){ delete e.cardio[c.key]; if(!Object.keys(e.cardio).length) e.cardio=null; } });
   await persistCardio(); await persist();
   cdClose(); render();
@@ -3832,12 +4091,14 @@ function sxOpen(key){
   const mode = sxIsReps(s) ? 'reps' : 'sec';
   $("sxTitle").textContent=t(s?'sx.edit':'sx.new');
   $("sxName").value=s?s.name:'';
-  sxModeSet(mode);
+  sxModeSet(mode); sxMusSet(s?s.mus:[]);
   $("sxDelete").style.display=s?'':'none';
   sxMsg(''); dlgOpen("sxWrap");
   if(!s) $("sxName").focus();
 }
-function sxClose(){ dlgClose("sxWrap"); sxResetDel(); sxMsg(''); sxEditing=null; }
+function sxClose(){ dlgClose("sxWrap"); sxResetDel(); sxMsg(''); sxEditing=null; sxPinDay=null; }
+const sxMusGet = () => [...document.querySelectorAll('#sxMus .mchip.on')].map(b=>b.dataset.m);
+function sxMusSet(list){ $("sxMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${(list||[]).indexOf(m.key)>=0?' on':''}" data-m="${m.key}">${esc(t('mus.'+m.key))}</button>`).join(''); }
 async function sxSave(){
   const name=$("sxName").value.trim();
   if(!name){ sxMsg(t('msg.needname'),true); $("sxName").focus(); return; }
@@ -3846,15 +4107,16 @@ async function sxSave(){
   if(sxEditing){
     const s=stretchByKey(sxEditing); if(!s){ sxClose(); return; }
     const upd=normStretch({key:s.key, name:name, unit:reps?'reps':null,
-      secs:reps?s.secs:v, reps:reps?v:s.reps, retired:s.retired});
+      secs:reps?s.secs:v, reps:reps?v:s.reps, mus:sxMusGet(), lib:s.lib, retired:s.retired});
     if(!upd){ sxMsg(t('msg.badname'),true); return; }
     Object.assign(s, upd);
   }else{
     if(stretches.some(x=>x.name.toLowerCase()===name.toLowerCase())){ sxMsg(t('msg.onlist'),true); return; }
     const s=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null,
-      secs:reps?0:v, reps:reps?v:0});
+      secs:reps?0:v, reps:reps?v:0, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
     stretches.push(s);
+    if(sxPinDay){ (planSx[sxPinDay]||(planSx[sxPinDay]=[])).push(s.key); await persistPlan(); }
   }
   const ok=await persistStretches();
   if(!ok){ sxMsg(t('msg.savefail'),true); return; }
@@ -3873,6 +4135,7 @@ async function sxDelete(){
   }
   sxResetDel();
   stretches=stretches.filter(x=>x.key!==s.key);
+  unpinLog(planSx, s.key); await persistPlan();
   entries.forEach(e=>{ if(e.mob && (s.key in e.mob)){ delete e.mob[s.key]; if(!Object.keys(e.mob).length) e.mob=null; } });
   await persistStretches(); await persist();
   sxClose(); render();
@@ -4772,7 +5035,7 @@ async function applyImport(data){
   if(Array.isArray(data.cardio)){ const bk=new Map(cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
   if(isObj(data.theme)){ theme=normTheme(data.theme); await persistTheme(); }
   if(isObj(data.gym)){ gym=normGym(data.gym); await persistGym(); }
-  if(isObj(data.plan)){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); await persistPlan(); }
+  if(isObj(data.plan)){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); planLogsInit(data.plan); await persistPlan(); }
   if(isObj(data.settings)){ settings=normSettings(data.settings); await persistSettings(); }
   await persist();
   fillForm($("fDate").value); render();
@@ -4970,11 +5233,41 @@ const LANG = {
     'calib.window':          'Window',
     'calib.yours':           'your own',
     'cd.add':                '+ Add cardio',
+    'cd.empty.add':            'Tap + Add cardio to pick one, and pin it to {day} to see it every week.',
+    'cd.empty.day':            'Nothing planned today.',
     'cd.empty1':             'No cardio on the list.',
     'cd.empty2':             'Add whatever you actually do — a name and how long you usually go for.',
     'cd.notarget':           'no target set',
     'cd.target':             'target {n} min',
     'cd.title':              'Cardio <span class="sub-note">· <span id="cdDate">—</span> · every tick and time saves itself</span>',
+    'cdlib.air_bike':          'Air bike intervals',
+    'cdlib.bike':              'Exercise bike',
+    'cdlib.boxing':            'Boxing bag work',
+    'cdlib.cycle':             'Cycling',
+    'cdlib.dance':             'Dancing',
+    'cdlib.elliptical':        'Elliptical',
+    'cdlib.hiit':              'Bodyweight HIIT circuit',
+    'cdlib.hike':              'Hiking',
+    'cdlib.incline_walk':      'Incline treadmill walk',
+    'cdlib.martial':           'Martial arts class',
+    'cdlib.racket':            'Racket sport',
+    'cdlib.ropes':             'Battle ropes',
+    'cdlib.row':               'Rowing machine',
+    'cdlib.ruck':              'Rucking',
+    'cdlib.run':               'Running',
+    'cdlib.shadow_box':        'Shadow boxing',
+    'cdlib.ski':               'Ski erg',
+    'cdlib.skip':              'Skipping',
+    'cdlib.sled':              'Sled pushes and drags',
+    'cdlib.spin':              'Spin class',
+    'cdlib.sprints':           'Sprint intervals',
+    'cdlib.stair_walk':        'Stair walking',
+    'cdlib.stairs':            'Stair climber',
+    'cdlib.swim':              'Swimming',
+    'cdlib.team':              'Team sport',
+    'cdlib.treadmill':         'Treadmill run',
+    'cdlib.walk':              'Walking',
+    'cdlib.yoga':              'Yoga flow',
     'cdx.edit':              'Edit cardio',
     'cdx.mins':              'Usual length · minutes',
     'cdx.new':               'New cardio',
@@ -5090,35 +5383,47 @@ const LANG = {
     'eq.back_ext':           'Back extension bench',
     'eq.bands':              'Resistance bands',
     'eq.barbell':            'Barbell',
+    'eq.battle_ropes':         'Battle ropes',
     'eq.bench':              'Bench',
+    'eq.bicycle':              'Bicycle',
     'eq.cable':              'Cable machine',
     'eq.dip_bars':           'Dip bars',
     'eq.dumbbells':          'Dumbbells',
+    'eq.elliptical':           'Elliptical',
+    'eq.exercise_bike':        'Exercise bike',
     'eq.ez_bar':             'EZ bar',
+    'eq.foam_roller':          'Foam roller',
     'eq.kettlebell':         'Kettlebell',
     'eq.leg_curl':           'Leg curl machine',
     'eq.leg_ext':            'Leg extension machine',
     'eq.leg_press':          'Leg press',
     'eq.pullup_bar':         'Pull-up bar',
+    'eq.punch_bag':            'Punch bag',
     'eq.rack':               'Squat rack',
     'eq.rings':              'Gymnastic rings',
     'eq.smith':                'Smith machine',
     'eq.trap_bar':             'Trap bar',
+    'eq.treadmill':            'Treadmill',
     'eq.landmine':             'Landmine',
     'eq.machine_press':        'Chest press machine',
     'eq.pec_deck':             'Pec deck',
     'eq.machine_shoulder':     'Shoulder press machine',
+    'eq.massage_ball':         'Massage ball',
     'eq.hack_squat':           'Hack squat machine',
     'eq.hip_machine':          'Hip abductor / adductor',
+    'eq.jump_rope':            'Skipping rope',
     'eq.calf_machine':         'Calf raise machine',
     'eq.ghd':                  'Glute-ham developer',
     'eq.box':                  'Plyo box or sturdy step',
     'eq.parallettes':          'Parallettes',
     'eq.ab_wheel':             'Ab wheel',
+    'eq.air_bike':             'Air bike',
     'eq.sled':                 'Sled',
     'eq.plates':               'Weight plates',
+    'eq.pool':                 'Swimming pool',
     'eq.assist_machine':       'Assisted pull-up / dip machine',
     'eq.row_machine':          'Seated row machine',
+    'eq.rower':                'Rowing machine',
     'eq.lat_raise_m':          'Lateral raise machine',
     'eq.curl_machine':         'Biceps curl machine',
     'eq.tri_machine':          'Triceps machine',
@@ -5128,10 +5433,13 @@ const LANG = {
     'eq.glute_machine':        'Glute kickback / hip thrust machine',
     'eq.ab_machine':           'Ab crunch / torso rotation machine',
     'eq.seated_calf_m':        'Seated calf raise machine',
+    'eq.ski_erg':              'Ski erg',
     'eq.med_ball':             'Medicine ball',
     'eq.sandbag':              'Sandbag',
     'eq.suspension':           'Suspension trainer (TRX)',
     'eq.stability_ball':       'Stability ball',
+    'eq.stair_climber':        'Stair climber',
+    'eq.stretch_strap':        'Stretching strap',
     'eq.climb_rope':           'Climbing rope',
     'eq.wrist_roller':         'Wrist roller',
     'eq.gripper':              'Hand gripper',
@@ -5184,22 +5492,29 @@ const LANG = {
     'guide.pre.start.note':  'Starting out: right for your first months of lifting. New muscles grow on far less work, and recovering well matters more than doing lots.',
     'guide.bodyweight':      'Bodyweight',
     'guide.browse.title':    'Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span>',
+    'guide.cd.title':          'Cardio <span class="sub-note">· add what you like · you choose the day</span>',
     'guide.count':           '{n} that train {name} directly',
     'guide.count.1':         '1 that trains {name} directly',
     'guide.count.s':         '{n} that also work {name}',
     'guide.count.s.1':       '1 that also works {name}',
+    'guide.count.x':           '{n} stretches for {name}',
+    'guide.count.x.1':         '1 stretch for {name}',
     'guide.eq.any':          'Any equipment ({n})',
     'guide.eq.item':         '{name} ({n})',
     'guide.eq.none':         'No equipment',
     'guide.eq.title':        'Filter by equipment',
     'guide.in':              'In collection',
+    'guide.in.sx':             'Added',
     'guide.mode.p':          'Main target · {n}',
     'guide.mode.s':          'Also works · {n}',
+    'guide.mode.x':            'Stretches · {n}',
     'guide.mute':            'Mute',
     'guide.needs':           'needs {list}',
+    'guide.noeq':              'No equipment',
     'guide.none':            'Nothing in your gym trains {name}. Turn on Show everything to see what would.',
     'guide.none.eq':         'Nothing here uses that equipment. Pick Any equipment to see the rest.',
     'guide.none.s':          'Nothing in your gym works {name} on the side. Turn on Show everything to see what would.',
+    'guide.none.x':            'No stretch for {name} with what your gym has. Turn on Show everything to see the rest.',
     'guide.novol':           'Nothing logged this week yet.',
     'guide.rec.more':        '{n} more under your range; every muscle is listed in Sets per Muscle above.',
     'guide.rec.none':        'Every muscle you have not muted is in range this week, or will be with the rest of your plan.',
@@ -5213,10 +5528,16 @@ const LANG = {
     'guide.st.ok':           'In range',
     'guide.st.sofar':        'So far',
     'guide.st.track':        'On track',
+    'guide.sx.allgood':        'Every muscle you trained this week has had a stretch.',
+    'guide.sx.missed':         'Trained this week but not stretched yet: {list}.',
+    'guide.sx.none':           'No stretches logged this week yet. The number on a muscle is how many stretches covered it.',
+    'guide.sx.plain':          'Not counted because no muscles are set: {list}. Add them when you edit the stretch.',
+    'guide.sx.title':          'Stretched This Week <span class="sub-note">· Sunday to Saturday · tap a muscle to browse its stretches</span>',
     'guide.unmute':          'Unmute',
     'guide.untagged':        'Not counted, because no muscles are set: {list}. Set them in Workout → Workout Collection.',
     'guide.vol.title':       'Sets per Muscle <span class="sub-note">· this week, Sunday to Saturday · a primary muscle counts the set, a secondary counts half</span>',
-    'gym.count':             'With this you can do {n} of the {total} exercises in the Guide.',
+    'gym.count':             'With this you can do {n} of the {total} exercises, stretches and cardio types in the Guide.',
+    'gym.grp.cardio':          'Cardio and mobility kit',
     'gym.grp.free':          'Free weights',
     'gym.grp.have':          '{n} of {total} ticked',
     'gym.grp.machine':       'Machines and cables',
@@ -5246,6 +5567,13 @@ const LANG = {
     'inst.nudge':            'Add Tally to your home screen: it opens like an app, full screen, and works with no signal.',
     'inst.nudge.ios':        'Add Tally to your home screen: tap Share (the square with an arrow), then Add to Home Screen. Details in Settings.',
     'inst.title':            'Install on This Device',
+    'kp.empty':                'Everything is already on today.',
+    'kp.mine.cd':              'Your cardio',
+    'kp.mine.sx':              'Your stretches',
+    'kp.search.cd':            'Search cardio',
+    'kp.search.sx':            'Search stretches or muscles',
+    'kp.title.cd':             'Add cardio',
+    'kp.title.sx':             'Add stretch',
     'lib.bwhead':            'Bodyweight · easiest first',
     'lib.air_squat':         'Bodyweight squat',
     'lib.back_ext':          'Back extension',
@@ -5886,6 +6214,8 @@ const LANG = {
     'metric.volume':         'session volume',
     'mob.add':               '+ Add stretch',
     'mob.edittip':           'Rename, retime or remove',
+    'mob.empty.add':           'Tap + Add stretch to pick one, and pin it to {day} to see it every week.',
+    'mob.empty.day':           'Nothing planned today.',
     'mob.empty1':            'No stretches on the list.',
     'mob.empty2':            'Add the ones you actually do — a name and how long you hold it.',
     'mob.hint.done':         'Mobility · {summary} — logged on the Workout page.',
@@ -5931,6 +6261,7 @@ const LANG = {
     'msg.protauto':           'protein back to {n} g a day',
     'msg.hidden':            '{name} hidden — old logs still show it',
     'msg.hidden.short':      '{name} hidden',
+    'msg.libadded':            '{name} added. Pin it to a day from the Workout page.',
     'msg.loadfail.del':      'Data failed to load — not deleting',
     'msg.loadfail.read':     'Couldn\'t read saved data — check storage; avoid saving over it',
     'msg.loadfail.save':     'Data failed to load — not saving, to avoid overwriting it',
@@ -6118,11 +6449,78 @@ const LANG = {
     'sx.hold':               'Hold · seconds',
     'sx.mode.reps':          'Reps',
     'sx.mode.sec':           'Seconds',
+    'sx.mus':                  'Stretches · muscles',
     'sx.new':                'New stretch',
     'sx.note':               'The timer counts this down, so the time recorded is the time you actually held — no stopping the clock late and correcting it afterwards.',
     'sx.note.reps':          'Counted, not timed — tick it off and type how many you actually did. No countdown for this one.',
     'sx.ph.name':            'Hamstring',
     'sx.reps':               'Reps · how many',
+    'sxlib.ankle_rock':        'Kneeling ankle rock',
+    'sxlib.arm_circles':       'Arm circles',
+    'sxlib.ball_backbend':     'Stability ball backbend',
+    'sxlib.ball_forearm':      'Massage ball forearm release',
+    'sxlib.ball_glute':        'Massage ball glute release',
+    'sxlib.band_dislocate':    'Band shoulder dislocates',
+    'sxlib.behind_clasp':      'Behind-the-back hand clasp',
+    'sxlib.bench_pec':         'Kneeling bench pec stretch',
+    'sxlib.butterfly':         'Butterfly stretch',
+    'sxlib.cat_cow':           'Cat-cow',
+    'sxlib.childs_pose':       'Child\'s pose',
+    'sxlib.chin_tuck':         'Chin tuck',
+    'sxlib.cobra':             'Cobra stretch',
+    'sxlib.couch':             'Couch stretch',
+    'sxlib.cross_body':        'Cross-body shoulder stretch',
+    'sxlib.deep_squat':        'Deep squat hold',
+    'sxlib.doorway_chest':     'Doorway chest stretch',
+    'sxlib.down_dog':          'Downward dog',
+    'sxlib.figure_four':       'Lying figure-four stretch',
+    'sxlib.frog':              'Frog stretch',
+    'sxlib.front_split':       'Front split',
+    'sxlib.full_bridge':       'Full bridge',
+    'sxlib.happy_baby':        'Happy baby',
+    'sxlib.hip_9090':          '90/90 hip switch',
+    'sxlib.hip_circles':       'Hip circles',
+    'sxlib.kneel_hipflex':     'Kneeling hip flexor stretch',
+    'sxlib.knees_chest':       'Knees-to-chest',
+    'sxlib.levator':           'Levator scapulae stretch',
+    'sxlib.lizard':            'Lizard pose',
+    'sxlib.middle_split':      'Middle split',
+    'sxlib.neck_rotation':     'Neck rotations',
+    'sxlib.oh_triceps':        'Overhead triceps stretch',
+    'sxlib.open_book':         'Open book rotation',
+    'sxlib.pancake':           'Pancake stretch',
+    'sxlib.passive_hang':      'Passive hang',
+    'sxlib.pigeon':            'Pigeon pose',
+    'sxlib.roll_calves':       'Foam roll calves',
+    'sxlib.roll_hams':         'Foam roll hamstrings',
+    'sxlib.roll_lats':         'Foam roll lats',
+    'sxlib.roll_quads':        'Foam roll quads',
+    'sxlib.roll_upper':        'Foam roll upper back',
+    'sxlib.roller_chest':      'Foam roller chest opener',
+    'sxlib.scorpion':          'Scorpion stretch',
+    'sxlib.seated_fold':       'Seated forward fold',
+    'sxlib.seated_glute':      'Seated glute stretch',
+    'sxlib.seated_twist':      'Seated spinal twist',
+    'sxlib.shoulder_ext':      'Seated shoulder extension',
+    'sxlib.side_bend':         'Standing side bend',
+    'sxlib.side_quad':         'Side-lying quad stretch',
+    'sxlib.sleeper':           'Sleeper stretch',
+    'sxlib.soleus':            'Bent-knee soleus stretch',
+    'sxlib.spinal_twist':      'Lying spinal twist',
+    'sxlib.standing_ham':      'Standing hamstring stretch',
+    'sxlib.standing_quad':     'Standing quad stretch',
+    'sxlib.step_calf':         'Step calf drop',
+    'sxlib.strap_ham':         'Lying strap hamstring stretch',
+    'sxlib.strap_triceps':     'Strap triceps stretch',
+    'sxlib.thread_needle':     'Thread the needle',
+    'sxlib.upper_trap':        'Upper trap neck stretch',
+    'sxlib.wall_biceps':       'Wall biceps stretch',
+    'sxlib.wall_calf':         'Wall calf stretch',
+    'sxlib.wall_lat':          'Wall lat stretch',
+    'sxlib.wall_pec':          'Wall pec stretch',
+    'sxlib.worlds_greatest':   'World\'s greatest stretch',
+    'sxlib.wrist_extensor':    'Wrist extensor stretch',
+    'sxlib.wrist_flexor':      'Wrist flexor stretch',
     'sync.backup':           'Save backup file',
     'sync.ai':               'Copy for your AI to analyse',
     'sync.emptyfile':        'That file is empty',
@@ -6259,16 +6657,19 @@ const LANG = {
   $("undoBtn").onclick=undoImport;
   $("restExactBtn").onclick=openExactSettings;
   $("mobWrap").onclick=ev=>{ const row=ev.target.closest('.mobrow'); if(!row) return; const k=row.dataset.k;
-    if(ev.target.closest('.mobtick')) toggleMob(k); else if(ev.target.closest('.mobgo')) startStretch(k); else if(ev.target.closest('.mobedit')) sxOpen(k); };
+    if(ev.target.closest('.mobpin')) toggleLogPin('sx',k); else if(ev.target.closest('.mobtick')) toggleMob(k); else if(ev.target.closest('.mobgo')) startStretch(k); else if(ev.target.closest('.mobedit')) sxOpen(k); };
   $("mobWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec'); if(!inp) return; const v=num(inp.value); setMob(inp.closest('.mobrow').dataset.k, (v==null||v<0)?null:v); };
   $("cdWrap").onclick=ev=>{ const row=ev.target.closest('.mobrow'); if(!row) return; const k=row.dataset.k;
-    if(ev.target.closest('.mobtick')) toggleCardio(k); else if(ev.target.closest('.mobgo')) startCardioTimer(k); else if(ev.target.closest('.mobedit')) cdOpen(k); };
+    if(ev.target.closest('.mobpin')) toggleLogPin('cd',k); else if(ev.target.closest('.mobtick')) toggleCardio(k); else if(ev.target.closest('.mobgo')) startCardioTimer(k); else if(ev.target.closest('.mobedit')) cdOpen(k); };
   $("cdWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec'); if(!inp) return; const v=num(inp.value); setCardio(inp.closest('.mobrow').dataset.k, (v==null||v<0)?null:v); };
   $("collWrap").onclick=ev=>{ const b=ev.target.closest('[data-cedit],[data-cret]'); if(!b) return;
     if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
     if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.libadd) shLibPick(d.libadd,false); else if(d.libpin) shLibPick(d.libpin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
-  $("pg-guide").onclick=ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band],[data-mode]'); if(!b) return; const d=b.dataset;
+  $("pg-guide").onclick=async ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band],[data-mode],[data-sxadd],[data-cdadd],[data-sxmus]'); if(!b) return; const d=b.dataset;
+    if(d.sxadd){ const k=await sxFromLib(d.sxadd); if(k){ render(); flash(tf('msg.libadded',{name:stretchByKey(k).name})); } return; }
+    if(d.cdadd){ const k=await cdFromLib(d.cdadd); if(k){ render(); flash(tf('msg.libadded',{name:cardioByKey(k).name})); } return; }
+    if(d.sxmus){ guideMus=d.sxmus; guideMode='x'; drawGuide(); const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); return; }
     if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute); else if(d.band) volBandPick(d.band);
     else if(d.mode){ guideMode=d.mode; drawGuide(); }
     else { guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
@@ -6291,8 +6692,14 @@ const LANG = {
   $("gymName").addEventListener('keydown', e=>{ if(e.key==='Enter') gymAddOwn(); });
   document.querySelectorAll('#segRest button').forEach(b=>b.onclick=()=>setRestPreset(+b.dataset.s));
   document.querySelectorAll('#segLead button').forEach(b=>b.onclick=()=>setLeadPreset(+b.dataset.l));
-  $("addStretchBtn").onclick=()=>sxOpen(null);
-  $("addCardioBtn").onclick=()=>cdOpen(null);
+  $("addStretchBtn").onclick=()=>kpOpen('sx');
+  $("addCardioBtn").onclick=()=>kpOpen('cd');
+  $("sxMus").onclick=ev=>{ const b=ev.target.closest('.mchip'); if(b) b.classList.toggle('on'); };
+  $("kpX").onclick=kpClose; $("kpNew").onclick=kpNew;
+  $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
+  $("kpSearch").oninput=kpRender;
+  $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
+    if(d.kadd) kpPick(d.kadd,false); else if(d.kpin) kpPick(d.kpin,true); else if(d.ladd) kpLibPick(d.ladd,false); else if(d.lpin) kpLibPick(d.lpin,true); };
   $("cdClose").onclick=cdClose;
   $("cdSave").onclick=cdSave;
   $("cdDelete").onclick=cdDelete;
@@ -6309,13 +6716,14 @@ const LANG = {
   $("restMinus").onclick=()=>restNudge(-15);
   $("restPlus").onclick=()=>restNudge(30);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(restTimer) timerTick(); drawExactNotice(); });
-  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); shClose(); sxClose(); cdClose(); dpClose(); } });
+  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); } });
   await purgeOldNamespace();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   await loadTheme();
   await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio(); await loadGym(); await loadBackupDate(); await loadUndo();
   await load(); await loadSettings();
   const rec=await recoverMovements(); await recoverStretches(); await recoverCardio();
+  planLogsInit(planRaw); await persistPlan();
   if(rec) flash(tn('msg.rebuilt',rec));
   syncRestSegs(); drawExactNotice();
   applyLang();
