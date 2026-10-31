@@ -45,15 +45,13 @@ it. Adding it to your home screen makes that far less likely, and a backup file 
 
 ## Support
 
-**Good tools should be accessible.** Tally is free for everyone.
+**I don't like subscriptions.** Tools for better health should be free for everyone, as long as the
+person making them can carry the cost. I can, so Tally is free and it stays free.
 
-No premium features. No locked functions. No subscription.
+I'm also not too proud to accept a donation, so here are the links if you'd like to:
+[Ko-fi](https://ko-fi.com/popo54321), or in Thailand, [EasyDonate](https://ezdn.app/popo54321).
 
-If Tally makes your training easier and you want to help keep it available, voluntary contributions
-are appreciated: [Ko-fi](https://ko-fi.com/popo54321), or in Thailand,
-[EasyDonate](https://ezdn.app/popo54321).
-
-**Use it because it's useful. Support it because you believe in it.**
+**But whatever happens, every version of Tally is free.** No premium tier, nothing locked, ever.
 
 ## Licence
 
