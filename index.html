@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-RBCiQARkSv86XOENBa4CMdtpDyUxJCjbKWmemPhDiS8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-bMmSbZqzm8GmouOiJGO4jRuN5lk3OvDycSUoV2fk9t8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -600,7 +600,7 @@
           <div class="calcsum" id="fProtSum"></div></div>
       </div>
       <button type="button" class="ghostbtn fastbtn" id="fastBtn" aria-pressed="false">Mark as fasting day</button>
-      <div class="sxnote fastnote" data-i18n="f.fast.note">On a fasting day, whatever you log still counts. If you log nothing, the day counts as 0 instead of being treated as forgotten.</div>
+      <div class="sxnote fastnote" data-i18n="f.fast.note">On a fasting day, log what you eat as normal (OMAD, a small meal, anything) and it counts as logged. Only if you eat nothing at all does the day count as 0.</div>
       <div class="mobhint" id="mobHint"></div>
 
       <div class="lbl" style="margin-top:24px;margin-bottom:4px" data-i18n-html="body.meas">Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span></div>
@@ -5604,7 +5604,7 @@ const LANG = {
     'ex.unpintip':           'Pinned to this session — tap to unpin',
     'f.addtip':              'Add the next meal to the total',
     'f.fast':                  'Mark as fasting day',
-    'f.fast.note':             'On a fasting day, whatever you log still counts. If you log nothing, the day counts as 0 instead of being treated as forgotten.',
+    'f.fast.note':             'On a fasting day, log what you eat as normal (OMAD, a small meal, anything) and it counts as logged. Only if you eat nothing at all does the day count as 0.',
     'f.fast.on':               '✓ Fasting day · tap to unmark',
     'f.height':              'Height (cm)',
     'f.kcal':                'Energy (kcal)',
