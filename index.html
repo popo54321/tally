@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-HybMEtvfmaVSe2qK3ZVwrNlMFcQdSkikKSEJLgwxiO8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-rl865hwKrJr/EdyOJ3viED0ry99+9EFkX04JIOxDdi8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,6 +193,7 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
+  .fastbtn{margin:2px 0 12px}
   .cdnokcal{margin:-2px 0 12px}
   .mchip.sxw.miss{border-color:var(--warn);color:var(--warn)}
   #sxWeek{margin:6px 0 10px}
@@ -596,6 +597,7 @@
           <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fProt" placeholder="g"><button type="button" class="addbtn" id="fProtAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
           <div class="calcsum" id="fProtSum"></div></div>
       </div>
+      <button type="button" class="ghostbtn fastbtn" id="fastBtn" data-i18n="f.fast">Fasting day · log 0 kcal</button>
       <div class="mobhint" id="mobHint"></div>
 
       <div class="lbl" style="margin-top:24px;margin-bottom:4px" data-i18n-html="body.meas">Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span></div>
@@ -638,7 +640,7 @@
     </div>
 
     <div class="card col-4">
-      <div class="lbl" data-i18n="stat.nutr">Nutrition · last 7 days</div>
+      <div class="lbl" data-i18n="stat.nutr">Nutrition · today and 6 days before</div>
       <div class="metric"><div class="name"><span data-i18n="stat.energy">Energy</span><span id="mKcalTarget">no target set</span></div>
         <div class="val"><span class="pill" id="mKcal">—</span></div></div>
       <div class="metric"><div class="name"><span data-i18n="stat.prot">Protein</span><span id="lProt">average a day</span></div>
@@ -1173,7 +1175,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.4';
+const APP_VERSION = '7.5';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -4320,12 +4322,16 @@ function drawBodyStats(){
     $("bfNow").innerHTML=lbf.bf.toFixed(1)+'<small>%</small>';
     $("bfDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.bf,7),'%') + fmtDelta(t('stat.d30'),deltaOf(e=>e.bf,30),'%');
   }
-  const wk=entries.filter(e=>within7(e.date));
-  const kE=wk.filter(e=>e.kcal!=null), pE=wk.filter(e=>e.prot!=null);
-  const kcalAvg=kE.length?Math.round(kE.reduce((s,e)=>s+e.kcal,0)/kE.length):null;
+  const last7=[6,5,4,3,2,1,0].map(daysAgo);
+  const avg7=get=>{
+    const first=(entries.find(e=>get(e)!=null)||{}).date; if(!first) return {avg:null, days:0, logged:0};
+    const days=last7.filter(d=>d>=first); if(!days.length) return {avg:null, days:0, logged:0};
+    const vals=days.map(d=>{ const e=entryOn(d); return e ? get(e) : null; });
+    return {avg:Math.round(vals.reduce((a,v)=>a+(v||0),0)/days.length), days:days.length, logged:vals.filter(v=>v!=null).length};
+  };
+  const k7=avg7(e=>e.kcal), p7=avg7(e=>e.prot), kcalAvg=k7.avg, protAvg=p7.avg;
   $("mKcal").textContent=kcalAvg!=null?kcalAvg+' kcal':'—';
-  $("mKcalTarget").textContent=tf('stat.targetn',{n:settings.kcalTarget, logged:kE.length});
-  const protAvg=pE.length?Math.round(pE.reduce((s,e)=>s+e.prot,0)/pE.length):null;
+  $("mKcalTarget").textContent=tf('stat.targetn',{n:settings.kcalTarget, logged:k7.logged, days:k7.days||7});
   $("mProt").textContent=protAvg!=null?protAvg+' g':'—';
   const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protavg',{target:protTarget(), ok:protOk()});
   setDot("dProt",protAvg==null?0:protAvg,protOk(),Math.round(protOk()*0.8));
@@ -4923,6 +4929,13 @@ function doExport(){
   box.value = entries.length ? exportPayload() : t('sync.nothing');
   box.classList.add('show'); box.focus(); box.select();
 }
+let fastArmed=null;
+function fastReset(){ if(fastArmed) clearTimeout(fastArmed); fastArmed=null; $("fastBtn").textContent=t('f.fast'); }
+function fastDay(){
+  const cur=entries.find(e=>e.date===$("fDate").value), had=cur && cur.kcal>0 ? cur.kcal : 0;
+  if(had && !fastArmed){ $("fastBtn").textContent=tf('f.fast.replace',{n:had.toLocaleString()}); fastArmed=setTimeout(fastReset, 4000); return; }
+  fastReset(); $("fKcal").value='0'; $("fProt").value='0'; saveEntry();
+}
 function smsg(msg,err){ const m=$("syncMsg"); if(!m) return; m.textContent=msg||''; m.className='syncmsg'+(err?' err':''); }
 function pickFile(){ smsg(''); $("importFile").click(); }
 function onFilePicked(ev){
@@ -5081,7 +5094,8 @@ function buildAiReport(){
   L.push('');
   L.push('--- DATA QUALITY FLAGS ---');
   const flags=[];
-  entries.forEach(e=>{ if((e.kcal!=null&&e.kcal<800)||(e.prot!=null&&e.prot<30)) flags.push(e.date+': kcal='+e.kcal+', prot='+e.prot+' - implausible, likely a mis-log'); });
+  const fasts=entries.filter(e=>e.kcal===0).map(e=>e.date);
+  if(fasts.length) L.push('Fasting days (logged as 0 kcal, real data, not errors): '+fasts.join(', '));
   entries.forEach(e=>{ const w=weekdayKey(e.date); if(e.day&&e.day!==w) flags.push(e.date+': tagged \''+e.day+'\' but that date is '+w+' - counts toward the wrong weekly pattern'); });
   const dsince=d=>d?Math.round(dnum(gen)-dnum(d)):null;
   const lastW=weighed.length?weighed[weighed.length-1].date:null;
@@ -5231,7 +5245,7 @@ async function saveEntry(){
   const ok=await persist(); render();
   if(ok){
     const rec=recordsNewOn(date);
-    const pn = fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
+    const pn = (entry.kcal===0 && !entry.prot) ? ' · '+t('msg.fastday') : fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
     flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):'')))+pn);
   }
   fillBody(date);
@@ -5580,6 +5594,8 @@ const LANG = {
     'ex.set':                'set',
     'ex.unpintip':           'Pinned to this session — tap to unpin',
     'f.addtip':              'Add the next meal to the total',
+    'f.fast':                  'Fasting day · log 0 kcal',
+    'f.fast.replace':        'Tap again to replace {n} kcal with a fasting day',
     'f.height':              'Height (cm)',
     'f.kcal':                'Energy (kcal)',
     'f.prot':                'Protein (g)',
@@ -6386,6 +6402,7 @@ const LANG = {
     'msg.enterfloor':        'Enter a number between 30 and 400 g',
     'msg.entertarget':       'Enter a target in kcal',
     'msg.exadded':           '{name} added — log the sets, then save',
+    'msg.fastday':             'fasting day logged',
     'msg.floorset':          'Protein target set to {n} g',
     'msg.prot.hit':           'protein {g} g, on target',
     'msg.prot.low':           'protein {g} g, a bit low today. That is fine now and then',
@@ -6572,10 +6589,10 @@ const LANG = {
     'stat.last':             'Last logged',
     'stat.lastsub':          'most recent entry',
     'stat.none':             'No entries yet',
-    'stat.nutr':             'Nutrition · last 7 days',
+    'stat.nutr':             'Nutrition · today and 6 days before',
     'stat.prot':             'Protein',
     'stat.protavg':           'average a day · aim {target} g, {ok} g+ is fine',
-    'stat.targetn':          'target {n} · {logged}/7 logged',
+    'stat.targetn':          'target {n} · {logged}/{days} days logged',
     'sx.counts':             'Counted in',
     'sx.edit':               'Edit stretch',
     'sx.hold':               'Hold · seconds',
@@ -6819,6 +6836,7 @@ const LANG = {
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
+  $("fastBtn").onclick=fastDay;
   $("abX").onclick=abClose; $("abOk").onclick=abClose; $("abNever").onclick=abNever;
   $("abWrap").onclick=ev=>{ if(ev.target===$("abWrap")) abClose(); };
   $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
