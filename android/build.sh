@@ -2,10 +2,6 @@ set -e
 : "${ANDROID_HOME:?set ANDROID_HOME to your Android SDK root}"
 VC=${1:?version code required - must be higher than the last release}
 VN=${2:?version name required}
-case "${3:-pro}" in
-  pro) ;;
-  *) echo "only Tally Pro is built since 5.5; the free flavour was dropped" >&2; exit 1 ;;
-esac
 BT=$ANDROID_HOME/build-tools/34.0.0
 AJ=$ANDROID_HOME/platforms/android-34/android.jar
 : "${KEYSTORE:?set KEYSTORE to the keystore file}"
@@ -37,7 +33,7 @@ javac -source 8 -target 8 -nowarn -g:none -bootclasspath "$AJ" -classpath "$AJ" 
 if command -v zip >/dev/null 2>&1; then (cd build && zip -q -j base.apk classes.dex)
 else node tools/addzip.js build/base.apk build/classes.dex; fi
 "$ZIPALIGN" -f -p 4 build/base.apk build/aligned.apk
-OUT="build/tally-pro-$VN.apk"
+OUT="build/tally-$VN.apk"
 "$APKSIGNER" sign --ks "$KEYSTORE" --ks-key-alias bodyandiron \
   --ks-pass env:KEYSTORE_PASS --key-pass env:KEY_PASS --min-sdk-version 29 \
   --v4-signing-enabled false \

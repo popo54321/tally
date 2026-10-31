@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-dTqXO4az0XdcG/lvle0emqQv/lLnpJ0V8HVHEgXKnws='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-nbEWdo/c48qnumzjRPeeDxJJWzipmqCVdAcQaAN93Kk='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -720,7 +720,7 @@
         <button type="button" class="reststart" id="restStart" data-i18n="log.startrest">Start rest</button>
         <button type="button" class="restsnd" id="restSnd" data-i18n-title="log.beeptip" title="Beep when a timer finishes">Beep</button>
       </div>
-      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally Pro.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
+      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
       <div id="exWrap"></div>
       <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
       <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
@@ -1163,7 +1163,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.1';
+const APP_VERSION = '7.2';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -3715,7 +3715,7 @@ function bakFromNudge(){
 function drawVersion(){
   const el=$("appVer"); if(!el) return;
   const android=!!window.AndroidFile;
-  const line=tf('ver.line',{name:t(android?'ver.pro':'ver.app'), v:APP_VERSION,
+  const line=tf('ver.line',{name:t('ver.app'), v:APP_VERSION,
     where:t(android ? 'ver.android' : location.protocol==='file:' ? 'ver.file' : 'ver.web')});
   el.textContent=line;
   if(!android && window.caches && caches.keys) caches.keys().then(ks=>{
@@ -6404,7 +6404,7 @@ const LANG = {
     'rest.alarm.stretch':    'Stretch done · {name}',
     'rest.beep':             'Beep',
     'rest.done':             'rest done — next set',
-    'rest.exact':            'In another app, the timer\'s alert can arrive minutes late: exact alarms are off for Tally Pro.',
+    'rest.exact':            'In another app, the timer\'s alert can arrive minutes late: exact alarms are off for Tally.',
     'rest.exact.btn':        'Allow exact alarms',
     'rest.getready':         'get into position',
     'rest.held':             'held {n}s',
@@ -6660,7 +6660,6 @@ const LANG = {
     'ver.build':             'build {id}',
     'ver.file':              'laptop copy',
     'ver.line':              '{name} {v} · {where}',
-    'ver.pro':               'Tally Pro',
     'ver.web':               'web app'
   },
 };

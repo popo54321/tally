@@ -68,7 +68,7 @@ jobs:
         run: |
           {
             echo '```'
-            "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "android/build/tally-pro-$VN.apk"
+            "$ANDROID_HOME/build-tools/34.0.0/apksigner" verify --print-certs "android/build/tally-$VN.apk"
             echo '```'
           } | tee -a "$GITHUB_STEP_SUMMARY"
 
@@ -77,10 +77,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VN: ${{ steps.v.outputs.name }}
         run: |
-          APK="android/build/tally-pro-$VN.apk"
+          APK="android/build/tally-$VN.apk"
           if gh release view "v$VN" > /dev/null 2>&1; then
             gh release upload "v$VN" "$APK" --clobber
           else
             gh release create "v$VN" "$APK" --title "Tally $VN" --target "$GITHUB_SHA" \
-              --notes "Tally Pro $VN, signed with the same key as every earlier build. Install it over the Tally Pro you have: your data stays."
+              --notes "Tally $VN for Android, signed with the same key as every earlier build. Install it over the Tally you have (named Tally Pro before 7.2): your data stays."
           fi

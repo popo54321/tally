@@ -22,7 +22,7 @@ full screen with no browser bars, works with no signal, and behaves like any oth
   browser, so if you have already logged in the browser, save a backup file and import it there.
 - **Laptop** — it just works in the browser. Install it from the address bar if you want.
 
-There is also a native Android app, Tally Pro: download the `.apk` from the
+There is also a native Android app: download the `.apk` from the
 [latest release](https://github.com/popo54321/tally/releases/latest) and install it over any
 earlier version. Your data stays.
 

@@ -26,4 +26,4 @@ const page = /http-equiv="Content-Security-Policy"/.test(raw) ? raw : withCsp(ra
 const c = check(page);
 if (!c.ok) { console.error('stage: the staged page fails its own policy (' + (c.why || c.missing + ' script(s) unlisted') + ')'); process.exit(1); }
 fs.writeFileSync(PAGE, page);
-console.log('stage: ' + OUT + ' from ' + path.relative(process.cwd(), SRC) + '  [Tally Pro, Content-Security-Policy checked]');
+console.log('stage: ' + OUT + ' from ' + path.relative(process.cwd(), SRC) + '  [Content-Security-Policy checked]');
