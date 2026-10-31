@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-BC2c931J/USgZd+bxX8TowRJ7kVkf1Z9n/2xmO9Cw1Y='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-lsxtVHuVz+ArNy1bVfGooEmZP5DUwDKJTU6IqyQ2g0g='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -420,6 +420,9 @@
   .mobname span{display:block;font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);margin-top:2px}
   .mobsec{width:64px;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:8px 4px;font-family:var(--font-mono);font-size:13.5px;text-align:center}
   .mobsec:focus{outline:none;border-color:var(--brass)}
+  .mobn{width:46px;background:var(--panel-2);border:1px solid var(--line);border-radius:7px;color:var(--ink);padding:8px 4px;font-family:var(--font-mono);font-size:13.5px;text-align:center}
+  .mobn:focus{outline:none;border-color:var(--brass)}
+  .mobx{font-family:var(--font-mono);font-size:11px;color:var(--txt-faint)}
   .mobu{font-family:var(--font-mono);font-size:10px;color:var(--txt-faint);margin-left:-3px}
   .mobgo{background:var(--brass);color:#fff;border:2px solid var(--line);border-radius:8px;font-family:var(--font-body);font-weight:800;font-size:11px;letter-spacing:.4px;text-transform:uppercase;padding:0 13px;min-height:38px;cursor:pointer;flex:none}
   .mobgo:active{background:var(--brass-bright)}
@@ -1122,6 +1125,7 @@
           <button type="button" data-m="sec" data-i18n="sx.mode.sec">Seconds</button><button type="button" data-m="reps" data-i18n="sx.mode.reps">Reps</button>
         </div>
       </div>
+      <div class="field"><label for="sxSets" data-i18n="sx.setsfld">Sets · how many</label><input type="number" min="1" max="20" inputmode="numeric" id="sxSets" placeholder="1"></div>
       <div class="field"><label for="sxSecs" id="sxNumLabel" data-i18n="sx.hold">Hold · seconds</label><input type="number" min="0" max="3600" step="5" inputmode="numeric" id="sxSecs" placeholder="45"></div>
       <div class="field"><label data-i18n="sx.mus">Stretches · muscles</label><div class="muschips" id="sxMus"></div></div>
       <div class="sxnote" id="sxNote" data-i18n="sx.note">The timer counts this down, so the time recorded is the time you actually held — no stopping the clock late and correcting it afterwards.</div>
@@ -1168,7 +1172,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.3';
+const APP_VERSION = '7.4';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -2160,6 +2164,7 @@ function normStretch(x){
     secs:(isNaN(s)||s<0||s>3600)?0:s,
     reps:(isNaN(r)||r<0||r>999)?0:r,
     unit:(x.unit==='reps')?'reps':null,
+    sets:(function(){ const n=parseInt(x.sets,10); return (isNaN(n)||n<1||n>20)?1:n; })(),
     mus:muscleList(x.mus,4),
     lib:(typeof x.lib==='string' && sxLibByKey(x.lib)) ? x.lib : null,
     retired:!!x.retired };
@@ -2370,6 +2375,11 @@ function normEntry(e){
   };
   o.cardio=tally(e.cardio);
   o.mob=tally(e.mob);
+  o.mobSets=null;
+  if(o.mob && e.mobSets && typeof e.mobSets==='object'){
+    const ms={}; for(const k in e.mobSets){ const n=parseInt(e.mobSets[k],10); if((k in o.mob) && n>1 && n<=50) ms[k]=n; }
+    if(Object.keys(ms).length) o.mobSets=ms;
+  }
   let m=null;
   if(e.meas && typeof e.meas==='object'){ const mm={}; MEAS.forEach(x=>{ if(e.meas[x.key]!=null){ const v=pos(e.meas[x.key]); if(v!=null) mm[x.key]=v; } }); if(Object.keys(mm).length) m=mm; }
   o.meas=m;
@@ -2398,6 +2408,7 @@ function mergeDay(a, b){
   ['day','weight','height','kcal','prot'].forEach(k=>{ if(b[k]!=null) o[k]=b[k]; });
   if(b.bf!=null){ o.bf=b.bf; o.bfSrc=b.bfSrc; }
   ['mob','cardio','meas','lifts'].forEach(k=>{ if(b[k] && Object.keys(b[k]).length) o[k]=Object.assign({}, a[k]||{}, b[k]); });
+  if(b.mob){ const ms=Object.assign({}, a.mobSets||{}); Object.keys(b.mob).forEach(k=>{ if(b.mobSets && b.mobSets[k]) ms[k]=b.mobSets[k]; else delete ms[k]; }); o.mobSets=ms; }
   return normEntry(o);
 }
 const RETIRED_KEYS = ['tally:stretches:v1', 'tally:cardio:v1', 'tally:lang:v1'];
@@ -3418,7 +3429,7 @@ function timerFinish(){
   $("restBar").classList.remove('lead');
   $("restBar").classList.add('done');
   beep(3);
-  if(z.kind==='stretch' && z.key) setMob(z.key, z.hold);
+  if(z.kind==='stretch' && z.key) mobSetAdd(z.key, z.hold);
   if(z.kind==='cardio' && z.key) setCardio(z.key, Math.round(z.hold/60));
 }
 function timerStop(){
@@ -3942,30 +3953,44 @@ function dayEntry(){
   }
   return e;
 }
-async function setMob(key, secs){
+const mobSetsOf = (e, k) => (e && e.mobSets && e.mobSets[k]) || 1;
+async function setMobLog(key, total, sets){
   const e=dayEntry(); if(!e) return;
-  const m=Object.assign({}, e.mob||{});
-  if(secs==null) delete m[key]; else m[key]=Math.max(0,Math.round(secs));
-  e.mob=Object.keys(m).length?m:null;
+  const m=Object.assign({}, e.mob||{}), ms=Object.assign({}, e.mobSets||{});
+  if(total==null){ delete m[key]; delete ms[key]; }
+  else{ m[key]=Math.max(0,Math.round(total)); if(sets>1) ms[key]=Math.min(50,Math.round(sets)); else delete ms[key]; }
+  e.mob=Object.keys(m).length?m:null; e.mobSets=Object.keys(ms).length?ms:null;
   await persist();
   drawMob(); stale('history');
 }
 function toggleMob(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.mob && (key in cur.mob));
-  if(on) return setMob(key, null);
-  const s=stretchByKey(key);
-  return setMob(key, s?sxTarget(s):0);
+  if(on) return setMobLog(key, null);
+  const s=stretchByKey(key), n=(s && s.sets) || 1;
+  return setMobLog(key, (s?sxTarget(s):0)*n, n);
 }
-function mobRowHtml(s, mob, gone){
+function mobSetAdd(key, amount){
+  const cur=entries.find(e=>e.date===$("fDate").value);
+  const on=!!(cur && cur.mob && (key in cur.mob));
+  return setMobLog(key, (on ? cur.mob[key] : 0)+amount, (on ? mobSetsOf(cur,key) : 0)+1);
+}
+function mobRowEdit(row){
+  const per=num(row.querySelector('.mobsec').value), n=num(row.querySelector('.mobn').value);
+  if(per==null && n==null) return setMobLog(row.dataset.k, null);
+  const s=stretchByKey(row.dataset.k), sets=Math.max(1, Math.round(n || (s && s.sets) || 1));
+  return setMobLog(row.dataset.k, Math.max(0, per || 0)*sets, sets);
+}
+function mobRowHtml(s, mob, gone, ms){
   const on=(s.key in mob);
-  const reps=sxIsReps(s), tgt=sxTarget(s);
-  const sub = tgt ? (reps ? tn('mob.repsn',tgt) : tf('mob.holdn',{n:tgt})) : t(reps?'mob.noreps':'mob.nohold');
+  const reps=sxIsReps(s), tgt=sxTarget(s), sets=s.sets||1, done=on ? ((ms && ms[s.key]) || 1) : 0;
+  const base = tgt ? (reps ? tn('mob.repsn',tgt) : tf('mob.holdn',{n:tgt})) : t(reps?'mob.noreps':'mob.nohold');
+  const sub = base + (sets>1 ? ' × '+tn('mob.setsn',sets) : '') + (on && sets>1 ? ' · '+tf('mob.setsof',{n:done, of:sets}) : '');
   const go = (!reps && s.secs) ? '<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>' : '';
   return `<div class="mobrow${on?' done':''}" data-k="${esc(s.key)}">
     <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
     <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
-    <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="0" value="${on?mob[s.key]:''}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span>
+    <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="${tgt||0}" value="${on?Math.round(mob[s.key]/done):''}" aria-label="${esc(t(reps?'sx.reps':'sx.hold'))}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${go}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
   </div>`;
@@ -3995,8 +4020,9 @@ function drawMob(){
   if(!list.length && !orphan.length){
     wrap.innerHTML='<div class="mobempty">'+esc(t(activeStretches().length?'mob.empty.day':'mob.empty1'))+'<br>'+esc(tf('mob.empty.add',{day:dayName($("fDay").value)}))+'</div>';
   }else{
-    wrap.innerHTML = list.map(s=>mobRowHtml(s,mob,false)).join('')
-      + orphan.map(k=>mobRowHtml({key:k, name:(stretchByKey(k)||{name:k}).name, secs:0, reps:0, unit:null}, mob, true)).join('');
+    const ms=(cur && cur.mobSets) || {};
+    wrap.innerHTML = list.map(s=>mobRowHtml(s,mob,false,ms)).join('')
+      + orphan.map(k=>mobRowHtml({key:k, name:(stretchByKey(k)||{name:k}).name, secs:0, reps:0, unit:null}, mob, true, ms)).join('');
   }
   const n=Object.keys(mob).length;
   let secs=0, reps=0;
@@ -4140,7 +4166,7 @@ function sxOpen(key){
   const mode = sxIsReps(s) ? 'reps' : 'sec';
   $("sxTitle").textContent=t(s?'sx.edit':'sx.new');
   $("sxName").value=s?s.name:'';
-  sxModeSet(mode); sxMusSet(s?s.mus:[]);
+  sxModeSet(mode); sxMusSet(s?s.mus:[]); $("sxSets").value=s ? s.sets : 1;
   $("sxDelete").style.display=s?'':'none';
   sxMsg(''); dlgOpen("sxWrap");
   if(!s) $("sxName").focus();
@@ -4156,13 +4182,13 @@ async function sxSave(){
   if(sxEditing){
     const s=stretchByKey(sxEditing); if(!s){ sxClose(); return; }
     const upd=normStretch({key:s.key, name:name, unit:reps?'reps':null,
-      secs:reps?s.secs:v, reps:reps?v:s.reps, mus:sxMusGet(), lib:s.lib, retired:s.retired});
+      secs:reps?s.secs:v, reps:reps?v:s.reps, sets:$("sxSets").value, mus:sxMusGet(), lib:s.lib, retired:s.retired});
     if(!upd){ sxMsg(t('msg.badname'),true); return; }
     Object.assign(s, upd);
   }else{
     if(stretches.some(x=>x.name.toLowerCase()===name.toLowerCase())){ sxMsg(t('msg.onlist'),true); return; }
     const s=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null,
-      secs:reps?0:v, reps:reps?v:0, mus:sxMusGet()});
+      secs:reps?0:v, reps:reps?v:0, sets:$("sxSets").value, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
     stretches.push(s);
     if(sxPinDay){ (planSx[sxPinDay]||(planSx[sxPinDay]=[])).push(s.key); await persistPlan(); }
@@ -4502,11 +4528,12 @@ CHART_DETAIL.strChart = d => {
     return cdRow(o.ex.name, fmtSets(o.k, e.lifts[o.k]), t(m.lbl)+' '+Math.round(m.val).toLocaleString()+u, i>=0?LINE_COLORS[i%LINE_COLORS.length]:'');
   }).join('');
 };
-const logRows = (log, nameOf, unitOf, sel) => Object.keys(log||{}).map(k=>({k, n:nameOf(k)})).sort((a,b)=>{
+const logRows = (log, nameOf, fmtVal, sel) => Object.keys(log||{}).map(k=>({k, n:nameOf(k)})).sort((a,b)=>{
     const ia=sel.indexOf(a.k), ib=sel.indexOf(b.k); return (ia<0?99:ia)-(ib<0?99:ib) || byName(a.n,b.n);
-  }).map(o=>{ const v=log[o.k], i=sel.indexOf(o.k); return cdRow(o.n, v ? v+' '+unitOf(o.k) : t('chart.d.done'), '', i>=0?LINE_COLORS[i%LINE_COLORS.length]:''); }).join('');
-CHART_DETAIL.sxChart = d => { const e=entryOn(d); return e && e.mob ? logRows(e.mob, sxName, k=>sxIsReps(stretchByKey(k)) ? t('unit.reps') : 's', logSelection('chartSx', sxAvail())) : ''; };
-CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, ()=>t('unit.min'), logSelection('chartCd', cdAvail())) : ''; };
+  }).map(o=>{ const v=log[o.k], i=sel.indexOf(o.k); return cdRow(o.n, v ? fmtVal(o.k, v) : t('chart.d.done'), '', i>=0?LINE_COLORS[i%LINE_COLORS.length]:''); }).join('');
+CHART_DETAIL.sxChart = d => { const e=entryOn(d); if(!e || !e.mob) return '';
+  return logRows(e.mob, sxName, (k,v)=>{ const u=sxIsReps(stretchByKey(k)) ? t('unit.reps') : 's', n=mobSetsOf(e,k); return n>1 ? n+' × '+Math.round(v/n)+' '+u : v+' '+u; }, logSelection('chartSx', sxAvail())); };
+CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, (k,v)=>v+' '+t('unit.min'), logSelection('chartCd', cdAvail())) : ''; };
 
 const BW_FALLBACK = 70;
 function exVolume(ex, sets, bw){
@@ -6308,6 +6335,9 @@ const LANG = {
     'mob.noreps':            'no count set',
     'mob.repsn':             '{n} reps',
     'mob.repsn.1':           '1 rep',
+    'mob.setsn':               '{n} sets',
+    'mob.setsn.1':             '1 set',
+    'mob.setsof':              '{n} of {of} done',
     'mob.straight':          'Straight in',
     'mob.ticktip':           'Mark done',
     'mob.title':             'Mobility <span class="sub-note">· <span id="mobDate">—</span> · every tick and time saves itself</span>',
@@ -6537,6 +6567,8 @@ const LANG = {
     'sx.note.reps':          'Counted, not timed — tick it off and type how many you actually did. No countdown for this one.',
     'sx.ph.name':            'Hamstring',
     'sx.reps':               'Reps · how many',
+    'sx.sets':                 'Sets',
+    'sx.setsfld':              'Sets · how many',
     'sxlib.adductor_stand':    'Standing adductor stretch',
     'sxlib.ankle_circles':     'Ankle circles',
     'sxlib.ankle_rock':        'Kneeling ankle rock',
@@ -6776,7 +6808,7 @@ const LANG = {
   $("restExactBtn").onclick=openExactSettings;
   $("mobWrap").onclick=ev=>{ const row=ev.target.closest('.mobrow'); if(!row) return; const k=row.dataset.k;
     if(ev.target.closest('.mobpin')) toggleLogPin('sx',k); else if(ev.target.closest('.mobtick')) toggleMob(k); else if(ev.target.closest('.mobgo')) startStretch(k); else if(ev.target.closest('.mobedit')) sxOpen(k); };
-  $("mobWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec'); if(!inp) return; const v=num(inp.value); setMob(inp.closest('.mobrow').dataset.k, (v==null||v<0)?null:v); };
+  $("mobWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec,.mobn'); if(inp) mobRowEdit(inp.closest('.mobrow')); };
   $("cdWrap").onclick=ev=>{ const row=ev.target.closest('.mobrow'); if(!row) return; const k=row.dataset.k;
     if(ev.target.closest('.mobpin')) toggleLogPin('cd',k); else if(ev.target.closest('.mobtick')) toggleCardio(k); else if(ev.target.closest('.mobgo')) startCardioTimer(k); else if(ev.target.closest('.mobedit')) cdOpen(k); };
   $("cdWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec'); if(!inp) return; const v=num(inp.value); setCardio(inp.closest('.mobrow').dataset.k, (v==null||v<0)?null:v); };
