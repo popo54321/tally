@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-lsxtVHuVz+ArNy1bVfGooEmZP5DUwDKJTU6IqyQ2g0g='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-HybMEtvfmaVSe2qK3ZVwrNlMFcQdSkikKSEJLgwxiO8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1146,7 +1146,8 @@
     </div>
     <div class="sh-list sh-form">
       <div class="field"><label for="cdName" data-i18n="fld.name">Name</label><input type="text" id="cdName" data-i18n-ph="cdx.ph.name" placeholder="Run" autocomplete="off"></div>
-      <div class="field"><label for="cdMins" data-i18n="cdx.mins">Usual length · minutes</label><input type="number" min="0" max="600" step="5" inputmode="numeric" id="cdMins" placeholder="30"></div>
+      <div class="field"><label for="cdSets" data-i18n="cdx.sets">Sets or rounds · how many</label><input type="number" min="1" max="20" inputmode="numeric" id="cdSets" placeholder="1"></div>
+      <div class="field"><label for="cdMins" data-i18n="cdx.mins">Length · minutes per set</label><input type="number" min="0" max="600" step="5" inputmode="numeric" id="cdMins" placeholder="30"></div>
       <div class="sxnote" data-i18n="cdx.note">Start counts this down. The minutes recorded stay editable, so a session that ran long or short is easy to correct.</div>
     </div>
     <div class="sh-foot">
@@ -2140,7 +2141,8 @@ function normCardio(x){
   const name=String(x.name==null?'':x.name).trim().slice(0,40);
   if(!name) return null;
   const m=parseInt(x.mins,10);
-  return { key, name, mins:(isNaN(m)||m<0||m>600)?0:m, lib:(typeof x.lib==='string' && cdLibByKey(x.lib)) ? x.lib : null, retired:!!x.retired };
+  const n=parseInt(x.sets,10);
+  return { key, name, mins:(isNaN(m)||m<0||m>600)?0:m, sets:(isNaN(n)||n<1||n>20)?1:n, lib:(typeof x.lib==='string' && cdLibByKey(x.lib)) ? x.lib : null, retired:!!x.retired };
 }
 function cdKeyFor(name){
   let base='cd_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
@@ -2375,11 +2377,13 @@ function normEntry(e){
   };
   o.cardio=tally(e.cardio);
   o.mob=tally(e.mob);
-  o.mobSets=null;
-  if(o.mob && e.mobSets && typeof e.mobSets==='object'){
-    const ms={}; for(const k in e.mobSets){ const n=parseInt(e.mobSets[k],10); if((k in o.mob) && n>1 && n<=50) ms[k]=n; }
-    if(Object.keys(ms).length) o.mobSets=ms;
-  }
+  const setCounts=(log, x)=>{
+    if(!log || !x || typeof x!=='object') return null;
+    const ms={}; for(const k in x){ const n=parseInt(x[k],10); if((k in log) && n>1 && n<=50) ms[k]=n; }
+    return Object.keys(ms).length ? ms : null;
+  };
+  o.mobSets=setCounts(o.mob, e.mobSets);
+  o.cardioSets=setCounts(o.cardio, e.cardioSets);
   let m=null;
   if(e.meas && typeof e.meas==='object'){ const mm={}; MEAS.forEach(x=>{ if(e.meas[x.key]!=null){ const v=pos(e.meas[x.key]); if(v!=null) mm[x.key]=v; } }); if(Object.keys(mm).length) m=mm; }
   o.meas=m;
@@ -2408,7 +2412,7 @@ function mergeDay(a, b){
   ['day','weight','height','kcal','prot'].forEach(k=>{ if(b[k]!=null) o[k]=b[k]; });
   if(b.bf!=null){ o.bf=b.bf; o.bfSrc=b.bfSrc; }
   ['mob','cardio','meas','lifts'].forEach(k=>{ if(b[k] && Object.keys(b[k]).length) o[k]=Object.assign({}, a[k]||{}, b[k]); });
-  if(b.mob){ const ms=Object.assign({}, a.mobSets||{}); Object.keys(b.mob).forEach(k=>{ if(b.mobSets && b.mobSets[k]) ms[k]=b.mobSets[k]; else delete ms[k]; }); o.mobSets=ms; }
+  [['mob','mobSets'],['cardio','cardioSets']].forEach(([f,sf])=>{ if(!b[f]) return; const ms=Object.assign({}, a[sf]||{}); Object.keys(b[f]).forEach(k=>{ if(b[sf] && b[sf][k]) ms[k]=b[sf][k]; else delete ms[k]; }); o[sf]=ms; });
   return normEntry(o);
 }
 const RETIRED_KEYS = ['tally:stretches:v1', 'tally:cardio:v1', 'tally:lang:v1'];
@@ -3430,7 +3434,7 @@ function timerFinish(){
   $("restBar").classList.add('done');
   beep(3);
   if(z.kind==='stretch' && z.key) mobSetAdd(z.key, z.hold);
-  if(z.kind==='cardio' && z.key) setCardio(z.key, Math.round(z.hold/60));
+  if(z.kind==='cardio' && z.key) cdSetAdd(z.key, Math.round(z.hold/60));
 }
 function timerStop(){
   if(restTimer){ clearInterval(restTimer); restTimer=null; }
@@ -4040,32 +4044,46 @@ function drawMob(){
                               : t('mob.hint.none');
 }
 
-async function setCardio(key, mins){
+const cdSetsOf = (e, k) => (e && e.cardioSets && e.cardioSets[k]) || 1;
+async function setCardioLog(key, total, sets){
   const e=dayEntry(); if(!e) return;
-  const m=Object.assign({}, e.cardio||{});
-  if(mins==null) delete m[key]; else m[key]=Math.max(0,Math.round(mins));
-  e.cardio=Object.keys(m).length?m:null;
+  const m=Object.assign({}, e.cardio||{}), ms=Object.assign({}, e.cardioSets||{});
+  if(total==null){ delete m[key]; delete ms[key]; }
+  else{ m[key]=Math.max(0,Math.round(total)); if(sets>1) ms[key]=Math.min(50,Math.round(sets)); else delete ms[key]; }
+  e.cardio=Object.keys(m).length?m:null; e.cardioSets=Object.keys(ms).length?ms:null;
   await persist();
   drawCardio(); stale('history');
 }
 function toggleCardio(key){
   const cur=entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.cardio && (key in cur.cardio));
-  if(on) return setCardio(key, null);
-  const c=cardioByKey(key);
-  return setCardio(key, c?c.mins:0);
+  if(on) return setCardioLog(key, null);
+  const c=cardioByKey(key), n=(c && c.sets) || 1;
+  return setCardioLog(key, (c?c.mins:0)*n, n);
+}
+function cdSetAdd(key, mins){
+  const cur=entries.find(e=>e.date===$("fDate").value);
+  const on=!!(cur && cur.cardio && (key in cur.cardio));
+  return setCardioLog(key, (on ? cur.cardio[key] : 0)+mins, (on ? cdSetsOf(cur,key) : 0)+1);
+}
+function cdRowEdit(row){
+  const per=num(row.querySelector('.mobsec').value), n=num(row.querySelector('.mobn').value);
+  if(per==null && n==null) return setCardioLog(row.dataset.k, null);
+  const c=cardioByKey(row.dataset.k), sets=Math.max(1, Math.round(n || (c && c.sets) || 1));
+  return setCardioLog(row.dataset.k, Math.max(0, per || 0)*sets, sets);
 }
 function startCardioTimer(key){
   const c=cardioByKey(key);
   if(!c || !c.mins){ flash(t('msg.needmins')); return; }
   timerStart({kind:'cardio', key:key, label:c.name, hold:c.mins*60, lead:settings.mobLead||0});
 }
-function cdRowHtml(c, log, gone){
-  const on=(c.key in log);
+function cdRowHtml(c, log, gone, ms){
+  const on=(c.key in log), sets=c.sets||1, done=on ? ((ms && ms[c.key]) || 1) : 0;
+  const sub=(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget')) + (sets>1 ? ' × '+tn('mob.setsn',sets) : '') + (on && sets>1 ? ' · '+tf('mob.setsof',{n:done, of:sets}) : '');
   return `<div class="mobrow${on?' done':''}" data-k="${esc(c.key)}">
     <button type="button" class="mobtick" title="${esc(t('mob.ticktip'))}" aria-label="${esc(t('mob.ticktip'))}" aria-pressed="${on}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planCd,c.key), $("fDay").value)}<span>${esc(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget'))}</span></div>
-    <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="0" value="${on?log[c.key]:''}"><span class="mobu">${esc(t('unit.min'))}</span>
+    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planCd,c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="${c.mins||0}" value="${on?Math.round(log[c.key]/done):''}" aria-label="${esc(t('cdx.mins'))}"><span class="mobu">${esc(t('unit.min'))}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
   </div>`;
@@ -4082,8 +4100,9 @@ function drawCardio(){
   if(!list.length && !orphan.length){
     wrap.innerHTML='<div class="mobempty">'+esc(t(activeCardio().length?'cd.empty.day':'cd.empty1'))+'<br>'+esc(tf('cd.empty.add',{day:dayName($("fDay").value)}))+'</div>';
   }else{
-    wrap.innerHTML = list.map(c=>cdRowHtml(c,log,false)).join('')
-      + orphan.map(k=>cdRowHtml({key:k, name:(cardioByKey(k)||{name:prettyKey(k)}).name, mins:0}, log, true)).join('');
+    const ms=(cur && cur.cardioSets) || {};
+    wrap.innerHTML = list.map(c=>cdRowHtml(c,log,false,ms)).join('')
+      + orphan.map(k=>cdRowHtml({key:k, name:(cardioByKey(k)||{name:prettyKey(k)}).name, mins:0}, log, true, ms)).join('');
   }
   const n=Object.keys(log).length;
   const mins=Object.keys(log).reduce((a,k)=>a+(log[k]||0),0);
@@ -4098,7 +4117,7 @@ function cdOpen(key){
   const c=key?cardioByKey(key):null;
   $("cdTitle").textContent=t(c?'cdx.edit':'cdx.new');
   $("cdName").value=c?c.name:'';
-  $("cdMins").value=c?(c.mins||''):'30';
+  $("cdMins").value=c?(c.mins||''):'30'; $("cdSets").value=c ? c.sets : 1;
   $("cdDelete").style.display=c?'':'none';
   cdMsg(''); dlgOpen("cdWrapSheet");
   if(!c) $("cdName").focus();
@@ -4109,12 +4128,12 @@ async function cdSave(){
   if(!name){ cdMsg(t('msg.needname'),true); $("cdName").focus(); return; }
   if(cdEditing){
     const c=cardioByKey(cdEditing); if(!c){ cdClose(); return; }
-    const upd=normCardio({key:c.key, name:name, mins:$("cdMins").value, lib:c.lib, retired:c.retired});
+    const upd=normCardio({key:c.key, name:name, mins:$("cdMins").value, sets:$("cdSets").value, lib:c.lib, retired:c.retired});
     if(!upd){ cdMsg(t('msg.badname'),true); return; }
     Object.assign(c, upd);
   }else{
     if(cardios.some(x=>x.name.toLowerCase()===name.toLowerCase())){ cdMsg(t('msg.onlist'),true); return; }
-    const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value});
+    const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value, sets:$("cdSets").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
     cardios.push(c);
     if(cdPinDay){ (planCd[cdPinDay]||(planCd[cdPinDay]=[])).push(c.key); await persistPlan(); }
@@ -4533,7 +4552,7 @@ const logRows = (log, nameOf, fmtVal, sel) => Object.keys(log||{}).map(k=>({k, n
   }).map(o=>{ const v=log[o.k], i=sel.indexOf(o.k); return cdRow(o.n, v ? fmtVal(o.k, v) : t('chart.d.done'), '', i>=0?LINE_COLORS[i%LINE_COLORS.length]:''); }).join('');
 CHART_DETAIL.sxChart = d => { const e=entryOn(d); if(!e || !e.mob) return '';
   return logRows(e.mob, sxName, (k,v)=>{ const u=sxIsReps(stretchByKey(k)) ? t('unit.reps') : 's', n=mobSetsOf(e,k); return n>1 ? n+' × '+Math.round(v/n)+' '+u : v+' '+u; }, logSelection('chartSx', sxAvail())); };
-CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, (k,v)=>v+' '+t('unit.min'), logSelection('chartCd', cdAvail())) : ''; };
+CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, (k,v)=>{ const n=cdSetsOf(e,k); return n>1 ? n+' × '+Math.round(v/n)+' '+t('unit.min') : v+' '+t('unit.min'); }, logSelection('chartCd', cdAvail())) : ''; };
 
 const BW_FALLBACK = 70;
 function exVolume(ex, sets, bw){
@@ -5375,10 +5394,11 @@ const LANG = {
     'cdlib.walk':              'Walking',
     'cdlib.yoga':              'Yoga flow',
     'cdx.edit':              'Edit cardio',
-    'cdx.mins':              'Usual length · minutes',
+    'cdx.mins':              'Length · minutes per set',
     'cdx.new':               'New cardio',
     'cdx.note':              'Start counts this down. The minutes recorded stay editable, so a session that ran long or short is easy to correct.',
     'cdx.ph.name':           'Run',
+    'cdx.sets':                'Sets or rounds · how many',
     'chart.7day':            '7-day {n}',
     'chart.abs':             'absolute {unit}, not indexed',
     'chart.avg':             'avg',
@@ -6811,7 +6831,7 @@ const LANG = {
   $("mobWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec,.mobn'); if(inp) mobRowEdit(inp.closest('.mobrow')); };
   $("cdWrap").onclick=ev=>{ const row=ev.target.closest('.mobrow'); if(!row) return; const k=row.dataset.k;
     if(ev.target.closest('.mobpin')) toggleLogPin('cd',k); else if(ev.target.closest('.mobtick')) toggleCardio(k); else if(ev.target.closest('.mobgo')) startCardioTimer(k); else if(ev.target.closest('.mobedit')) cdOpen(k); };
-  $("cdWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec'); if(!inp) return; const v=num(inp.value); setCardio(inp.closest('.mobrow').dataset.k, (v==null||v<0)?null:v); };
+  $("cdWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec,.mobn'); if(inp) cdRowEdit(inp.closest('.mobrow')); };
   $("collWrap").onclick=ev=>{ const b=ev.target.closest('[data-cedit],[data-cret]'); if(!b) return;
     if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
