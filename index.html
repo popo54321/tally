@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-j41JXlg6iVmzMNZRjkHUZax6Qfqrm1etd+K3EUkAmbo='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-aR1N950qg4mm0+g3RyNhshAEVgZayskO0NRv8ebKpOQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -193,6 +193,7 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .instnudge{border-color:var(--brass)}
+  .cdnokcal{margin:-2px 0 12px}
   .mchip.sxw.miss{border-color:var(--warn);color:var(--warn)}
   #sxWeek{margin:6px 0 10px}
   .mobname .mobpin{margin-left:6px;vertical-align:1px}
@@ -743,6 +744,7 @@
 
     <div class="card col-12" id="cardCardio">
       <div class="lbl" data-i18n-html="cd.title">Cardio <span class="sub-note">· <span id="cdDate">—</span> · every tick and time saves itself</span></div>
+      <div class="sxnote cdnokcal" data-i18n="cd.nokcal">No calorie counts here on purpose: the calorie target already learns from your weight trend, so your cardio is in there.</div>
       <div class="mobctl">
         <div class="mobtot" id="cdTot">—</div>
       </div>
@@ -818,6 +820,7 @@
     </div>
     <div class="card col-12" id="cardCdLib">
       <div class="lbl" data-i18n-html="guide.cd.title">Cardio <span class="sub-note">· add what you like · you choose the day</span></div>
+      <div class="sxnote cdnokcal" data-i18n="cd.nokcal">No calorie counts here on purpose: the calorie target already learns from your weight trend, so your cardio is in there.</div>
       <div id="cdLibWrap"></div>
     </div>
   </div>
@@ -929,6 +932,10 @@
             the standard approximation for body tissue. It is only an approximation: early weight
             change is largely water and glycogen, which carry almost no energy, so short windows
             overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.cardio.h">Cardio and calories</div>
+          <div class="m-b" data-i18n-html="meth.cardio.b">Tally doesn’t estimate calories burned. Machines and watches often overestimate exercise burn, and adding those numbers back to your target can quietly undo a deficit. You don’t need them: your adaptive maintenance estimate is worked out from what you eat and what your weight actually does, so the energy your cardio burns is already in it. Do more cardio and the estimate rises to match within a couple of weeks; do less and it falls. If your cardio changes a lot from week to week, the estimate lags behind by a week or two.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.target.h">Daily target · your goal rate</div>
@@ -1300,14 +1307,14 @@ const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullu
                'cable','leg_press','leg_curl','leg_ext','back_ext','bands',
                'smith','trap_bar','landmine','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','ghd','box','parallettes','ab_wheel','sled',
                'plates','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','ssb','glute_machine','ab_machine','seated_calf_m','med_ball','sandbag','suspension','stability_ball','climb_rope','wrist_roller','gripper',
-               'treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball'];
+               'treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball','stick'];
 
 const EQUIP_GROUPS = [
   {key:'free', items:['barbell','dumbbells','kettlebell','ez_bar','trap_bar','ssb','plates','med_ball','sandbag']},
   {key:'machine', items:['cable','smith','leg_press','leg_curl','leg_ext','machine_press','pec_deck','machine_shoulder','hack_squat','hip_machine','calf_machine','assist_machine','row_machine','lat_raise_m','curl_machine','tri_machine','pendulum','belt_squat','glute_machine','ab_machine','seated_calf_m']},
   {key:'station', items:['bench','rack','pullup_bar','dip_bars','back_ext','ghd','box','landmine','climb_rope','sled']},
   {key:'small', items:['rings','suspension','bands','parallettes','ab_wheel','stability_ball','wrist_roller','gripper']},
-  {key:'cardio', items:['treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball']}
+  {key:'cardio', items:['treadmill','exercise_bike','bicycle','rower','elliptical','stair_climber','ski_erg','air_bike','pool','jump_rope','battle_ropes','punch_bag','foam_roller','stretch_strap','massage_ball','stick']}
 ];
 
 const LIB = [
@@ -1970,7 +1977,44 @@ const SX_LIB = [
   {key:'knees_chest', mus:['lower_back','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
   {key:'spinal_twist', mus:['lower_back','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
   {key:'seated_twist', mus:['lower_back','back'], eq:[], mode:'sec', tgt:30, lv:1},
-  {key:'scorpion', mus:['lower_back','chest','glutes'], eq:[], mode:'reps', tgt:6, lv:2}
+  {key:'scorpion', mus:['lower_back','chest','glutes'], eq:[], mode:'reps', tgt:6, lv:2},
+  {key:'leg_swing_fb', mus:['hamstrings','quads'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'leg_swing_side', mus:['glutes','hamstrings'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'knee_hugs', mus:['glutes','hamstrings'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'quad_pulls', mus:['quads'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'arm_swings', mus:['chest','back'], eq:[], mode:'reps', tgt:15, lv:1},
+  {key:'torso_twists', mus:['abs','lower_back'], eq:[], mode:'reps', tgt:15, lv:1},
+  {key:'lunge_reach', mus:['quads','abs'], eq:[], mode:'reps', tgt:8, lv:2},
+  {key:'shoulder_cars', mus:['delt_front','delt_rear'], eq:[], mode:'reps', tgt:5, lv:2},
+  {key:'hip_cars', mus:['glutes'], eq:[], mode:'reps', tgt:5, lv:2},
+  {key:'wrist_circles', mus:['forearms'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'ankle_circles', mus:['calves'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'neck_circles', mus:['traps'], eq:[], mode:'reps', tgt:6, lv:1},
+  {key:'puppy', mus:['back','chest'], eq:[], mode:'sec', tgt:45, lv:2},
+  {key:'sphinx', mus:['abs','lower_back'], eq:[], mode:'sec', tgt:45, lv:1},
+  {key:'camel', mus:['quads','abs','chest'], eq:[], mode:'sec', tgt:30, lv:3},
+  {key:'low_lunge', mus:['quads'], eq:[], mode:'sec', tgt:45, lv:1},
+  {key:'triangle', mus:['hamstrings','abs'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'pyramid', mus:['hamstrings'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'wide_fold', mus:['hamstrings','lower_back'], eq:[], mode:'sec', tgt:45, lv:1},
+  {key:'eagle_arms', mus:['delt_rear','traps'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'bench_prayer', mus:['back','triceps'], eq:['bench'], mode:'sec', tgt:30, lv:2},
+  {key:'wall_angels', mus:['delt_side','traps'], eq:[], mode:'reps', tgt:10, lv:1},
+  {key:'reverse_prayer', mus:['forearms','delt_front'], eq:[], mode:'sec', tgt:30, lv:2},
+  {key:'kneel_wrist', mus:['forearms'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'neck_side', mus:['traps'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'roll_thoracic', mus:['back'], eq:['foam_roller'], mode:'sec', tgt:60, lv:1},
+  {key:'lateral_lunge_st', mus:['hamstrings','glutes'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'adductor_stand', mus:['hamstrings'], eq:[], mode:'sec', tgt:30, lv:1},
+  {key:'cossack_hold', mus:['hamstrings','glutes','quads'], eq:[], mode:'sec', tgt:30, lv:3},
+  {key:'ball_foot', mus:['calves'], eq:['massage_ball'], mode:'sec', tgt:60, lv:1},
+  {key:'band_ankle', mus:['calves'], eq:['bands'], mode:'reps', tgt:10, lv:2},
+  {key:'stick_dislocate', mus:['delt_front','chest','delt_rear'], eq:['stick'], mode:'reps', tgt:10, lv:2},
+  {key:'stick_ohs', mus:['glutes','calves','delt_front'], eq:['stick'], mode:'sec', tgt:30, lv:3},
+  {key:'stick_rotation', mus:['back','abs'], eq:['stick'], mode:'reps', tgt:10, lv:1},
+  {key:'stick_sidebend', mus:['abs','back'], eq:['stick'], mode:'reps', tgt:10, lv:1},
+  {key:'stick_hinge', mus:['hamstrings','lower_back'], eq:['stick'], mode:'reps', tgt:10, lv:1},
+  {key:'stick_lat', mus:['back','triceps'], eq:['stick','bench'], mode:'sec', tgt:30, lv:2}
 ];
 const CD_LIB = [
   {key:'walk', eq:[], mins:30},
@@ -5237,6 +5281,7 @@ const LANG = {
     'cd.empty.day':            'Nothing planned today.',
     'cd.empty1':             'No cardio on the list.',
     'cd.empty2':             'Add whatever you actually do — a name and how long you usually go for.',
+    'cd.nokcal':               'No calorie counts here on purpose: the calorie target already learns from your weight trend, so your cardio is in there.',
     'cd.notarget':           'no target set',
     'cd.target':             'target {n} min',
     'cd.title':              'Cardio <span class="sub-note">· <span id="cdDate">—</span> · every tick and time saves itself</span>',
@@ -5439,6 +5484,7 @@ const LANG = {
     'eq.suspension':           'Suspension trainer (TRX)',
     'eq.stability_ball':       'Stability ball',
     'eq.stair_climber':        'Stair climber',
+    'eq.stick':                'Stick or broomstick',
     'eq.stretch_strap':        'Stretching strap',
     'eq.climb_rope':           'Climbing rope',
     'eq.wrist_roller':         'Wrist roller',
@@ -6200,6 +6246,8 @@ const LANG = {
     'meth.bf.h':             'Body fat · US Navy girth method',
     'meth.bmr.b':            'Resting rate = 10 × weight(kg) + 6.25 × height(cm) − 5 × age, then <b>+5</b> for men or <b>−161</b> for women. Multiplied by an activity factor of 1.2 to 1.9 depending on how much you train. Mifflin-St Jeor (1990) is the equation most dietetic practice uses, and is a population average: individual resting rates vary by roughly ±10% around it, more if you are very lean, very heavy, or older.',
     'meth.bmr.h':            'Starting energy estimate · Mifflin-St Jeor',
+    'meth.cardio.b':           'Tally doesn’t estimate calories burned. Machines and watches often overestimate exercise burn, and adding those numbers back to your target can quietly undo a deficit. You don’t need them: your adaptive maintenance estimate is worked out from what you eat and what your weight actually does, so the energy your cardio burns is already in it. Do more cardio and the estimate rises to match within a couple of weeks; do less and it falls. If your cardio changes a lot from week to week, the estimate lags behind by a week or two.',
+    'meth.cardio.h':           'Cardio and calories',
     'meth.coach.b':          'Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night\'s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.',
     'meth.coach.h':          'Next-session suggestions · patient double progression',
     'meth.prot.b':           '<b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.',
@@ -6455,70 +6503,107 @@ const LANG = {
     'sx.note.reps':          'Counted, not timed — tick it off and type how many you actually did. No countdown for this one.',
     'sx.ph.name':            'Hamstring',
     'sx.reps':               'Reps · how many',
+    'sxlib.adductor_stand':    'Standing adductor stretch',
+    'sxlib.ankle_circles':     'Ankle circles',
     'sxlib.ankle_rock':        'Kneeling ankle rock',
     'sxlib.arm_circles':       'Arm circles',
+    'sxlib.arm_swings':        'Arm swings',
     'sxlib.ball_backbend':     'Stability ball backbend',
+    'sxlib.ball_foot':         'Massage ball foot roll',
     'sxlib.ball_forearm':      'Massage ball forearm release',
     'sxlib.ball_glute':        'Massage ball glute release',
+    'sxlib.band_ankle':        'Banded ankle mobilisation',
     'sxlib.band_dislocate':    'Band shoulder dislocates',
     'sxlib.behind_clasp':      'Behind-the-back hand clasp',
     'sxlib.bench_pec':         'Kneeling bench pec stretch',
+    'sxlib.bench_prayer':      'Bench prayer lat stretch',
     'sxlib.butterfly':         'Butterfly stretch',
+    'sxlib.camel':             'Camel pose',
     'sxlib.cat_cow':           'Cat-cow',
     'sxlib.childs_pose':       'Child\'s pose',
     'sxlib.chin_tuck':         'Chin tuck',
     'sxlib.cobra':             'Cobra stretch',
+    'sxlib.cossack_hold':      'Cossack squat hold',
     'sxlib.couch':             'Couch stretch',
     'sxlib.cross_body':        'Cross-body shoulder stretch',
     'sxlib.deep_squat':        'Deep squat hold',
     'sxlib.doorway_chest':     'Doorway chest stretch',
     'sxlib.down_dog':          'Downward dog',
+    'sxlib.eagle_arms':        'Eagle arms',
     'sxlib.figure_four':       'Lying figure-four stretch',
     'sxlib.frog':              'Frog stretch',
     'sxlib.front_split':       'Front split',
     'sxlib.full_bridge':       'Full bridge',
     'sxlib.happy_baby':        'Happy baby',
     'sxlib.hip_9090':          '90/90 hip switch',
+    'sxlib.hip_cars':          'Hip CARs',
     'sxlib.hip_circles':       'Hip circles',
+    'sxlib.knee_hugs':         'Walking knee hugs',
     'sxlib.kneel_hipflex':     'Kneeling hip flexor stretch',
+    'sxlib.kneel_wrist':       'Kneeling wrist stretch',
     'sxlib.knees_chest':       'Knees-to-chest',
+    'sxlib.lateral_lunge_st':  'Lateral lunge stretch',
+    'sxlib.leg_swing_fb':      'Leg swings, front to back',
+    'sxlib.leg_swing_side':    'Leg swings, side to side',
     'sxlib.levator':           'Levator scapulae stretch',
     'sxlib.lizard':            'Lizard pose',
+    'sxlib.low_lunge':         'Low lunge',
+    'sxlib.lunge_reach':       'Lunge with overhead reach',
     'sxlib.middle_split':      'Middle split',
+    'sxlib.neck_circles':      'Neck half circles',
     'sxlib.neck_rotation':     'Neck rotations',
+    'sxlib.neck_side':         'Neck side stretch',
     'sxlib.oh_triceps':        'Overhead triceps stretch',
     'sxlib.open_book':         'Open book rotation',
     'sxlib.pancake':           'Pancake stretch',
     'sxlib.passive_hang':      'Passive hang',
     'sxlib.pigeon':            'Pigeon pose',
+    'sxlib.puppy':             'Puppy pose',
+    'sxlib.pyramid':           'Pyramid pose',
+    'sxlib.quad_pulls':        'Walking quad pulls',
+    'sxlib.reverse_prayer':    'Reverse prayer',
     'sxlib.roll_calves':       'Foam roll calves',
     'sxlib.roll_hams':         'Foam roll hamstrings',
     'sxlib.roll_lats':         'Foam roll lats',
     'sxlib.roll_quads':        'Foam roll quads',
+    'sxlib.roll_thoracic':     'Foam roller thoracic extension',
     'sxlib.roll_upper':        'Foam roll upper back',
     'sxlib.roller_chest':      'Foam roller chest opener',
     'sxlib.scorpion':          'Scorpion stretch',
     'sxlib.seated_fold':       'Seated forward fold',
     'sxlib.seated_glute':      'Seated glute stretch',
     'sxlib.seated_twist':      'Seated spinal twist',
+    'sxlib.shoulder_cars':     'Shoulder CARs',
     'sxlib.shoulder_ext':      'Seated shoulder extension',
     'sxlib.side_bend':         'Standing side bend',
     'sxlib.side_quad':         'Side-lying quad stretch',
     'sxlib.sleeper':           'Sleeper stretch',
     'sxlib.soleus':            'Bent-knee soleus stretch',
+    'sxlib.sphinx':            'Sphinx pose',
     'sxlib.spinal_twist':      'Lying spinal twist',
     'sxlib.standing_ham':      'Standing hamstring stretch',
     'sxlib.standing_quad':     'Standing quad stretch',
     'sxlib.step_calf':         'Step calf drop',
+    'sxlib.stick_dislocate':   'Stick shoulder dislocates',
+    'sxlib.stick_hinge':       'Stick hip hinge drill',
+    'sxlib.stick_lat':         'Kneeling stick lat stretch',
+    'sxlib.stick_ohs':         'Stick overhead squat hold',
+    'sxlib.stick_rotation':    'Stick thoracic rotation',
+    'sxlib.stick_sidebend':    'Stick side bend',
     'sxlib.strap_ham':         'Lying strap hamstring stretch',
     'sxlib.strap_triceps':     'Strap triceps stretch',
     'sxlib.thread_needle':     'Thread the needle',
+    'sxlib.torso_twists':      'Torso twists',
+    'sxlib.triangle':          'Triangle pose',
     'sxlib.upper_trap':        'Upper trap neck stretch',
+    'sxlib.wall_angels':       'Wall angels',
     'sxlib.wall_biceps':       'Wall biceps stretch',
     'sxlib.wall_calf':         'Wall calf stretch',
     'sxlib.wall_lat':          'Wall lat stretch',
     'sxlib.wall_pec':          'Wall pec stretch',
+    'sxlib.wide_fold':         'Wide-leg forward fold',
     'sxlib.worlds_greatest':   'World\'s greatest stretch',
+    'sxlib.wrist_circles':     'Wrist circles',
     'sxlib.wrist_extensor':    'Wrist extensor stretch',
     'sxlib.wrist_flexor':      'Wrist flexor stretch',
     'sync.backup':           'Save backup file',
