@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-o2IXXRUcghoeFJ1PrlvPMUX380UmIV3/fDsB49nsnOE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-D3l5juBuh0BfSKUQ/1cBGXnZavyo+TMQbg4W2KIOJpQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -89,7 +89,7 @@
 
   .chartwrap{margin-top:6px}
   svg{display:block;width:100%;height:auto}
-  .axis{font-family:var(--font-mono);font-size:12.5px;fill:var(--txt-faint)}
+  .axis{font-family:var(--font-mono);font-size:11px;fill:var(--txt-faint)}
 
   .form-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
   .field label{display:block;font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-faint);margin-bottom:6px}
@@ -281,6 +281,7 @@
   .chartwin{display:flex;justify-content:flex-end;margin:-2px 0 12px}
   .chartwin .seg{border-color:var(--line-soft)}
   .chartwin .seg button{padding:6px 11px;font-size:10.5px}
+  @media (max-width:520px){ .chartwin .seg{display:flex;flex-wrap:nowrap;width:100%} .chartwin .seg button{flex:1;padding:7px 4px} }
   .manual-target{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:1px solid var(--line-soft)}
   .manual-target label{font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-faint)}
   .manual-target input{width:110px;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;font-family:var(--font-mono);font-size:14px}
@@ -1190,7 +1191,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.7';
+const APP_VERSION = '7.8';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -4424,11 +4425,17 @@ function weekTrendChange(wp, start){
   let iB=-1; wp.forEach((e,i)=>{ if(e.date<start) iB=i; });
   return (iB>=0 && iB<wp.length-1) ? Math.round((trs[trs.length-1]-trs[iB])*100)/100 : null;
 }
+function chartSize(svg, baseH){
+  const W=Math.max(170, Math.round(svg.clientWidth || (svg.parentNode && svg.parentNode.clientWidth) || 760));
+  const H=Math.round(Math.max(170, Math.min(baseH, W*0.62)));
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  return [W, H];
+}
 function drawWeight(weighed){
   const trAll=trendWeights(weighed.map(e=>({t:dnum(e.date), w:e.weight})));
   const trOf=new Map(weighed.map((e,i)=>[e.date, trAll[i]]));
   weighed=weighed.filter(e=>inChartWin(e.date));
-  const svg=$("wChart"), W=760,H=300,padL=46,padR=22,padT=16,padB=34;
+  const svg=$("wChart"), [W,H]=chartSize(svg,300), padL=46,padR=16,padT=16,padB=30;
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
   if(!weighed.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="15">${esc(t('chart.empty.weight'))}</text>`; chartRecord('wChart', []); return; }
@@ -4444,7 +4451,7 @@ function drawWeight(weighed){
   for(let i=0;i<=4;i++){ const v=yMin+(yMax-yMin)*i/4, y=yTo(v);
     g+=`<line x1="${x0}" y1="${y}" x2="${x1}" y2="${y}" stroke="${C.grid}"/>`;
     g+=`<text class="axis" x="${x0-7}" y="${y+3}" text-anchor="end">${v.toFixed(1)}</text>`; }
-  if(dMax>dMin){ const nT=Math.min(5,dMax-dMin+1);
+  if(dMax>dMin){ const nT=Math.max(2, Math.min(5, dMax-dMin+1, Math.floor((x1-x0)/52)+1));
     for(let i=0;i<nT;i++){ const dn=Math.round(dMin+(dMax-dMin)*i/(nT-1)), x=xTo(dn);
       g+=`<text class="axis" x="${x.toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtTick(dn)}</text>`; } }
   else { g+=`<text class="axis" x="${((x0+x1)/2).toFixed(1)}" y="${y1+18}" text-anchor="middle">${fmtTick(dMin)}</text>`; }
@@ -4459,18 +4466,22 @@ function drawWeight(weighed){
   weighed.forEach(e=>g+=`<circle cx="${xTo(dnum(e.date)).toFixed(1)}" cy="${yTo(e.weight).toFixed(1)}" r="2.6" fill="${C.dot}" stroke="${C.line}" stroke-width="1.4" opacity="0.6"/>`);
   g+=`<polyline points="${trl.join(' ')}" fill="none" stroke="${C.line}" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>`;
   const le=weighed[n-1], lt=trOf.get(le.date);
-  g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" style="fill:${C.ink};font-size:13px">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
+  if(W>=520) g+=`<text class="axis" x="${(xTo(dnum(le.date))-6).toFixed(1)}" y="${yTo(lt)-9}" text-anchor="end" style="fill:${C.ink};font-size:13px">${esc(t('chart.trend'))} ${lt.toFixed(1)}</text>`;
   svg.innerHTML=`<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${C.line}"/><stop offset="1" stop-color="${C.line}" stop-opacity="0"/></linearGradient></defs>`+g;
-  chartRecord('wChart', weighed.map(e=>e.date), d=>xTo(dnum(d)), y0, y1, {trend:trOf, label:d=>{ const e=entryOn(d); return e && e.weight!=null ? e.weight.toFixed(1)+' kg' : ''; }});
+  chartRecord('wChart', weighed.map(e=>e.date), d=>xTo(dnum(d)), y0, y1, {W:W, trend:trOf, label:d=>{ const e=entryOn(d); return e && e.weight!=null ? e.weight.toFixed(1)+' kg' : ''; }});
 }
 
 function drawMultiLine(svgId, series, opts){
   opts=opts||{};
   const legend = opts.legend!==false;
-  const svg=$(svgId), W=760,H=260,padL=44,padR=legend?108:22,padT=16,padB=26;
+  series=series.filter(s=>s.points.length);
+  const svg=$(svgId);
+  let [W,H]=chartSize(svg,260);
+  const below=legend && W<520, cols=W<250 ? 1 : 2, rows=below ? Math.ceil(series.length/cols) : 0;
+  if(rows){ H+=rows*17+10; svg.setAttribute('viewBox', `0 0 ${W} ${H}`); }
+  const padL=44, padR=(legend && !below)?108:16, padT=16, padB=14+(rows ? rows*17+10 : 0);
   const C=chartColors();
   const x0=padL,x1=W-padR,y0=padT,y1=H-padB;
-  series=series.filter(s=>s.points.length);
   if(!series.length){ svg.innerHTML=`<text x="${(x0+x1)/2}" y="${(y0+y1)/2}" text-anchor="middle" fill="${C.faint}" font-family="JetBrains Mono" font-size="14">${esc(opts.empty||'')}</text>`; chartRecord(svgId, []); return; }
   let allD=[]; series.forEach(s=>s.points.forEach(p=>allD.push(dnum(p.date))));
   const dMin=Math.min(...allD), dMax=Math.max(...allD);
@@ -4494,14 +4505,14 @@ function drawMultiLine(svgId, series, opts){
     if(coords.length>1) g+=`<polyline points="${coords.join(' ')}" fill="none" stroke="${col}" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"/>`;
     ps.forEach(p=>g+=`<circle cx="${xTo(p.date).toFixed(1)}" cy="${yTo(p.val).toFixed(1)}" r="3" fill="${C.dot}" stroke="${col}" stroke-width="2"/>`);
     if(legend){
-      const ly=y0+12+si*17;
-      g+=`<line x1="${x1+12}" y1="${ly-4}" x2="${x1+28}" y2="${ly-4}" stroke="${col}" stroke-width="2.6"/>`;
-      g+=`<text class="axis" x="${x1+32}" y="${ly}">${esc(s.name)}</text>`;
+      const lx = below ? x0+(si%cols)*((x1-x0)/cols) : x1+12, ly = below ? y1+24+Math.floor(si/cols)*17 : y0+12+si*17;
+      g+=`<line x1="${lx}" y1="${ly-4}" x2="${lx+16}" y2="${ly-4}" stroke="${col}" stroke-width="2.6"/>`;
+      g+=`<text class="axis" x="${lx+20}" y="${ly}">${esc(s.name)}</text>`;
     }
   });
   svg.innerHTML=g;
   const dates=[...new Set(series.flatMap(s=>s.points.map(p=>p.date)))].sort();
-  chartRecord(svgId, dates, xTo, y0, y1);
+  chartRecord(svgId, dates, xTo, y0, y1, {W:W});
 }
 
 const CHART={}, CHART_DAY={}, CHART_DETAIL={};
@@ -4544,11 +4555,11 @@ function chartScrubShow(id, d){
   m.classList.add('live');
   let g=svg.querySelector('.chbub');
   if(!g){ g=document.createElementNS(NS,'g'); g.setAttribute('class','chbub'); g.innerHTML='<rect rx="6"/><text/>'; svg.appendChild(g); }
-  const k=760/Math.max(1, svg.getBoundingClientRect().width), fs=13*k;
-  const label=fmtDay(d)+(st.label ? ' · '+st.label(d) : ''), w=label.length*fs*0.62+fs*1.4, h=fs*1.9;
-  const bx=Math.max(2, Math.min(760-w-2, x-w/2));
+  const fs=13, W=st.W||760;
+  const label=fmtDay(d)+(st.label ? ' · '+st.label(d) : ''), w=Math.min(W-4, label.length*fs*0.62+fs*1.4), h=fs*1.9;
+  const bx=Math.max(2, Math.min(W-w-2, x-w/2));
   const r=g.firstElementChild, tx=g.lastElementChild;
-  r.setAttribute('x',bx.toFixed(1)); r.setAttribute('y',1); r.setAttribute('width',w.toFixed(1)); r.setAttribute('height',h.toFixed(1)); r.setAttribute('rx',(6*k).toFixed(1));
+  r.setAttribute('x',bx.toFixed(1)); r.setAttribute('y',1); r.setAttribute('width',w.toFixed(1)); r.setAttribute('height',h.toFixed(1)); r.setAttribute('rx',6);
   tx.setAttribute('x',(bx+w/2).toFixed(1)); tx.setAttribute('y',(1+h*0.68).toFixed(1)); tx.setAttribute('font-size',fs.toFixed(1)); tx.textContent=label;
 }
 function chartScrubEnd(id, keep){
@@ -4747,7 +4758,7 @@ function chartFoldDraw(k, hasAny){
 async function chartFoldToggle(k){
   const card=$(FOLD_CARD[k]);
   settings.chartFold=Object.assign({}, settings.chartFold, {[k]:!card.classList.contains('folded')});
-  await persistSettings(); chartFoldDraw(k, true);
+  await persistSettings(); chartFoldDraw(k, true); render();
 }
 
 const MEAS=['neck','shoulders','chest','arm','forearm','waist','hips','thigh','calf'].map(key=>({key}));
@@ -6881,6 +6892,8 @@ const LANG = {
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
+  let resizeW=window.innerWidth, resizeT=null;
+  window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(()=>{ if(window.innerWidth!==resizeW){ resizeW=window.innerWidth; render(); } }, 200); });
   $("sizeDown").onclick=()=>textScale(-1); $("sizeUp").onclick=()=>textScale(1); $("sizeReset").onclick=()=>textScale(0);
   $("fastBtn").onclick=toggleFast;
   $("abX").onclick=abClose; $("abOk").onclick=abClose; $("abNever").onclick=abNever;
