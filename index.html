@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-HFvmTXX05W0hVjHWdbF4YbMy0cxz+qsxQaIJeku+m8g='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-lCwgiKcx0qck1IhwhEO3qed43vmN6uG+d9oXHScM5SQ='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -106,7 +106,8 @@
   .calcsum{font-family:var(--font-mono);font-size:11px;line-height:13px;color:var(--brass);margin-top:5px;min-height:13px}
 
   .ex{margin-bottom:13px}
-  .ex-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:8px}
+  .ex-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;margin-bottom:7px;gap:8px}
+  .ex-name{flex:1 1 140px;min-width:0}
   .ex-name{font-family:var(--font-mono);font-size:12px;letter-spacing:.5px;color:var(--ink);text-transform:uppercase}
   .ex-name span{color:var(--txt-faint);font-size:9.5px;letter-spacing:.3px;text-transform:none}
   .rtag{display:inline-block;background:var(--gold);color:var(--on-accent);border:2px solid var(--line);border-radius:6px;padding:0 6px;margin:0 3px;font-family:var(--font-mono);font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;vertical-align:1px}
@@ -332,7 +333,7 @@
   .daynav:active{background:var(--gold);color:var(--on-accent)}
   .daynav.today{font-size:11px;letter-spacing:.5px;text-transform:uppercase}
 
-  .ex-ctl{display:flex;align-items:center;gap:4px;flex:none}
+  .ex-ctl{display:flex;align-items:center;gap:4px;flex:none;margin-left:auto}
   .addmove{width:100%;margin-top:6px;background:var(--panel-2);border:2px dashed var(--line-soft);border-radius:9px;color:var(--ink-dim);
     font-family:var(--font-mono);font-size:11.5px;letter-spacing:.5px;text-transform:uppercase;padding:12px;cursor:pointer;transition:.15s;min-height:44px}
   .addmove:hover{border-color:var(--brass);color:var(--brass-bright);border-style:solid}
@@ -388,6 +389,27 @@
   .sh-form .seg button{flex:1;padding:10px 8px;font-size:11px;min-height:40px}
 
   .exchips{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}
+  .plgoal{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px;margin-bottom:14px}
+  .plgoal .field{flex:1 1 150px;margin:0;max-width:260px}
+  .plgoal .seg button{padding:11px 14px}
+  .plown{width:74px;background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:5px 6px;font-family:var(--font-mono);font-size:12px;text-align:center}
+  .plfor{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-dim);margin:-4px 0 12px}
+  .plfor button{background:none;border:none;color:var(--txt-faint);cursor:pointer;font-size:13px;padding:4px 6px}
+  .plres{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:10px;padding:14px;margin:4px 0 12px}
+  .plhead{font-family:var(--font-mono);font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--txt-faint);margin-bottom:10px}
+  .plviz{display:flex;align-items:center;flex-wrap:wrap;gap:3px;min-height:40px}
+  .plviz .sleeve{width:26px;height:12px;background:var(--line);border-radius:2px 0 0 2px;margin-right:2px}
+  .plviz .collar{width:6px;height:22px;background:var(--line);border-radius:2px;margin-right:3px}
+  .plate{display:flex;align-items:center;justify-content:center;min-width:28px;padding:0 3px;border:2px solid var(--line);border-radius:4px;background:var(--panel);
+    font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--ink)}
+  .plate.lb{background:var(--gold);color:var(--on-accent)}
+  .pllist{font-family:var(--font-mono);font-size:13px;color:var(--ink);margin-top:12px;line-height:1.6}
+  .pltot{font-family:var(--font-mono);font-size:11px;color:var(--txt-faint);margin-top:4px;line-height:1.6}
+  .plalt{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--font-mono);font-size:11px;color:var(--ink-dim);margin-top:10px}
+  .plsetup summary{cursor:pointer;font-family:var(--font-mono);font-size:11.5px;color:var(--ink-dim);padding:6px 0}
+  .plsetup .pltop{margin-top:12px}
+  .plbtn{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:6px;font-family:var(--font-mono);font-size:11px;padding:5px 10px;cursor:pointer;flex:none}
+  .plbtn:hover{border-color:var(--brass);color:var(--brass-bright)}
   .exchip{display:inline-flex;align-items:center;gap:6px;background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:7px;color:var(--ink-dim);
     font-family:var(--font-mono);font-size:11px;padding:7px 10px;cursor:pointer;transition:.12s;min-height:36px}
   .exchip .sw{width:11px;height:11px;border-radius:3px;border:1.5px solid var(--line);background:transparent;flex:none}
@@ -744,6 +766,24 @@
       <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
       <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
       <div class="saved" id="savedMsg2" data-i18n="msg.saved">Saved</div>
+    </div>
+
+    <div class="card col-12" id="cardPlates">
+      <div class="lbl" data-i18n-html="pl.title">Plate Calculator <span class="sub-note">· what to load on each side</span></div>
+      <div class="plfor" id="plFor" style="display:none"></div>
+      <div class="plgoal">
+        <div class="field"><label for="plGoal" data-i18n="pl.goal">Total weight you want</label><input id="plGoal" type="number" min="0" step="0.5" inputmode="decimal" placeholder="100"></div>
+        <div class="seg" id="plUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>
+      </div>
+      <div class="ctl-lbl" data-i18n="pl.bar">Bar</div>
+      <div class="exchips" id="plBar"></div>
+      <div id="plOut"></div>
+      <details class="plsetup" id="plSetup">
+        <summary id="plSetupSum">Your plates</summary>
+        <div class="sxnote" data-i18n="pl.setupnote">Tick the plates your gym has. Mix kg and lb if it has both. The calculator assumes there are enough of each to load both sides.</div>
+        <div class="ctl-lbl pltop">kg</div><div class="exchips" id="plKg"></div>
+        <div class="ctl-lbl">lb</div><div class="exchips" id="plLb"></div>
+      </details>
     </div>
 
     <div class="card col-12" id="cardMob">
@@ -1194,7 +1234,7 @@
 </div>
 
 <script>
-const APP_VERSION = '7.9';
+const APP_VERSION = '8.0';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
@@ -1209,6 +1249,45 @@ const KCAL_PER_KG = 7700;
 const kcalFloor = () => settings.sex==='female' ? 1200 : 1500;
 // Energy dot: green within a tenth of the target, yellow below that, red when more than a tenth over
 // or under the safe minimum. With sex not set the lower minimum is used, so a normal intake for a woman is never called dangerous.
+// Plate calculator. Plates are ids like 'kg20' or 'lb45'; bars are ids from PL_BARS.
+const LB = 0.45359237;
+const PL_KG = [50, 25, 20, 15, 10, 5, 2.5, 2, 1.25, 1, 0.5, 0.25];
+const PL_LB = [55, 45, 35, 25, 10, 5, 2.5, 1.25];
+const PL_ALL = PL_KG.map(v=>'kg'+v).concat(PL_LB.map(v=>'lb'+v));
+const PL_DEF = ['kg25','kg20','kg15','kg10','kg5','kg2.5','kg1.25'];
+const PL_BARS = [{id:'kg20', kg:20}, {id:'kg15', kg:15}, {id:'kg10', kg:10}, {id:'lb45', kg:45*LB}, {id:'lb35', kg:35*LB}, {id:'own'}, {id:'none', kg:0}];
+const PL_BAR_IDS = PL_BARS.map(b=>b.id);
+const plateKg = id => id.slice(0,2)==='lb' ? parseFloat(id.slice(2))*LB : parseFloat(id.slice(2));
+function normPlates(x){
+  x=(x && typeof x==='object') ? x : {};
+  const have=Array.isArray(x.have) ? PL_ALL.filter(id=>x.have.indexOf(id)>=0) : PL_DEF.slice();
+  const own=parseFloat(x.barOwn), by={};
+  if(x.barBy && typeof x.barBy==='object') Object.keys(x.barBy).slice(0,400).forEach(k=>{ if(SAFE_KEY.test(k) && PL_BAR_IDS.indexOf(x.barBy[k])>=0) by[k]=x.barBy[k]; });
+  return {have, bar:PL_BAR_IDS.indexOf(x.bar)>=0 ? x.bar : 'kg20', barOwn:(own>0 && own<=100) ? Math.round(own*100)/100 : null,
+          unit:x.unit==='lb' ? 'lb' : 'kg', barBy:by};
+}
+// Fewest plates per side that land closest to the goal. Works in the plates' own unit (lb if every plate is lb), to 0.01.
+function plateSolve(goalKg, barKg, have){
+  const sideKg=(goalKg-barKg)/2;
+  if(sideKg < -1e-6) return {err:'under'};
+  if(!have.length) return {err:'none'};
+  const inLb=have.every(id=>id.slice(0,2)==='lb'), toU = kg => kg/(inLb?LB:1)*100;
+  const ps=have.map(id=>({id, kg:plateKg(id), u:Math.round(id.slice(0,2)==='lb' ? (inLb ? parseFloat(id.slice(2))*100 : toU(plateKg(id))) : toU(plateKg(id)))}))
+    .sort((a,b)=>b.kg-a.kg);
+  const T=Math.round(toU(Math.max(0, sideKg))), max=T+ps[0].u;
+  if(max>120000) return {err:'big'};
+  const best=new Uint16Array(max+1).fill(65535), from=new Int8Array(max+1).fill(-1);
+  best[0]=0;
+  for(let v=1; v<=max; v++) for(let i=0;i<ps.length;i++){ const q=v-ps[i].u; if(q>=0 && best[q]!==65535 && best[q]+1<best[v]){ best[v]=best[q]+1; from[v]=i; } }
+  const tol=inLb || have.every(id=>id.slice(0,2)==='kg') ? 0 : 2;
+  const build = v => { const side=[]; while(v>0){ const i=from[v]; side.push(ps[i]); v-=ps[i].u; } return {side, totalKg:barKg+2*side.reduce((a,p)=>a+p.kg,0)}; };
+  for(let d=0; d<=tol; d++) for(const v of [T-d, T+d]) if(v>=0 && v<=max && best[v]!==65535) return {exact:true, main:build(v)};
+  let lo=-1, hi=-1;
+  for(let v=T; v>=0; v--) if(best[v]!==65535){ lo=v; break; }
+  for(let v=T; v<=max; v++) if(best[v]!==65535){ hi=v; break; }
+  const L=lo>=0 ? build(lo) : null, H=hi>=0 ? build(hi) : null;
+  return {exact:false, main:L||H, alt:(L && H) ? H : null};
+}
 const kcalSafeMin = () => settings.sex==='male' ? 1500 : 1200;
 function kcalBand(target){
   const min=kcalSafeMin(), tg=Math.max(target, min), r10=v=>Math.round(v/10)*10;
@@ -2300,6 +2379,7 @@ function normSettings(s){
     volHi: band.hi,
     volMute: muscleList(s.volMute, MUSCLE_KEYS.length),
     calRate: CAL_RATES.indexOf(parseFloat(s.calRate))>=0 ? parseFloat(s.calRate) : -0.25,
+    plates: normPlates(s.plates),
     calPeriod: s.calPeriod==='all' ? 91 : parseInt(s.calPeriod,10)===21 ? 28 : (CAL_PERIODS.indexOf(parseInt(s.calPeriod,10))>=0 ? parseInt(s.calPeriod,10) : 28)
   };
 }
@@ -2480,7 +2560,7 @@ async function persist(){
   try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','chartSx','chartCd','chartFold','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod'];
+const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','chartSx','chartCd','chartFold','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod','plates'];
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
@@ -2922,6 +3002,81 @@ function fmtSets(key, sets){
   return sets.map(s=>{ const l=ld(s); return (l ? l+'×' : '')+rp(s.reps); }).join('  ');
 }
 
+const PL_BAR_EQ = ['barbell','ez_bar','trap_bar','ssb','smith'], PL_MACH_EQ = ['leg_press','hack_squat','belt_squat','pendulum'];
+function plateKind(ex){
+  if(!ex || ex.added || ex.unit==='sec') return null;
+  const l=ex.lib ? libByKey(ex.lib) : null, eq=(l && l.eq) || ex.eq || [];
+  if(eq.some(e=>PL_BAR_EQ.indexOf(e)>=0)) return eq.indexOf('ez_bar')>=0 ? 'ez' : 'bar';
+  return eq.some(e=>PL_MACH_EQ.indexOf(e)>=0) ? 'machine' : null;
+}
+let plGoal=null, plEx=null;
+const plBarOf = () => { const P=settings.plates; return (plEx && P.barBy[plEx]) || (plEx && plateKind(exByKey(plEx))==='machine' ? 'none' : plEx && plateKind(exByKey(plEx))==='ez' ? 'kg10' : P.bar); };
+const plBarKg = id => id==='own' ? (settings.plates.barOwn||0) : PL_BARS.find(b=>b.id===id).kg;
+const plFmt = (kg, unit) => { const v=unit==='lb' ? kg/LB : kg; return (Math.round(v*100)/100).toString(); };
+const plLabel = id => plFmt(plateKg(id), id.slice(0,2))+' '+id.slice(0,2);
+function plateFromEx(ex){
+  plEx=ex.key;
+  const ks=[...document.querySelectorAll('#sets-'+ex.key+' .kg')].map(i=>num(i.value)).filter(v=>v!=null && v>0);
+  if(ks.length){ plGoal=Math.max(...ks); settings.plates.unit='kg'; }
+  drawPlates(); $("cardPlates").scrollIntoView({behavior:'smooth', block:'start'});
+}
+function drawPlates(){
+  const P=settings.plates, card=$("cardPlates"); if(!card) return;
+  const unit=P.unit, bar=plBarOf(), ex=plEx ? exByKey(plEx) : null;
+  if(!ex) plEx=null;
+  const f=$("plFor");
+  if(ex){ f.style.display=''; f.innerHTML=`<span>${esc(tf('pl.for',{name:ex.name}))}</span><button type="button" aria-label="${esc(t('pl.unlink'))}" title="${esc(t('pl.unlink'))}">✕</button>`; f.querySelector('button').onclick=()=>{ plEx=null; drawPlates(); }; }
+  else f.style.display='none';
+  const gi=$("plGoal"); if(document.activeElement!==gi) gi.value=plGoal==null ? '' : String(plGoal);
+  document.querySelectorAll('#plUnit button').forEach(b=>b.classList.toggle('on', b.dataset.u===unit));
+  const chip=(id, lbl, on)=>`<button type="button" class="exchip${on?' on':''}" data-id="${esc(id)}"><span class="sw"${on?' style="background:var(--line)"':''}></span>${esc(lbl)}</button>`;
+  $("plBar").innerHTML=PL_BARS.map(b=>b.id==='own'
+      ? chip('own', t('pl.bar.own'), bar==='own')+(bar==='own' ? `<input class="plown" id="plOwn" type="number" min="0" max="100" step="0.5" inputmode="decimal" placeholder="kg" aria-label="${esc(t('pl.bar.ownkg'))}" value="${P.barOwn==null?'':P.barOwn}">` : '')
+      : chip(b.id, b.id==='none' ? t('pl.bar.none') : plLabel(b.id), bar===b.id)).join('');
+  $("plBar").querySelectorAll('.exchip').forEach(b=>b.onclick=()=>plSetBar(b.dataset.id));
+  const own=$("plOwn"); if(own) own.onchange=async()=>{ const v=num(own.value); P.barOwn=(v!=null && v>=0 && v<=100) ? Math.round(v*100)/100 : null; await persistSettings(); drawPlates(); };
+  const pchips=(list, u)=>list.map(v=>chip(u+v, plFmt(u==='lb'?v*LB:v, u), P.have.indexOf(u+v)>=0)).join('');
+  $("plKg").innerHTML=pchips(PL_KG,'kg'); $("plLb").innerHTML=pchips(PL_LB,'lb');
+  card.querySelectorAll('#plKg .exchip, #plLb .exchip').forEach(b=>b.onclick=()=>plToggle(b.dataset.id));
+  $("plSetupSum").textContent=tf('pl.setup',{n:P.have.length});
+  $("plOut").innerHTML=plResultHtml(unit, bar);
+  const alt=$("plUse"); if(alt) alt.onclick=()=>{ plGoal=+alt.dataset.v; drawPlates(); };
+}
+function plResultHtml(unit, bar){
+  const P=settings.plates, other=unit==='kg' ? 'lb' : 'kg';
+  if(plGoal==null || !(plGoal>0)) return `<div class="sxnote">${esc(t('pl.empty'))}</div>`;
+  if(bar==='own' && settings.plates.barOwn==null) return `<div class="sxnote">${esc(t('pl.ownfirst'))}</div>`;
+  const goalKg=unit==='lb' ? plGoal*LB : plGoal, barKg=plBarKg(bar);
+  if(goalKg>(unit==='lb' ? 2000*LB : 1000)) return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
+  const r=plateSolve(goalKg, barKg, P.have);
+  if(r.err==='under') return `<div class="sxnote">${esc(tf('pl.under',{bar:plFmt(barKg,unit)+' '+unit}))}</div>`;
+  if(r.err==='none') return `<div class="sxnote">${esc(t('pl.noplates'))}</div>`;
+  if(r.err==='big') return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
+  const m=r.main, groups=[];
+  m.side.forEach(p=>{ const g=groups.find(x=>x.id===p.id); if(g) g.n++; else groups.push({id:p.id, n:1}); });
+  const maxKg=Math.max(25, ...m.side.map(p=>p.kg));
+  const viz=m.side.length ? '<div class="plviz"><span class="sleeve"></span>'+m.side.map(p=>`<span class="plate${p.id.slice(0,2)==='lb'?' lb':''}" style="height:${Math.round(26+70*Math.sqrt(p.kg/maxKg))}px">${esc(plFmt(p.kg, p.id.slice(0,2)))}</span>`).join('')+'<span class="collar"></span></div>' : '';
+  const list=m.side.length ? groups.map(g=>(g.n>1 ? g.n+' × ' : '')+plLabel(g.id)).join(' + ') : t('pl.nothing');
+  const tot=plFmt(m.totalKg,unit)+' '+unit, totO=plFmt(m.totalKg,other)+' '+other;
+  let h=`<div class="plres"><div class="plhead">${esc(t(m.side.length ? 'pl.each' : 'pl.eachnone'))}</div>${viz}<div class="pllist">${esc(list)}</div>`
+    +`<div class="pltot">${esc(tf(bar==='none' ? 'pl.totnobar' : 'pl.tot',{tot, other:totO, bar:plFmt(barKg,unit)+' '+unit, side:plFmt(m.side.reduce((a,p)=>a+p.kg,0),unit)+' '+unit}))}</div>`;
+  if(!r.exact){
+    h+=`<div class="plalt"><span>${esc(tf('pl.notexact',{goal:plGoal+' '+unit}))}</span>`;
+    if(r.alt){ const v=Math.round((unit==='lb' ? r.alt.totalKg/LB : r.alt.totalKg)*100)/100; h+=`<button type="button" class="plbtn" id="plUse" data-v="${v}">${esc(tf('pl.useup',{w:v+' '+unit}))}</button>`; }
+    h+='</div>';
+  }
+  return h+'</div>';
+}
+async function plSetBar(id){
+  const P=settings.plates;
+  if(plEx) P.barBy[plEx]=id; else P.bar=id;
+  await persistSettings(); drawPlates();
+}
+async function plToggle(id){
+  const P=settings.plates, i=P.have.indexOf(id);
+  if(i>=0) P.have.splice(i,1); else P.have=PL_ALL.filter(x=>x===id || P.have.indexOf(x)>=0);
+  await persistSettings(); drawPlates();
+}
 function appendExBlock(wrap, ex, dayKey){
   const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
   const onDate=$("fDate").value, curE=entries.find(e=>e.date===onDate);
@@ -2932,6 +3087,7 @@ function appendExBlock(wrap, ex, dayKey){
   block.innerHTML=`<div class="ex-head">
       <div class="ex-name">${esc(ex.name)} ${rchip}${mark}<span> · ${esc(exNote(ex))}</span></div>
       <div class="ex-ctl">
+        ${plateKind(ex) ? `<button type="button" class="plbtn" data-ex="${esc(ex.key)}">${esc(t('pl.btn'))}</button>` : ''}
         <button class="addset" data-ex="${esc(ex.key)}">+ ${esc(t('ex.set'))}</button>
         <button class="exdrop" data-ex="${esc(ex.key)}" title="${esc(t('ex.droptip'))}" aria-label="${esc(t('ex.droptip'))}">✕</button>
       </div>
@@ -2942,6 +3098,7 @@ function appendExBlock(wrap, ex, dayKey){
     rememberSets(ex);
   };
   block.querySelector('.exdrop').onclick=()=>dropMovement(ex.key, dayKey);
+  const pb=block.querySelector('.plbtn'); if(pb) pb.onclick=()=>plateFromEx(ex);
   block.querySelector('.xtag').onclick=()=>togglePin(ex.key, dayKey);
   wrap.appendChild(block);
   return block;
@@ -4357,7 +4514,7 @@ function fillBody(date){
 
 const PAGE_DRAW = {
   body:     () => { drawBodyStats(); drawWeight(entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
-  workout:  () => { drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
+  workout:  () => { drawPlates(); drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
   guide:    () => drawGuide(),
   gym:      () => drawGym(),
   settings: () => { drawTheme(); drawUndo(); drawVersion(); },
@@ -6663,6 +6820,29 @@ const LANG = {
     'stat.prot':             'Protein',
     'stat.protavg':           'average a day · aim {target} g, {ok} g+ is fine',
     'stat.targetn':          'target {n}, {lo}–{hi} is fine · {logged}/7 days logged',
+    'pl.title':              'Plate Calculator <span class="sub-note">· what to load on each side</span>',
+    'pl.goal':               'Total weight you want',
+    'pl.bar':                'Bar',
+    'pl.bar.own':            'My own',
+    'pl.bar.ownkg':          'Your bar in kg',
+    'pl.bar.none':           'No bar · machine',
+    'pl.setup':              'Your plates · {n} ticked',
+    'pl.setupnote':          'Tick the plates your gym has. Mix kg and lb if it has both. The calculator assumes there are enough of each to load both sides.',
+    'pl.btn':                'Plates',
+    'pl.for':                'For {name} · the bar you pick is remembered for it',
+    'pl.unlink':             'Stop linking to this movement',
+    'pl.empty':              'Type the total you want on the bar or machine.',
+    'pl.ownfirst':           'Type your bar\'s weight in kg next to My own.',
+    'pl.under':              'That is less than the bar on its own ({bar}).',
+    'pl.noplates':           'Tick at least one plate under Your plates.',
+    'pl.big':                'That is more than the calculator handles. Try a smaller total.',
+    'pl.each':               'Each side · bar end on the left, heaviest first',
+    'pl.eachnone':           'Each side',
+    'pl.nothing':            'No plates: the bar on its own',
+    'pl.tot':                'Total {tot} ({other}) = bar {bar} + 2 × {side}',
+    'pl.totnobar':           'Total {tot} ({other}) = 2 × {side}',
+    'pl.notexact':           'Your plates cannot make exactly {goal}. This is the closest below.',
+    'pl.useup':              'Closest above: {w}',
     'stat.targetlow':        'target {n}, {lo}–{hi} is fine, under {min} is too low · {logged}/7 days logged',
     'dot.kcal.ok':           'Close to your target',
     'dot.kcal.under':        'Below your target',
@@ -6920,6 +7100,9 @@ const LANG = {
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
+  $("plGoal").oninput=()=>{ const v=num($("plGoal").value); plGoal=(v!=null && v>0) ? v : null; $("plOut").innerHTML=plResultHtml(settings.plates.unit, plBarOf()); const a=$("plUse"); if(a) a.onclick=()=>{ plGoal=+a.dataset.v; drawPlates(); }; };
+  document.querySelectorAll('#plUnit button').forEach(b=>b.onclick=async()=>{ const P=settings.plates; if(P.unit===b.dataset.u) return;
+    if(plGoal!=null) plGoal=Math.round((b.dataset.u==='lb' ? plGoal/LB : plGoal*LB)*2)/2; P.unit=b.dataset.u; await persistSettings(); drawPlates(); });
   let resizeW=window.innerWidth, resizeT=null;
   window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(()=>{ if(window.innerWidth!==resizeW){ resizeW=window.innerWidth; render(); } }, 200); });
   $("sizeDown").onclick=()=>textScale(-1); $("sizeUp").onclick=()=>textScale(1); $("sizeReset").onclick=()=>textScale(0);
