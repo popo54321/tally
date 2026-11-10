@@ -20,6 +20,8 @@ import { SKEY, XKEY, PKEY, SXKEY, EKEY, TKEY, CDKEY, GKEY, BKEY, UKEY, ABOUT_KEY
   normEntry, normEntries, mergeDay, normPlates, normSettings, normTheme, normCustomEx, normExEdits, normCardio, normStretch, normDayLists, everyDay, normGym } from '../store/schema';
 import { MEAS } from '../data/measurements';
 import { S } from '../state/app';
+import * as P from '../state/persist';
+import { rebuildCatalogue, exByKey, stretchByKey, cardioByKey, activeStretches, activeCardio, purgeOldNamespace } from '../state/persist';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
 const kcalFloor = () => core.kcalFloor(S.settings.sex);
@@ -33,12 +35,6 @@ const ACTIVITY_HELP = ['hour','hard','week','lower'];
 
 const colName = v => t('col.'+String(v).replace(/^--/,''));
 const MAX_SERIES = 8;
-function rebuildCatalogue(){
-  S.catalogue=S.customEx.map(e=>{ const ed=S.exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
-  S.catByKey=new Map(S.catalogue.map(e=>[e.key,e]));
-}
-rebuildCatalogue();
-const exByKey = k => S.catByKey.get(k);
 
 
 
@@ -72,8 +68,6 @@ function cdKeyFor(name){
   while(S.cardios.some(c=>c.key===k)) k=base+(++n);
   return k;
 }
-const cardioByKey = k => S.cardios.find(c=>c.key===k);
-const activeCardio = () => S.cardios.filter(c=>!c.retired);
 const sxIsReps = s => !!(s && s.unit==='reps');
 const sxTarget = s => !s ? 0 : (sxIsReps(s) ? (s.reps||0) : (s.secs||0));
 function sxKeyFor(name){
@@ -83,9 +77,7 @@ function sxKeyFor(name){
   while(S.stretches.some(s=>s.key===k)) k=base+(++n);
   return k;
 }
-const stretchByKey = k => S.stretches.find(s=>s.key===k);
 const exNote = ex => (ex && ex.note) ? ex.note : t('ex.defaultnote');
-const activeStretches = () => S.stretches.filter(s=>!s.retired);
 
 const DAYS = ['sun','mon','tue','wed','thu','fri','sat'].map(key=>({key}));
 const dayName = k => t('day.'+k);
@@ -157,79 +149,13 @@ const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
 
-async function purgeOldNamespace(){
-  try{
-    const have=(await STORE.list('tally:')) || [];
-    const old=((await STORE.list('training-log:')) || []).concat(RETIRED_KEYS.filter(k=>have.indexOf(k)>=0));
-    for(const k of old){ try{ await STORE.set(k,''); }catch(e){} }
-    if(typeof localStorage!=='undefined'){ old.forEach(k=>{ try{ localStorage.removeItem(k); }catch(e){} }); }
-    return old.length;
-  }catch(e){ return 0; }
-}
-const DAYS_STORE = new DaysStore(STORE, () => localDate());
-async function load(){
-  S.loadFailed=false; S.entries=[];
-  const r=await DAYS_STORE.load();
-  if(r.failed){ S.loadFailed=true; return; }
-  S.entries=normEntries(r.days);
-  // First start after the update (copy the 8.1 days into the new layout) or a month old enough to pack.
-  if(r.needsWrite){ try{ await DAYS_STORE.save(S.entries); }catch(e){ console.error('day storage update failed',e); } }
-}
-async function persist(){
-  try{ await DAYS_STORE.save(S.entries); return true; }
-  catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
-}
-async function loadSettings(){
-  try{
-    const v=await STORE.get(SKEY); if(!v) return;
-    const s=JSON.parse(v)||{};
-    S.settings=normSettings(s);
-    const canon=o=>JSON.stringify(KNOWN_SETTINGS.map(k=>(o&&o[k]!==undefined)?o[k]:null));
-    if(Object.keys(s).length!==KNOWN_SETTINGS.length || canon(s)!==canon(S.settings)) await persistSettings();
-  }catch(e){}
-}
-async function persistSettings(){ try{ await STORE.set(SKEY, JSON.stringify(S.settings)); }catch(e){} }
+const load = P.loadDays;
+async function persist(){ const ok=await P.saveDays(); if(!ok) flash(t('msg.savefail'),true); return ok; }
+const loadSettings = P.loadSettings, persistSettings = P.saveSettings;
 
-async function loadCatalogue(){
-  S.customEx=[];
-  try{
-    const v=await STORE.get(XKEY);
-    if(v){ const a=JSON.parse(v);
-      if(Array.isArray(a)){ const seen=new Set();
-        a.forEach(x=>{ const c=normCustomEx(x); if(c && !seen.has(c.key)){ seen.add(c.key); S.customEx.push(c); } });
-      } }
-  }catch(e){ console.error('movement catalogue read failed',e); }
-  rebuildCatalogue();
-}
-async function persistCatalogue(){
-  rebuildCatalogue();
-  try{ await STORE.set(XKEY, JSON.stringify(S.customEx)); return true; }
-  catch(e){ console.error('catalogue save failed',e); return false; }
-}
-function prettyKey(k){
-  const s=String(k).replace(/^(cx|sx|cd)_/,'').replace(/[_-]+/g,' ').trim();
-  return s ? s.charAt(0).toUpperCase()+s.slice(1) : t('ex.movement');
-}
-async function recoverMovements(){
-  const seen=new Set();
-  S.entries.forEach(e=>Object.keys(e.lifts||{}).forEach(k=>{ if(!exByKey(k)) seen.add(k); }));
-  if(!seen.size) return 0;
-  seen.forEach(k=>{
-    const looksCustom=/^cx_/.test(k);
-    const def=normCustomEx({
-      key: looksCustom ? k : 'cx_'+String(k).replace(/[^a-z0-9]/g,'').slice(0,28),
-      name: prettyKey(k),
-      short: prettyKey(k).toLowerCase().slice(0,16),
-      note:t('msg.recoverednote'), def:0, added:false, group:'other'
-    });
-    if(!def) return;
-    if(!looksCustom){ if(!CX_KEY.test(k)) return; def.key=k; }
-    if(!S.customEx.some(x=>x.key===def.key)) S.customEx.push(def);
-  });
-  rebuildCatalogue();
-  await persistCatalogue();
-  return seen.size;
-}
+const loadCatalogue = P.loadCatalogue, persistCatalogue = P.saveCatalogue;
+const prettyKey = k => P.prettyKey(k, t('ex.movement'));
+const recoverMovements = () => P.recoverMovements(t('ex.movement'), t('msg.recoverednote'));
 const PAGES=['body','workout','guide','gym','settings','history'];
 let curPage='body';
 function showPage(k){
@@ -290,16 +216,8 @@ async function textScale(step){
   const cur=Math.max(0, TEXT_SCALES.indexOf(S.theme.scale)), i=step===0 ? TEXT_SCALES.indexOf(1) : Math.max(0, Math.min(TEXT_SCALES.length-1, (TEXT_SCALES.indexOf(S.theme.scale)<0 ? TEXT_SCALES.indexOf(1) : cur)+step));
   S.theme.scale=TEXT_SCALES[i]; await persistTheme(); render();
 }
-async function loadTheme(){
-  try{ const v=await STORE.get(TKEY); if(v) S.theme=normTheme(JSON.parse(v)); }
-  catch(e){ console.error('theme read failed',e); }
-  applyTheme();
-}
-async function persistTheme(){
-  applyTheme();
-  try{ await STORE.set(TKEY, JSON.stringify(S.theme)); return true; }
-  catch(e){ console.error('theme save failed',e); return false; }
-}
+async function loadTheme(){ await P.loadTheme(); applyTheme(); }
+async function persistTheme(){ applyTheme(); return P.saveTheme(); }
 async function setFont(k){
   if(!FONTS.some(f=>f.key===k)) return;
   S.theme.font=k; await persistTheme(); drawTheme();
@@ -350,92 +268,12 @@ function drawTheme(){
   }
 }
 
-async function loadExEdits(){
-  S.exEdits={};
-  try{ const v=await STORE.get(EKEY); if(v) S.exEdits=normExEdits(JSON.parse(v)); }
-  catch(e){ console.error('movement edits read failed',e); }
-  rebuildCatalogue();
-}
-async function persistExEdits(){
-  rebuildCatalogue();
-  try{ await STORE.set(EKEY, JSON.stringify(S.exEdits)); return true; }
-  catch(e){ console.error('movement edits save failed',e); return false; }
-}
-async function loadPlan(){
-  S.planExtras={};
-  S.planSets={};
-  S.planRaw=null;
-  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); S.planRaw=p; S.planExtras=normPlan(p); S.planSets=normPlanSets(p && p.sets); } }
-  catch(e){ console.error('plan read failed',e); }
-}
-async function loadStretches(){
-  S.stretches=[];
-  try{
-    const v=await STORE.get(SXKEY);
-    if(v!=null){ const a=JSON.parse(v);
-      if(Array.isArray(a)){ const used=new Set();
-        a.forEach(x=>{ const s=normStretch(x); if(s && !used.has(s.key)){ used.add(s.key); S.stretches.push(s); } });
-      } }
-  }catch(e){ console.error('stretch list read failed',e); }
-}
-async function recoverStretches(){
-  const seen=new Set();
-  S.entries.forEach(e=>Object.keys(e.mob||{}).forEach(k=>{ if(!stretchByKey(k)) seen.add(k); }));
-  if(!seen.size) return 0;
-  seen.forEach(k=>{
-    const s=normStretch({key:k, name:prettyKey(k), secs:0});
-    if(s && !stretchByKey(s.key)) S.stretches.push(s);
-  });
-  await persistStretches();
-  return seen.size;
-}
-async function persistStretches(){
-  try{ await STORE.set(SXKEY, JSON.stringify(S.stretches)); return true; }
-  catch(e){ console.error('stretch list save failed',e); return false; }
-}
-async function loadCardio(){
-  S.cardios=[];
-  try{
-    const v=await STORE.get(CDKEY);
-    if(v!=null){ const a=JSON.parse(v);
-      if(Array.isArray(a)){ const used=new Set();
-        a.forEach(x=>{ const c=normCardio(x); if(c && !used.has(c.key)){ used.add(c.key); S.cardios.push(c); } }); } }
-  }catch(e){ console.error('cardio list read failed',e); }
-}
-async function persistCardio(){
-  try{ await STORE.set(CDKEY, JSON.stringify(S.cardios)); return true; }
-  catch(e){ console.error('cardio list save failed',e); return false; }
-}
-async function loadGym(){
-  try{ const v=await STORE.get(GKEY); S.gym=normGym(v!=null ? JSON.parse(v) : null); }
-  catch(e){ console.error('gym read failed',e); S.gym=normGym(null); }
-}
-async function persistGym(){
-  try{ await STORE.set(GKEY, JSON.stringify(S.gym)); return true; }
-  catch(e){ console.error('gym save failed',e); return false; }
-}
-async function recoverCardio(){
-  const seen=new Set();
-  S.entries.forEach(e=>Object.keys(e.cardio||{}).forEach(k=>{ if(!cardioByKey(k)) seen.add(k); }));
-  if(!seen.size) return 0;
-  seen.forEach(k=>{ const c=normCardio({key:k, name:prettyKey(k), mins:0}); if(c) S.cardios.push(c); });
-  await persistCardio();
-  return seen.size;
-}
+const loadExEdits = P.loadExEdits, persistExEdits = P.saveExEdits, loadPlan = P.loadPlan;
+const loadStretches = P.loadStretches, persistStretches = P.saveStretches, recoverStretches = () => P.recoverStretches(t('ex.movement'));
+const loadCardio = P.loadCardio, persistCardio = P.saveCardio, loadGym = P.loadGym, persistGym = P.saveGym;
+const recoverCardio = () => P.recoverCardio(t('ex.movement'));
 const sxToday = {}, cdToday = {};
-function planLogsInit(p){
-  S.planSx = (p && p.sx!==undefined) ? normDayLists(p.sx, stretchByKey) : everyDay(activeStretches().map(x=>x.key));
-  S.planCd = (p && p.cd!==undefined) ? normDayLists(p.cd, cardioByKey) : everyDay(activeCardio().map(x=>x.key));
-}
-const planObject = () => Object.assign({}, S.planExtras, {sets:S.planSets, sx:S.planSx, cd:S.planCd});
-async function persistPlan(){
-  Object.keys(S.planSets).forEach(d=>{
-    Object.keys(S.planSets[d]).forEach(k=>{ if((S.planExtras[d]||[]).indexOf(k)<0) delete S.planSets[d][k]; });
-    if(!Object.keys(S.planSets[d]).length) delete S.planSets[d];
-  });
-  try{ await STORE.set(PKEY, JSON.stringify(planObject())); return true; }
-  catch(e){ console.error('plan save failed',e); return false; }
-}
+const planLogsInit = P.planLogsInit, planObject = P.planObject, persistPlan = P.savePlan;
 
 const liftsOf = (e,k)=> (e.lifts && e.lifts[k]) ? e.lifts[k] : [];
 const groupName = k => t('grp.'+(GROUP_KEYS.indexOf(k)>=0?k:'other'));
@@ -1400,10 +1238,8 @@ async function updCheck(){
 function instLater(){ try{ localStorage.setItem(INST_SNOOZE, String(Date.now())); }catch(e){} drawInstall(); }
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); instPrompt=e; drawInstall(); });
 window.addEventListener('appinstalled', ()=>{ instPrompt=null; drawInstall(); flash(t('inst.done')); });
-async function loadBackupDate(){
-  try{ const v=await STORE.get(BKEY); S.lastBackup=(typeof v==='string' && validDate(v)) ? v : null; }catch(e){ S.lastBackup=null; }
-}
-async function markBackedUp(){ S.lastBackup=localDate(); try{ await STORE.set(BKEY, S.lastBackup); }catch(e){} drawBackup(); }
+const loadBackupDate = P.loadBackupDate;
+async function markBackedUp(){ await P.saveBackupDate(); drawBackup(); }
 const backupAge = () => S.lastBackup ? dnum(localDate())-dnum(S.lastBackup) : null;
 function backupDue(){
   if(!S.entries.length) return false;
@@ -2552,11 +2388,7 @@ function bfModeSet(m, seed){
 const bfNeeds = () => core.bfNeeds(S.settings.sex);
 const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); return n.length>1 ? n.slice(0,-1).join(', ')+' and '+n[n.length-1] : (n[0]||''); };
 
-function exportObject(extra){
-  return Object.assign({app:'tally', version:4, exportedAt:new Date().toISOString(),
-    entries: S.entries, settings: S.settings, exercises:S.customEx, plan:planObject(), stretches:S.stretches, exEdits:S.exEdits, cardio:S.cardios,
-    theme:S.theme, gym:S.gym}, extra||{});
-}
+const exportObject = P.exportObject;
 function exportPayload(){ return JSON.stringify(exportObject()); }
 function doExport(){
   const box=$("exportBox");
@@ -2808,17 +2640,7 @@ async function applyImport(data){
   fillForm($("fDate").value); render();
 }
 let undoArmed=false, undoTimer=null;
-async function saveUndo(){
-  S.undoSnap={at:localDate(), n:S.entries.length, data:exportObject()};
-  try{ await STORE.set(UKEY, JSON.stringify(S.undoSnap)); }catch(e){ S.undoSnap=null; }
-}
-async function loadUndo(){
-  try{
-    const v=await STORE.get(UKEY), u=v ? JSON.parse(v) : null;
-    S.undoSnap=(u && u.at===localDate() && u.data && Array.isArray(u.data.entries)) ? u : null;
-    if(v && !S.undoSnap) await STORE.set(UKEY,'');
-  }catch(e){ S.undoSnap=null; }
-}
+const saveUndo = P.saveUndo, loadUndo = P.loadUndo;
 function drawUndo(){
   const b=$("undoBtn"); if(!b) return;
   b.style.display=S.undoSnap ? '' : 'none';

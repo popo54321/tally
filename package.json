@@ -5,7 +5,7 @@
   "description": "Tally \u2014 Your Private Training & Body Log",
   "scripts": {
     "build": "node build/build.mjs",
-    "check": "tsc -p . && node build/check-layers.mjs && node build/build.mjs",
+    "check": "tsc -p . && node build/check-layers.mjs && node build/check-names.mjs && node build/build.mjs",
     "record:old": "node tests/record.mjs old",
     "record:new": "node tests/record.mjs new",
     "compare": "node tests/compare.mjs old new",

@@ -33,6 +33,8 @@ export async function openApp(browser, base, target, { store = {}, viewport = 'p
   await page.clock.setFixedTime(new Date(TODAY));
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
+  // errors the app catches and only logs (its start-up code does this) count too
+  page.on('console', m => { if (m.type() === 'error' && !/Service Worker/.test(m.text())) errors.push('logged: ' + m.text().split('\n')[0]); });
   await page.goto(`${base}/${target}/index.html`);
   await page.waitForFunction(() => document.fonts && document.fonts.status === 'loaded');
   // no fades or animations, so a picture never catches something halfway (same for old and new)
