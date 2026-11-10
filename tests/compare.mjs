@@ -21,10 +21,14 @@ const mb = JSON.parse(fs.readFileSync(path.join(B, 'manifest.json'), 'utf8'));
 fs.rmSync(D, { recursive: true, force: true });
 
 // Known, intended differences go here.
-const ALLOW = [];
+// 9.1: the maintenance estimate (calorie card), its method text, and the Weekly Review line that quotes it.
+const ALLOW = [/\/body\/06-card$/, /\/settings\/\d+-cardMethods$/, /\/history\/\d+-cardReview$/];
+// Cards right below a card that changed height can sit a fraction of a pixel lower, which shifts the edge
+// smoothing of their text: for these the wording must still match exactly, but the picture is not compared.
+const SHIFTED = [/\/body\/07-cardProfile$/, /\/settings\/\d+-cardAbout$/];
 // The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
 // Every other word on the card must still match, and the picture is then not compared.
-const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.0';
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.1';
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));
@@ -64,7 +68,7 @@ for (const k of keys) {
     if (ta === tb) { same++; continue; }
   }
   if (x.png === 'missing' || y.png === 'missing') { bad.push(`${k}: could not photograph in ${x.png === 'missing' ? a : b}: ${(x.error || y.error || '').slice(0, 100)}`); continue; }
-  if (x.png !== y.png) { const p = pixelDiff(k); if (p) notes.push(p); }
+  if (x.png !== y.png && !SHIFTED.some(r => r.test(k))) { const p = pixelDiff(k); if (p) notes.push(p); }
   if (x.txt !== y.txt) {
     const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split('\n'), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8').split('\n');
     const i = ta.findIndex((l, j) => l !== tb[j]);

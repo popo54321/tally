@@ -95,7 +95,7 @@ export const CASES = [
   { name: 'trendWeights', old: 'trendWeights', new: 'Core.trendWeights', runs: 1500, gen: r => [pick(r, [null, randDays(r).filter(e => e.weight != null).map(e => ({ t: Math.floor(Date.parse(e.date) / 864e5), w: e.weight }))])] },
   { name: 'weekTrendChange', old: 'weekTrendChange', new: 'Core.weekTrendChange', runs: 1500, gen: r => { const d = randDays(r).filter(e => e.weight != null); return [d, d.length ? d[Math.floor(r() * d.length)].date : '2026-11-01']; } },
   { name: 'lastNumOf/deltaOf', old: "(E,n)=>{entries=E;return [lastNumOf(e=>e.weight),lastNumOf(e=>e.kcal),deltaOf(e=>e.weight,n),deltaOf(e=>e.bf,n)]}", new: '(E,n)=>[Core.lastNumOf(E,e=>e.weight),Core.lastNumOf(E,e=>e.kcal),Core.deltaOf(E,e=>e.weight,n),Core.deltaOf(E,e=>e.bf,n)]', runs: 1500, gen: r => [randDays(r), pick(r, [7, 30, 1, 0])] },
-  { name: 'calRecommend', old: "(E,p,s,c)=>{entries=E;settings.calPeriod=p;settings.sex=s;settings.calRate=c;return calRecommend()}", new: '(E,p,s,c)=>Core.calRecommend(E,{calPeriod:p,sex:s,calRate:c})', runs: 2000, gen: r => [randDays(r), pick(r, [14, 28, 91]), sexOf(r), pick(r, [-0.5, -0.25, 0, 0.25, 0.5])] },
+  // calRecommend: changed on purpose in 9.1 (outlier-proof line, range, formula blend); checked by tests/estimate.mjs instead.
 
   // batch 4: strength, records, weekly sets
   { name: 'workSets', old: 'workSets', new: 'Core.workSets', gen: r => [pick(r, [null, randSets(r)])] },
@@ -119,7 +119,7 @@ export const CASES = [
   { name: 'colour contrast', old: '(a,b,c)=>[contrast(hexRgb(a),hexRgb(b)),luminance(hexRgb(c)),rgbHex(hexRgb(a)),legibleFaint(a,b,[c,b])]', new: '(a,b,c)=>[Core.contrast(Core.hexRgb(a),Core.hexRgb(b)),Core.luminance(Core.hexRgb(c)),Core.rgbHex(Core.hexRgb(a)),Core.legibleFaint(a,b,[c,b])]', gen: r => [hex(r), hex(r), hex(r)] },
 
   // step 5: text
-  { name: 'all 8.1 text identical (only copy-a-day wording added)', old: '()=>JSON.stringify(LANG.en)', new: '()=>JSON.stringify(Object.fromEntries(Object.entries(Core.EN).filter(([k])=>!k.startsWith("copy."))))', runs: 1, gen: () => [] },
+  { name: 'all 8.1 text identical (except copy-a-day and the 9.1 estimate wording)', old: '()=>JSON.stringify(Object.fromEntries(Object.entries(LANG.en).filter(([k])=>k!=="meth.adapt.b")))', new: '()=>JSON.stringify(Object.fromEntries(Object.entries(Core.EN).filter(([k])=>!k.startsWith("copy.") && !/^calib[.](basis|blend|noformula|range)/.test(k) && k!=="meth.adapt.b")))', runs: 1, gen: () => [] },
   { name: 't/tf/tn', old: '(k,v,n)=>[t(k),tf(k,v),tn(k,n,v)]', new: '(k,v,n)=>[Core.t(k),Core.tf(k,v),Core.tn(k,n,v)]', gen: r => [pick(r, ['stat.targetn', 'sync.imported', 'pl.useup', 'nope.key', 'rev.one.over', 'f.left.kcal', 'tdee.title', 'sync.undo']), pick(r, [undefined, { n: int(r, 0, 3), w: '1 kg', avg: 5, target: '2,000' }, { goal: 'x' }]), int(r, 0, 3)] },
 
   // step 5: tidying saved data, on messy input

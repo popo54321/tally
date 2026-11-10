@@ -11,7 +11,7 @@ import { fmtSigned } from '../core/numbers';
 import { kcalOf } from '../core/nutrition';
 import { t, tf, tn } from '../i18n/index';
 import { $, cap, flash, isObj } from './dom';
-import { APP_VERSION, DAYS, activeGroups, deltaOf, didGroup, entriesInWindow, exportObject, fmtSets, groupName, groupTarget, kcalFloor, kcalTargetFor, lastSessionOf, liftsOf, measName, normPlan, normPlanSets, persist, persistCardio, persistCatalogue, persistExEdits, persistGym, persistPlan, persistSettings, persistStretches, planKeys, planLogsInit, protOk, protTarget, saveUndo, sessionEx, sessionTarget, sxIsReps, trained } from './shared';
+import { APP_VERSION, calRecommend, DAYS, activeGroups, deltaOf, didGroup, entriesInWindow, exportObject, fmtSets, groupName, groupTarget, kcalFloor, kcalTargetFor, lastSessionOf, liftsOf, measName, normPlan, normPlanSets, persist, persistCardio, persistCatalogue, persistExEdits, persistGym, persistPlan, persistSettings, persistStretches, planKeys, planLogsInit, protOk, protTarget, saveUndo, sessionEx, sessionTarget, sxIsReps, trained } from './shared';
 import { fillForm, profileTDEE } from './body';
 import { markBackedUp } from './backup';
 import { persistTheme } from './theme';
@@ -102,7 +102,7 @@ export function buildAiReport(){
     + (bfMan?(' NOTE: '+bfMan+' entr'+(bfMan===1?'y was':'ies were')+' entered by hand instead (scale, DEXA or calipers) and are not girth estimates.'):''));
   const pt=profileTDEE();
   if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+(S.settings.sex||'male')+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
-  L.push('Adaptive maintenance: least-squares weight trend over the window x 7700 kcal/kg, subtracted from mean logged intake. Short windows are distorted by water and glycogen.');
+  L.push('Adaptive maintenance: robust weight trend over the window (Theil-Sen: median of pairwise slopes, so single odd weigh-ins barely move it) x 7700 kcal/kg, subtracted from mean logged intake, with a +/- range from weigh-in scatter, span and intake variation. Blended with the formula estimate (Mifflin-St Jeor x activity, assumed +/-10%), each weighted by how certain it is, so early estimates lean on the formula and later ones on the logs. Short windows are distorted by water and glycogen.');
   L.push('Daily target: maintenance + (goal kg/week x 7700 / 7), floored at '+kcalFloor()+' kcal.');
   L.push('Protein: one fixed daily target, 100 g for women and 140 g for men (120 g until sex is set). That is about 1.6 g/kg of a healthy weight for nearly every height; 75% of it matches the 1.2 g/kg low end of current guidelines.');
   const planLine=DAYS.map(d=>{
@@ -120,8 +120,10 @@ export function buildAiReport(){
   L.push('Trend, all data: '+fmtSigned(slopeAll,' kg/week',2));
   if(cal.slope!=null) L.push('Trend, calibration window ('+periodLabel(S.settings.calPeriod)+'): '+fmtSigned(cal.slope*7,' kg/week',2));
   if(cal.tdee!=null){
-    const rec=kcalTargetFor(cal.tdee);
-    L.push('Estimated maintenance (TDEE, back-calculated): '+Math.round(cal.tdee/10)*10+' kcal');
+    const cr=calRecommend(), rec=cr.target;
+    L.push('Estimated maintenance (TDEE): '+Math.round(cr.tdee/10)*10+' kcal, likely range +/-'+Math.max(30, Math.round(cr.sd/10)*10)+' kcal'
+      +(cr.formula!=null ? ' (blend: '+Math.round(cr.logShare*100)+'% from logs, rest from the formula estimate '+cr.formula+' kcal)' : ' (from logs only; no profile for a formula estimate)'));
+    L.push('Back-calculated from logs alone: '+Math.round(cal.tdee/10)*10+' kcal +/-'+Math.round(cal.sd/10)*10+' (robust trend line through the weigh-ins)');
     L.push('Mean intake logged (window): '+Math.round(cal.meanK)+' kcal');
     L.push('Recommended intake for the selected goal: '+rec+' kcal   (currently set: '+S.settings.kcalTarget+')');
   } else {

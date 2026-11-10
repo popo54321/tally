@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-uM1yc+2HRkS7PdJ8XQhbP7blAdOzxGgcl2VhZ3xxmS8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-h6CJpEP1GaGW4GCdFxFdyHoTZIdgwUqveM7OPPLwefg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3628,6 +3628,12 @@
     "calib.current": "current: {n} kcal",
     "calib.est": "Est. maintenance",
     "calib.esttdee": "calibrated from your logs",
+    "calib.basis.logs": "from your logs",
+    "calib.basis.mostly": "mostly your logs, partly the formula",
+    "calib.basis.formula": "still learning: mostly the formula",
+    "calib.blend": "Your logs alone say {log}; the formula from your profile says {f}. While data is thin they are blended, each counted by how sure it is: your logs count for {pct} so far, and more as you log.",
+    "calib.noformula": "Log your height once (Body & food) and set age and activity under Profile & Protein, and a formula estimate will steady this while data is thin.",
+    "calib.range": "{sd} is the likely range: the real figure is probably within that either side. It narrows as you log.",
     "calib.flat": "flat",
     "calib.floored": "floored",
     "calib.for": "for {rate}",
@@ -4629,7 +4635,7 @@
     "m.shoulders": "Shoulders",
     "m.thigh": "Thigh",
     "m.waist": "Waist",
-    "meth.adapt.b": "Your calorie maintenance estimate, continuously calibrated using your actual food logs and weight trend. Once there are about two weeks of data, the app stops relying on a formula and works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day, and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.",
+    "meth.adapt.b": "Your calorie maintenance estimate, continuously calibrated using your actual food logs and weight trend. It draws a trend line through your weigh-ins that one odd reading cannot tilt (the middle value of the slopes between every pair of weigh-ins), and compares it with your average logged intake over the same span: <b>maintenance = average intake − (trend × 7,700)</b>. It also works out how sure that is, from how much your weigh-ins wobble around the line, how many days they span and how much your intake varies, and shows it as a ± range. While data is thin, this is blended with the formula estimate from your profile (resting energy × activity, typically within about a tenth of the truth), each counted by how sure it is: in the first weeks the formula carries most of it, and after a month or so of steady logging it is almost all your own numbers. Without a profile, your logs stand alone. The 7,700 kcal per kg figure is the standard approximation for body tissue. It is only an approximation: early weight change is largely water and glycogen, which carry almost no energy, so short windows overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.",
     "meth.adapt.h": "Adaptive Maintenance Estimate",
     "meth.age.b": 'Age is entered directly rather than as a year of birth, so there is no guessing whether a birthday has passed. It is stored with the date you set it and advances on its own, so the estimate does not quietly go stale — correct it any time. <br><br>Activity multipliers run 1.2 to 1.9. Every app describes these as "1–3 sessions a week" without ever saying what a session is, so this one gives hours of actual working time and judges effort by whether you can still talk — full conversation is easy, short sentences is moderate, barely a word is hard. Count your job and daily life too, not just the gym. If you are between two levels take the lower one: overshooting here is the commonest mistake, and it only affects the starting estimate anyway.',
     "meth.age.h": "Age and activity",
@@ -5257,38 +5263,77 @@
     const anchor = dnum(days[days.length - 1].date);
     return days.filter((e) => dnum(e.date) >= anchor - (period - 1));
   }
+  var median = (xs) => {
+    const a = xs.slice().sort((x, y) => x - y), m = a.length >> 1;
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  };
+  function robustLine(pts) {
+    if (pts.length < 2) return null;
+    const slopes = [];
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) if (pts[j].t !== pts[i].t) slopes.push((pts[j].w - pts[i].w) / (pts[j].t - pts[i].t));
+    if (!slopes.length) return null;
+    const slope = median(slopes), icpt = median(pts.map((p) => p.w - slope * p.t));
+    const sd = 1.4826 * median(pts.map((p) => Math.abs(p.w - icpt - slope * p.t)));
+    return { slope, sd };
+  }
+  var MIN_SCATTER = 0.25;
+  var LOG_ALLOWANCE = 40;
+  var FORMULA_SPREAD = 0.1;
   function calcCalibration(win) {
     const wd = win.filter((e) => e.weight != null).map((e) => ({ t: dnum(e.date), w: e.weight })).sort((a, b) => a.t - b.t);
     const kdAll = win.filter((e) => kcalOf(e) != null).map((e) => kcalOf(e));
-    const out = { weighIns: wd.length, kcalDays: kdAll.length, spanDays: 0, slope: null, meanK: null, tdee: null };
+    const out = { weighIns: wd.length, kcalDays: kdAll.length, spanDays: 0, slope: null, meanK: null, tdee: null, sd: null };
     if (wd.length >= 2) {
       const firstT = wd[0].t, lastT = wd[wd.length - 1].t;
       out.spanDays = lastT - firstT + 1;
-      const n = wd.length, tbar = wd.reduce((s, p) => s + p.t, 0) / n, wbar = wd.reduce((s, p) => s + p.w, 0) / n;
-      let nu = 0, de = 0;
-      wd.forEach((p) => {
-        nu += (p.t - tbar) * (p.w - wbar);
-        de += (p.t - tbar) ** 2;
-      });
-      if (de > 0) out.slope = nu / de;
+      const n = wd.length, tbar = wd.reduce((s, p) => s + p.t, 0) / n;
+      const sxx = wd.reduce((s, p) => s + (p.t - tbar) ** 2, 0);
+      const line = robustLine(wd);
+      if (line) out.slope = line.slope;
       const kdAlign = win.filter((e) => kcalOf(e) != null && dnum(e.date) >= firstT && dnum(e.date) <= lastT - 1).map((e) => kcalOf(e));
       if (kdAlign.length) out.meanK = kdAlign.reduce((s, k) => s + k, 0) / kdAlign.length;
+      if (line && kdAlign.length && sxx > 0) {
+        const scatter = n >= 4 ? Math.max(MIN_SCATTER, line.sd) : 2 * MIN_SCATTER;
+        const slopeSe = scatter / Math.sqrt(sxx);
+        const kSd = kdAlign.length >= 2 ? Math.sqrt(kdAlign.reduce((s, k) => s + (k - out.meanK) ** 2, 0) / (kdAlign.length - 1)) : 500;
+        out.sd = Math.sqrt((slopeSe * KCAL_PER_KG) ** 2 + kSd ** 2 / kdAlign.length + LOG_ALLOWANCE ** 2);
+      }
     } else if (kdAll.length) {
       out.meanK = kdAll.reduce((s, k) => s + k, 0) / kdAll.length;
     }
     if (out.slope != null && out.meanK != null) out.tdee = out.meanK - out.slope * KCAL_PER_KG;
     return out;
   }
+  function profileTdee(days, o) {
+    const w = lastNumOf(days, (e) => e.weight), h = lastNumOf(days, (e) => e.height);
+    const age = effAge(o.age, o.ageSet);
+    if (w == null || h == null || age == null) return null;
+    const bmr = mifflinBMR(w, h, age, o.sex);
+    if (bmr == null) return null;
+    const a = ACTIVITY.find((x) => x.key === o.activity) || ACTIVITY[2];
+    return { bmr: Math.round(bmr), tdee: Math.round(bmr * a.mult), mult: a.mult, act: a.key, age, weight: w, height: h };
+  }
+  function blendEstimate(log, formula) {
+    if (formula == null) return { tdee: log.tdee, sd: log.sd, logShare: 1 };
+    const wl = 1 / (log.sd * log.sd), fsd = formula * FORMULA_SPREAD, wf = 1 / (fsd * fsd);
+    return { tdee: (log.tdee * wl + formula * wf) / (wl + wf), sd: 1 / Math.sqrt(wl + wf), logShare: wl / (wl + wf) };
+  }
   function calRecommend(days, o) {
     const c = calcCalibration(entriesInWindow(days, o.calPeriod));
     const enough = c.tdee != null && c.spanDays >= CAL_NEED.span && c.weighIns >= CAL_NEED.weighIns && c.kcalDays >= CAL_NEED.kcalDays;
-    const has = c.tdee != null;
+    const has = c.tdee != null && c.sd != null;
+    const prior = profileTdee(days, o);
+    const b = has ? blendEstimate({ tdee: c.tdee, sd: c.sd }, prior ? prior.tdee : null) : null;
     return {
       c,
       enough,
       partial: has && c.spanDays < o.calPeriod,
-      target: has ? kcalTargetFor(c.tdee, o.sex, o.calRate) : null,
-      floored: has && c.tdee + o.calRate * KCAL_PER_KG / 7 < kcalFloor(o.sex)
+      tdee: b ? b.tdee : null,
+      sd: b ? b.sd : null,
+      logShare: b ? b.logShare : null,
+      formula: prior ? prior.tdee : null,
+      target: b ? kcalTargetFor(b.tdee, o.sex, o.calRate) : null,
+      floored: !!b && b.tdee + o.calRate * KCAL_PER_KG / 7 < kcalFloor(o.sex)
     };
   }
 
@@ -5335,7 +5380,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.0";
+  var APP_VERSION = "9.1";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target) => kcalBand(target, S.settings.sex);
   var kcalState2 = (avg, target) => kcalState(avg, target, S.settings.sex);
@@ -5602,7 +5647,6 @@
   };
   var measName = (k) => t("m." + k).replace(/\s*\(.*\)$/, "").toLowerCase();
   var entriesInWindow2 = () => entriesInWindow(S.entries, S.settings.calPeriod);
-  var kcalTargetFor2 = (tdee) => kcalTargetFor(tdee, S.settings.sex, S.settings.calRate);
   var calRecommend2 = () => calRecommend(S.entries, S.settings);
   var bfNeeds2 = () => bfNeeds(S.settings.sex);
   var bfNeedsText = () => {
@@ -8317,15 +8361,7 @@
     }
     calcHint(id);
   }
-  function profileTDEE() {
-    const w = lastNumOf2((e) => e.weight), h = lastNumOf2((e) => e.height);
-    const age = effAge2();
-    if (w == null || h == null || age == null) return null;
-    const bmr = mifflinBMR(w, h, age, S.settings.sex);
-    if (bmr == null) return null;
-    const a = ACTIVITY.find((x) => x.key === S.settings.activity) || ACTIVITY[2];
-    return { bmr: Math.round(bmr), tdee: Math.round(bmr * a.mult), mult: a.mult, act: a.key, age, weight: w, height: h };
-  }
+  var profileTDEE = () => profileTdee(S.entries, S.settings);
   function drawBMR() {
     const out = $("bmrOut");
     if (!out) return;
@@ -8536,9 +8572,10 @@
       return;
     }
     const kgWk = c.slope * 7, target = r.target, floored = r.floored;
-    const tdeeR = Math.round(c.tdee / 10) * 10, meanR = Math.round(c.meanK);
+    const tdeeR = Math.round(r.tdee / 10) * 10, meanR = Math.round(c.meanK), sdR = Math.max(30, Math.round(r.sd / 10) * 10);
+    const basis = t(r.logShare >= 0.9 ? "calib.basis.logs" : r.logShare >= 0.6 ? "calib.basis.mostly" : "calib.basis.formula");
     const bwNow = lastNumOf2((e) => e.weight);
-    const perKg = bwNow ? c.tdee / bwNow : null;
+    const perKg = bwNow ? r.tdee / bwNow : null;
     const shaky = perKg != null && (perKg < 16 || perKg > 60) || c.spanDays < 21;
     const meta = (v) => '<b style="color:var(--brass-bright)">' + v + "</b>";
     const remark = !r.enough ? tf("calib.early", { d: meta(c.spanDays), w: meta(c.weighIns), k: meta(c.kcalDays) }) : r.partial ? tf("calib.partial", { d: meta(c.spanDays), p: meta(S.settings.calPeriod) }) : "";
@@ -8546,11 +8583,13 @@
     out.innerHTML = `
     <div class="calib-grid">
       <div class="cstat head"><div class="cs-lbl">${t("calib.rec")}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored ? " · " + t("calib.floored") : ""}${r.partial ? " · " + t("calib.partialtag") : ""}</div></div>
-      <div class="cstat"><div class="cs-lbl">${t("calib.est")}</div><div class="cs-val">${tdeeR}<span>kcal</span></div><div class="cs-sub">${t("calib.esttdee")}</div></div>
+      <div class="cstat"><div class="cs-lbl">${t("calib.est")}</div><div class="cs-val">${tdeeR}<span>±${sdR} kcal</span></div><div class="cs-sub">${esc(basis)}</div></div>
       <div class="cstat"><div class="cs-lbl">${t("calib.avg")}</div><div class="cs-val">${meanR}<span>kcal</span></div><div class="cs-sub">${t("calib.overwindow")}</div></div>
       <div class="cstat"><div class="cs-lbl">${t("calib.trend")}</div><div class="cs-val">${fmtSigned(kgWk, "", 2)}<span>kg/wk</span></div><div class="cs-sub">${t(roundTo(kgWk, 2) < 0 ? "calib.losing" : roundTo(kgWk, 2) > 0 ? "calib.gaining" : "calib.flat")}</div></div>
     </div>
-    <div class="calib-meta">${tf("calib.meta", { w: '<b style="color:var(--brass-bright)">' + c.weighIns + "</b>", k: '<b style="color:var(--brass-bright)">' + c.kcalDays + "</b>", d: '<b style="color:var(--brass-bright)">' + c.spanDays + "</b>" })}</div>
+    <div class="calib-meta">${tf("calib.meta", { w: '<b style="color:var(--brass-bright)">' + c.weighIns + "</b>", k: '<b style="color:var(--brass-bright)">' + c.kcalDays + "</b>", d: '<b style="color:var(--brass-bright)">' + c.spanDays + "</b>" })}
+      ${r.formula != null && r.logShare < 0.9 ? " " + tf("calib.blend", { log: '<b style="color:var(--brass-bright)">' + Math.round(r.c.tdee / 10) * 10 + "</b>", f: '<b style="color:var(--brass-bright)">' + r.formula + "</b>", pct: '<b style="color:var(--brass-bright)">' + Math.round(r.logShare * 100) + "%</b>" }) : ""}
+      ${r.formula == null ? " " + t("calib.noformula") : ""} ${tf("calib.range", { sd: '<b style="color:var(--brass-bright)">±' + sdR + "</b>" })}</div>
     ${remark ? `<div class="calib-need calib-remark">${remark}</div>` : ""}
     ${r.enough ? `<div class="calib-note">${t(shaky ? "calib.shaky" : "calib.steady")}</div>` : ""}
     <button class="apply${S.settings.kcalTarget === target ? " done" : ""}" id="applyBtn">${S.settings.kcalTarget === target ? tf("calib.applied", { n: target }) : tf("calib.apply", { n: target })}</button>`;
@@ -8796,7 +8835,7 @@
     L.push("Body fat: US Navy girth method (Hodgdon & Beckett), " + (S.settings.sex || "male") + " equation, from logged girths and height. Roughly +/-3-4 points against DEXA." + (bfMan ? " NOTE: " + bfMan + " entr" + (bfMan === 1 ? "y was" : "ies were") + " entered by hand instead (scale, DEXA or calipers) and are not girth estimates." : ""));
     const pt = profileTDEE();
     if (pt) L.push("Starting energy estimate: Mifflin-St Jeor resting rate " + pt.bmr + " kcal (weight " + pt.weight.toFixed(1) + " kg, height " + pt.height + " cm, age " + pt.age + ", " + (S.settings.sex || "male") + ") x " + pt.mult + " activity = " + pt.tdee + " kcal.");
-    L.push("Adaptive maintenance: least-squares weight trend over the window x 7700 kcal/kg, subtracted from mean logged intake. Short windows are distorted by water and glycogen.");
+    L.push("Adaptive maintenance: robust weight trend over the window (Theil-Sen: median of pairwise slopes, so single odd weigh-ins barely move it) x 7700 kcal/kg, subtracted from mean logged intake, with a +/- range from weigh-in scatter, span and intake variation. Blended with the formula estimate (Mifflin-St Jeor x activity, assumed +/-10%), each weighted by how certain it is, so early estimates lean on the formula and later ones on the logs. Short windows are distorted by water and glycogen.");
     L.push("Daily target: maintenance + (goal kg/week x 7700 / 7), floored at " + kcalFloor2() + " kcal.");
     L.push("Protein: one fixed daily target, 100 g for women and 140 g for men (120 g until sex is set). That is about 1.6 g/kg of a healthy weight for nearly every height; 75% of it matches the 1.2 g/kg low end of current guidelines.");
     const planLine = DAYS2.map((d) => {
@@ -8817,8 +8856,9 @@
     L.push("Trend, all data: " + fmtSigned(slopeAll, " kg/week", 2));
     if (cal.slope != null) L.push("Trend, calibration window (" + periodLabel(S.settings.calPeriod) + "): " + fmtSigned(cal.slope * 7, " kg/week", 2));
     if (cal.tdee != null) {
-      const rec = kcalTargetFor2(cal.tdee);
-      L.push("Estimated maintenance (TDEE, back-calculated): " + Math.round(cal.tdee / 10) * 10 + " kcal");
+      const cr = calRecommend2(), rec = cr.target;
+      L.push("Estimated maintenance (TDEE): " + Math.round(cr.tdee / 10) * 10 + " kcal, likely range +/-" + Math.max(30, Math.round(cr.sd / 10) * 10) + " kcal" + (cr.formula != null ? " (blend: " + Math.round(cr.logShare * 100) + "% from logs, rest from the formula estimate " + cr.formula + " kcal)" : " (from logs only; no profile for a formula estimate)"));
+      L.push("Back-calculated from logs alone: " + Math.round(cal.tdee / 10) * 10 + " kcal +/-" + Math.round(cal.sd / 10) * 10 + " (robust trend line through the weigh-ins)");
       L.push("Mean intake logged (window): " + Math.round(cal.meanK) + " kcal");
       L.push("Recommended intake for the selected goal: " + rec + " kcal   (currently set: " + S.settings.kcalTarget + ")");
     } else {

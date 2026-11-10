@@ -4,7 +4,7 @@ name: Check rebuild
 # frozen 8.1 app and the rebuilt app and fail if any picture or text differs.
 on:
   push:
-    branches: [rebuild]
+    branches: [rebuild, 'tally-*']
   workflow_dispatch:
 
 permissions:
@@ -31,6 +31,9 @@ jobs:
 
       - name: Same answers as 8.1 on random inputs
         run: node tests/equiv.mjs
+
+      - name: Maintenance estimate against simulated people with known maintenance
+        run: node tests/estimate.mjs
 
       - name: Storage (update from 8.1, saving, packing, going back to 8.1, crash, damage)
         run: node tests/storage.mjs

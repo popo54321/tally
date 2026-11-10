@@ -9,12 +9,13 @@
     "record:old": "node tests/record.mjs old",
     "record:new": "node tests/record.mjs new",
     "compare": "node tests/compare.mjs old new",
-    "test": "npm run check && node tests/equiv.mjs && node tests/storage.mjs && node tests/copyday.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
+    "test": "npm run check && node tests/equiv.mjs && node tests/estimate.mjs && node tests/storage.mjs && node tests/copyday.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
     "fixtures": "node tests/fixtures/generate.mjs",
     "equiv": "node tests/equiv.mjs",
     "storage": "node tests/storage.mjs",
     "copyday": "node tests/copyday.mjs",
-    "release": "npm run check && cp dist/index.html index.html && cp dist/sw.js sw.js"
+    "release": "npm run check && cp dist/index.html index.html && cp dist/sw.js sw.js",
+    "estimate": "node tests/estimate.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

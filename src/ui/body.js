@@ -1,4 +1,5 @@
 // Body page: the day form (weight, food, girths, fasting), stat cards, calorie estimate, protein and profile.
+import { profileTdee } from '../core/trend';
 import { ACTIVITY, kcalOf, mifflinBMR, protOf } from '../core/nutrition';
 import { MEAS } from '../data/measurements';
 import { S } from '../state/app';
@@ -46,15 +47,7 @@ export function calcAdd(id){
   try{ el.setSelectionRange(el.value.length, el.value.length); }catch(e){}
   calcHint(id);
 }
-export function profileTDEE(){
-  const w=lastNumOf(e=>e.weight), h=lastNumOf(e=>e.height);
-  const age=effAge();
-  if(w==null||h==null||age==null) return null;
-  const bmr=mifflinBMR(w,h,age,S.settings.sex);
-  if(bmr==null) return null;
-  const a=ACTIVITY.find(x=>x.key===S.settings.activity)||ACTIVITY[2];
-  return {bmr:Math.round(bmr), tdee:Math.round(bmr*a.mult), mult:a.mult, act:a.key, age:age, weight:w, height:h};
-}
+export const profileTDEE = () => profileTdee(S.entries, S.settings);
 export function drawBMR(){
   const out=$("bmrOut"); if(!out) return;
   const seg=$("segActivity");
@@ -225,9 +218,10 @@ export function drawCalibration(){
     return;
   }
   const kgWk=c.slope*7, target=r.target, floored=r.floored;
-  const tdeeR=Math.round(c.tdee/10)*10, meanR=Math.round(c.meanK);
+  const tdeeR=Math.round(r.tdee/10)*10, meanR=Math.round(c.meanK), sdR=Math.max(30, Math.round(r.sd/10)*10);
+  const basis=t(r.logShare>=0.9 ? 'calib.basis.logs' : r.logShare>=0.6 ? 'calib.basis.mostly' : 'calib.basis.formula');
   const bwNow=lastNumOf(e=>e.weight);
-  const perKg = bwNow ? c.tdee/bwNow : null;
+  const perKg = bwNow ? r.tdee/bwNow : null;
   const shaky = (perKg!=null && (perKg<16 || perKg>60)) || c.spanDays<21;
   const meta=v=>'<b style="color:var(--brass-bright)">'+v+'</b>';
   const remark = !r.enough ? tf('calib.early',{d:meta(c.spanDays), w:meta(c.weighIns), k:meta(c.kcalDays)})
@@ -236,11 +230,13 @@ export function drawCalibration(){
   out.innerHTML=`
     <div class="calib-grid">
       <div class="cstat head"><div class="cs-lbl">${t('calib.rec')}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored?' · '+t('calib.floored'):''}${r.partial?' · '+t('calib.partialtag'):''}</div></div>
-      <div class="cstat"><div class="cs-lbl">${t('calib.est')}</div><div class="cs-val">${tdeeR}<span>kcal</span></div><div class="cs-sub">${t('calib.esttdee')}</div></div>
+      <div class="cstat"><div class="cs-lbl">${t('calib.est')}</div><div class="cs-val">${tdeeR}<span>±${sdR} kcal</span></div><div class="cs-sub">${esc(basis)}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.avg')}</div><div class="cs-val">${meanR}<span>kcal</span></div><div class="cs-sub">${t('calib.overwindow')}</div></div>
       <div class="cstat"><div class="cs-lbl">${t('calib.trend')}</div><div class="cs-val">${fmtSigned(kgWk,'',2)}<span>kg/wk</span></div><div class="cs-sub">${t(roundTo(kgWk,2)<0?'calib.losing':roundTo(kgWk,2)>0?'calib.gaining':'calib.flat')}</div></div>
     </div>
-    <div class="calib-meta">${tf('calib.meta',{w:'<b style="color:var(--brass-bright)">'+c.weighIns+'</b>', k:'<b style="color:var(--brass-bright)">'+c.kcalDays+'</b>', d:'<b style="color:var(--brass-bright)">'+c.spanDays+'</b>'})}</div>
+    <div class="calib-meta">${tf('calib.meta',{w:'<b style="color:var(--brass-bright)">'+c.weighIns+'</b>', k:'<b style="color:var(--brass-bright)">'+c.kcalDays+'</b>', d:'<b style="color:var(--brass-bright)">'+c.spanDays+'</b>'})}
+      ${r.formula!=null && r.logShare<0.9 ? ' '+tf('calib.blend',{log:'<b style="color:var(--brass-bright)">'+Math.round(r.c.tdee/10)*10+'</b>', f:'<b style="color:var(--brass-bright)">'+r.formula+'</b>', pct:'<b style="color:var(--brass-bright)">'+Math.round(r.logShare*100)+'%</b>'}) : ''}
+      ${r.formula==null ? ' '+t('calib.noformula') : ''} ${tf('calib.range',{sd:'<b style="color:var(--brass-bright)">±'+sdR+'</b>'})}</div>
     ${remark?`<div class="calib-need calib-remark">${remark}</div>`:''}
     ${r.enough?`<div class="calib-note">${t(shaky?'calib.shaky':'calib.steady')}</div>`:''}
     <button class="apply${S.settings.kcalTarget===target?' done':''}" id="applyBtn">${S.settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
