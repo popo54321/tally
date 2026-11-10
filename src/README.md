@@ -11,8 +11,10 @@ exist to keep the code easy to change.
 | `i18n/` | Every word the app shows. | nothing |
 | `store/` | The only code that reads or writes saved data: storage access, format versions, upgrading older data, packing old months into half-year bundles, backup import and export. | `core/`, `data/` |
 | `state/` | The one record of what the app currently knows, changed only through named actions (log a set, tick a stretch, copy a day, undo). Each action saves only what it changed. | `core/`, `data/`, `store/` |
-| `ui/` | Pages, cards and shared pieces (charts, day picker, dialogs). Each card draws from the state and redraws only when its own data changes. | everything above, `i18n/` |
-| `platform/` | Device links: offline helper, install banner, Android file saving, Android Back button, rest-timer alarms. | `ui/`, `state/`, `i18n/` |
-| `legacy/` | The 8.1 code, still in one piece. It shrinks as each part moves into the folders above, with all picture checks re-run after every move. When it is empty, it is deleted. | anything (temporary) |
+| `platform/` | Device services with no screen of their own: the offline helper (`sw.js`), its start-up registration (`boot.js`) and the Android rest-timer alarm bridge. | `core/`, `data/` |
+| `ui/` | One file per page or card (`body`, `workout-log`, `plates`, `mobility`, `cardio`, `guide`, `gym`, `history`, `sync`, ...), plus shared pieces: `charts`, `dialog`, `datepicker`, `picker`, `movements`, `dom`, `nav`, `view` (screen state that is never saved) and `start` (start-up). | everything above, `i18n/` |
 
-`build/check-layers.mjs` fails the build if a file imports from a folder its row does not allow.
+`build/check-layers.mjs` fails the build if a file imports from a folder its row does not allow, and
+`build/check-names.mjs` fails it if a `.js` file uses a name it neither defines nor imports.
+The `.js` files under `ui/` are the 8.1 screen code moved as it was; they become typed `.ts` files
+one at a time.

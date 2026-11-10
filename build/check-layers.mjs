@@ -10,9 +10,8 @@ const ALLOWED = {
   i18n: [],
   store: ['core', 'data', 'store'],
   state: ['core', 'data', 'store', 'state'],
-  ui: ['core', 'data', 'store', 'state', 'ui', 'i18n'],
-  platform: ['ui', 'state', 'i18n', 'platform', 'core', 'data'],
-  legacy: null,   // temporary: may use anything
+  ui: ['core', 'data', 'store', 'state', 'ui', 'i18n', 'platform'],
+  platform: ['core', 'data', 'platform'],
   '.': null,      // main.ts wires everything together
 };
 
