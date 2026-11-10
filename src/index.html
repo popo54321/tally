@@ -1,0 +1,684 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!--CSP-->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#dde6da">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Tally">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<script>
+<!--BOOT-->
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tally — Your Private Training &amp; Body Log</title>
+<style>
+<!--FONTS-->
+</style>
+<style>
+<!--APP_CSS-->
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title"><span class="sub" data-i18n="app.sub">Your Private Training &amp; Body Log</span>Tally</div>
+  </header>
+
+  <div class="baknudge instnudge" id="instNudge" style="display:none">
+    <span id="instText"></span>
+    <button type="button" class="ghostbtn" id="instNow" data-i18n="inst.now">Install</button>
+    <button type="button" class="bakskip" id="instLater" data-i18n="bak.later">Not now</button>
+  </div>
+  <div class="baknudge" id="bakNudge" style="display:none">
+    <span id="bakNudgeText"></span>
+    <button type="button" class="ghostbtn" id="bakNow" data-i18n="bak.now">Save backup</button>
+    <button type="button" class="bakskip" id="bakLater" data-i18n="bak.later">Not now</button>
+  </div>
+
+  <div class="sched" id="sched"></div>
+
+  <div class="qnav" id="tabs">
+    <button type="button" data-pg="body" data-i18n="nav.body">Body</button>
+    <button type="button" data-pg="workout" data-i18n="nav.workout">Workout</button>
+    <button type="button" data-pg="guide" data-i18n="nav.guide">Guide</button>
+    <button type="button" data-pg="gym" data-i18n="nav.gym">My Gym</button>
+    <button type="button" data-pg="settings" data-i18n="nav.settings">Settings</button>
+    <button type="button" data-pg="history" data-i18n="nav.history">History</button>
+  </div>
+
+  <div class="daybar" id="dayBar">
+    <span class="daybar-lbl" data-i18n="day.lbl">Day</span>
+    <button type="button" class="daynav" id="dayPrev" data-i18n-title="day.prev" title="Previous day">‹</button>
+    <input type="date" id="fDate" hidden><button type="button" class="datebtn" id="dateBtn"></button>
+    <button type="button" class="daynav" id="dayNext" data-i18n-title="day.next" title="Next day">›</button>
+    <button type="button" class="daynav today" id="dayToday" data-i18n="day.today">Today</button>
+  </div>
+
+  <div class="grid page on" id="pg-body">
+    <div class="card col-12" id="cardBody">
+      <div class="lbl" data-i18n="body.title">Body &amp; food</div>
+      <div class="form-grid">
+        <div class="field"><label data-i18n="f.weight">Weight (kg)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fWeight" placeholder="kg"></div>
+        <div class="field"><label data-i18n="f.height">Height (cm)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fHeight" placeholder="cm"></div>
+        <div class="field"><label data-i18n="f.kcal">Energy (kcal)</label>
+          <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fKcal" placeholder="kcal"><button type="button" class="addbtn" id="fKcalAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
+          <div class="calcsum" id="fKcalSum"></div><div class="calcleft" id="fKcalLeft"></div></div>
+        <div class="field"><label data-i18n="f.prot">Protein (g)</label>
+          <div class="calcfield"><input type="text" inputmode="numeric" autocomplete="off" id="fProt" placeholder="g"><button type="button" class="addbtn" id="fProtAdd" data-i18n-title="f.addtip" title="Add the next meal to the total">+</button></div>
+          <div class="calcsum" id="fProtSum"></div><div class="calcleft" id="fProtLeft"></div></div>
+      </div>
+      <button type="button" class="ghostbtn fastbtn" id="fastBtn" aria-pressed="false">Mark as fasting day</button>
+      <div class="sxnote fastnote" data-i18n="f.fast.note">On a fasting day, log what you eat as normal (OMAD, a small meal, anything) and it counts as logged. Only if you eat nothing at all does the day count as 0.</div>
+      <div class="mobhint" id="mobHint"></div>
+
+      <div class="lbl" style="margin-top:24px;margin-bottom:4px" data-i18n-html="body.meas">Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span></div>
+      <div class="meas-grid">
+        <div class="field"><label data-i18n="m.neck">Neck</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fNeck" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.shoulders">Shoulders</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fShoulders" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.chest">Chest</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fChest" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.arm">Arm (flexed)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fArm" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.forearm">Forearm</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fForearm" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.waist">Waist</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fWaist" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.hips">Hips</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fHips" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.thigh">Thigh</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fThigh" placeholder="cm"></div>
+        <div class="field"><label data-i18n="m.calf">Calf</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fCalf" placeholder="cm"></div>
+      </div>
+
+      <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n="body.bf">Body fat</div>
+      <div class="seg segwrap" id="segBf">
+        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I'll enter it</button>
+      </div>
+      <div class="meas-grid" id="bfManualRow" style="display:none">
+        <div class="field"><label for="fBf" data-i18n="body.bfpct">Body fat (%)</label><input type="number" min="1" max="70" step="0.1" inputmode="decimal" id="fBf" placeholder="%"></div>
+      </div>
+      <div class="sxnote" id="bfSrcNote"></div>
+
+      <button class="save" id="saveBtn" data-i18n="btn.save">Save entry</button>
+      <div class="saved" id="savedMsg" data-i18n="msg.saved">Saved</div>
+    </div>
+
+
+    <div class="card col-4">
+      <div class="lbl" data-i18n="stat.bw">Bodyweight</div>
+      <div class="big" id="wNow">—<small>kg</small></div>
+      <div class="delta" id="wDelta" data-i18n="stat.none">No entries yet</div>
+    </div>
+
+    <div class="card col-4" id="bfCard">
+      <div class="lbl" data-i18n-html="stat.bf">Body Fat <span class="sub-note">· estimate · US Navy girth method</span></div>
+      <div class="big" id="bfNow">—<small>%</small></div>
+      <div class="delta" id="bfDelta" data-i18n="stat.none">No entries yet</div>
+    </div>
+
+    <div class="card col-4">
+      <div class="lbl" data-i18n="stat.nutr">Nutrition · today and 6 days before</div>
+      <div class="metric"><div class="name"><span data-i18n="stat.energy">Energy</span><span id="mKcalTarget">no target set</span></div>
+        <div class="val"><span class="pill" id="mKcal">—</span><span class="dot no" id="dKcal" role="img"></span></div></div>
+      <div class="metric"><div class="name"><span data-i18n="stat.prot">Protein</span><span id="lProt">average a day</span></div>
+        <div class="val"><span class="pill" id="mProt">—</span><span class="dot no" id="dProt" role="img"></span></div></div>
+      <div class="metric"><div class="name"><span data-i18n="stat.last">Last logged</span><span data-i18n="stat.lastsub">most recent entry</span></div>
+        <div class="val"><span class="pill" id="mToday">—</span></div></div>
+    </div>
+
+    <div class="card col-12">
+      <div class="lbl" data-i18n-html="chart.weight">Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in · press and drag on the chart to pick a day</span></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="chartwrap"><svg id="wChart" viewBox="0 0 760 300"></svg></div>
+      <div class="chartpick" data-chart="wChart"></div>
+    </div>
+
+    <div class="card col-12">
+      <div class="lbl" data-i18n-html="chart.size">Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend · press and drag on the chart to pick a day</span></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="chartwrap"><svg id="bodyChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="bodyChart"></div>
+    </div>
+
+    <div class="card col-12">
+      <div class="lbl" data-i18n-html="calib.title">Adaptive Calorie Target <span class="sub-note">· maintenance estimate calibrated from your food logs and weight trend · see “Where these numbers come from” on the Settings page</span></div>
+      <div class="calib-controls">
+        <div><div class="ctl-lbl" data-i18n="calib.window">Window</div>
+          <div class="seg" id="segPeriod">
+            <button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button>
+          </div>
+        </div>
+        <div><div class="ctl-lbl" data-i18n="calib.goal">Goal · weekly rate</div>
+          <div class="seg" id="segRate">
+            <button data-r="-0.5">−0.5</button><button data-r="-0.25">−0.25</button><button data-r="0" data-i18n="calib.maintain">Maintain</button><button data-r="0.25">+0.25</button><button data-r="0.5">+0.5</button>
+          </div>
+        </div>
+      </div>
+      <div id="calibOut"></div>
+      <div class="manual-target">
+        <label for="manualKcal" data-i18n="calib.manual">Set target manually</label>
+        <input type="number" min="0" step="25" inputmode="numeric" id="manualKcal" placeholder="kcal">
+        <button class="mt-set" id="setManualBtn" data-i18n="btn.set">Set</button>
+        <span class="mt-current" id="mtCurrent"></span>
+      </div>
+      <div class="sxnote protown" data-i18n="calib.ownnote">The recommended number comes from your own logs, but the method behind it is a general one that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.</div>
+    </div>
+
+    <div class="card col-12" id="cardProfile">
+      <div class="lbl" data-i18n-html="prof.title">Profile &amp; Protein <span class="sub-note">· body-fat formula and daily protein</span></div>
+      <div class="calib-controls">
+        <div><div class="ctl-lbl" data-i18n="prof.sex">Sex · for both formulas</div>
+          <div class="seg" id="segSex">
+            <button type="button" data-s="male" data-i18n="prof.male">Male</button><button type="button" data-s="female" data-i18n="prof.female">Female</button>
+          </div>
+        </div>
+        <div><div class="ctl-lbl" data-i18n="prof.age">Age</div>
+          <input type="number" min="10" max="120" step="1" inputmode="numeric" id="fAge" class="restcustom" style="width:80px" data-i18n-ph="prof.years" placeholder="years">
+        </div>
+      </div>
+      <div class="ctl-lbl" style="margin-top:4px" data-i18n="prof.activity">Activity · hours of real training a week, including your job and daily life</div>
+      <div class="seg segwrap" id="segActivity"></div>
+      <div class="picknote" id="actNote"></div>
+      <div class="helpbox" id="actHelp"></div>
+      <div id="bmrOut"></div>
+      <div class="ctl-lbl" style="margin-top:16px" data-i18n="prof.prot">Protein · a day</div>
+      <div id="protOut"></div>
+      <div class="manual-target">
+        <label for="manualProt" data-i18n="prof.manual">Set your own</label>
+        <input type="number" min="30" max="400" step="5" inputmode="numeric" id="manualProt" placeholder="g">
+        <button class="mt-set" id="setProtBtn" data-i18n="btn.set">Set</button>
+        <span class="mt-current" id="mpCurrent"></span>
+      </div>
+      <div class="sxnote protown" data-i18n="prot.ownnote">These numbers are a general guide that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.</div>
+      <div class="sxnote" id="bfNote"></div>
+    </div>
+
+  </div>
+
+  <div class="grid page" id="pg-workout">
+    <div class="card col-12" id="cardLog">
+      <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
+      <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
+      <div class="restctl">
+        <div class="seg" id="segRest">
+          <button type="button" data-s="60">60s</button><button type="button" data-s="90">90s</button><button type="button" data-s="120">2m</button><button type="button" data-s="180">3m</button>
+        </div>
+        <input type="number" min="10" max="900" step="5" inputmode="numeric" id="restCustom" class="restcustom" data-i18n-ph="log.sec" placeholder="sec">
+        <button type="button" class="reststart" id="restStart" data-i18n="log.startrest">Start rest</button>
+        <button type="button" class="restsnd" id="restSnd" data-i18n-title="log.beeptip" title="Beep when a timer finishes">Beep</button>
+      </div>
+      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
+      <div id="exWrap"></div>
+      <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
+      <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
+      <div class="saved" id="savedMsg2" data-i18n="msg.saved">Saved</div>
+    </div>
+
+    <div class="card col-12" id="cardPlates">
+      <div class="lbl" data-i18n-html="pl.title">Plate Calculator <span class="sub-note">· what to load on each side</span></div>
+      <div class="plgoal">
+        <div class="field"><label for="plGoal" data-i18n="pl.goal">Total weight you want</label><input id="plGoal" type="number" min="0" step="0.5" inputmode="decimal" placeholder="100"></div>
+        <div class="seg" id="plUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>
+      </div>
+      <div class="ctl-lbl" data-i18n="pl.bar">Bar</div>
+      <div class="exchips" id="plBar"></div>
+      <div id="plOut"></div>
+      <details class="plsetup" id="plSetup">
+        <summary id="plSetupSum">Your plates</summary>
+        <div class="sxnote" data-i18n="pl.setupnote">Tick the plates your gym has. Mix kg and lb if it has both. The calculator assumes there are enough of each to load both sides.</div>
+        <div class="ctl-lbl pltop">kg</div><div class="exchips" id="plKg"></div>
+        <div class="ctl-lbl">lb</div><div class="exchips" id="plLb"></div>
+      </details>
+    </div>
+
+    <div class="card col-12" id="cardMob">
+      <div class="lbl" data-i18n-html="mob.title">Mobility <span class="sub-note">· <span id="mobDate">—</span> · every tick and time saves itself</span></div>
+      <div class="mobctl">
+        <div>
+          <div class="ctl-lbl" data-i18n="mob.lead">Get into position first</div>
+          <div class="seg" id="segLead">
+            <button type="button" data-l="0" data-i18n="mob.straight">Straight in</button><button type="button" data-l="5">5s</button><button type="button" data-l="10">10s</button>
+          </div>
+        </div>
+        <div class="mobtot" id="mobTot">—</div>
+      </div>
+      <div id="mobWrap"></div>
+      <button type="button" class="addmove" id="addStretchBtn" data-i18n="mob.add">+ Add stretch</button>
+    </div>
+
+    <div class="card col-12" id="cardCardio">
+      <div class="lbl" data-i18n-html="cd.title">Cardio <span class="sub-note">· <span id="cdDate">—</span> · every tick and time saves itself</span></div>
+      <div class="sxnote cdnokcal" data-i18n="cd.nokcal">No calorie counts here on purpose: the calorie target already learns from your weight trend, so your cardio is in there.</div>
+      <div class="mobctl">
+        <div class="mobtot" id="cdTot">—</div>
+      </div>
+      <div id="cdWrap"></div>
+      <button type="button" class="addmove" id="addCardioBtn" data-i18n="cd.add">+ Add cardio</button>
+    </div>
+
+    <div class="card col-12" id="cardColl">
+      <div class="lbl" data-i18n-html="coll.title">Workout Collection <span class="sub-note">· the library every session picks from · adding here does not add it to today</span></div>
+      <input type="text" class="sh-search collsearch" id="collSearch" data-i18n-ph="coll.search" placeholder="Search the collection" autocomplete="off">
+      <div id="collWrap"></div>
+      <button type="button" class="addmove" id="addWorkoutBtn" data-i18n="coll.add">+ Add a workout to the collection</button>
+    </div>
+
+    <div class="card col-12" id="cardProg">
+      <div class="lbl" data-i18n-html="prog.title">Lift Progression <span class="sub-note">· current plan only</span></div>
+      <div class="prog" id="progWrap"></div>
+    </div>
+
+    <div class="card col-12" id="cardStr">
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once · press and drag on the chart to pick a day</span></div><button type="button" class="foldbtn" data-fold="str" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="strPick"></div>
+      <div class="chartwrap"><svg id="strChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="strChart"></div>
+      <div class="chartnote" id="strNote"></div>
+    </div>
+
+    <div class="card col-12" id="cardSxTrend">
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.sx">Mobility Trend <span class="sub-note">· seconds held, or reps for counted stretches · press and drag on the chart to pick a day</span></div><button type="button" class="foldbtn" data-fold="sx" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="sxPick"></div>
+      <div class="chartwrap"><svg id="sxChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="sxChart"></div>
+      <div class="chartnote" id="sxNote"></div>
+    </div>
+
+    <div class="card col-12" id="cardCdTrend">
+      <div class="foldhead"><div class="lbl" data-i18n-html="chart.cd">Cardio Trend <span class="sub-note">· minutes per session · press and drag on the chart to pick a day</span></div><button type="button" class="foldbtn" data-fold="cd" aria-expanded="true">▾</button></div>
+      <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="exchips" id="cdPick"></div>
+      <div class="chartwrap"><svg id="cdChart" viewBox="0 0 760 260"></svg></div>
+      <div class="chartpick" data-chart="cdChart"></div>
+      <div class="chartnote" id="cdNote"></div>
+    </div>
+
+  </div>
+
+  <div class="grid page" id="pg-guide">
+    <div class="card col-12" id="cardVol">
+      <div class="lbl" data-i18n-html="guide.vol.title">Sets per Muscle <span class="sub-note">· last 7 days · a primary muscle counts the set, a secondary counts half</span></div>
+      <div class="volband"><span data-i18n="guide.band">Aim for</span><input type="number" id="volLo" min="0" max="99" inputmode="numeric"><span>–</span><input type="number" id="volHi" min="1" max="100" inputmode="numeric"><span data-i18n="guide.band.unit">sets a week per muscle</span></div>
+      <div class="muschips volpre" id="volPre"></div>
+      <div class="sxnote volhelp" id="volHelp"></div>
+      <div id="volWrap"></div>
+      <div class="sxnote" id="volNote"></div>
+    </div>
+    <div class="card col-12" id="cardSxWeek">
+      <div class="lbl" data-i18n-html="guide.sx.title">Stretched This Week <span class="sub-note">· Sunday to Saturday · tap a muscle to browse its stretches</span></div>
+      <div class="muschips" id="sxWeek"></div>
+      <div class="sxnote" id="sxWeekNote"></div>
+    </div>
+    <div class="card col-12" id="cardRec">
+      <div class="lbl" data-i18n-html="guide.rec.title">Recommended <span class="sub-note">· for muscles under your range, with what your gym has</span></div>
+      <div id="recWrap"></div>
+    </div>
+    <div class="card col-12" id="cardBrowse">
+      <div class="lbl" data-i18n-html="guide.browse.title">Browse by Muscle <span class="sub-note">· add what you like · you choose the day</span></div>
+      <div class="muschips" id="browseMus"></div>
+      <div class="browsectl"><div class="seg" id="browseMode"></div><select id="browseEq" class="daysel browseeq" data-i18n-title="guide.eq.title" title="Filter by equipment" aria-label="Filter by equipment"></select></div>
+      <div class="browsehead"><span id="browseCount"></span><button type="button" class="ghostbtn" id="browseAll" data-i18n="guide.all.on">Show everything</button></div>
+      <div id="browseWrap"></div>
+    </div>
+    <div class="card col-12" id="cardCdLib">
+      <div class="lbl" data-i18n-html="guide.cd.title">Cardio <span class="sub-note">· add what you like · you choose the day</span></div>
+      <div class="sxnote cdnokcal" data-i18n="cd.nokcal">No calorie counts here on purpose: the calorie target already learns from your weight trend, so your cardio is in there.</div>
+      <div id="cdLibWrap"></div>
+    </div>
+  </div>
+
+  <div class="grid page" id="pg-gym">
+    <div class="card col-12" id="cardGym">
+      <div class="lbl" data-i18n-html="gym.title">My Gym <span class="sub-note">· what you can train with</span></div>
+      <div class="sxnote" data-i18n="gym.intro">Tick what you have, and the Guide suggests only what you can actually do. Bodyweight exercises are always included.</div>
+      <div id="gymWrap"></div>
+      <div class="sxnote" id="gymCount"></div>
+      <div class="lbl" style="margin-top:24px" data-i18n="gym.own">Your own equipment</div>
+      <div class="sxnote" data-i18n="gym.own.note">A record of what else you have. The Guide only matches the list above.</div>
+      <div id="gymOwn"></div>
+      <div class="gymadd"><input type="text" id="gymName" data-i18n-ph="gym.ph" placeholder="Sled, battle ropes…" autocomplete="off"><button type="button" class="ghostbtn" id="gymAdd" data-i18n="btn.add">Add</button></div>
+    </div>
+  </div>
+
+  <div class="grid page" id="pg-settings">
+    <div class="card col-12" id="cardDonate">
+      <div class="lbl" data-i18n-html="don.title">Support Tally <span class="sub-note">· free for everyone, always</span></div>
+      <div class="sxnote donbody" data-i18n-html="don.body"><b>I don’t like subscriptions.</b> Tools for better health should be free for everyone, as long as the person making them can carry the cost. I can, so Tally is free and it stays free.<br><br>I’m also not going to pretend I don’t want any money if I can get some, so the links are below.<br><br><b>But whatever happens, every version of Tally is free.</b> No premium tier, no ads, no paywall, ever.</div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="donKofi" href="https://ko-fi.com/popo54321" target="_blank" rel="noopener" data-i18n="don.kofi">Donate on Ko-fi</a>
+        <span class="donsub" data-i18n="don.kofi.sub">International · card or PayPal</span>
+      </div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="donThai" href="https://ezdn.app/popo54321" target="_blank" rel="noopener" data-i18n="don.thai">Donate on EasyDonate</a>
+        <span class="donsub" data-i18n="don.thai.sub">In Thailand · PromptPay and Thai banks</span>
+      </div>
+    </div>
+
+    <div class="card col-12" id="cardInstall" style="display:none">
+      <div class="lbl" data-i18n="inst.title">Install on This Device</div>
+      <div class="sxnote" id="instHow"></div>
+      <button type="button" class="ghostbtn" id="instBtn" style="margin-top:10px" data-i18n="inst.now">Install</button>
+    </div>
+    <div class="card col-12" id="cardUpdate">
+      <div class="lbl" data-i18n="upd.title">Version &amp; Updates</div>
+      <div class="sxnote" id="updNow"></div>
+      <div class="sxnote" id="updHow"></div>
+      <div class="donrow">
+        <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
+        <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <span class="donsub" id="updMsg"></span>
+      </div>
+    </div>
+    <div class="card col-12">
+      <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
+      <div class="syncrow">
+        <button class="ghostbtn" id="fileBtn" data-i18n="sync.fromfile">Import from file</button>
+        <button class="ghostbtn" id="backupBtn" data-i18n="sync.backup">Save backup file</button>
+        <button class="ghostbtn" id="exportBtn" data-i18n="sync.export">Export data</button>
+        <button class="ghostbtn" id="importBtn" data-i18n="sync.import">Import data</button>
+      </div>
+      <div class="bakline" id="bakLine"></div>
+      <input type="file" id="importFile" accept="application/json,.json,text/plain" style="display:none">
+      <div class="syncmsg" id="syncMsg"></div>
+      <textarea id="exportBox" class="databox" readonly></textarea>
+      <textarea id="importBox" class="databox" data-i18n-ph="sync.pastehere" placeholder="Paste exported data here, then press Load."></textarea>
+      <button class="loadbtn" id="loadBtn" data-i18n="sync.load">Load imported data</button>
+      <button class="ghostbtn" id="undoBtn" style="display:none;margin-bottom:10px"></button>
+      <div class="syncrow" style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft)">
+        <button class="ghostbtn" id="aiBtn" data-i18n="sync.ai">Copy for your AI to analyse</button>
+      </div>
+      <textarea id="aiBox" class="aibox" readonly></textarea>
+      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
+    </div>
+
+    <div class="card col-12" id="cardTheme">
+      <div class="lbl" data-i18n-html="theme.title">Appearance <span class="sub-note">· font and colours, saved on this device</span></div>
+      <div class="ctl-lbl" data-i18n="theme.size">Text size · bigger text, the layout follows</div>
+      <div class="sizerow">
+        <button type="button" class="ghostbtn sizebtn" id="sizeDown" data-i18n-title="theme.smaller" title="Smaller text" aria-label="Smaller text">A−</button>
+        <span class="sizeval" id="sizeVal">100%</span>
+        <button type="button" class="ghostbtn sizebtn" id="sizeUp" data-i18n-title="theme.larger" title="Larger text" aria-label="Larger text">A+</button>
+        <button type="button" class="ghostbtn" id="sizeReset" data-i18n="theme.sizereset">Reset to 100%</button>
+      </div>
+      <div class="ctl-lbl" style="margin-top:14px" data-i18n="theme.font">Font style</div>
+      <div class="seg segwrap" id="segFont"></div>
+      <div class="picknote" id="fontNote"></div>
+      <div class="ctl-lbl" style="margin-top:14px" data-i18n="theme.presets">Colour presets</div>
+      <div class="seg segwrap" id="segPreset"></div>
+      <div class="ctl-lbl" style="margin-top:16px" data-i18n="theme.every">Every colour · tap a swatch to change it</div>
+      <div class="colgrid" id="colGrid"></div>
+      <button type="button" class="ghostbtn" id="resetThemeBtn" style="margin-top:14px" data-i18n="theme.reset">Reset colours to default</button>
+    </div>
+
+    <div class="card col-12" id="cardMethods">
+      <div class="lbl" data-i18n="meth.title">Where these numbers come from</div>
+      <div class="methods">
+        <div class="method">
+          <div class="m-h" data-i18n="meth.bf.h">Body fat · US Navy girth method</div>
+          <div class="m-b" data-i18n-html="meth.bf.b">Estimated from body measurements, not measured directly.
+            <b>Male:</b> 495 ÷ (1.0324 − 0.19077 × log₁₀(waist − neck) + 0.15456 × log₁₀(height)) − 450.
+            <b>Female:</b> 495 ÷ (1.29579 − 0.35004 × log₁₀(waist + hips − neck) + 0.22100 × log₁₀(height)) − 450.
+            All girths in centimetres. Published by Hodgdon and Beckett (1984) for the US Navy.
+            Typical agreement with a DEXA scan is around ±3–4 percentage points, and it is more
+            reliable for tracking change over time than for any single reading. Nothing is shown
+            until every measurement the formula needs has been logged.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.bmr.h">Starting energy estimate · Mifflin-St Jeor</div>
+          <div class="m-b" data-i18n-html="meth.bmr.b">Resting rate = 10 × weight(kg) + 6.25 × height(cm) − 5 × age, then
+            <b>+5</b> for men or <b>−161</b> for women. Multiplied by an activity factor of 1.2 to 1.9
+            depending on how much you train. Mifflin-St Jeor (1990) is the equation most dietetic
+            practice uses, and is a population average: individual resting rates vary by roughly
+            ±10% around it, more if you are very lean, very heavy, or older.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.adapt.h">Adaptive Maintenance Estimate</div>
+          <div class="m-b" data-i18n-html="meth.adapt.b">Your calorie maintenance estimate, continuously calibrated using your actual food logs and
+            weight trend. Once there are about two weeks of data, the app stops relying on a formula and
+            works from your own numbers. It fits a straight line through your weigh-ins to get a trend in kg per day,
+            and compares it with your average logged intake over the same span:
+            <b>maintenance = average intake − (trend × 7,700)</b>. The 7,700 kcal per kg figure is
+            the standard approximation for body tissue. It is only an approximation: early weight
+            change is largely water and glycogen, which carry almost no energy, so short windows
+            overstate or understate badly. That is why 14 days is the minimum and 28 is preferred, and why the app flags a window it does not trust. 91 days (13 weeks) smooths out the most, but if your weight has changed direction within it, the answer lags behind where you are now. Your logging does not have to be accurate, only consistent. Because the estimate compares what you log with what your weight actually does, a habit of logging a food low or high is built into the maintenance figure, and the target that comes out of it works in the same numbers. What throws it is a change: starting to weigh food, counting something you used to leave out, or skipping whole meals on some days and not others. After a change like that, give it a couple of weeks.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.cardio.h">Cardio and calories</div>
+          <div class="m-b" data-i18n-html="meth.cardio.b">Tally doesn’t estimate calories burned. Machines and watches often overestimate exercise burn, and adding those numbers back to your target can quietly undo a deficit. You don’t need them: your adaptive maintenance estimate is worked out from what you eat and what your weight actually does, so the energy your cardio burns is already in it. Do more cardio and the estimate rises to match within a couple of weeks; do less and it falls. If your cardio changes a lot from week to week, the estimate lags behind by a week or two.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.target.h">Daily target · your goal rate</div>
+          <div class="m-b" data-i18n-html="meth.target.b">Target = maintenance + (goal kg per week × 7,700 ÷ 7). A goal of −0.5 kg
+            per week is a deficit of about 550 kcal a day. The app will not suggest below
+            1,500 kcal for men or 1,200 for women, whatever the arithmetic produces, because eating
+            adequately below that is difficult without supervision. <b>The dot next to Energy</b> compares your
+            average with the target: green within a tenth either way, yellow when lower than that, red when
+            more than a tenth over. It is also red under 1,500 kcal a day for men or 1,200 for women
+            (1,200 when sex is not set), whatever your target.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.prot.h">Protein · one number, no maths</div>
+          <div class="m-b" data-i18n-html="meth.prot.b"><b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>
+          <div class="m-b" data-i18n-html="meth.rec.b">Records are read off your history every time and never stored, so a corrected or deleted day cannot leave a stale best behind. Loaded lifts keep the heaviest set and the best estimated one-rep max; bodyweight lifts keep the most reps and the heaviest added weight; holds keep the longest. <br><br>Estimated one-rep max uses <b>Epley: weight × (1 + reps ÷ 30)</b>, and only for sets of 1 to 12 reps. Past about twelve the formula drifts badly, so a set of twenty says little about a single: endurance-range sets still count towards the heaviest set, just not towards the estimate. A single counts as its own weight. <br><br>A first session sets no records, because there is nothing yet to beat.</div>
+        </div>
+        <div class="method">
+          <div class="m-h" data-i18n="meth.age.h">Age and activity</div>
+          <div class="m-b" data-i18n-html="meth.age.b">Age is entered directly rather than as a year of birth, so there is no
+            guessing whether a birthday has passed. It is stored with the date you set it and
+            advances on its own, so the estimate does not quietly go stale — correct it any time.
+            <br><br>Activity multipliers run 1.2 to 1.9. Every app describes these as "1–3 sessions
+            a week" without ever saying what a session is, so this one gives hours of actual working
+            time and judges effort by whether you can still talk — full conversation is easy, short
+            sentences is moderate, barely a word is hard. Count your job and daily life too, not
+            just the gym. If you are between two levels take the lower one: overshooting here is the
+            commonest mistake, and it only affects the starting estimate anyway.</div>
+        </div>
+      </div>
+      <div class="disclaimer" data-i18n-html="disc">
+        <b>These are estimates for tracking your own training, not medical or dietary advice.</b>
+        Every formula here is a population average applied to one person, and every one of them can
+        be wrong for you. Nothing in this app is a diagnosis, a treatment, or a substitute for a
+        doctor or a registered dietitian. If you are pregnant, under 18, managing a medical
+        condition or an eating disorder, or taking medication affected by diet, speak to a
+        qualified professional before acting on any number here. You are responsible for what you
+        do with it.
+      </div>
+    </div>
+
+    <div class="card col-12" id="cardAbout">
+      <div class="lbl" data-i18n="about.card">About Tally</div>
+      <div class="abtext" id="abCard"></div>
+    </div>
+
+    <div class="col-12 appver" id="appVer"></div>
+
+  </div>
+
+  <div class="grid page" id="pg-history">
+    <div class="card col-12" id="cardReview">
+      <div class="lbl" data-i18n-html="rev.title">This Week <span class="sub-note">· the last 7 days, and the one thing most worth changing</span></div>
+      <div class="calib-grid" id="revGrid"></div>
+      <div class="revone" id="revOne"></div>
+    </div>
+
+    <div class="card col-12" id="cardHist">
+      <div class="lbl" data-i18n="hist.title">History</div>
+      <div class="tablescroll">
+        <table>
+          <thead><tr><th data-i18n="hist.date">Date</th><th data-i18n="hist.day">Day</th><th>kg</th><th>%bf</th><th>kcal</th><th>P</th><th data-i18n="hist.mob">Mobility</th><th></th></tr></thead>
+          <tbody id="histBody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="ghostbtn histmore" id="histMore" style="display:none"></button>
+      <div class="empty" id="histEmpty" data-i18n="hist.empty">No entries logged yet. Log your first day on the Body or Workout page.</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="dpwrap" id="dpWrap">
+  <div class="dp" role="dialog" aria-modal="true" aria-labelledby="dpTitle" tabindex="-1">
+    <div class="dp-head">
+      <button type="button" class="dp-nav" id="dpPrev" data-i18n-title="dp.prev" title="Previous month">‹</button>
+      <div class="dp-title" id="dpTitle"></div>
+      <button type="button" class="dp-nav" id="dpNext" data-i18n-title="dp.next" title="Next month">›</button>
+    </div>
+    <div class="dp-grid" id="dpGrid"></div>
+    <div class="dp-foot">
+      <button type="button" class="dp-cancel" id="dpCancel" data-i18n="btn.cancel">Cancel</button>
+      <button type="button" class="dp-today" id="dpToday" data-i18n="day.today">Today</button>
+    </div>
+  </div>
+</div>
+
+<div class="shwrap" id="abWrap">
+  <div class="sh abt" role="dialog" aria-modal="true" aria-labelledby="abTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="abTitle" data-i18n="about.title">Welcome to Tally</div>
+      <button type="button" class="sh-x" id="abX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list abtext" id="abText"></div>
+    <div class="abhint" data-i18n="about.hint">You can read this again any time in Settings → About Tally.</div>
+    <div class="sh-foot">
+      <button type="button" id="abNever" data-i18n="about.never">Don’t show again</button>
+      <button type="button" class="prim" id="abOk" data-i18n="about.ok">Got it</button>
+    </div>
+  </div>
+</div>
+<div class="shwrap" id="kpWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="kpTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="kpTitle"></div>
+      <button type="button" class="sh-x" id="kpX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <input type="text" class="sh-search" id="kpSearch" autocomplete="off">
+    <div class="sh-list" id="kpList"></div>
+    <div class="sh-foot"><button type="button" class="prim" id="kpNew"></button></div>
+  </div>
+</div>
+<div class="shwrap" id="shWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="shTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="shTitle" data-i18n="sh.title.add">Add movement</div>
+      <button type="button" class="sh-x" id="shClose" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div id="shListMode">
+      <input type="text" class="sh-search" id="shSearch" data-i18n-ph="sh.search" placeholder="Search movements" autocomplete="off">
+      <div class="sh-list" id="shList"></div>
+      <div class="sh-foot">
+        <button type="button" id="shManageBtn" data-i18n="sh.manage">Manage</button>
+        <button type="button" class="prim" id="shNewBtn" data-i18n="sh.new">New movement</button>
+      </div>
+    </div>
+    <div id="shFormMode" class="sh-form" style="display:none">
+      <div class="sh-list">
+        <div class="field"><label for="shName" data-i18n="fld.name">Name</label><input type="text" id="shName" data-i18n-ph="sh.ph.name" placeholder="DB lateral raise" autocomplete="off"></div>
+        <div class="field"><label for="shShort" data-i18n="sh.short">Short label · charts and history</label><input type="text" id="shShort" data-i18n-ph="sh.ph.short" placeholder="lateral" autocomplete="off"></div>
+        <div class="field"><label data-i18n="sh.countsas">Counts as</label>
+          <div class="seg" id="shGroup"></div>
+        </div>
+        <div class="field"><label data-i18n="sh.muscles">Muscles · tap once for primary, twice for secondary</label>
+          <div class="muschips" id="shMus"></div>
+        </div>
+        <div class="field"><label data-i18n="sh.loading">Loading</label>
+          <div class="seg" id="shMode">
+            <button type="button" data-m="kg">kg</button><button type="button" data-m="bw" data-i18n="sh.bw">Bodyweight +kg</button><button type="button" data-m="sec" data-i18n="sh.secs">Seconds</button>
+          </div>
+        </div>
+        <div class="field"><label for="shDef" data-i18n="sh.startload">Starting load · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shDef" placeholder="0"></div>
+        <div class="field"><label data-i18n="sh.coach">Coaching · what the next session suggests</label>
+          <div class="seg segwrap" id="shGoal">
+            <button type="button" data-g="off" data-i18n="goal.off">Off</button><button type="button" data-g="strength" data-i18n="goal.strength">Power 3–6</button><button type="button" data-g="strength2" data-i18n="goal.strength2">Muscle 6–8</button><button type="button" data-g="endurance" data-i18n="goal.endurance">Endurance 15–20</button><button type="button" data-g="custom" data-i18n="goal.custom">Custom</button>
+          </div>
+          <div class="coachgrid" id="shRangeRow">
+            <div class="field"><label for="shMin" data-i18n="sh.coach.from">From</label><input type="number" min="1" inputmode="numeric" id="shMin"></div>
+            <div class="field"><label for="shMax" data-i18n="sh.coach.to">To</label><input type="number" min="1" inputmode="numeric" id="shMax"></div>
+            <div class="field"><label for="shStep" data-i18n="sh.coach.step">Step · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shStep"></div>
+          </div>
+          <div class="sxnote" id="shCoachNote"></div>
+        </div>
+        <div class="field"><label for="shNote" data-i18n="sh.note">Note · shown under the name</label><input type="text" id="shNote" data-i18n-ph="sh.ph.note" placeholder="12–20 · per arm" autocomplete="off"></div>
+      </div>
+      <div class="sh-foot">
+        <button type="button" id="shCancelNew" data-i18n="btn.back">Back</button>
+        <button type="button" id="shDelete" style="display:none" data-i18n="btn.remove">Remove</button>
+        <button type="button" class="prim" id="shCreate" data-i18n="sh.createadd">Create &amp; add</button>
+      </div>
+    </div>
+    <div class="sh-msg" id="shMsg"></div>
+  </div>
+</div>
+
+<div class="shwrap" id="sxWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="sxTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="sxTitle" data-i18n="sx.new">New stretch</div>
+      <button type="button" class="sh-x" id="sxClose" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list sh-form">
+      <div class="field"><label for="sxName" data-i18n="fld.name">Name</label><input type="text" id="sxName" data-i18n-ph="sx.ph.name" placeholder="Hamstring" autocomplete="off"></div>
+      <div class="field"><label data-i18n="sx.counts">Counted in</label>
+        <div class="seg" id="sxMode">
+          <button type="button" data-m="sec" data-i18n="sx.mode.sec">Seconds</button><button type="button" data-m="reps" data-i18n="sx.mode.reps">Reps</button>
+        </div>
+      </div>
+      <div class="field"><label for="sxSets" data-i18n="sx.setsfld">Sets · how many</label><input type="number" min="1" max="20" inputmode="numeric" id="sxSets" placeholder="1"></div>
+      <div class="field"><label for="sxSecs" id="sxNumLabel" data-i18n="sx.hold">Hold · seconds</label><input type="number" min="0" max="3600" step="5" inputmode="numeric" id="sxSecs" placeholder="45"></div>
+      <div class="field"><label data-i18n="sx.mus">Stretches · muscles</label><div class="muschips" id="sxMus"></div></div>
+      <div class="sxnote" id="sxNote" data-i18n="sx.note">The timer counts this down, so the time recorded is the time you actually held — no stopping the clock late and correcting it afterwards.</div>
+    </div>
+    <div class="sh-foot">
+      <button type="button" id="sxDelete" data-i18n="btn.remove">Remove</button>
+      <button type="button" class="prim" id="sxSave" data-i18n="btn.saveshort">Save</button>
+    </div>
+    <div class="sh-msg" id="sxMsg"></div>
+  </div>
+</div>
+
+<div class="shwrap" id="cdWrapSheet">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="cdTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="cdTitle" data-i18n="cdx.new">New cardio</div>
+      <button type="button" class="sh-x" id="cdClose" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list sh-form">
+      <div class="field"><label for="cdName" data-i18n="fld.name">Name</label><input type="text" id="cdName" data-i18n-ph="cdx.ph.name" placeholder="Run" autocomplete="off"></div>
+      <div class="field"><label for="cdSets" data-i18n="cdx.sets">Sets or rounds · how many</label><input type="number" min="1" max="20" inputmode="numeric" id="cdSets" placeholder="1"></div>
+      <div class="field"><label for="cdMins" data-i18n="cdx.mins">Length · minutes per set</label><input type="number" min="0" max="600" step="5" inputmode="numeric" id="cdMins" placeholder="30"></div>
+      <div class="sxnote" data-i18n="cdx.note">Start counts this down. The minutes recorded stay editable, so a session that ran long or short is easy to correct.</div>
+    </div>
+    <div class="sh-foot">
+      <button type="button" id="cdDelete" data-i18n="btn.remove">Remove</button>
+      <button type="button" class="prim" id="cdSave" data-i18n="btn.saveshort">Save</button>
+    </div>
+    <div class="sh-msg" id="cdMsg"></div>
+  </div>
+</div>
+
+<div class="restbar" id="restBar" role="status" aria-live="polite">
+  <div class="restrow">
+    <div class="restnum" id="restNum">0:00</div>
+    <div class="restwho" id="restWho" data-i18n="rest.rest">rest</div>
+    <div class="restbtns">
+      <button type="button" id="restMinus">−15</button>
+      <button type="button" id="restPlus">+30</button>
+      <button type="button" id="restPause" data-i18n="rest.pause">Pause</button>
+      <button type="button" id="restStop" data-i18n-title="rest.stop" title="Stop the timer">✕</button>
+    </div>
+  </div>
+  <div class="restprog"><i id="restFill"></i></div>
+</div>
+<script>
+<!--APP_JS-->
+</script>
+</body>
+</html>

@@ -2,14 +2,19 @@
   "name": "tally",
   "private": true,
   "type": "module",
-  "description": "Tally — Your Private Training & Body Log",
+  "description": "Tally \u2014 Your Private Training & Body Log",
   "scripts": {
+    "build": "node build/build.mjs",
+    "check": "tsc -p . && node build/check-layers.mjs && node build/build.mjs",
     "record:old": "node tests/record.mjs old",
     "record:new": "node tests/record.mjs new",
     "compare": "node tests/compare.mjs old new",
+    "test": "npm run check && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
     "fixtures": "node tests/fixtures/generate.mjs"
   },
   "devDependencies": {
-    "pngjs": "7.0.0"
+    "esbuild": "0.28.2",
+    "pngjs": "7.0.0",
+    "typescript": "5.9.3"
   }
 }

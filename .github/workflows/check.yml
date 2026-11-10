@@ -1,0 +1,44 @@
+name: Check rebuild
+
+# On every push to the rebuild branch: type-check, layer rules, build, then photograph the
+# frozen 8.1 app and the rebuilt app and fail if any picture or text differs.
+on:
+  push:
+    branches: [rebuild]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install
+        run: |
+          npm ci --no-audit --no-fund
+          npm install --no-save --no-audit --no-fund playwright@1.63.0
+          npx playwright install --with-deps chromium
+
+      - name: Type-check, layer rules, build
+        run: npm run check
+
+      - name: Photograph 8.1 and the rebuild, then compare
+        run: |
+          node tests/record.mjs old
+          node tests/record.mjs new
+          node tests/compare.mjs old new
+
+      - name: Keep the differences for a look
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: picture-differences
+          path: tests/out/diff/
+          if-no-files-found: ignore

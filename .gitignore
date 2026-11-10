@@ -12,3 +12,4 @@ Keys/
 android/build/
 tests/out/
 node_modules/
+dist/
