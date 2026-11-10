@@ -9,3 +9,7 @@ export * from './trend';
 export * from './strength';
 export * from './volume';
 export * from '../data/muscles';
+export * from './colour';
+export * from '../data/themes';
+export * from '../data/equipment';
+export * from '../data/library';

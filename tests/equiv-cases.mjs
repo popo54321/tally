@@ -36,6 +36,8 @@ const recs = (ex, sessions) => { const out = {}; const better = (o, kg, reps) =>
     else { if (better(out.heavy, kg, x.reps)) out.heavy = { kg, reps: x.reps }; const e = (kg > 0 && x.reps >= 1 && x.reps <= 12) ? (x.reps === 1 ? kg : kg * (1 + x.reps / 30)) : null; if (e != null && (!out.e1rm || e > out.e1rm.e)) out.e1rm = { kg, reps: x.reps, e }; } }));
   return out; };
 
+const hex = r => '#' + Array.from({ length: 3 }, () => int(r, 0, 255).toString(16).padStart(2, '0')).join('');
+
 export const CASES = [
   { name: 'calcVal', old: 'calcVal', new: 'Core.calcVal', seed: 1, runs: 6000, gen: r => {
       const parts = []; const n = int(r, 1, 6);
@@ -93,4 +95,9 @@ export const CASES = [
   { name: 'weekState', old: 'weekState', new: 'Core.weekState', gen: r => [pick(r, ['chest', 'back']), { vol: { chest: int(r, 0, 30), back: r() * 25 }, proj: { chest: int(r, 0, 30), back: r() * 25 }, planned: r() < 0.5, lastDay: r() < 0.3 }, int(r, 2, 12), int(r, 13, 25), pick(r, [[], ['chest'], ['back']])] },
   { name: 'sessionMetric/exVolume', old: '(ex,s,bw)=>[sessionMetric(ex,s,bw),exVolume(ex,s,bw)]', new: '(ex,s,bw)=>[Core.sessionMetric(ex,s),Core.exVolume(ex,s,bw)]', gen: r => [randMove(r), randSets(r).filter(x => x && x.reps > 0), pick(r, [null, 0, r() * 120])] },
   { name: 'muscleList/muscleGrp', old: '(a,c,k)=>[muscleList(a,c),muscleGrp(k)]', new: '(a,c,k)=>[Core.muscleList(a,c),Core.muscleGrp(k)]', gen: r => [pick(r, [null, 'chest', musc(r).concat(['nope', 'chest'])]), int(r, 0, 5), pick(r, ['chest', 'abs', 'calves', 'x'])] },
+
+  // batch 5: fixed lists must be identical, and the colour maths
+  { name: 'lists identical', old: '()=>JSON.stringify([LIB,SX_LIB,CD_LIB,EQUIP,EQUIP_GROUPS,FONTS,THEME_VARS,THEME_PRESETS,TEXT_SCALES,MUSCLES,GROUPS,String(HEXRE)])', new: '()=>JSON.stringify([Core.LIB,Core.SX_LIB,Core.CD_LIB,Core.EQUIP,Core.EQUIP_GROUPS,Core.FONTS,Core.THEME_VARS,Core.THEME_PRESETS,Core.TEXT_SCALES,Core.MUSCLES,Core.GROUPS,String(Core.HEXRE)])', runs: 1, gen: () => [] },
+  { name: 'library lookups', old: 'k=>[libByKey(k),sxLibByKey(k),cdLibByKey(k)]', new: 'k=>[Core.libByKey(k),Core.sxLibByKey(k),Core.cdLibByKey(k)]', gen: r => [pick(r, ['bb_bench', 'couch', 'walk', 'deadlift', 'pigeon', 'run', 'nope', ''])] },
+  { name: 'colour contrast', old: '(a,b,c)=>[contrast(hexRgb(a),hexRgb(b)),luminance(hexRgb(c)),rgbHex(hexRgb(a)),legibleFaint(a,b,[c,b])]', new: '(a,b,c)=>[Core.contrast(Core.hexRgb(a),Core.hexRgb(b)),Core.luminance(Core.hexRgb(c)),Core.rgbHex(Core.hexRgb(a)),Core.legibleFaint(a,b,[c,b])]', gen: r => [hex(r), hex(r), hex(r)] },
 ];
