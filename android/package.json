@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "type": "commonjs",
+  "description": "The Android packaging tools (tools/*.js) are plain Node scripts; this keeps them out of the web app's module setting."
+}

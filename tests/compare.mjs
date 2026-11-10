@@ -20,8 +20,11 @@ const ma = JSON.parse(fs.readFileSync(path.join(A, 'manifest.json'), 'utf8'));
 const mb = JSON.parse(fs.readFileSync(path.join(B, 'manifest.json'), 'utf8'));
 fs.rmSync(D, { recursive: true, force: true });
 
-// Known, intended differences go here, e.g. the version number once the rebuild has its own.
+// Known, intended differences go here.
 const ALLOW = [];
+// The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
+// Every other word on the card must still match, and the picture is then not compared.
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.0';
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));
@@ -56,6 +59,10 @@ for (const k of keys) {
   const x = ma[k], y = mb[k];
   if (!x || !y) { bad.push(`${k}: only in ${x ? a : b}`); continue; }
   const notes = [];
+  if (VERSION_CARD.test(k)) {
+    const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split(OLD_V).join(NEW_V), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8');
+    if (ta === tb) { same++; continue; }
+  }
   if (x.png === 'missing' || y.png === 'missing') { bad.push(`${k}: could not photograph in ${x.png === 'missing' ? a : b}: ${(x.error || y.error || '').slice(0, 100)}`); continue; }
   if (x.png !== y.png) { const p = pixelDiff(k); if (p) notes.push(p); }
   if (x.txt !== y.txt) {

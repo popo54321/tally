@@ -13,7 +13,7 @@ bt(){ for e in "" ".exe" ".bat"; do [ -f "$BT/$1$e" ] && { echo "$BT/$1$e"; retu
       echo "missing $1 in $BT" >&2; exit 1; }
 AAPT2=$(bt aapt2); D8=$(bt d8); ZIPALIGN=$(bt zipalign); APKSIGNER=$(bt apksigner)
 
-PV=$(sed -n "s/^const APP_VERSION = '\([^']*\)';.*/\1/p" "$PAGE")
+PV=$(grep -o "APP_VERSION = [\"'][0-9][0-9.]*" "$PAGE" | head -1 | grep -o "[0-9][0-9.]*$")
 [ "$PV" = "$VN" ] || { echo "version name $VN does not match APP_VERSION '$PV' in $PAGE - bump the page first" >&2; exit 1; }
 
 if [ "$PAGE" = app/assets/index.html ]; then node tools/verify.js || { echo "verify failed - not building"; exit 1; }; fi
