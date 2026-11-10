@@ -100,4 +100,8 @@ export const CASES = [
   { name: 'lists identical', old: '()=>JSON.stringify([LIB,SX_LIB,CD_LIB,EQUIP,EQUIP_GROUPS,FONTS,THEME_VARS,THEME_PRESETS,TEXT_SCALES,MUSCLES,GROUPS,String(HEXRE)])', new: '()=>JSON.stringify([Core.LIB,Core.SX_LIB,Core.CD_LIB,Core.EQUIP,Core.EQUIP_GROUPS,Core.FONTS,Core.THEME_VARS,Core.THEME_PRESETS,Core.TEXT_SCALES,Core.MUSCLES,Core.GROUPS,String(Core.HEXRE)])', runs: 1, gen: () => [] },
   { name: 'library lookups', old: 'k=>[libByKey(k),sxLibByKey(k),cdLibByKey(k)]', new: 'k=>[Core.libByKey(k),Core.sxLibByKey(k),Core.cdLibByKey(k)]', gen: r => [pick(r, ['bb_bench', 'couch', 'walk', 'deadlift', 'pigeon', 'run', 'nope', ''])] },
   { name: 'colour contrast', old: '(a,b,c)=>[contrast(hexRgb(a),hexRgb(b)),luminance(hexRgb(c)),rgbHex(hexRgb(a)),legibleFaint(a,b,[c,b])]', new: '(a,b,c)=>[Core.contrast(Core.hexRgb(a),Core.hexRgb(b)),Core.luminance(Core.hexRgb(c)),Core.rgbHex(Core.hexRgb(a)),Core.legibleFaint(a,b,[c,b])]', gen: r => [hex(r), hex(r), hex(r)] },
+
+  // step 5: text
+  { name: 'all text identical', old: '()=>JSON.stringify(LANG.en)', new: '()=>JSON.stringify(Core.EN)', runs: 1, gen: () => [] },
+  { name: 't/tf/tn', old: '(k,v,n)=>[t(k),tf(k,v),tn(k,n,v)]', new: '(k,v,n)=>[Core.t(k),Core.tf(k,v),Core.tn(k,n,v)]', gen: r => [pick(r, ['stat.targetn', 'sync.imported', 'pl.useup', 'nope.key', 'rev.one.over', 'f.left.kcal', 'tdee.title', 'sync.undo']), pick(r, [undefined, { n: int(r, 0, 3), w: '1 kg', avg: 5, target: '2,000' }, { goal: 'x' }]), int(r, 0, 3)] },
 ];

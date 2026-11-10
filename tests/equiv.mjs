@@ -10,7 +10,7 @@ const RUNS = 3000;
 const filter = process.argv[2] || '';
 
 // All of src/core as one script that puts its functions on window.Core.
-const core = await esbuild.build({ stdin: { contents: "export * from './core/index';", resolveDir: path.join(ROOT, 'src'), loader: 'ts' },
+const core = await esbuild.build({ stdin: { contents: "export * from './core/index'; export * from './i18n/index'; export { EN } from './i18n/en';", resolveDir: path.join(ROOT, 'src'), loader: 'ts' },
   bundle: true, write: false, format: 'iife', globalName: 'Core', target: ['chrome90'] });
 
 const { server, url } = await start();
