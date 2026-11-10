@@ -1,6 +1,10 @@
 // The 8.1 code, moving out piece by piece into the folders described in src/README.md.
 import { localDate, daysAgo, within7, dnum, validDate, weekdayKey, fmtDMY, fmtDM, fmtTick } from '../core/dates';
 import { num, roundTo, fmtSigned, calcVal } from '../core/numbers';
+import * as core from '../core/index';
+import { KCAL_PER_KG, DEF_TARGET, CAL_RATES, CAL_PERIODS, CAL_NEED, ACTIVITY, mifflinBMR, kcalOf, protOf } from '../core/nutrition';
+import { bfNavy } from '../core/body';
+import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
@@ -12,19 +16,7 @@ const TKEY = "tally:theme:v1";
 const CDKEY = "tally:cardio:v2";
 const GKEY = "tally:gym:v1";
 const BKEY = "tally:backup:v1";
-const KCAL_PER_KG = 7700;
-const kcalFloor = () => settings.sex==='female' ? 1200 : 1500;
-// Energy dot: green within a tenth of the target, yellow below that, red when more than a tenth over
-// or under the safe minimum. With sex not set the lower minimum is used, so a normal intake for a woman is never called dangerous.
-// Plate calculator. Plates are ids like 'kg20' or 'lb45'; bars are ids from PL_BARS.
-const LB = 0.45359237;
-const PL_KG = [50, 25, 20, 15, 10, 5, 2.5, 2, 1.25, 1, 0.5, 0.25];
-const PL_LB = [55, 45, 35, 25, 10, 5, 2.5, 1.25];
-const PL_ALL = PL_KG.map(v=>'kg'+v).concat(PL_LB.map(v=>'lb'+v));
-const PL_DEF = ['kg25','kg20','kg15','kg10','kg5','kg2.5','kg1.25'];
-const PL_BARS = [{id:'kg20', kg:20}, {id:'kg15', kg:15}, {id:'kg10', kg:10}, {id:'lb45', kg:45*LB}, {id:'lb35', kg:35*LB}, {id:'own'}, {id:'none', kg:0}];
-const PL_BAR_IDS = PL_BARS.map(b=>b.id);
-const plateKg = id => id.slice(0,2)==='lb' ? parseFloat(id.slice(2))*LB : parseFloat(id.slice(2));
+const kcalFloor = () => core.kcalFloor(settings.sex);
 function normPlates(x){
   x=(x && typeof x==='object') ? x : {};
   const have=Array.isArray(x.have) ? PL_ALL.filter(id=>x.have.indexOf(id)>=0) : PL_DEF.slice();
@@ -32,58 +24,12 @@ function normPlates(x){
   return {have, bar:PL_BAR_IDS.indexOf(x.bar)>=0 ? x.bar : 'kg20', barOwn:(own>0 && own<=100) ? Math.round(own*100)/100 : null,
           unit:x.unit==='lb' ? 'lb' : 'kg'};
 }
-// Fewest plates per side that land closest to the goal. Works in the plates' own unit (lb if every plate is lb), to 0.01.
-function plateSolve(goalKg, barKg, have){
-  const sideKg=(goalKg-barKg)/2;
-  if(sideKg < -1e-6) return {err:'under'};
-  if(!have.length) return {err:'none'};
-  const inLb=have.every(id=>id.slice(0,2)==='lb'), toU = kg => kg/(inLb?LB:1)*100;
-  const ps=have.map(id=>({id, kg:plateKg(id), u:Math.round(id.slice(0,2)==='lb' ? (inLb ? parseFloat(id.slice(2))*100 : toU(plateKg(id))) : toU(plateKg(id)))}))
-    .sort((a,b)=>b.kg-a.kg);
-  const T=Math.round(toU(Math.max(0, sideKg))), max=T+ps[0].u;
-  if(max>120000) return {err:'big'};
-  const best=new Uint16Array(max+1).fill(65535), from=new Int8Array(max+1).fill(-1);
-  best[0]=0;
-  for(let v=1; v<=max; v++) for(let i=0;i<ps.length;i++){ const q=v-ps[i].u; if(q>=0 && best[q]!==65535 && best[q]+1<best[v]){ best[v]=best[q]+1; from[v]=i; } }
-  const tol=inLb || have.every(id=>id.slice(0,2)==='kg') ? 0 : 2;
-  const build = v => { const side=[]; while(v>0){ const i=from[v]; side.push(ps[i]); v-=ps[i].u; } return {side, totalKg:barKg+2*side.reduce((a,p)=>a+p.kg,0)}; };
-  for(let d=0; d<=tol; d++) for(const v of [T-d, T+d]) if(v>=0 && v<=max && best[v]!==65535) return {exact:true, main:build(v)};
-  let lo=-1, hi=-1;
-  for(let v=T; v>=0; v--) if(best[v]!==65535){ lo=v; break; }
-  for(let v=T; v<=max; v++) if(best[v]!==65535){ hi=v; break; }
-  const L=lo>=0 ? build(lo) : null, H=hi>=0 ? build(hi) : null;
-  return {exact:false, main:L||H, alt:(L && H) ? H : null};
-}
-const kcalSafeMin = () => settings.sex==='male' ? 1500 : 1200;
-function kcalBand(target){
-  const min=kcalSafeMin(), tg=Math.max(target, min), r10=v=>Math.round(v/10)*10;
-  return {min, lo:Math.max(min, r10(tg*0.9)), hi:r10(tg*1.1)};
-}
-function kcalState(avg, target){
-  if(avg==null) return 'none';
-  const b=kcalBand(target);
-  return avg<b.min ? 'verylow' : avg>b.hi ? 'over' : avg<b.lo ? 'under' : 'ok';
-}
-const PROT_BY_SEX = {female:100, male:140}, PROT_UNSET = 120, PROT_OK = 0.75;
-const DEF_TARGET = 2000;
-const CAL_RATES = [-0.5, -0.25, 0, 0.25, 0.5];
-const CAL_PERIODS = [14, 28, 91];
-const ACTIVITY = [
-  {key:'sed',   mult:1.2},
-  {key:'light', mult:1.375},
-  {key:'mod',   mult:1.55},
-  {key:'high',  mult:1.725},
-  {key:'ath',   mult:1.9}
-];
+const kcalBand = target => core.kcalBand(target, settings.sex);
+const kcalState = (avg, target) => core.kcalState(avg, target, settings.sex);
 const actName  = k => t('act.'+k+'.name');
 const actHours = k => t('act.'+k+'.hours');
 const actNote  = k => t('act.'+k+'.note');
 const ACTIVITY_HELP = ['hour','hard','week','lower'];
-function mifflinBMR(kg, cm, age, sex){
-  if(kg==null||cm==null||age==null) return null;
-  if(kg<=0||cm<=0||age<=0||age>120) return null;
-  return 10*kg + 6.25*cm - 5*age + (sex==='female' ? -161 : 5);
-}
 const DEF_REST = 90;
 
 const FONTS = [
@@ -1103,15 +1049,10 @@ const LINE_COLORS = ['#0d59d1','#f7801e','#ffc21a','#e11d2a','#8b2fc9','#1b9fd8'
 
 let entries = [];
 let settings = normSettings({});
-function effAge(){
-  if(settings.age==null) return null;
-  if(!settings.ageSet) return settings.age;
-  const yrs=Math.floor((dnum(localDate())-dnum(settings.ageSet))/365.25);
-  return Math.min(120, settings.age + Math.max(0,yrs));
-}
-const protAuto = () => PROT_BY_SEX[settings.sex] || PROT_UNSET;
-const protTarget = () => settings.protFloor || protAuto();
-const protOk = () => Math.round(protTarget()*PROT_OK/5)*5;
+const effAge = () => core.effAge(settings.age, settings.ageSet);
+const protAuto = () => core.protAuto(settings.sex);
+const protTarget = () => core.protTarget(settings.sex, settings.protFloor);
+const protOk = () => core.protOk(settings.sex, settings.protFloor);
 function normSettings(s){
   s = (s && typeof s==='object') ? s : {};
   const k=parseFloat(s.kcalTarget), band=volBand(s);
@@ -2881,8 +2822,6 @@ function dayEntry(){
   }
   return e;
 }
-const kcalOf = e => e.kcal!=null ? e.kcal : (e.fast ? 0 : null);
-const protOf = e => e.prot!=null ? e.prot : (e.fast ? 0 : null);
 async function toggleFast(){
   const e=dayEntry(); if(!e) return;
   if(e.fast) delete e.fast; else e.fast=true;
@@ -3692,8 +3631,7 @@ function calcCalibration(win){
   if(out.slope!=null && out.meanK!=null) out.tdee=out.meanK-out.slope*KCAL_PER_KG;
   return out;
 }
-const CAL_NEED = {span:14, weighIns:6, kcalDays:6};
-const kcalTargetFor = tdee => Math.round(Math.max(kcalFloor(), tdee+settings.calRate*KCAL_PER_KG/7)/25)*25;
+const kcalTargetFor = tdee => core.kcalTargetFor(tdee, settings.sex, settings.calRate);
 function calRecommend(){
   const c=calcCalibration(entriesInWindow());
   const enough = c.tdee!=null && c.spanDays>=CAL_NEED.span && c.weighIns>=CAL_NEED.weighIns && c.kcalDays>=CAL_NEED.kcalDays;
@@ -3846,23 +3784,7 @@ function bfModeSet(m, seed){
     : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1), girths:bfNeedsText()}) : tf('body.bf.none',{girths:bfNeedsText()}));
 }
 
-function bfNavy(meas, height, sex){
-  if(!meas || height==null) return null;
-  const waist=meas.waist, neck=meas.neck, hips=meas.hips;
-  if(waist==null||neck==null) return null;
-  let v;
-  if(sex==='female'){
-    if(hips==null) return null;
-    if(waist+hips-neck<=0) return null;
-    v=1.29579-0.35004*Math.log10(waist+hips-neck)+0.22100*Math.log10(height);
-  }else{
-    if(waist-neck<=0) return null;
-    v=1.0324-0.19077*Math.log10(waist-neck)+0.15456*Math.log10(height);
-  }
-  const bf=495/v-450;
-  return (bf>0&&bf<70)?bf:null;
-}
-const bfNeeds = () => settings.sex==='female' ? ['waist','hips','neck'] : ['waist','neck'];
+const bfNeeds = () => core.bfNeeds(settings.sex);
 const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); return n.length>1 ? n.slice(0,-1).join(', ')+' and '+n[n.length-1] : (n[0]||''); };
 
 function exportObject(extra){

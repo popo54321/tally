@@ -4,6 +4,7 @@ const pick = (r, a) => a[Math.floor(r() * a.length)];
 const int = (r, lo, hi) => lo + Math.floor(r() * (hi - lo + 1));
 const dateStr = r => `${int(r, 2019, 2030)}-${String(int(r, 1, 12)).padStart(2, '0')}-${String(int(r, 1, 31)).padStart(2, '0')}`;
 const messy = r => pick(r, [() => dateStr(r), () => '2026-02-30', () => '', () => null, () => 20260101, () => '2026-1-1', () => 'x'])();
+const sexOf = r => pick(r, ['male', 'female', null, undefined]);
 const numish = r => pick(r, [() => r() * 400 - 100, () => int(r, -5, 3000), () => String(r() * 90), () => '', () => null, () => 'abc', () => -0, () => 1e-9])();
 
 export const CASES = [
@@ -24,4 +25,21 @@ export const CASES = [
   { name: 'fmtDMY', old: 'fmtDMY', new: 'Core.fmtDMY', gen: r => [pick(r, [() => dateStr(r), () => '', () => null])()] },
   { name: 'fmtDM', old: 'fmtDM', new: 'Core.fmtDM', gen: r => [dateStr(r)] },
   { name: 'fmtTick', old: 'fmtTick', new: 'Core.fmtTick', gen: r => [int(r, 17000, 22000)] },
+
+  // batch 2: nutrition, body, plates. Old functions read the page's settings, so each call sets them first.
+  { name: 'kcalFloor', old: "s=>{settings.sex=s;return kcalFloor()}", new: 's=>Core.kcalFloor(s)', gen: r => [sexOf(r)] },
+  { name: 'kcalTargetFor', old: "(t,s,c)=>{settings.sex=s;settings.calRate=c;return kcalTargetFor(t)}", new: '(t,s,c)=>Core.kcalTargetFor(t,s,c)', gen: r => [r() * 4000, sexOf(r), pick(r, [-0.5, -0.25, 0, 0.25, 0.5])] },
+  { name: 'kcalBand', old: "(t,s)=>{settings.sex=s;return kcalBand(t)}", new: '(t,s)=>Core.kcalBand(t,s)', gen: r => [int(r, 500, 4500), sexOf(r)] },
+  { name: 'kcalState', old: "(a,t,s)=>{settings.sex=s;return kcalState(a,t)}", new: '(a,t,s)=>Core.kcalState(a,t,s)', gen: r => [pick(r, [null, undefined, int(r, 0, 5000)]), int(r, 500, 4500), sexOf(r)] },
+  { name: 'protTarget/Ok/Auto', old: "(s,f)=>{settings.sex=s;settings.protFloor=f;return [protTarget(),protOk(),protAuto()]}", new: '(s,f)=>[Core.protTarget(s,f),Core.protOk(s,f),Core.protAuto(s)]', gen: r => [sexOf(r), pick(r, [null, undefined, int(r, 30, 400)])] },
+  { name: 'effAge', old: "(a,d)=>{settings.age=a;settings.ageSet=d;return effAge()}", new: '(a,d)=>Core.effAge(a,d)', gen: r => [pick(r, [null, int(r, 10, 120)]), pick(r, [null, '', dateStr(r)])] },
+  { name: 'kcalOf/protOf', old: 'e=>[kcalOf(e),protOf(e)]', new: 'e=>[Core.kcalOf(e),Core.protOf(e)]', gen: r => [{ kcal: pick(r, [null, undefined, 0, int(r, 0, 4000)]), prot: pick(r, [null, undefined, 0, int(r, 0, 300)]), fast: pick(r, [true, false, undefined]) }] },
+  { name: 'mifflinBMR', old: 'mifflinBMR', new: 'Core.mifflinBMR', gen: r => [pick(r, [null, -1, r() * 150]), pick(r, [null, 0, r() * 210]), pick(r, [null, 0, 130, int(r, 1, 100)]), sexOf(r)] },
+  { name: 'bfNavy', old: 'bfNavy', new: 'Core.bfNavy', gen: r => [pick(r, [null, { waist: r() * 120 + 40, neck: r() * 30 + 25, hips: pick(r, [undefined, r() * 60 + 70]) }, { neck: 40 }]), pick(r, [null, r() * 60 + 140]), sexOf(r)] },
+  { name: 'bfNeeds', old: "s=>{settings.sex=s;return bfNeeds()}", new: 's=>Core.bfNeeds(s)', gen: r => [sexOf(r)] },
+  { name: 'plateKg', old: 'plateKg', new: 'Core.plateKg', gen: r => [pick(r, ['kg20', 'kg2.5', 'lb45', 'lb1.25', 'kg0.25', 'lb55'])] },
+  { name: 'plateSolve', old: 'plateSolve', new: 'Core.plateSolve', runs: 800, gen: r => {
+      const all = ['kg50', 'kg25', 'kg20', 'kg15', 'kg10', 'kg5', 'kg2.5', 'kg2', 'kg1.25', 'kg1', 'kg0.5', 'kg0.25', 'lb55', 'lb45', 'lb35', 'lb25', 'lb10', 'lb5', 'lb2.5', 'lb1.25'];
+      const have = all.filter(() => r() < 0.4);
+      return [pick(r, [r() * 300, int(r, 0, 1200), 20, 0]), pick(r, [20, 15, 10, 45 * 0.45359237, 0, r() * 30]), have]; } },
 ];
