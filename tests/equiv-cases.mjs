@@ -23,6 +23,19 @@ const randDays = r => {
   return out;
 };
 
+
+const MUSC = ['chest', 'delt_front', 'delt_side', 'triceps', 'back', 'traps', 'delt_rear', 'biceps', 'forearms', 'quads', 'hamstrings', 'glutes', 'calves', 'abs', 'lower_back'];
+const musc = r => MUSC.filter(() => r() < 0.15);
+const randSets = r => Array.from({ length: int(r, 0, 5) }, () => pick(r, [{ kg: pick(r, [0, 2.5 * int(r, 0, 80), r() * 100]), reps: int(r, 0, 25) }, { variant: 'band', reps: int(r, 1, 15) }, { reps: int(r, 1, 12) }, null]));
+const randMove = r => ({ key: 'x', unit: pick(r, [null, 'sec']), added: r() < 0.25, repMin: pick(r, [null, 3, 6, 8, 15]), repMax: pick(r, [null, 6, 8, 12, 20]), step: pick(r, [0, 2.5, 5, null]), def: pick(r, [0, 20, null]) });
+// records computed the 8.1 way, as inputs for the 'records beaten' check
+const recs = (ex, sessions) => { const out = {}; const better = (o, kg, reps) => !o || kg > o.kg || (kg === o.kg && reps > o.reps);
+  sessions.forEach(s => s.sets.forEach(x => { if (!(x && x.reps > 0)) return; const kg = typeof x.kg === 'number' ? x.kg : 0;
+    if (ex.unit === 'sec') { if (!out.hold || x.reps > out.hold.reps) out.hold = { kg, reps: x.reps }; }
+    else if (ex.added) { if (kg === 0) { if (!out.bwReps || x.reps > out.bwReps.reps) out.bwReps = { kg: 0, reps: x.reps }; } else if (better(out.heavy, kg, x.reps)) out.heavy = { kg, reps: x.reps }; }
+    else { if (better(out.heavy, kg, x.reps)) out.heavy = { kg, reps: x.reps }; const e = (kg > 0 && x.reps >= 1 && x.reps <= 12) ? (x.reps === 1 ? kg : kg * (1 + x.reps / 30)) : null; if (e != null && (!out.e1rm || e > out.e1rm.e)) out.e1rm = { kg, reps: x.reps, e }; } }));
+  return out; };
+
 export const CASES = [
   { name: 'calcVal', old: 'calcVal', new: 'Core.calcVal', seed: 1, runs: 6000, gen: r => {
       const parts = []; const n = int(r, 1, 6);
@@ -64,4 +77,20 @@ export const CASES = [
   { name: 'weekTrendChange', old: 'weekTrendChange', new: 'Core.weekTrendChange', runs: 1500, gen: r => { const d = randDays(r).filter(e => e.weight != null); return [d, d.length ? d[Math.floor(r() * d.length)].date : '2026-11-01']; } },
   { name: 'lastNumOf/deltaOf', old: "(E,n)=>{entries=E;return [lastNumOf(e=>e.weight),lastNumOf(e=>e.kcal),deltaOf(e=>e.weight,n),deltaOf(e=>e.bf,n)]}", new: '(E,n)=>[Core.lastNumOf(E,e=>e.weight),Core.lastNumOf(E,e=>e.kcal),Core.deltaOf(E,e=>e.weight,n),Core.deltaOf(E,e=>e.bf,n)]', runs: 1500, gen: r => [randDays(r), pick(r, [7, 30, 1, 0])] },
   { name: 'calRecommend', old: "(E,p,s,c)=>{entries=E;settings.calPeriod=p;settings.sex=s;settings.calRate=c;return calRecommend()}", new: '(E,p,s,c)=>Core.calRecommend(E,{calPeriod:p,sex:s,calRate:c})', runs: 2000, gen: r => [randDays(r), pick(r, [14, 28, 91]), sexOf(r), pick(r, [-0.5, -0.25, 0, 0.25, 0.5])] },
+
+  // batch 4: strength, records, weekly sets
+  { name: 'workSets', old: 'workSets', new: 'Core.workSets', gen: r => [pick(r, [null, randSets(r)])] },
+  { name: 'coachNext', old: 'coachNext', new: 'Core.coachNext', runs: 4000, gen: r => [pick(r, [null, randMove(r)]), pick(r, [null, [], Array.from({ length: int(r, 1, 6) }, () => randSets(r))])] },
+  { name: 'e1rm', old: 'e1rm', new: 'Core.e1rm', gen: r => [pick(r, [0, -5, r() * 300]), int(r, -1, 20)] },
+  { name: 'recordsOf', old: 'recordsOf', new: 'Core.recordsOf', gen: r => [randMove(r), pick(r, [null, Array.from({ length: int(r, 0, 6) }, () => ({ date: '2026-0' + int(r, 1, 9) + '-1' + int(r, 0, 9), sets: randSets(r) }))])] },
+  { name: 'recordsBeaten', old: 'recordsBeaten', new: '(ex,w,n)=>Core.recordsBeatenKinds(w,n).map(k=>k==="heavy"?fmtLoad(ex,n.heavy.kg)+" × "+n.heavy.reps:k==="e1rm"?t("rec.e1rm")+" "+n.e1rm.e.toFixed(1)+" kg":k==="bwReps"?"BW × "+n.bwReps.reps:n.hold.reps+"s")',
+    gen: r => { const ex = randMove(r), ss = () => Array.from({ length: int(r, 1, 4) }, () => ({ date: '2026-01-01', sets: randSets(r) })); return [ex, recs(ex, ss()), recs(ex, ss())]; } },
+  { name: 'goalOfRange', old: 'goalOfRange', new: 'Core.goalOfRange', gen: r => [pick(r, [null, 3, 6, 15, int(r, 1, 30)]), pick(r, [null, 6, 8, 20, int(r, 1, 30)])] },
+  { name: 'STEP_DEF/repInc', old: 'u=>[STEP_DEF(u),repInc({unit:u}),repInc(null)]', new: 'u=>[Core.STEP_DEF(u),Core.repInc({unit:u}),Core.repInc(null)]', gen: r => [pick(r, ['sec', null, 'reps', undefined])] },
+  { name: 'volBand', old: 'volBand', new: 'Core.volBand', gen: r => [pick(r, [null, {}, { volLo: int(r, -5, 40), volHi: int(r, -5, 120) }, { volLo: '8', volHi: '16' }])] },
+  { name: 'muscleVolume', old: '(D,M)=>muscleVolume(D,k=>M[k])', new: '(D,M)=>Core.muscleVolume(D,k=>M[k])', runs: 1500, gen: r => { const M = {}, keys = ['a', 'b', 'c', 'd']; keys.forEach(k => { if (r() < 0.8) M[k] = { prim: musc(r), sec: musc(r) }; }); return [pick(r, [null, Array.from({ length: int(r, 0, 8) }, () => ({ date: '2026-11-01', lifts: Object.fromEntries(keys.filter(() => r() < 0.5).map(k => [k, randSets(r)])) }))]), M]; } },
+  { name: 'weekStart', old: 'weekStart', new: 'Core.weekStart', gen: r => [pick(r, [null, undefined, dateStr(r)])] },
+  { name: 'weekState', old: 'weekState', new: 'Core.weekState', gen: r => [pick(r, ['chest', 'back']), { vol: { chest: int(r, 0, 30), back: r() * 25 }, proj: { chest: int(r, 0, 30), back: r() * 25 }, planned: r() < 0.5, lastDay: r() < 0.3 }, int(r, 2, 12), int(r, 13, 25), pick(r, [[], ['chest'], ['back']])] },
+  { name: 'sessionMetric/exVolume', old: '(ex,s,bw)=>[sessionMetric(ex,s,bw),exVolume(ex,s,bw)]', new: '(ex,s,bw)=>[Core.sessionMetric(ex,s),Core.exVolume(ex,s,bw)]', gen: r => [randMove(r), randSets(r).filter(x => x && x.reps > 0), pick(r, [null, 0, r() * 120])] },
+  { name: 'muscleList/muscleGrp', old: '(a,c,k)=>[muscleList(a,c),muscleGrp(k)]', new: '(a,c,k)=>[Core.muscleList(a,c),Core.muscleGrp(k)]', gen: r => [pick(r, [null, 'chest', musc(r).concat(['nope', 'chest'])]), int(r, 0, 5), pick(r, ['chest', 'abs', 'calves', 'x'])] },
 ];

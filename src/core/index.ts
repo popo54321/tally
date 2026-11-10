@@ -6,3 +6,6 @@ export * from './body';
 export * from './plates';
 export * from './types';
 export * from './trend';
+export * from './strength';
+export * from './volume';
+export * from '../data/muscles';

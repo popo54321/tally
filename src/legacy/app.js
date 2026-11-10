@@ -5,6 +5,9 @@ import * as core from '../core/index';
 import { DEF_TARGET, CAL_RATES, CAL_PERIODS, ACTIVITY, mifflinBMR, kcalOf, protOf } from '../core/nutrition';
 import { bfNavy } from '../core/body';
 import { trendWeights, weekTrendChange, calcCalibration } from '../core/trend';
+import { GOALS, goalOfRange, STEP_DEF, CLEAN_TO_STEP, repInc, workSets, coachNext, E1RM_MAX_REPS, e1rm, recordsOf, BW_FALLBACK, exVolume, sessionMetric } from '../core/strength';
+import { VOL_LO, VOL_HI, VOL_PRESETS, volBand, muscleVolume, weekStart, weekState } from '../core/volume';
+import { MUSCLES, MUSCLE_KEYS, muscleList, muscleGrp, GROUPS, GROUP_KEYS } from '../data/muscles';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
 const KEY = "tally:entries:v1";
@@ -121,21 +124,6 @@ rebuildCatalogue();
 const exByKey = k => CAT_BY_KEY.get(k);
 
 const CX_KEY = /^(cx_)?[a-z][a-z0-9_]{0,31}$/;
-const MUSCLES = [
-  {key:'chest',grp:'push'}, {key:'delt_front',grp:'push'}, {key:'delt_side',grp:'push'}, {key:'triceps',grp:'push'},
-  {key:'back',grp:'pull'}, {key:'traps',grp:'pull'}, {key:'delt_rear',grp:'pull'}, {key:'biceps',grp:'pull'}, {key:'forearms',grp:'pull'},
-  {key:'quads',grp:'legs'}, {key:'hamstrings',grp:'legs'}, {key:'glutes',grp:'legs'}, {key:'calves',grp:'legs'},
-  {key:'abs',grp:'core'}, {key:'lower_back',grp:'core'}
-];
-const MUSCLE_KEYS = MUSCLES.map(m=>m.key);
-const muscleList = (a, cap) => Array.isArray(a) ? [...new Set(a.filter(k=>MUSCLE_KEYS.indexOf(k)>=0))].slice(0,cap) : [];
-const muscleGrp = k => { const m=MUSCLES.find(x=>x.key===k); return m ? m.grp : 'other'; };
-const VOL_LO = 10, VOL_HI = 20;
-const VOL_PRESETS = [{key:'start',lo:6,hi:10}, {key:'build',lo:VOL_LO,hi:VOL_HI}, {key:'keep',lo:4,hi:8}];
-function volBand(s){
-  const lo=parseInt(s && s.volLo,10), hi=parseInt(s && s.volHi,10);
-  return (isNaN(lo) || isNaN(hi) || lo<0 || hi>100 || lo>=hi) ? {lo:VOL_LO, hi:VOL_HI} : {lo:lo, hi:hi};
-}
 
 
 const EQUIP = ['barbell','dumbbells','kettlebell','ez_bar','bench','rack','pullup_bar','dip_bars','rings',
@@ -897,32 +885,7 @@ function bwSplit(list, lvOf, rowFn, hdCls){
 const qWords = x => { const w=String(x||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); return w.concat(w.slice(1).map((v,i)=>w[i]+v)); };
 const qMatch = (q, text) => { const h=qWords(text); return String(q||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(p=>h.some(w=>w.indexOf(p)===0)); };
 const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
-function muscleVolume(days, exOf){
-  const vol={}; MUSCLE_KEYS.forEach(k=>vol[k]=0);
-  const untagged=new Set();
-  (days||[]).forEach(e=>Object.keys((e && e.lifts)||{}).forEach(key=>{
-    const n=(e.lifts[key]||[]).filter(s=>s && s.reps>0).length; if(!n) return;
-    const ex=exOf(key), p=(ex && ex.prim)||[], s=(ex && ex.sec)||[];
-    if(!p.length && !s.length){ untagged.add(key); return; }
-    p.forEach(m=>{ if(m in vol) vol[m]+=n; });
-    s.forEach(m=>{ if(m in vol) vol[m]+=n/2; });
-  }));
-  return {vol:vol, untagged:[...untagged]};
-}
 
-const GOALS = [
-  {key:'strength',  min:3,  max:6},
-  {key:'strength2', min:6,  max:8},
-  {key:'endurance', min:15, max:20}
-];
-const goalOfRange = (mn,mx) => {
-  if(mn==null || mx==null) return 'off';
-  const g=GOALS.find(x=>x.min===mn && x.max===mx);
-  return g ? g.key : 'custom';
-};
-const STEP_DEF = unit => unit==='sec' ? 0 : 2.5;
-const CLEAN_TO_STEP = 2;
-const repInc = ex => (ex && ex.unit==='sec') ? 5 : 1;
 function normCustomEx(x){
   if(!x || typeof x!=='object') return null;
   const key = (typeof x.key==='string') ? x.key : '';
@@ -1553,8 +1516,6 @@ async function persistPlan(){
 }
 
 const liftsOf = (e,k)=> (e.lifts && e.lifts[k]) ? e.lifts[k] : [];
-const GROUPS = [{key:'push'}, {key:'pull'}, {key:'legs'}, {key:'core'}, {key:'other'}];
-const GROUP_KEYS = GROUPS.map(g=>g.key);
 const groupName = k => t('grp.'+(GROUP_KEYS.indexOf(k)>=0?k:'other'));
 const groupOf = ex => (ex && GROUP_KEYS.indexOf(ex.group)>=0) ? ex.group : 'other';
 function didGroup(e,group){
@@ -1574,28 +1535,6 @@ function lastSessionOf(key, dayKey){
 }
 const deltaOf = (get, days) => core.deltaOf(entries, get, days);
 
-function workSets(sets){
-  const ws=(sets||[]).filter(s=>s && s.reps>0 && typeof s.kg==='number');
-  if(!ws.length) return null;
-  const top=Math.max(...ws.map(s=>s.kg));
-  return {load:top, reps:ws.filter(s=>s.kg===top).map(s=>s.reps)};
-}
-function coachNext(ex, sessions){
-  if(!ex || ex.repMin==null || ex.repMax==null) return null;
-  const mn=ex.repMin, mx=ex.repMax, step=ex.step||0, inc=repInc(ex);
-  const hist=(sessions||[]).map(workSets).filter(Boolean);
-  if(!hist.length) return {kind:'first', load:ex.def||0, targets:[mn], last:null};
-  const last=hist[hist.length-1];
-  const clean = w => w.reps.every(r=>r>=mx);
-  const climb = w => { const aim=Math.min(mx, Math.max(mn, Math.min(...w.reps)+inc)); return w.reps.map(()=>aim); };
-  if(last.reps.some(r=>r<mn)) return {kind:'floor', load:last.load, targets:climb(last), last:last};
-  if(!clean(last)) return {kind:'reps', load:last.load, targets:climb(last), last:last};
-  let run=0;
-  for(let i=hist.length-1; i>=0 && hist[i].load===last.load && clean(hist[i]); i--) run++;
-  if(run<CLEAN_TO_STEP) return {kind:'confirm', load:last.load, targets:last.reps.map(()=>mx), last:last, run:run};
-  if(step>0) return {kind:'up', load:Math.round((last.load+step)*100)/100, targets:last.reps.map(()=>mn), last:last, run:run};
-  return {kind:'top', load:last.load, targets:last.reps.map(()=>mx), last:last, run:run};
-}
 const sessionsBefore = (key, date) => entries.filter(e=>e.date<date).map(e=>liftsOf(e,key)).filter(s=>s.length);
 function fmtLoad(ex, kg){
   if(ex.added) return kg>0 ? 'BW+'+kg : 'BW';
@@ -1612,27 +1551,6 @@ function coachLine(ex, plan){
   return `<b>${esc(t('coach.next'))}</b> · ${L?`<b>${esc(L)}</b> · `:''}${esc(msg)}`;
 }
 
-const E1RM_MAX_REPS = 12;
-const e1rm = (kg, reps) => (kg>0 && reps>=1 && reps<=E1RM_MAX_REPS) ? (reps===1 ? kg : kg*(1+reps/30)) : null;
-function recordsOf(ex, sessions){
-  const r={};
-  const better=(o,kg,reps)=>!o || kg>o.kg || (kg===o.kg && reps>o.reps);
-  (sessions||[]).forEach(s=>(s.sets||[]).forEach(x=>{
-    if(!(x && x.reps>0)) return;
-    const kg=typeof x.kg==='number' ? x.kg : 0;
-    if(ex.unit==='sec'){
-      if(!r.hold || x.reps>r.hold.reps) r.hold={kg:kg, reps:x.reps, date:s.date};
-    } else if(ex.added){
-      if(kg===0){ if(!r.bwReps || x.reps>r.bwReps.reps) r.bwReps={kg:0, reps:x.reps, date:s.date}; }
-      else if(better(r.heavy,kg,x.reps)) r.heavy={kg:kg, reps:x.reps, date:s.date};
-    } else {
-      if(better(r.heavy,kg,x.reps)) r.heavy={kg:kg, reps:x.reps, date:s.date};
-      const e=e1rm(kg, x.reps);
-      if(e!=null && (!r.e1rm || e>r.e1rm.e)) r.e1rm={kg:kg, reps:x.reps, e:e, date:s.date};
-    }
-  }));
-  return r;
-}
 function recordsLine(ex, r){
   const b=[];
   if(r.bwReps) b.push(`${esc(t('rec.bwreps'))} <b>BW × ${r.bwReps.reps}</b>`);
@@ -1642,13 +1560,8 @@ function recordsLine(ex, r){
   return b.join(' · ');
 }
 function recordsBeaten(ex, was, now){
-  const b=[];
-  if(now.heavy && was.heavy && (now.heavy.kg>was.heavy.kg || (now.heavy.kg===was.heavy.kg && now.heavy.reps>was.heavy.reps)))
-    b.push(fmtLoad(ex, now.heavy.kg)+' × '+now.heavy.reps);
-  if(now.e1rm && was.e1rm && now.e1rm.e>was.e1rm.e+0.05) b.push(t('rec.e1rm')+' '+now.e1rm.e.toFixed(1)+' kg');
-  if(now.bwReps && was.bwReps && now.bwReps.reps>was.bwReps.reps) b.push('BW × '+now.bwReps.reps);
-  if(now.hold && was.hold && now.hold.reps>was.hold.reps) b.push(now.hold.reps+'s');
-  return b;
+  return core.recordsBeatenKinds(was, now).map(k => k==='heavy' ? fmtLoad(ex, now.heavy.kg)+' × '+now.heavy.reps
+    : k==='e1rm' ? t('rec.e1rm')+' '+now.e1rm.e.toFixed(1)+' kg' : k==='bwReps' ? 'BW × '+now.bwReps.reps : now.hold.reps+'s');
 }
 function recordsNewOn(date){
   const day=entries.find(e=>e.date===date); if(!day || !day.lifts) return '';
@@ -2658,7 +2571,6 @@ function libRow(l){
   return `<div class="librow${ok?'':' off'}"><div class="libname">${esc(t('lib.'+l.key))}${lvTag(l.lv)}`
     + `<span class="sub">${esc(mus)}<br>${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>${act}</div>`;
 }
-function weekStart(ds){ const d=new Date((ds||localDate())+'T12:00:00'); d.setDate(d.getDate()-d.getDay()); return localDate(d); }
 function weekVolume(){
   const today=localDate(), start=weekStart(today), todayIdx=new Date(today+'T12:00:00').getDay();
   const done=muscleVolume(entries.filter(e=>e.date>=start && e.date<=today), exByKey);
@@ -2675,14 +2587,6 @@ function weekVolume(){
   });
   const proj={}; MUSCLE_KEYS.forEach(k=>proj[k]=done.vol[k]+plan[k]);
   return {vol:done.vol, proj:proj, untagged:done.untagged, planned:planKeys().length>0, lastDay:todayIdx===6};
-}
-function weekState(k, w, lo, hi, mute){
-  const v=w.vol[k], p=w.proj[k];
-  if(v>hi) return 'high';
-  if(v>=lo) return 'ok';
-  if(w.planned && p>=lo) return 'track';
-  if(mute.indexOf(k)>=0) return 'muted';
-  return (w.planned || w.lastDay) ? 'low' : 'sofar';
 }
 function drawGuide(){
   const wrap=$("volWrap"); if(!wrap) return;
@@ -3427,17 +3331,6 @@ CHART_DETAIL.sxChart = d => { const e=entryOn(d); if(!e || !e.mob) return '';
   return logRows(e.mob, sxName, (k,v)=>{ const u=sxIsReps(stretchByKey(k)) ? t('unit.reps') : 's', n=mobSetsOf(e,k); return n>1 ? n+' × '+Math.round(v/n)+' '+u : v+' '+u; }, logSelection('chartSx', sxAvail())); };
 CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows(e.cardio, cdName, (k,v)=>{ const n=cdSetsOf(e,k); return n>1 ? n+' × '+Math.round(v/n)+' '+t('unit.min') : v+' '+t('unit.min'); }, logSelection('chartCd', cdAvail())) : ''; };
 
-const BW_FALLBACK = 70;
-function exVolume(ex, sets, bw){
-  const base = ex.added ? (bw||BW_FALLBACK) : 0;
-  return sets.reduce((a,s)=>a+(base+(s.kg||0))*s.reps,0);
-}
-function sessionMetric(ex, sets, bw){
-  const reps=sets.reduce((a,s)=>a+s.reps,0);
-  if(ex.unit==='sec') return {val:reps, unit:'sec',  lbl:'metric.time'};
-  if(ex.added)        return {val:reps, unit:'reps', lbl:'metric.reps'};
-  return {val:sets.reduce((a,s)=>a+(s.kg||0)*s.reps,0), unit:'kg', lbl:'metric.volume'};
-}
 function exSessions(key){
   const bwFallback=lastNumOf(e=>e.weight)||BW_FALLBACK;
   return entries.filter(e=>liftsOf(e,key).length)
