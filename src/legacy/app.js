@@ -15,32 +15,19 @@ import { hexRgb, rgbHex, luminance, contrast, legibleFaint } from '../core/colou
 import { STORE } from '../store/kv';
 import { t, tf, tn } from '../i18n/index';
 import { DaysStore } from '../store/days';
+import * as schema from '../store/schema';
+import { SKEY, XKEY, PKEY, SXKEY, EKEY, TKEY, CDKEY, GKEY, BKEY, UKEY, ABOUT_KEY, RETIRED_KEYS, KNOWN_SETTINGS, SAFE_KEY, CX_KEY, CD_KEY, SX_KEY, DEF_REST, PLAN_SETS_DEF,
+  normEntry, normEntries, mergeDay, normPlates, normSettings, normTheme, normCustomEx, normExEdits, normCardio, normStretch, normDayLists, everyDay, normGym } from '../store/schema';
+import { MEAS } from '../data/measurements';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
-const SKEY = "tally:settings:v1";
-const XKEY = "tally:exercises:v1";
-const PKEY = "tally:plan:v1";
-const SXKEY = "tally:stretches:v2";
-const EKEY = "tally:exedits:v1";
-const TKEY = "tally:theme:v1";
-const CDKEY = "tally:cardio:v2";
-const GKEY = "tally:gym:v1";
-const BKEY = "tally:backup:v1";
 const kcalFloor = () => core.kcalFloor(settings.sex);
-function normPlates(x){
-  x=(x && typeof x==='object') ? x : {};
-  const have=Array.isArray(x.have) ? PL_ALL.filter(id=>x.have.indexOf(id)>=0) : PL_DEF.slice();
-  const own=parseFloat(x.barOwn);
-  return {have, bar:PL_BAR_IDS.indexOf(x.bar)>=0 ? x.bar : 'kg20', barOwn:(own>0 && own<=100) ? Math.round(own*100)/100 : null,
-          unit:x.unit==='lb' ? 'lb' : 'kg'};
-}
 const kcalBand = target => core.kcalBand(target, settings.sex);
 const kcalState = (avg, target) => core.kcalState(avg, target, settings.sex);
 const actName  = k => t('act.'+k+'.name');
 const actHours = k => t('act.'+k+'.hours');
 const actNote  = k => t('act.'+k+'.note');
 const ACTIVITY_HELP = ['hour','hard','week','lower'];
-const DEF_REST = 90;
 
 
 const colName = v => t('col.'+String(v).replace(/^--/,''));
@@ -48,21 +35,6 @@ const MAX_SERIES = 8;
 
 let customEx = [];
 let exEdits = {};
-function normExEdits(o){
-  const out={};
-  if(!o || typeof o!=='object') return out;
-  for(const k in o){
-    const v=o[k]; if(!v || typeof v!=='object') continue;
-    const e={};
-    if(typeof v.name==='string' && v.name.trim()) e.name=v.name.trim().slice(0,40);
-    if(typeof v.short==='string' && v.short.trim()) e.short=v.short.trim().slice(0,16);
-    if(typeof v.note==='string' && v.note.trim()) e.note=v.note.trim().slice(0,60);
-    if(typeof v.group==='string' && GROUP_KEYS.indexOf(v.group)>=0) e.group=v.group;
-    if(v.retired) e.retired=true;
-    if(Object.keys(e).length) out[k]=e;
-  }
-  return out;
-}
 let CATALOGUE = [], CAT_BY_KEY = new Map();
 function rebuildCatalogue(){
   CATALOGUE=customEx.map(e=>{ const ed=exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
@@ -71,7 +43,6 @@ function rebuildCatalogue(){
 rebuildCatalogue();
 const exByKey = k => CAT_BY_KEY.get(k);
 
-const CX_KEY = /^(cx_)?[a-z][a-z0-9_]{0,31}$/;
 
 
 
@@ -90,32 +61,6 @@ const qWords = x => { const w=String(x||'').toLowerCase().split(/[^a-z0-9]+/).fi
 const qMatch = (q, text) => { const h=qWords(text); return String(q||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(p=>h.some(w=>w.indexOf(p)===0)); };
 const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
 
-function normCustomEx(x){
-  if(!x || typeof x!=='object') return null;
-  const key = (typeof x.key==='string') ? x.key : '';
-  if(!CX_KEY.test(key)) return null;
-  const name = String(x.name==null?'':x.name).trim().slice(0,40);
-  if(!name) return null;
-  const d = parseFloat(x.def);
-  const unit = (x.unit==='sec') ? 'sec' : null;
-  const rMin=parseInt(x.repMin,10), rMax=parseInt(x.repMax,10);
-  const ranged = !isNaN(rMin) && !isNaN(rMax) && rMin>=1 && rMax>=rMin && rMax<=(unit==='sec'?3600:100);
-  const st=parseFloat(x.step);
-  const prim=muscleList(x.prim,3), sec=muscleList(x.sec,4).filter(k=>prim.indexOf(k)<0);
-  return { key, name,
-    short: (String(x.short==null?'':x.short).trim().slice(0,16) || name.toLowerCase().slice(0,16)),
-    note:  String(x.note==null?'':x.note).trim().slice(0,60),
-    def:   (isNaN(d)||d<0) ? 0 : d,
-    added: !!x.added,
-    unit:  unit,
-    group: (GROUP_KEYS.indexOf(x.group)>=0) ? x.group : 'other',
-    repMin: ranged ? rMin : null,
-    repMax: ranged ? rMax : null,
-    step:   ranged ? ((isNaN(st)||st<0||st>50) ? STEP_DEF(unit) : Math.round(st*100)/100) : null,
-    prim: prim, sec: sec,
-    lib: (typeof x.lib==='string' && libByKey(x.lib)) ? x.lib : null,
-    retired: !!x.retired, custom:true };
-}
 function cxKeyFor(name){
   let base = 'cx_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='cx_') base='cx_move';
@@ -125,17 +70,6 @@ function cxKeyFor(name){
 }
 
 let cardios = [];
-const CD_KEY = /^cd_[a-z0-9]{1,32}$/;
-function normCardio(x){
-  if(!x || typeof x!=='object') return null;
-  const key=(typeof x.key==='string')?x.key:'';
-  if(!CD_KEY.test(key)) return null;
-  const name=String(x.name==null?'':x.name).trim().slice(0,40);
-  if(!name) return null;
-  const m=parseInt(x.mins,10);
-  const n=parseInt(x.sets,10);
-  return { key, name, mins:(isNaN(m)||m<0||m>600)?0:m, sets:(isNaN(n)||n<1||n>20)?1:n, lib:(typeof x.lib==='string' && cdLibByKey(x.lib)) ? x.lib : null, retired:!!x.retired };
-}
 function cdKeyFor(name){
   let base='cd_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='cd_') base='cd_session';
@@ -146,23 +80,6 @@ function cdKeyFor(name){
 const cardioByKey = k => cardios.find(c=>c.key===k);
 const activeCardio = () => cardios.filter(c=>!c.retired);
 let stretches = [];
-const SX_KEY = /^sx_[a-z0-9]{1,32}$/;
-function normStretch(x){
-  if(!x || typeof x!=='object') return null;
-  const key=(typeof x.key==='string')?x.key:'';
-  if(!SX_KEY.test(key)) return null;
-  const name=String(x.name==null?'':x.name).trim().slice(0,40);
-  if(!name) return null;
-  const s=parseInt(x.secs,10), r=parseInt(x.reps,10);
-  return { key, name,
-    secs:(isNaN(s)||s<0||s>3600)?0:s,
-    reps:(isNaN(r)||r<0||r>999)?0:r,
-    unit:(x.unit==='reps')?'reps':null,
-    sets:(function(){ const n=parseInt(x.sets,10); return (isNaN(n)||n<1||n>20)?1:n; })(),
-    mus:muscleList(x.mus,4),
-    lib:(typeof x.lib==='string' && sxLibByKey(x.lib)) ? x.lib : null,
-    retired:!!x.retired };
-}
 const sxIsReps = s => !!(s && s.unit==='reps');
 const sxTarget = s => !s ? 0 : (sxIsReps(s) ? (s.reps||0) : (s.secs||0));
 function sxKeyFor(name){
@@ -185,28 +102,9 @@ function dayLabel(k){
   return dayName(k)+' · '+ks.map(x=>{ const e=exByKey(x); return e?e.short:x; }).join(' + ');
 }
 let planExtras = {};
-function normPlan(p){
-  const out={};
-  if(!p || typeof p!=='object') return out;
-  DAYS.forEach(d=>{
-    const a=p[d.key]; if(!Array.isArray(a)) return;
-    const keep=[];
-    a.forEach(k=>{ if(typeof k==='string' && exByKey(k) && keep.indexOf(k)<0) keep.push(k); });
-    if(keep.length) out[d.key]=keep;
-  });
-  return out;
-}
+const normPlan = p => schema.normPlan(p, exByKey);
 let planSets = {};
-const PLAN_SETS_DEF = 3;
-function normPlanSets(p){
-  const out={};
-  if(!p || typeof p!=='object') return out;
-  DAYS.forEach(d=>{
-    const m=p[d.key]; if(!m || typeof m!=='object') return;
-    Object.keys(m).forEach(k=>{ const n=parseInt(m[k],10); if(exByKey(k) && n>=1 && n<=20) (out[d.key]||(out[d.key]={}))[k]=n; });
-  });
-  return out;
-}
+const normPlanSets = p => schema.normPlanSets(p, exByKey);
 const plannedSets = (dayKey, key) => (planSets[dayKey] && planSets[dayKey][key]) || null;
 function sessionEx(dayKey){
   return (planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
@@ -221,42 +119,6 @@ const effAge = () => core.effAge(settings.age, settings.ageSet);
 const protAuto = () => core.protAuto(settings.sex);
 const protTarget = () => core.protTarget(settings.sex, settings.protFloor);
 const protOk = () => core.protOk(settings.sex, settings.protFloor);
-function normSettings(s){
-  s = (s && typeof s==='object') ? s : {};
-  const k=parseFloat(s.kcalTarget), band=volBand(s);
-  const r=parseInt(s.restSec,10);
-  let sel=null;
-  const keyList = a => { if(!Array.isArray(a)) return null; const o=[]; a.forEach(x=>{ if(typeof x==='string' && x && o.indexOf(x)<0 && o.length<200) o.push(x); }); return o; };
-  sel=keyList(s.chartEx);
-  const fold={}; if(s.chartFold && typeof s.chartFold==='object') ['str','sx','cd'].forEach(k=>{ if(typeof s.chartFold[k]==='boolean') fold[k]=s.chartFold[k]; });
-  return {
-    kcalTarget: (isNaN(k)||k<=0) ? DEF_TARGET : Math.round(k),
-    kcalOwn: !!s.kcalOwn,
-    chartEx: sel,
-    chartSx: keyList(s.chartSx),
-    chartCd: keyList(s.chartCd),
-    chartFold: fold,
-    restSec: (isNaN(r)||r<10||r>900) ? DEF_REST : r,
-    restSound: (s.restSound==null) ? true : !!s.restSound,
-    mobLead: ([0,5,10].indexOf(parseInt(s.mobLead,10))>=0) ? parseInt(s.mobLead,10) : 5,
-    sex: (s.sex==='female' || s.sex==='male') ? s.sex : null,
-    protFloor: (function(){
-      const p=parseInt(s.protFloor,10);
-      if(isNaN(p)||p<30||p>400) return null;
-      if('protPerKg' in s && (parseFloat(s.protPerKg)>0 || p===140)) return null;
-      return p;
-    })(),
-    age: (function(){ const a=parseInt(s.age,10); return (isNaN(a)||a<10||a>120)?null:a; })(),
-    ageSet: (typeof s.ageSet==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s.ageSet)) ? s.ageSet : null,
-    activity: (ACTIVITY.some(a=>a.key===s.activity)) ? s.activity : 'mod',
-    volLo: band.lo,
-    volHi: band.hi,
-    volMute: muscleList(s.volMute, MUSCLE_KEYS.length),
-    calRate: CAL_RATES.indexOf(parseFloat(s.calRate))>=0 ? parseFloat(s.calRate) : -0.25,
-    plates: normPlates(s.plates),
-    calPeriod: s.calPeriod==='all' ? 91 : parseInt(s.calPeriod,10)===21 ? 28 : (CAL_PERIODS.indexOf(parseInt(s.calPeriod,10))>=0 ? parseInt(s.calPeriod,10) : 28)
-  };
-}
 let chartPeriod = 28;
 
 function chartWindowStart(){
@@ -307,66 +169,7 @@ const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&
 
 let loadFailed=false;
 
-const SAFE_KEY = /^[A-Za-z0-9_-]{1,64}$/;
-function normEntry(e){
-  if(!e || !validDate(e.date)) return null;
-  const pos=v=>{ const x=parseFloat(v); return (isNaN(x)||x<=0)?null:x; };
-  const nn =v=>{ const x=parseFloat(v); return (isNaN(x)||x<0)?null:x; };
-  const o={ date:e.date, day:(typeof e.day==='string'&&e.day)?e.day:weekdayKey(e.date) };
-  o.weight=e.weight!=null?pos(e.weight):null;
-  o.height=e.height!=null?pos(e.height):null;
-  o.bf=e.bf!=null?pos(e.bf):null;
-  o.bfSrc=(e.bfSrc==='manual' && o.bf!=null)?'manual':null;
-  o.kcal=e.kcal!=null?nn(e.kcal):null;
-  o.prot=e.prot!=null?nn(e.prot):null;
-  if(e.fast===true) o.fast=true;
-  const tally=x=>{
-    if(!x || typeof x!=='object') return null;
-    const out={};
-    for(const k in x){ if(!SAFE_KEY.test(k)) continue; const v=(x[k]===true) ? 0 : nn(x[k]); if(v!=null) out[k]=Math.round(v); }
-    return Object.keys(out).length ? out : null;
-  };
-  o.cardio=tally(e.cardio);
-  o.mob=tally(e.mob);
-  const setCounts=(log, x)=>{
-    if(!log || !x || typeof x!=='object') return null;
-    const ms={}; for(const k in x){ const n=parseInt(x[k],10); if((k in log) && n>1 && n<=50) ms[k]=n; }
-    return Object.keys(ms).length ? ms : null;
-  };
-  o.mobSets=setCounts(o.mob, e.mobSets);
-  o.cardioSets=setCounts(o.cardio, e.cardioSets);
-  let m=null;
-  if(e.meas && typeof e.meas==='object'){ const mm={}; MEAS.forEach(x=>{ if(e.meas[x.key]!=null){ const v=pos(e.meas[x.key]); if(v!=null) mm[x.key]=v; } }); if(Object.keys(mm).length) m=mm; }
-  o.meas=m;
-  const L={};
-  if(e.lifts && typeof e.lifts==='object'){
-    for(const k in e.lifts){ if(!SAFE_KEY.test(k)) continue; const a=e.lifts[k];
-      if(Array.isArray(a)){ const arr=a.map(s=>{ if(!s) return null; const reps=pos(s.reps); if(reps==null) return null;
-        if(s.variant!=null) return {variant:String(s.variant), reps:reps};
-        const kg=s.kg!=null?(nn(s.kg)??0):0; return {kg:kg, reps:reps}; }).filter(Boolean);
-        if(arr.length) L[k]=arr; } }
-  }
-  o.lifts=L;
-  return o;
-}
 
-function normEntries(list){
-  const byDate=new Map();
-  (Array.isArray(list) ? list : []).map(normEntry).filter(Boolean).forEach(e=>{
-    const was=byDate.get(e.date);
-    byDate.set(e.date, was ? mergeDay(was, e) : e);
-  });
-  return [...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));
-}
-function mergeDay(a, b){
-  const o=Object.assign({}, a);
-  ['day','weight','height','kcal','prot','fast'].forEach(k=>{ if(b[k]!=null) o[k]=b[k]; });
-  if(b.bf!=null){ o.bf=b.bf; o.bfSrc=b.bfSrc; }
-  ['mob','cardio','meas','lifts'].forEach(k=>{ if(b[k] && Object.keys(b[k]).length) o[k]=Object.assign({}, a[k]||{}, b[k]); });
-  [['mob','mobSets'],['cardio','cardioSets']].forEach(([f,sf])=>{ if(!b[f]) return; const ms=Object.assign({}, a[sf]||{}); Object.keys(b[f]).forEach(k=>{ if(b[sf] && b[sf][k]) ms[k]=b[sf][k]; else delete ms[k]; }); o[sf]=ms; });
-  return normEntry(o);
-}
-const RETIRED_KEYS = ['tally:stretches:v1', 'tally:cardio:v1', 'tally:lang:v1'];
 async function purgeOldNamespace(){
   try{
     const have=(await STORE.list('tally:')) || [];
@@ -389,7 +192,6 @@ async function persist(){
   try{ await DAYS_STORE.save(entries); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
-const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','chartSx','chartCd','chartFold','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod','plates'];
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
@@ -467,19 +269,6 @@ function applyLang(){
 }
 
 let theme = {font:'min', colors:{}, scale:1};
-function normTheme(x){
-  const out={font:'min', colors:{}, scale:1};
-  if(!x || typeof x!=='object') return out;
-  if(TEXT_SCALES.indexOf(x.scale)>=0) out.scale=x.scale;
-  if(FONTS.some(f=>f.key===x.font)) out.font=x.font;
-  if(x.colors && typeof x.colors==='object'){
-    THEME_VARS.forEach(v=>{
-      const c=x.colors[v.v];
-      if(typeof c==='string' && HEXRE.test(c.trim())) out.colors[v.v]=c.trim().toLowerCase();
-    });
-  }
-  return out;
-}
 function activePreset(){
   const cur=theme.colors||{};
   const hit=THEME_PRESETS.find(p=>{
@@ -633,19 +422,6 @@ async function persistCardio(){
   catch(e){ console.error('cardio list save failed',e); return false; }
 }
 let gym = {set:false, have:[], own:[]};
-function normGym(g){
-  g=(g && typeof g==='object') ? g : {};
-  const have=Array.isArray(g.have) ? [...new Set(g.have.filter(k=>EQUIP.indexOf(k)>=0))] : [];
-  const own=[], seen=new Set();
-  (Array.isArray(g.own) ? g.own : []).forEach(x=>{
-    const name=String((x && x.name)||'').trim().slice(0,40); if(!name) return;
-    let k=(x && /^ge_[a-z0-9]{1,30}$/.test(x.key)) ? x.key : 'ge_'+(name.toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,24)||'item');
-    const base=k; let n=1;
-    while(seen.has(k)) k=base+(++n);
-    seen.add(k); own.push({key:k, name:name});
-  });
-  return {set:!!g.set, have:have, own:own};
-}
 async function loadGym(){
   try{ const v=await STORE.get(GKEY); gym=normGym(v!=null ? JSON.parse(v) : null); }
   catch(e){ console.error('gym read failed',e); gym=normGym(null); }
@@ -664,13 +440,6 @@ async function recoverCardio(){
 }
 let planSx = {}, planCd = {}, planRaw = null;
 const sxToday = {}, cdToday = {};
-function normDayLists(p, exists){
-  const out={};
-  if(!isObj(p)) return out;
-  DAYS.forEach(d=>{ const a=p[d.key]; if(!Array.isArray(a)) return; const keep=[]; a.forEach(k=>{ if(typeof k==='string' && exists(k) && keep.indexOf(k)<0) keep.push(k); }); if(keep.length) out[d.key]=keep; });
-  return out;
-}
-function everyDay(keys){ const o={}; if(keys.length) DAYS.forEach(d=>{ o[d.key]=keys.slice(); }); return o; }
 function planLogsInit(p){
   planSx = (p && p.sx!==undefined) ? normDayLists(p.sx, stretchByKey) : everyDay(activeStretches().map(x=>x.key));
   planCd = (p && p.cd!==undefined) ? normDayLists(p.cd, cardioByKey) : everyDay(activeCardio().map(x=>x.key));
@@ -957,7 +726,6 @@ function dlgClose(id){
   if(dlgReturn && document.contains(dlgReturn) && dlgReturn.focus) dlgReturn.focus({preventScroll:true});
   dlgReturn=null;
 }
-const ABOUT_KEY='tally:aboutSeen:v1';
 const aboutHtml = () => ['why','parts','logging','origin','gym','yours'].map(k=>`<section class="ab-sec${k==='parts'?' key':''}">${t('about.'+k)}</section>`).join('');
 function abOpen(){ $("abText").innerHTML=aboutHtml(); $("abText").scrollTop=0; dlgOpen("abWrap"); }
 function abClose(){ dlgClose("abWrap"); }
@@ -2638,7 +2406,6 @@ async function chartFoldToggle(k){
   await persistSettings(); chartFoldDraw(k, true); render();
 }
 
-const MEAS=['neck','shoulders','chest','arm','forearm','waist','hips','thigh','calf'].map(key=>({key}));
 const measName = k => t('m.'+k).replace(/\s*\(.*\)$/,'').toLowerCase();
 function buildBodySeries(){
   return MEAS.map(m=>{
@@ -3058,7 +2825,6 @@ async function applyImport(data){
   fillForm($("fDate").value); render();
 }
 
-const UKEY = "tally:undo:v1";
 let undoSnap=null, undoArmed=false, undoTimer=null;
 async function saveUndo(){
   undoSnap={at:localDate(), n:entries.length, data:exportObject()};

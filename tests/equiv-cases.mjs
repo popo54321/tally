@@ -38,6 +38,23 @@ const recs = (ex, sessions) => { const out = {}; const better = (o, kg, reps) =>
 
 const hex = r => '#' + Array.from({ length: 3 }, () => int(r, 0, 255).toString(16).padStart(2, '0')).join('');
 
+
+const messyDay = r => pick(r, [() => null, () => ({ date: 'bad' }), () => {
+  const e = { date: pick(r, [dateStr(r), '2026-01-15']) };
+  if (r() < 0.5) e.day = pick(r, ['mon', '', 5, 'x']);
+  if (r() < 0.7) e.weight = numish(r); if (r() < 0.3) e.height = numish(r); if (r() < 0.2) { e.bf = numish(r); e.bfSrc = pick(r, ['manual', 'calc']); }
+  if (r() < 0.6) e.kcal = numish(r); if (r() < 0.6) e.prot = numish(r); if (r() < 0.1) e.fast = pick(r, [true, 'yes', 1]);
+  if (r() < 0.4) e.mob = { sx_a: pick(r, [true, 30, -5, '12.6']), 'bad key': 3, sx_b: 90 }; if (r() < 0.3) e.mobSets = { sx_a: pick(r, [2, '3', 1, 60]), sx_z: 2 };
+  if (r() < 0.3) e.cardio = { cd_walk: pick(r, [30, true, 'x']) }; if (r() < 0.2) e.cardioSets = { cd_walk: pick(r, [3, 0]) };
+  if (r() < 0.3) e.meas = { waist: numish(r), neck: numish(r), nope: 5 };
+  if (r() < 0.5) e.lifts = { cx_a: [{ kg: numish(r), reps: numish(r) }, null, { variant: 'band', reps: 8 }, { reps: 5 }], 'x y': [{ kg: 1, reps: 1 }], cx_b: 'x' };
+  return e; }])();
+const messySettings = r => ({ kcalTarget: numish(r), kcalOwn: r() < 0.5, chartEx: pick(r, [null, ['a', 'a', '', 5]]), chartFold: pick(r, [null, { str: true, sx: 'x', zz: false }]),
+  restSec: pick(r, [5, 90, '120', 1000]), restSound: pick(r, [undefined, false, 0]), mobLead: pick(r, [0, 5, '10', 7]), sex: pick(r, ['male', 'female', 'm', null]),
+  protFloor: pick(r, [undefined, 20, 140, '150', 500]), protPerKg: pick(r, [undefined, 1.6, 0]), age: pick(r, [undefined, 5, 34, '40', 130]), ageSet: pick(r, [undefined, '2026-01-01', 'x']),
+  activity: pick(r, ['mod', 'ath', 'x']), volLo: pick(r, [undefined, 8, 30]), volHi: pick(r, [undefined, 16, 10]), volMute: pick(r, [undefined, ['chest', 'nope']]),
+  calRate: pick(r, [-0.5, '0.25', 0.3, undefined]), calPeriod: pick(r, ['all', 21, 14, '91', 30, undefined]), plates: pick(r, [undefined, { have: ['kg20'] }]) });
+
 export const CASES = [
   { name: 'calcVal', old: 'calcVal', new: 'Core.calcVal', seed: 1, runs: 6000, gen: r => {
       const parts = []; const n = int(r, 1, 6);
@@ -104,4 +121,18 @@ export const CASES = [
   // step 5: text
   { name: 'all text identical', old: '()=>JSON.stringify(LANG.en)', new: '()=>JSON.stringify(Core.EN)', runs: 1, gen: () => [] },
   { name: 't/tf/tn', old: '(k,v,n)=>[t(k),tf(k,v),tn(k,n,v)]', new: '(k,v,n)=>[Core.t(k),Core.tf(k,v),Core.tn(k,n,v)]', gen: r => [pick(r, ['stat.targetn', 'sync.imported', 'pl.useup', 'nope.key', 'rev.one.over', 'f.left.kcal', 'tdee.title', 'sync.undo']), pick(r, [undefined, { n: int(r, 0, 3), w: '1 kg', avg: 5, target: '2,000' }, { goal: 'x' }]), int(r, 0, 3)] },
+
+  // step 5: tidying saved data, on messy input
+  { name: 'normEntry', old: 'normEntry', new: 'Core.normEntry', runs: 5000, gen: r => [messyDay(r)] },
+  { name: 'normEntries', old: 'normEntries', new: 'Core.normEntries', runs: 1500, gen: r => [pick(r, [null, 'x', Array.from({ length: int(r, 0, 12) }, () => messyDay(r))])] },
+  { name: 'mergeDay', old: 'mergeDay', new: 'Core.mergeDay', gen: r => [messyDay(r) || { date: '2026-01-01' }, messyDay(r) || { date: '2026-01-01' }] },
+  { name: 'normSettings', old: 'normSettings', new: 'Core.normSettings', runs: 5000, gen: r => [pick(r, [null, 'x', messySettings(r)])] },
+  { name: 'normTheme', old: 'normTheme', new: 'Core.normTheme', gen: r => [pick(r, [null, { font: pick(r, ['min', 'zen', 'nope']), scale: pick(r, [1, 1.3, 2, '1.1']), colors: { '--bg': pick(r, ['#ABCDEF', ' #123456 ', 'red', 5]), '--nope': '#000000' } }])] },
+  { name: 'normCustomEx', old: 'normCustomEx', new: 'Core.normCustomEx', runs: 5000, gen: r => [pick(r, [null, { key: pick(r, ['cx_bench', 'bad key', 'a', 'Cx_x', 'cx_' + 'z'.repeat(40)]), name: pick(r, ['Bench', '', '  x  ', 'N'.repeat(50)]), short: pick(r, [undefined, 'b', '']), note: pick(r, [undefined, 'n'.repeat(70)]), def: pick(r, [undefined, -1, '20', 'x']), unit: pick(r, ['sec', 'reps', undefined]), repMin: pick(r, [undefined, 3, '6', 0, 50]), repMax: pick(r, [undefined, 6, 8, 200, 4000]), step: pick(r, [undefined, 2.5, -1, 99, '1.25']), prim: musc(r).concat(pick(r, [[], ['nope']])), sec: musc(r), group: pick(r, ['push', 'nope', undefined]), lib: pick(r, ['bb_bench', 'nope', undefined]), added: r() < 0.3, retired: r() < 0.2 }])] },
+  { name: 'normExEdits', old: 'normExEdits', new: 'Core.normExEdits', gen: r => [pick(r, [null, { a: { name: ' X ', short: '', note: 'n', group: 'pull', retired: 1 }, b: 5, c: { group: 'nope' } }])] },
+  { name: 'normCardio/normStretch', old: '(c,s)=>[normCardio(c),normStretch(s)]', new: '(c,s)=>[Core.normCardio(c),Core.normStretch(s)]', gen: r => [{ key: pick(r, ['cd_walk', 'walk', 'cd_']), name: pick(r, ['Walk', '']), mins: pick(r, [30, -1, 700, '45']), sets: pick(r, [1, 3, 0, 25]), lib: pick(r, ['walk', 'nope']) }, { key: pick(r, ['sx_couch', 'couch']), name: pick(r, ['Couch', '']), secs: pick(r, [30, -1, 4000]), reps: pick(r, [10, 1000]), unit: pick(r, ['reps', 'sec']), sets: pick(r, [2, 30]), mus: musc(r), lib: pick(r, ['couch', 'nope']) }] },
+  { name: 'normGym/normPlates', old: '(g,p)=>[normGym(g),normPlates(p)]', new: '(g,p)=>[Core.normGym(g),Core.normPlates(p)]', gen: r => [pick(r, [null, { set: 1, have: ['barbell', 'nope', 'barbell'], own: [{ name: 'Sandbag' }, { name: 'Sandbag' }, { key: 'ge_x', name: 'X' }, { name: '' }] }]), pick(r, [null, { have: ['kg20', 'lb45', 'nope'], bar: pick(r, ['lb35', 'x']), barOwn: pick(r, [12.345, 0, 200, '15']), unit: pick(r, ['lb', 'kg', 'st']) }])] },
+  { name: 'normPlan/normPlanSets/normDayLists', setup: "customEx=[normCustomEx({key:'cx_a',name:'A'}),normCustomEx({key:'cx_b',name:'B'})];rebuildCatalogue();",
+    old: 'p=>[normPlan(p),normPlanSets(p.sets),normDayLists(p.sx,k=>k.startsWith("sx_"))]', new: 'p=>[Core.normPlan(p,exByKey),Core.normPlanSets(p.sets,exByKey),Core.normDayLists(p.sx,k=>k.startsWith("sx_"))]',
+    gen: r => [{ mon: pick(r, [['cx_a', 'cx_a', 'cx_z', 5], 'x', []]), sun: ['cx_b'], nope: ['cx_a'], sets: { mon: { cx_a: pick(r, [3, '4', 0, 25]), cx_z: 3 }, fri: 'x' }, sx: pick(r, [null, [], { tue: ['sx_a', 'sx_a', 'b'], xyz: ['sx_q'] }]) }] },
 ];
