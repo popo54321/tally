@@ -19,11 +19,12 @@ import * as schema from '../store/schema';
 import { SKEY, XKEY, PKEY, SXKEY, EKEY, TKEY, CDKEY, GKEY, BKEY, UKEY, ABOUT_KEY, RETIRED_KEYS, KNOWN_SETTINGS, SAFE_KEY, CX_KEY, CD_KEY, SX_KEY, DEF_REST, PLAN_SETS_DEF,
   normEntry, normEntries, mergeDay, normPlates, normSettings, normTheme, normCustomEx, normExEdits, normCardio, normStretch, normDayLists, everyDay, normGym } from '../store/schema';
 import { MEAS } from '../data/measurements';
+import { S } from '../state/app';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
-const kcalFloor = () => core.kcalFloor(settings.sex);
-const kcalBand = target => core.kcalBand(target, settings.sex);
-const kcalState = (avg, target) => core.kcalState(avg, target, settings.sex);
+const kcalFloor = () => core.kcalFloor(S.settings.sex);
+const kcalBand = target => core.kcalBand(target, S.settings.sex);
+const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
 const actName  = k => t('act.'+k+'.name');
 const actHours = k => t('act.'+k+'.hours');
 const actNote  = k => t('act.'+k+'.note');
@@ -32,16 +33,12 @@ const ACTIVITY_HELP = ['hour','hard','week','lower'];
 
 const colName = v => t('col.'+String(v).replace(/^--/,''));
 const MAX_SERIES = 8;
-
-let customEx = [];
-let exEdits = {};
-let CATALOGUE = [], CAT_BY_KEY = new Map();
 function rebuildCatalogue(){
-  CATALOGUE=customEx.map(e=>{ const ed=exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
-  CAT_BY_KEY=new Map(CATALOGUE.map(e=>[e.key,e]));
+  S.catalogue=S.customEx.map(e=>{ const ed=S.exEdits[e.key]; return ed ? Object.assign({}, e, ed) : e; });
+  S.catByKey=new Map(S.catalogue.map(e=>[e.key,e]));
 }
 rebuildCatalogue();
-const exByKey = k => CAT_BY_KEY.get(k);
+const exByKey = k => S.catByKey.get(k);
 
 
 
@@ -65,33 +62,30 @@ function cxKeyFor(name){
   let base = 'cx_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='cx_') base='cx_move';
   let k=base, n=1;
-  while(CAT_BY_KEY.has(k)) k=base+(++n);
+  while(S.catByKey.has(k)) k=base+(++n);
   return k;
 }
-
-let cardios = [];
 function cdKeyFor(name){
   let base='cd_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='cd_') base='cd_session';
   let k=base, n=1;
-  while(cardios.some(c=>c.key===k)) k=base+(++n);
+  while(S.cardios.some(c=>c.key===k)) k=base+(++n);
   return k;
 }
-const cardioByKey = k => cardios.find(c=>c.key===k);
-const activeCardio = () => cardios.filter(c=>!c.retired);
-let stretches = [];
+const cardioByKey = k => S.cardios.find(c=>c.key===k);
+const activeCardio = () => S.cardios.filter(c=>!c.retired);
 const sxIsReps = s => !!(s && s.unit==='reps');
 const sxTarget = s => !s ? 0 : (sxIsReps(s) ? (s.reps||0) : (s.secs||0));
 function sxKeyFor(name){
   let base='sx_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='sx_') base='sx_stretch';
   let k=base, n=1;
-  while(stretches.some(s=>s.key===k)) k=base+(++n);
+  while(S.stretches.some(s=>s.key===k)) k=base+(++n);
   return k;
 }
-const stretchByKey = k => stretches.find(s=>s.key===k);
+const stretchByKey = k => S.stretches.find(s=>s.key===k);
 const exNote = ex => (ex && ex.note) ? ex.note : t('ex.defaultnote');
-const activeStretches = () => stretches.filter(s=>!s.retired);
+const activeStretches = () => S.stretches.filter(s=>!s.retired);
 
 const DAYS = ['sun','mon','tue','wed','thu','fri','sat'].map(key=>({key}));
 const dayName = k => t('day.'+k);
@@ -101,29 +95,24 @@ function dayLabel(k){
   if(!ks.length) return dayName(k)+' · '+t('day.rest');
   return dayName(k)+' · '+ks.map(x=>{ const e=exByKey(x); return e?e.short:x; }).join(' + ');
 }
-let planExtras = {};
 const normPlan = p => schema.normPlan(p, exByKey);
-let planSets = {};
 const normPlanSets = p => schema.normPlanSets(p, exByKey);
-const plannedSets = (dayKey, key) => (planSets[dayKey] && planSets[dayKey][key]) || null;
+const plannedSets = (dayKey, key) => (S.planSets[dayKey] && S.planSets[dayKey][key]) || null;
 function sessionEx(dayKey){
-  return (planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
+  return (S.planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
 }
 const planKeys = () => { const s=new Set(); DAYS.forEach(d=>sessionEx(d.key).forEach(k=>s.add(k))); return [...s]; };
 
 const LINE_COLORS = ['#0d59d1','#f7801e','#ffc21a','#e11d2a','#8b2fc9','#1b9fd8','#2fb84a','#d6006e','#141430'];
-
-let entries = [];
-let settings = normSettings({});
-const effAge = () => core.effAge(settings.age, settings.ageSet);
-const protAuto = () => core.protAuto(settings.sex);
-const protTarget = () => core.protTarget(settings.sex, settings.protFloor);
-const protOk = () => core.protOk(settings.sex, settings.protFloor);
+const effAge = () => core.effAge(S.settings.age, S.settings.ageSet);
+const protAuto = () => core.protAuto(S.settings.sex);
+const protTarget = () => core.protTarget(S.settings.sex, S.settings.protFloor);
+const protOk = () => core.protOk(S.settings.sex, S.settings.protFloor);
 let chartPeriod = 28;
 
 function chartWindowStart(){
-  if(chartPeriod==='all' || !entries.length) return null;
-  return dnum(entries[entries.length-1].date)-(chartPeriod-1);
+  if(chartPeriod==='all' || !S.entries.length) return null;
+  return dnum(S.entries[S.entries.length-1].date)-(chartPeriod-1);
 }
 function inChartWin(dateStr){ const s=chartWindowStart(); return s===null || dnum(dateStr)>=s; }
 function windowSeries(series){
@@ -144,7 +133,7 @@ function calcHint(id){
 // Under Energy and Protein: the day's target and what is left of it, updated as you type.
 function calcLeft(id, v){
   const out=$(id+'Left'); if(!out) return;
-  const kcal=id==='fKcal', tgt=kcal ? settings.kcalTarget : protTarget(), unit=kcal ? ' kcal' : ' g';
+  const kcal=id==='fKcal', tgt=kcal ? S.settings.kcalTarget : protTarget(), unit=kcal ? ' kcal' : ' g';
   if(v==null){ out.textContent=''; return; }
   const left=Math.round(tgt-v), head=tf(kcal ? 'f.left.kcal' : 'f.left.prot',{n:tgt.toLocaleString()});
   const tail = left>0 ? tf('f.left.left',{n:left.toLocaleString()+unit}) : left===0 ? t('f.left.exact') : tf(kcal ? 'f.left.over' : 'f.left.done',{n:(-left).toLocaleString()+unit});
@@ -167,8 +156,6 @@ function calcAdd(id){
 const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-let loadFailed=false;
-
 
 async function purgeOldNamespace(){
   try{
@@ -181,42 +168,42 @@ async function purgeOldNamespace(){
 }
 const DAYS_STORE = new DaysStore(STORE, () => localDate());
 async function load(){
-  loadFailed=false; entries=[];
+  S.loadFailed=false; S.entries=[];
   const r=await DAYS_STORE.load();
-  if(r.failed){ loadFailed=true; return; }
-  entries=normEntries(r.days);
+  if(r.failed){ S.loadFailed=true; return; }
+  S.entries=normEntries(r.days);
   // First start after the update (copy the 8.1 days into the new layout) or a month old enough to pack.
-  if(r.needsWrite){ try{ await DAYS_STORE.save(entries); }catch(e){ console.error('day storage update failed',e); } }
+  if(r.needsWrite){ try{ await DAYS_STORE.save(S.entries); }catch(e){ console.error('day storage update failed',e); } }
 }
 async function persist(){
-  try{ await DAYS_STORE.save(entries); return true; }
+  try{ await DAYS_STORE.save(S.entries); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
 async function loadSettings(){
   try{
     const v=await STORE.get(SKEY); if(!v) return;
     const s=JSON.parse(v)||{};
-    settings=normSettings(s);
+    S.settings=normSettings(s);
     const canon=o=>JSON.stringify(KNOWN_SETTINGS.map(k=>(o&&o[k]!==undefined)?o[k]:null));
-    if(Object.keys(s).length!==KNOWN_SETTINGS.length || canon(s)!==canon(settings)) await persistSettings();
+    if(Object.keys(s).length!==KNOWN_SETTINGS.length || canon(s)!==canon(S.settings)) await persistSettings();
   }catch(e){}
 }
-async function persistSettings(){ try{ await STORE.set(SKEY, JSON.stringify(settings)); }catch(e){} }
+async function persistSettings(){ try{ await STORE.set(SKEY, JSON.stringify(S.settings)); }catch(e){} }
 
 async function loadCatalogue(){
-  customEx=[];
+  S.customEx=[];
   try{
     const v=await STORE.get(XKEY);
     if(v){ const a=JSON.parse(v);
       if(Array.isArray(a)){ const seen=new Set();
-        a.forEach(x=>{ const c=normCustomEx(x); if(c && !seen.has(c.key)){ seen.add(c.key); customEx.push(c); } });
+        a.forEach(x=>{ const c=normCustomEx(x); if(c && !seen.has(c.key)){ seen.add(c.key); S.customEx.push(c); } });
       } }
   }catch(e){ console.error('movement catalogue read failed',e); }
   rebuildCatalogue();
 }
 async function persistCatalogue(){
   rebuildCatalogue();
-  try{ await STORE.set(XKEY, JSON.stringify(customEx)); return true; }
+  try{ await STORE.set(XKEY, JSON.stringify(S.customEx)); return true; }
   catch(e){ console.error('catalogue save failed',e); return false; }
 }
 function prettyKey(k){
@@ -225,7 +212,7 @@ function prettyKey(k){
 }
 async function recoverMovements(){
   const seen=new Set();
-  entries.forEach(e=>Object.keys(e.lifts||{}).forEach(k=>{ if(!exByKey(k)) seen.add(k); }));
+  S.entries.forEach(e=>Object.keys(e.lifts||{}).forEach(k=>{ if(!exByKey(k)) seen.add(k); }));
   if(!seen.size) return 0;
   seen.forEach(k=>{
     const looksCustom=/^cx_/.test(k);
@@ -237,7 +224,7 @@ async function recoverMovements(){
     });
     if(!def) return;
     if(!looksCustom){ if(!CX_KEY.test(k)) return; def.key=k; }
-    if(!customEx.some(x=>x.key===def.key)) customEx.push(def);
+    if(!S.customEx.some(x=>x.key===def.key)) S.customEx.push(def);
   });
   rebuildCatalogue();
   await persistCatalogue();
@@ -267,24 +254,22 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.getAttribute('data-i18n-ph')); });
   document.querySelectorAll('[data-i18n-title]').forEach(el=>{ el.title=t(el.getAttribute('data-i18n-title')); if(!/[A-Za-z0-9]/.test(el.textContent)) el.setAttribute('aria-label', el.title); });
 }
-
-let theme = {font:'min', colors:{}, scale:1};
 function activePreset(){
-  const cur=theme.colors||{};
+  const cur=S.theme.colors||{};
   const hit=THEME_PRESETS.find(p=>{
     const pk=Object.keys(p.colors), ck=Object.keys(cur);
     return pk.length===ck.length && pk.every(k=>cur[k]===p.colors[k]);
   });
   return hit?hit.key:null;
 }
-const themeColor = v => theme.colors[v] || (THEME_VARS.find(x=>x.v===v)||{}).def;
+const themeColor = v => S.theme.colors[v] || (THEME_VARS.find(x=>x.v===v)||{}).def;
 function applyTheme(){
   const root=document.documentElement;
   THEME_VARS.forEach(v=>{
-    const c=theme.colors[v.v];
+    const c=S.theme.colors[v.v];
     if(c) root.style.setProperty(v.v, c); else root.style.removeProperty(v.v);
   });
-  const f=FONTS.find(x=>x.key===theme.font)||FONTS[0];
+  const f=FONTS.find(x=>x.key===S.theme.font)||FONTS[0];
   root.style.setProperty('--font-body', f.body);
   root.style.setProperty('--font-display', f.display);
   root.style.setProperty('--font-mono', f.mono);
@@ -292,59 +277,59 @@ function applyTheme(){
   root.style.setProperty('--display-spacing', f.displaySpacing);
   root.style.setProperty('--display-transform', f.displayTransform);
   root.style.setProperty('--txt-faint', legibleFaint(themeColor('--ink-faint'), themeColor('--ink'), [themeColor('--panel'), themeColor('--panel-2')]));
-  root.style.zoom = theme.scale===1 ? '' : String(theme.scale);
+  root.style.zoom = S.theme.scale===1 ? '' : String(S.theme.scale);
   drawTextSize();
 }
 function drawTextSize(){
   const v=$("sizeVal"); if(!v) return;
-  const i=TEXT_SCALES.indexOf(theme.scale);
-  v.textContent=Math.round(theme.scale*100)+'%';
-  $("sizeDown").disabled = i<=0; $("sizeUp").disabled = i>=TEXT_SCALES.length-1; $("sizeReset").disabled = theme.scale===1;
+  const i=TEXT_SCALES.indexOf(S.theme.scale);
+  v.textContent=Math.round(S.theme.scale*100)+'%';
+  $("sizeDown").disabled = i<=0; $("sizeUp").disabled = i>=TEXT_SCALES.length-1; $("sizeReset").disabled = S.theme.scale===1;
 }
 async function textScale(step){
-  const cur=Math.max(0, TEXT_SCALES.indexOf(theme.scale)), i=step===0 ? TEXT_SCALES.indexOf(1) : Math.max(0, Math.min(TEXT_SCALES.length-1, (TEXT_SCALES.indexOf(theme.scale)<0 ? TEXT_SCALES.indexOf(1) : cur)+step));
-  theme.scale=TEXT_SCALES[i]; await persistTheme(); render();
+  const cur=Math.max(0, TEXT_SCALES.indexOf(S.theme.scale)), i=step===0 ? TEXT_SCALES.indexOf(1) : Math.max(0, Math.min(TEXT_SCALES.length-1, (TEXT_SCALES.indexOf(S.theme.scale)<0 ? TEXT_SCALES.indexOf(1) : cur)+step));
+  S.theme.scale=TEXT_SCALES[i]; await persistTheme(); render();
 }
 async function loadTheme(){
-  try{ const v=await STORE.get(TKEY); if(v) theme=normTheme(JSON.parse(v)); }
+  try{ const v=await STORE.get(TKEY); if(v) S.theme=normTheme(JSON.parse(v)); }
   catch(e){ console.error('theme read failed',e); }
   applyTheme();
 }
 async function persistTheme(){
   applyTheme();
-  try{ await STORE.set(TKEY, JSON.stringify(theme)); return true; }
+  try{ await STORE.set(TKEY, JSON.stringify(S.theme)); return true; }
   catch(e){ console.error('theme save failed',e); return false; }
 }
 async function setFont(k){
   if(!FONTS.some(f=>f.key===k)) return;
-  theme.font=k; await persistTheme(); drawTheme();
+  S.theme.font=k; await persistTheme(); drawTheme();
 }
 async function setThemeColor(v,c){
   if(!THEME_VARS.some(x=>x.v===v) || !HEXRE.test(c)) return;
-  theme.colors[v]=c.toLowerCase(); await persistTheme(); drawTheme();
+  S.theme.colors[v]=c.toLowerCase(); await persistTheme(); drawTheme();
 }
 function repaintCharts(){
-  drawWeight(entries.filter(e=>e.weight!=null));
+  drawWeight(S.entries.filter(e=>e.weight!=null));
   drawStrength(); drawSxTrend(); drawCdTrend(); drawBody();
 }
 async function applyPreset(k){
   const p=THEME_PRESETS.find(x=>x.key===k); if(!p) return;
-  theme.colors={};
-  Object.keys(p.colors).forEach(v=>{ if(THEME_VARS.some(x=>x.v===v)) theme.colors[v]=p.colors[v]; });
+  S.theme.colors={};
+  Object.keys(p.colors).forEach(v=>{ if(THEME_VARS.some(x=>x.v===v)) S.theme.colors[v]=p.colors[v]; });
   await persistTheme(); drawTheme(); repaintCharts();
   flash(tf('msg.preset',{name:t('pre.'+p.key)}));
 }
 async function resetTheme(){
-  theme.colors={}; await persistTheme(); drawTheme(); repaintCharts();
+  S.theme.colors={}; await persistTheme(); drawTheme(); repaintCharts();
   flash(t('msg.colreset'));
 }
 function drawTheme(){
   const fs=$("segFont");
   if(fs){
-    fs.innerHTML=FONTS.map(f=>`<button type="button" data-f="${f.key}"${f.key===theme.font?' class="on"':''}>${esc(t('font.'+f.key+'.name'))}</button>`).join('');
+    fs.innerHTML=FONTS.map(f=>`<button type="button" data-f="${f.key}"${f.key===S.theme.font?' class="on"':''}>${esc(t('font.'+f.key+'.name'))}</button>`).join('');
     fs.querySelectorAll('button').forEach(b=>b.onclick=()=>setFont(b.dataset.f));
   }
-  const f=FONTS.find(x=>x.key===theme.font)||FONTS[0];
+  const f=FONTS.find(x=>x.key===S.theme.font)||FONTS[0];
   const fn=$("fontNote"); if(fn) fn.innerHTML=`<b>${esc(t('font.'+f.key+'.name'))}</b> — ${esc(t('font.'+f.key+'.note'))}`;
 
   const ps=$("segPreset"), on=activePreset();
@@ -354,7 +339,7 @@ function drawTheme(){
   }
   const grid=$("colGrid");
   if(grid){
-    const cur=v=>theme.colors[v] || (THEME_VARS.find(x=>x.v===v)||{}).def;
+    const cur=v=>S.theme.colors[v] || (THEME_VARS.find(x=>x.v===v)||{}).def;
     grid.innerHTML=THEME_VARS.map(v=>
       `<label class="colrow"><input type="color" data-v="${v.v}" value="${cur(v.v)}">`
       +`<span class="colname">${esc(colName(v.v))}<i>${cur(v.v)}</i></span></label>`).join('');
@@ -366,89 +351,87 @@ function drawTheme(){
 }
 
 async function loadExEdits(){
-  exEdits={};
-  try{ const v=await STORE.get(EKEY); if(v) exEdits=normExEdits(JSON.parse(v)); }
+  S.exEdits={};
+  try{ const v=await STORE.get(EKEY); if(v) S.exEdits=normExEdits(JSON.parse(v)); }
   catch(e){ console.error('movement edits read failed',e); }
   rebuildCatalogue();
 }
 async function persistExEdits(){
   rebuildCatalogue();
-  try{ await STORE.set(EKEY, JSON.stringify(exEdits)); return true; }
+  try{ await STORE.set(EKEY, JSON.stringify(S.exEdits)); return true; }
   catch(e){ console.error('movement edits save failed',e); return false; }
 }
 async function loadPlan(){
-  planExtras={};
-  planSets={};
-  planRaw=null;
-  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); planRaw=p; planExtras=normPlan(p); planSets=normPlanSets(p && p.sets); } }
+  S.planExtras={};
+  S.planSets={};
+  S.planRaw=null;
+  try{ const v=await STORE.get(PKEY); if(v){ const p=JSON.parse(v); S.planRaw=p; S.planExtras=normPlan(p); S.planSets=normPlanSets(p && p.sets); } }
   catch(e){ console.error('plan read failed',e); }
 }
 async function loadStretches(){
-  stretches=[];
+  S.stretches=[];
   try{
     const v=await STORE.get(SXKEY);
     if(v!=null){ const a=JSON.parse(v);
       if(Array.isArray(a)){ const used=new Set();
-        a.forEach(x=>{ const s=normStretch(x); if(s && !used.has(s.key)){ used.add(s.key); stretches.push(s); } });
+        a.forEach(x=>{ const s=normStretch(x); if(s && !used.has(s.key)){ used.add(s.key); S.stretches.push(s); } });
       } }
   }catch(e){ console.error('stretch list read failed',e); }
 }
 async function recoverStretches(){
   const seen=new Set();
-  entries.forEach(e=>Object.keys(e.mob||{}).forEach(k=>{ if(!stretchByKey(k)) seen.add(k); }));
+  S.entries.forEach(e=>Object.keys(e.mob||{}).forEach(k=>{ if(!stretchByKey(k)) seen.add(k); }));
   if(!seen.size) return 0;
   seen.forEach(k=>{
     const s=normStretch({key:k, name:prettyKey(k), secs:0});
-    if(s && !stretchByKey(s.key)) stretches.push(s);
+    if(s && !stretchByKey(s.key)) S.stretches.push(s);
   });
   await persistStretches();
   return seen.size;
 }
 async function persistStretches(){
-  try{ await STORE.set(SXKEY, JSON.stringify(stretches)); return true; }
+  try{ await STORE.set(SXKEY, JSON.stringify(S.stretches)); return true; }
   catch(e){ console.error('stretch list save failed',e); return false; }
 }
 async function loadCardio(){
-  cardios=[];
+  S.cardios=[];
   try{
     const v=await STORE.get(CDKEY);
     if(v!=null){ const a=JSON.parse(v);
       if(Array.isArray(a)){ const used=new Set();
-        a.forEach(x=>{ const c=normCardio(x); if(c && !used.has(c.key)){ used.add(c.key); cardios.push(c); } }); } }
+        a.forEach(x=>{ const c=normCardio(x); if(c && !used.has(c.key)){ used.add(c.key); S.cardios.push(c); } }); } }
   }catch(e){ console.error('cardio list read failed',e); }
 }
 async function persistCardio(){
-  try{ await STORE.set(CDKEY, JSON.stringify(cardios)); return true; }
+  try{ await STORE.set(CDKEY, JSON.stringify(S.cardios)); return true; }
   catch(e){ console.error('cardio list save failed',e); return false; }
 }
-let gym = {set:false, have:[], own:[]};
 async function loadGym(){
-  try{ const v=await STORE.get(GKEY); gym=normGym(v!=null ? JSON.parse(v) : null); }
-  catch(e){ console.error('gym read failed',e); gym=normGym(null); }
+  try{ const v=await STORE.get(GKEY); S.gym=normGym(v!=null ? JSON.parse(v) : null); }
+  catch(e){ console.error('gym read failed',e); S.gym=normGym(null); }
 }
 async function persistGym(){
-  try{ await STORE.set(GKEY, JSON.stringify(gym)); return true; }
+  try{ await STORE.set(GKEY, JSON.stringify(S.gym)); return true; }
   catch(e){ console.error('gym save failed',e); return false; }
 }
 async function recoverCardio(){
   const seen=new Set();
-  entries.forEach(e=>Object.keys(e.cardio||{}).forEach(k=>{ if(!cardioByKey(k)) seen.add(k); }));
+  S.entries.forEach(e=>Object.keys(e.cardio||{}).forEach(k=>{ if(!cardioByKey(k)) seen.add(k); }));
   if(!seen.size) return 0;
-  seen.forEach(k=>{ const c=normCardio({key:k, name:prettyKey(k), mins:0}); if(c) cardios.push(c); });
+  seen.forEach(k=>{ const c=normCardio({key:k, name:prettyKey(k), mins:0}); if(c) S.cardios.push(c); });
   await persistCardio();
   return seen.size;
 }
-let planSx = {}, planCd = {}, planRaw = null;
 const sxToday = {}, cdToday = {};
 function planLogsInit(p){
-  planSx = (p && p.sx!==undefined) ? normDayLists(p.sx, stretchByKey) : everyDay(activeStretches().map(x=>x.key));
-  planCd = (p && p.cd!==undefined) ? normDayLists(p.cd, cardioByKey) : everyDay(activeCardio().map(x=>x.key));
+  S.planSx = (p && p.sx!==undefined) ? normDayLists(p.sx, stretchByKey) : everyDay(activeStretches().map(x=>x.key));
+  S.planCd = (p && p.cd!==undefined) ? normDayLists(p.cd, cardioByKey) : everyDay(activeCardio().map(x=>x.key));
 }
-const planObject = () => Object.assign({}, planExtras, {sets:planSets, sx:planSx, cd:planCd});
+const planObject = () => Object.assign({}, S.planExtras, {sets:S.planSets, sx:S.planSx, cd:S.planCd});
 async function persistPlan(){
-  Object.keys(planSets).forEach(d=>{
-    Object.keys(planSets[d]).forEach(k=>{ if((planExtras[d]||[]).indexOf(k)<0) delete planSets[d][k]; });
-    if(!Object.keys(planSets[d]).length) delete planSets[d];
+  Object.keys(S.planSets).forEach(d=>{
+    Object.keys(S.planSets[d]).forEach(k=>{ if((S.planExtras[d]||[]).indexOf(k)<0) delete S.planSets[d][k]; });
+    if(!Object.keys(S.planSets[d]).length) delete S.planSets[d];
   });
   try{ await STORE.set(PKEY, JSON.stringify(planObject())); return true; }
   catch(e){ console.error('plan save failed',e); return false; }
@@ -466,15 +449,15 @@ function groupTarget(group){
 const sessionTarget = () => DAYS.filter(d=>sessionEx(d.key).length>0).length;
 const activeGroups = () => GROUPS.filter(g=>groupTarget(g.key)>0);
 const trained = e => !!(e.lifts && Object.keys(e.lifts).length);
-const lastNumOf = get => core.lastNumOf(entries, get);
+const lastNumOf = get => core.lastNumOf(S.entries, get);
 function lastSessionOf(key, dayKey){
-  if(dayKey){ for(let i=entries.length-1;i>=0;i--){ const e=entries[i]; if(e.day===dayKey){ const s=liftsOf(e,key); if(s.length) return s; } } }
-  for(let i=entries.length-1;i>=0;i--){ const s=liftsOf(entries[i],key); if(s.length) return s; }
+  if(dayKey){ for(let i=S.entries.length-1;i>=0;i--){ const e=S.entries[i]; if(e.day===dayKey){ const s=liftsOf(e,key); if(s.length) return s; } } }
+  for(let i=S.entries.length-1;i>=0;i--){ const s=liftsOf(S.entries[i],key); if(s.length) return s; }
   return null;
 }
-const deltaOf = (get, days) => core.deltaOf(entries, get, days);
+const deltaOf = (get, days) => core.deltaOf(S.entries, get, days);
 
-const sessionsBefore = (key, date) => entries.filter(e=>e.date<date).map(e=>liftsOf(e,key)).filter(s=>s.length);
+const sessionsBefore = (key, date) => S.entries.filter(e=>e.date<date).map(e=>liftsOf(e,key)).filter(s=>s.length);
 function fmtLoad(ex, kg){
   if(ex.added) return kg>0 ? 'BW+'+kg : 'BW';
   if(ex.unit==='sec' && !kg) return '';
@@ -503,11 +486,11 @@ function recordsBeaten(ex, was, now){
     : k==='e1rm' ? t('rec.e1rm')+' '+now.e1rm.e.toFixed(1)+' kg' : k==='bwReps' ? 'BW × '+now.bwReps.reps : now.hold.reps+'s');
 }
 function recordsNewOn(date){
-  const day=entries.find(e=>e.date===date); if(!day || !day.lifts) return '';
+  const day=S.entries.find(e=>e.date===date); if(!day || !day.lifts) return '';
   const out=[];
   Object.keys(day.lifts).forEach(key=>{
     const ex=exByKey(key); if(!ex) return;
-    const all=entries.map(e=>({date:e.date, sets:liftsOf(e,key)})).filter(s=>s.sets.length);
+    const all=S.entries.map(e=>({date:e.date, sets:liftsOf(e,key)})).filter(s=>s.sets.length);
     const others=all.filter(s=>s.date!==date), mine=all.filter(s=>s.date===date);
     if(!others.length || !mine.length) return;
     const bits=recordsBeaten(ex, recordsOf(ex, others), recordsOf(ex, mine));
@@ -527,12 +510,12 @@ function fmtSets(key, sets){
 }
 
 let plGoal=null;
-const plBarOf = () => settings.plates.bar;
-const plBarKg = id => id==='own' ? (settings.plates.barOwn||0) : PL_BARS.find(b=>b.id===id).kg;
+const plBarOf = () => S.settings.plates.bar;
+const plBarKg = id => id==='own' ? (S.settings.plates.barOwn||0) : PL_BARS.find(b=>b.id===id).kg;
 const plFmt = (kg, unit) => { const v=unit==='lb' ? kg/LB : kg; return (Math.round(v*100)/100).toString(); };
 const plLabel = id => plFmt(plateKg(id), id.slice(0,2))+' '+id.slice(0,2);
 function drawPlates(){
-  const P=settings.plates, card=$("cardPlates"); if(!card) return;
+  const P=S.settings.plates, card=$("cardPlates"); if(!card) return;
   const unit=P.unit, bar=plBarOf();
   const gi=$("plGoal"); if(document.activeElement!==gi) gi.value=plGoal==null ? '' : String(plGoal);
   document.querySelectorAll('#plUnit button').forEach(b=>b.classList.toggle('on', b.dataset.u===unit));
@@ -550,9 +533,9 @@ function drawPlates(){
   const alt=$("plUse"); if(alt) alt.onclick=()=>{ plGoal=+alt.dataset.v; drawPlates(); };
 }
 function plResultHtml(unit, bar){
-  const P=settings.plates, other=unit==='kg' ? 'lb' : 'kg';
+  const P=S.settings.plates, other=unit==='kg' ? 'lb' : 'kg';
   if(plGoal==null || !(plGoal>0)) return `<div class="sxnote">${esc(t('pl.empty'))}</div>`;
-  if(bar==='own' && settings.plates.barOwn==null) return `<div class="sxnote">${esc(t('pl.ownfirst'))}</div>`;
+  if(bar==='own' && S.settings.plates.barOwn==null) return `<div class="sxnote">${esc(t('pl.ownfirst'))}</div>`;
   const goalKg=unit==='lb' ? plGoal*LB : plGoal, barKg=plBarKg(bar);
   if(goalKg>(unit==='lb' ? 2000*LB : 1000)) return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
   const r=plateSolve(goalKg, barKg, P.have);
@@ -575,18 +558,18 @@ function plResultHtml(unit, bar){
   return h+'</div>';
 }
 async function plSetBar(id){
-  const P=settings.plates;
+  const P=S.settings.plates;
   P.bar=id;
   await persistSettings(); drawPlates();
 }
 async function plToggle(id){
-  const P=settings.plates, i=P.have.indexOf(id);
+  const P=S.settings.plates, i=P.have.indexOf(id);
   if(i>=0) P.have.splice(i,1); else P.have=PL_ALL.filter(x=>x===id || P.have.indexOf(x)>=0);
   await persistSettings(); drawPlates();
 }
 function appendExBlock(wrap, ex, dayKey){
-  const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
-  const onDate=$("fDate").value, curE=entries.find(e=>e.date===onDate);
+  const pinned=(S.planExtras[dayKey]||[]).indexOf(ex.key)>=0;
+  const onDate=$("fDate").value, curE=S.entries.find(e=>e.date===onDate);
   const plan=(curE && liftsOf(curE,ex.key).length) ? null : coachNext(ex, sessionsBefore(ex.key, onDate));
   const rchip=(ex.repMin!=null && ex.repMax!=null) ? `<span class="rtag">${ex.repMin}–${ex.repMax}${ex.unit==='sec'?'s':''}</span>` : '';
   const mark=`<button type="button" class="xtag${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`;
@@ -609,13 +592,13 @@ function appendExBlock(wrap, ex, dayKey){
   return block;
 }
 async function togglePin(key, dayKey){
-  const list=planExtras[dayKey]||(planExtras[dayKey]=[]);
+  const list=S.planExtras[dayKey]||(S.planExtras[dayKey]=[]);
   const i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; } else list.push(key);
+  if(i>=0){ list.splice(i,1); if(!list.length) delete S.planExtras[dayKey]; } else list.push(key);
   await persistPlan();
   const box=$("sets-"+key), tag=(box&&box.parentNode)?box.parentNode.querySelector('.xtag'):null;
   if(tag){
-    const on=(planExtras[dayKey]||[]).indexOf(key)>=0;
+    const on=(S.planExtras[dayKey]||[]).indexOf(key)>=0;
     tag.className='xtag'+(on?' pin':'');
     tag.textContent=t(on?'ex.pinned':'ex.added');
     tag.title=on?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)});
@@ -652,16 +635,16 @@ function addMovementToForm(key){
   const note=wrap.querySelector('.restnote'); if(note) note.remove();
   const dayKey=$("fDay").value;
   appendExBlock(wrap, ex, dayKey);
-  prefillEx(ex, dayKey, entries.find(e=>e.date===$("fDate").value));
+  prefillEx(ex, dayKey, S.entries.find(e=>e.date===$("fDate").value));
   return true;
 }
 async function dropMovement(key, dayKey){
   const box=$("sets-"+key);
   if(box && box.parentNode) box.parentNode.remove();
-  const list=planExtras[dayKey]||[];
+  const list=S.planExtras[dayKey]||[];
   const i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete planExtras[dayKey]; await persistPlan(); render(); }
-  if(!$("exWrap").children.length) buildExForm(entries.find(e=>e.date===$("fDate").value), dayKey);
+  if(i>=0){ list.splice(i,1); if(!list.length) delete S.planExtras[dayKey]; await persistPlan(); render(); }
+  if(!$("exWrap").children.length) buildExForm(S.entries.find(e=>e.date===$("fDate").value), dayKey);
 }
 function addSetRow(ex, loadVal, reps, aim){
   const box=$("sets-"+ex.key); if(!box) return;
@@ -679,16 +662,16 @@ function addSetRow(ex, loadVal, reps, aim){
 }
 async function rememberSets(ex){
   const dayKey=$("fDay").value, box=$("sets-"+ex.key);
-  if(!box || (planExtras[dayKey]||[]).indexOf(ex.key)<0) return;
+  if(!box || (S.planExtras[dayKey]||[]).indexOf(ex.key)<0) return;
   const n=box.querySelectorAll('.setrow').length;
   if(n<1 || plannedSets(dayKey, ex.key)===n) return;
-  (planSets[dayKey]||(planSets[dayKey]={}))[ex.key]=n;
+  (S.planSets[dayKey]||(S.planSets[dayKey]={}))[ex.key]=n;
   await persistPlan(); drawGuide();
 }
 function renumber(ex){ const box=$("sets-"+ex.key); if(box) box.querySelectorAll('.setrow').forEach((r,i)=>r.querySelector('.setn').textContent=i+1); }
 function readExForm(){
   const lifts={};
-  CATALOGUE.forEach(ex=>{
+  S.catalogue.forEach(ex=>{
     const box=$("sets-"+ex.key); if(!box) return;
     const arr=[];
     box.querySelectorAll('.setrow').forEach(r=>{
@@ -739,8 +722,8 @@ function tallyBack(){
 }
 let kpKind='sx', sxPinDay=null, cdPinDay=null;
 const kpCfg = k => k==='sx'
-  ? {lib:SX_LIB, mine:activeStretches, plan:planSx, today:sxToday, libName:l=>t('sxlib.'+l.key), owned:sxOwned, fromLib:sxFromLib, draw:()=>drawMob(), log:'mob'}
-  : {lib:CD_LIB, mine:activeCardio,    plan:planCd, today:cdToday, libName:l=>t('cdlib.'+l.key), owned:cdOwned, fromLib:cdFromLib, draw:()=>drawCardio(), log:'cardio'};
+  ? {lib:SX_LIB, mine:activeStretches, plan:S.planSx, today:sxToday, libName:l=>t('sxlib.'+l.key), owned:sxOwned, fromLib:sxFromLib, draw:()=>drawMob(), log:'mob'}
+  : {lib:CD_LIB, mine:activeCardio,    plan:S.planCd, today:cdToday, libName:l=>t('cdlib.'+l.key), owned:cdOwned, fromLib:cdFromLib, draw:()=>drawCardio(), log:'cardio'};
 function kpOpen(kind){
   kpKind=kind;
   $("kpTitle").textContent=t(kind==='sx'?'kp.title.sx':'kp.title.cd');
@@ -752,7 +735,7 @@ function kpClose(){ dlgClose("kpWrap"); }
 const sxSub = l => (l.mode==='reps' ? tn('mob.repsn',l.tgt) : tf('mob.holdn',{n:l.tgt}));
 function kpRender(){
   const c=kpCfg(kpKind), q=$("kpSearch").value.trim(), dayKey=$("fDay").value;
-  const cur=entries.find(e=>e.date===$("fDate").value), log=(cur && cur[c.log]) || {};
+  const cur=S.entries.find(e=>e.date===$("fDate").value), log=(cur && cur[c.log]) || {};
   const shown=new Set(dayLogKeys(c.plan, c.today, log));
   const pinBtn=(attr,k)=>`<button class="sh-pin" ${attr}="${esc(k)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>`;
   const mine=c.mine().filter(x=>!shown.has(x.key) && (!q || qMatch(q, x.name))).sort((a,b)=>byName(a.name,b.name));
@@ -776,8 +759,8 @@ async function kpPick(key, pin){
 }
 async function kpLibPick(libKey, pin){ const key=await kpCfg(kpKind).fromLib(libKey); if(key) kpPick(key, pin); }
 function kpNew(){ kpClose(); if(kpKind==='sx'){ sxPinDay=$("fDay").value; sxOpen(null); } else { cdPinDay=$("fDay").value; cdOpen(null); } }
-const sxOwned = l => stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
-const cdOwned = l => cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;
+const sxOwned = l => S.stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
+const cdOwned = l => S.cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;
 async function sxFromLib(k){
   const l=sxLibByKey(k); if(!l) return null;
   const have=sxOwned(l);
@@ -785,7 +768,7 @@ async function sxFromLib(k){
   const name=t('sxlib.'+k), reps=l.mode==='reps';
   const x=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null, secs:reps?0:l.tgt, reps:reps?l.tgt:0, mus:l.mus, lib:k});
   if(!x) return null;
-  stretches.push(x); await persistStretches(); return x.key;
+  S.stretches.push(x); await persistStretches(); return x.key;
 }
 async function cdFromLib(k){
   const l=cdLibByKey(k); if(!l) return null;
@@ -794,7 +777,7 @@ async function cdFromLib(k){
   const name=t('cdlib.'+k);
   const x=normCardio({key:cdKeyFor(name), name:name, mins:l.mins, lib:k});
   if(!x) return null;
-  cardios.push(x); await persistCardio(); return x.key;
+  S.cardios.push(x); await persistCardio(); return x.key;
 }
 function shOpen(){
   shManaging=false; shMsg('');
@@ -809,9 +792,9 @@ function shRenderList(){
   const onForm=k=>!!$("sets-"+k);
   const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
   const row=ex=>{
-    const pinned=(planExtras[dayKey]||[]).indexOf(ex.key)>=0;
+    const pinned=(S.planExtras[dayKey]||[]).indexOf(ex.key)>=0;
     if(shManaging){
-      const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
+      const days=S.entries.filter(e=>liftsOf(e,ex.key).length).length;
       return `<div class="sh-row">
         <div class="nm">${esc(ex.name)}<span>${esc(loadDesc(ex))} · ${esc(days?tn('coll.sessions',days):t('coll.never'))}${ex.retired?' · '+esc(t('coll.hidden')):''}</span></div>
         <button class="sh-pin" data-edit="${esc(ex.key)}">${esc(t('btn.edit'))}</button>
@@ -824,7 +807,7 @@ function shRenderList(){
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t('btn.add'))}</button>
       </div>`;
   };
-  const pool = CATALOGUE.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key))).sort(exOrder);
+  const pool = S.catalogue.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key))).sort(exOrder);
   const lrow=l=>{
     const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.bodyweight');
     return `<div class="sh-row${ok?'':' off'}">
@@ -850,7 +833,7 @@ async function shLibPick(k, pin){
 async function shPick(key, pin){
   const dayKey=$("fDay").value;
   if(pin){
-    const list=planExtras[dayKey]||(planExtras[dayKey]=[]);
+    const list=S.planExtras[dayKey]||(S.planExtras[dayKey]=[]);
     if(list.indexOf(key)<0) list.push(key);
     await persistPlan();
   }
@@ -861,19 +844,19 @@ async function shPick(key, pin){
   flash(pin ? tf('msg.pinned',{name:(ex?ex.name:t('ex.movement')), day:dayShort(dayKey)})
             : tf('msg.exadded',{name:(ex?ex.name:t('ex.movement'))}));
 }
-function unhide(key){ const ed=exEdits[key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete exEdits[key]; } }
+function unhide(key){ const ed=S.exEdits[key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete S.exEdits[key]; } }
 function unpinEverywhere(key){
   let touched=false;
-  Object.keys(planExtras).forEach(dk=>{
-    const i=planExtras[dk].indexOf(key);
-    if(i>=0){ planExtras[dk].splice(i,1); if(!planExtras[dk].length) delete planExtras[dk]; touched=true; }
+  Object.keys(S.planExtras).forEach(dk=>{
+    const i=S.planExtras[dk].indexOf(key);
+    if(i>=0){ S.planExtras[dk].splice(i,1); if(!S.planExtras[dk].length) delete S.planExtras[dk]; touched=true; }
   });
   return touched;
 }
 async function shRetire(key){
   const ex=exByKey(key); if(!ex) return;
   const hide=!ex.retired;
-  if(hide) (exEdits[key]||(exEdits[key]={})).retired=true; else unhide(key);
+  if(hide) (S.exEdits[key]||(S.exEdits[key]={})).retired=true; else unhide(key);
   const unpinned = hide ? unpinEverywhere(key) : false;
   await persistExEdits(); if(unpinned) await persistPlan();
   const box=$("sets-"+key), tag=(box&&box.parentNode)?box.parentNode.querySelector('.xtag'):null;
@@ -887,7 +870,7 @@ function shResetDel(){ shDelArmed=null; if(shDelTimer) clearTimeout(shDelTimer);
 async function shDelete(){
   const key=shEditing; if(!key) return;
   const ex=exByKey(key); if(!ex) return;
-  const days=entries.filter(e=>liftsOf(e,key).length).length;
+  const days=S.entries.filter(e=>liftsOf(e,key).length).length;
   if(shDelArmed!==key){
     shDelArmed=key;
     $("shDelete").textContent=t('btn.tapagain');
@@ -897,10 +880,10 @@ async function shDelete(){
     return;
   }
   shResetDel();
-  entries.forEach(e=>{ if(e.lifts && e.lifts[key]) delete e.lifts[key]; });
+  S.entries.forEach(e=>{ if(e.lifts && e.lifts[key]) delete e.lifts[key]; });
   unpinEverywhere(key);
-  if(Array.isArray(settings.chartEx)) settings.chartEx=settings.chartEx.filter(k=>k!==key);
-  customEx=customEx.filter(x=>x.key!==key); delete exEdits[key];
+  if(Array.isArray(S.settings.chartEx)) S.settings.chartEx=S.settings.chartEx.filter(k=>k!==key);
+  S.customEx=S.customEx.filter(x=>x.key!==key); delete S.exEdits[key];
   await persistCatalogue(); await persistExEdits(); await persistPlan(); await persistSettings(); await persist();
   shClose(); fillForm($("fDate").value); render();
   flash(tf('msg.removed',{name:ex.name})+(days?(' · '+tn('msg.cleared',days)):''));
@@ -1011,12 +994,12 @@ async function shCreate(){
 
   const mode=shModeGet(), mus=shMusRead();
   if(shEditing){
-    const ed=exEdits[shEditing]||(exEdits[shEditing]={});
+    const ed=S.exEdits[shEditing]||(S.exEdits[shEditing]={});
     ed.name=name.slice(0,40);
     if(short) ed.short=short.slice(0,16); else delete ed.short;
     if(note) ed.note=note.slice(0,60); else delete ed.note;
     ed.group=shGroupGet();
-    const own=customEx.find(x=>x.key===shEditing);
+    const own=S.customEx.find(x=>x.key===shEditing);
     if(own){
       const d=parseFloat($("shDef").value);
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
@@ -1032,7 +1015,7 @@ async function shCreate(){
   }
 
   const lower=name.toLowerCase();
-  const existing=CATALOGUE.find(x=>x.name.toLowerCase()===lower);
+  const existing=S.catalogue.find(x=>x.name.toLowerCase()===lower);
   if(existing){
     if(existing.retired){ unhide(existing.key); await persistExEdits(); }
     if(shAddToDay) addMovementToForm(existing.key);
@@ -1047,9 +1030,9 @@ async function shCreate(){
     prim: mus.prim, sec: mus.sec
   });
   if(!def){ shMsg(t('msg.badname'),true); return; }
-  customEx.push(def);
+  S.customEx.push(def);
   const ok=await persistCatalogue();
-  if(!ok){ customEx.pop(); rebuildCatalogue(); shMsg(t('msg.savefail.ex'),true); return; }
+  if(!ok){ S.customEx.pop(); rebuildCatalogue(); shMsg(t('msg.savefail.ex'),true); return; }
   if(shAddToDay) addMovementToForm(def.key);
   shClose();
   render();
@@ -1063,10 +1046,10 @@ function restRemaining(endAt, now){ return (endAt==null) ? 0 : Math.max(0, Math.
 function fmtClock(s){ return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
 const hasAlarm = () => { try{ return !!(window.AndroidAlarm && window.AndroidAlarm.schedule); }catch(e){ return false; } };
 const exactAlarmsOff = () => { try{ return hasAlarm() && typeof window.AndroidAlarm.exactAllowed==='function' && !window.AndroidAlarm.exactAllowed(); }catch(e){ return false; } };
-function drawExactNotice(){ const el=$("restExact"); if(el) el.style.display=(settings.restSound && exactAlarmsOff()) ? '' : 'none'; }
+function drawExactNotice(){ const el=$("restExact"); if(el) el.style.display=(S.settings.restSound && exactAlarmsOff()) ? '' : 'none'; }
 function openExactSettings(){ try{ window.AndroidAlarm.openExactSettings(); }catch(e){} }
 function alarmSet(secs, label){
-  if(!hasAlarm() || !settings.restSound) return;
+  if(!hasAlarm() || !S.settings.restSound) return;
   try{ window.AndroidAlarm.schedule(Math.max(0,Math.round(secs*1000)), label||t('rest.alarm.rest')); }catch(e){}
 }
 function alarmCancel(){
@@ -1075,10 +1058,10 @@ function alarmCancel(){
 }
 function audioWake(){
   try{ const AC=window.AudioContext||window.webkitAudioContext;
-    if(AC && settings.restSound){ if(!audioCtx) audioCtx=new AC(); if(audioCtx.state==='suspended') audioCtx.resume(); } }catch(e){}
+    if(AC && S.settings.restSound){ if(!audioCtx) audioCtx=new AC(); if(audioCtx.state==='suspended') audioCtx.resume(); } }catch(e){}
 }
 function beep(n, freq){
-  if(!settings.restSound) return;
+  if(!S.settings.restSound) return;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     if(!audioCtx) audioCtx=new AC();
@@ -1177,52 +1160,52 @@ function restNudge(sec){
 function restLen(){
   const c=$("restCustom")?num($("restCustom").value):null;
   if(c!=null && c>=10 && c<=900) return Math.round(c);
-  return settings.restSec||DEF_REST;
+  return S.settings.restSec||DEF_REST;
 }
 function startRest(secs, who){
   const s=(secs!=null && secs>0) ? Math.round(secs) : restLen();
-  if(s!==settings.restSec && s>=10 && s<=900){ settings.restSec=s; syncRestSegs(); persistSettings(); }
+  if(s!==S.settings.restSec && s>=10 && s<=900){ S.settings.restSec=s; syncRestSegs(); persistSettings(); }
   timerStart({kind:'rest', label: who?(t('rest.rest')+' · '+who):t('rest.rest'), hold:s, lead:0});
 }
 function startStretch(key){
   const s=stretchByKey(key);
   if(!s || sxIsReps(s) || !s.secs){ flash(t('msg.needhold')); return; }
-  timerStart({kind:'stretch', key:key, label:s.name, hold:s.secs, lead:settings.mobLead||0});
+  timerStart({kind:'stretch', key:key, label:s.name, hold:s.secs, lead:S.settings.mobLead||0});
 }
 function syncRestSegs(){
-  document.querySelectorAll('#segRest button').forEach(b=>b.classList.toggle('on', +b.dataset.s===settings.restSec));
-  document.querySelectorAll('#segLead button').forEach(b=>b.classList.toggle('on', +b.dataset.l===(settings.mobLead||0)));
-  const b=$("restSnd"); if(b){ b.classList.toggle('on', !!settings.restSound); b.textContent=t(settings.restSound?'rest.beep':'rest.silent'); }
+  document.querySelectorAll('#segRest button').forEach(b=>b.classList.toggle('on', +b.dataset.s===S.settings.restSec));
+  document.querySelectorAll('#segLead button').forEach(b=>b.classList.toggle('on', +b.dataset.l===(S.settings.mobLead||0)));
+  const b=$("restSnd"); if(b){ b.classList.toggle('on', !!S.settings.restSound); b.textContent=t(S.settings.restSound?'rest.beep':'rest.silent'); }
 }
-async function setRestPreset(s){ settings.restSec=s; $("restCustom").value=''; syncRestSegs(); await persistSettings(); }
-async function setLeadPreset(s){ settings.mobLead=s; syncRestSegs(); await persistSettings(); }
+async function setRestPreset(s){ S.settings.restSec=s; $("restCustom").value=''; syncRestSegs(); await persistSettings(); }
+async function setLeadPreset(s){ S.settings.mobLead=s; syncRestSegs(); await persistSettings(); }
 async function toggleRestSound(){
-  settings.restSound=!settings.restSound;
+  S.settings.restSound=!S.settings.restSound;
   syncRestSegs(); await persistSettings(); drawExactNotice();
-  if(!settings.restSound) alarmCancel();
+  if(!S.settings.restSound) alarmCancel();
   else if(tmr && tmr.doneAt==null && tmr.leftPaused==null){
     alarmSet(restRemaining(tmr.endAt,Date.now())+(tmr.phase==='lead'?tmr.hold:0), tmr.alarmLabel);
   }
-  if(settings.restSound){ audioWake(); beep(1); }
+  if(S.settings.restSound){ audioWake(); beep(1); }
 }
 
 function profileTDEE(){
   const w=lastNumOf(e=>e.weight), h=lastNumOf(e=>e.height);
   const age=effAge();
   if(w==null||h==null||age==null) return null;
-  const bmr=mifflinBMR(w,h,age,settings.sex);
+  const bmr=mifflinBMR(w,h,age,S.settings.sex);
   if(bmr==null) return null;
-  const a=ACTIVITY.find(x=>x.key===settings.activity)||ACTIVITY[2];
+  const a=ACTIVITY.find(x=>x.key===S.settings.activity)||ACTIVITY[2];
   return {bmr:Math.round(bmr), tdee:Math.round(bmr*a.mult), mult:a.mult, act:a.key, age:age, weight:w, height:h};
 }
 function drawBMR(){
   const out=$("bmrOut"); if(!out) return;
   const seg=$("segActivity");
   if(seg){
-    seg.innerHTML=ACTIVITY.map(a=>`<button type="button" data-a="${a.key}"${a.key===settings.activity?' class="on"':''}>${esc(actName(a.key))}<i>${esc(actHours(a.key))}</i></button>`).join('');
+    seg.innerHTML=ACTIVITY.map(a=>`<button type="button" data-a="${a.key}"${a.key===S.settings.activity?' class="on"':''}>${esc(actName(a.key))}<i>${esc(actHours(a.key))}</i></button>`).join('');
     seg.querySelectorAll('button').forEach(b=>b.onclick=()=>setActivity(b.dataset.a));
   }
-  const a=ACTIVITY.find(x=>x.key===settings.activity)||ACTIVITY[2];
+  const a=ACTIVITY.find(x=>x.key===S.settings.activity)||ACTIVITY[2];
   const an=$("actNote");
   if(an) an.innerHTML=`<b>${esc(actName(a.key))} · ${esc(actHours(a.key))} ${esc(t('prof.actweek'))}</b><br>${esc(actNote(a.key))}`;
   const ah=$("actHelp");
@@ -1239,28 +1222,28 @@ function drawBMR(){
     out.innerHTML=`<div class="calib-meta">${esc(tf('bmr.need',{list:missing.join(t('and'))}))}</div>`;
     return;
   }
-  const drifted = settings.ageSet && settings.age!=null && p.age!==settings.age;
+  const drifted = S.settings.ageSet && S.settings.age!=null && p.age!==S.settings.age;
   out.innerHTML=`<div class="calib-line">${tf('bmr.line',{kcal:'<b>'+p.tdee+' kcal</b>'})}`
     +`<span class="calib-sub">${tf('bmr.sub',{bmr:p.bmr, mult:p.mult, act:esc(actName(p.act).toLowerCase()), age:p.age})}</span></div>`
     +`<div class="calib-meta">${tf('bmr.meta',{kg:p.weight.toFixed(1), cm:p.height, age:p.age})}`
-    +(drifted?' '+tf('bmr.drift',{age:settings.age}):'')+`</div>`;
+    +(drifted?' '+tf('bmr.drift',{age:S.settings.age}):'')+`</div>`;
 }
 async function setActivity(k){
   if(!ACTIVITY.some(a=>a.key===k)) return;
-  settings.activity=k; await persistSettings(); render();
+  S.settings.activity=k; await persistSettings(); render();
 }
 async function setAge(){
   const v=parseInt($("fAge").value,10);
-  if(isNaN(v)){ settings.age=null; settings.ageSet=null; }
+  if(isNaN(v)){ S.settings.age=null; S.settings.ageSet=null; }
   else if(v<10||v>120){ flash(t('msg.enterage'),true); return; }
-  else { settings.age=v; settings.ageSet=localDate(); }
+  else { S.settings.age=v; S.settings.ageSet=localDate(); }
   await persistSettings(); render();
 }
 function drawProtein(){
-  const tg=protTarget(), ok=protOk(), own=settings.protFloor!=null;
+  const tg=protTarget(), ok=protOk(), own=S.settings.protFloor!=null;
   const out=$("protOut");
   if(out){
-    const why = own ? tf('prot.why.own',{g:protAuto()}) : t(settings.sex ? 'prot.why.'+settings.sex : 'prot.why.unset');
+    const why = own ? tf('prot.why.own',{g:protAuto()}) : t(S.settings.sex ? 'prot.why.'+S.settings.sex : 'prot.why.unset');
     out.innerHTML=`<div class="calib-line">${tf('prot.aim',{g:'<b>'+tg+' g</b>'})}<span class="calib-sub">${esc(tf('prot.okfrom',{g:ok}))}</span></div>`
       +`<div class="calib-meta">${esc(why)}</div>`
       +`<div class="calib-meta">${esc(tf('prot.relax',{ok:ok}))}</div>`
@@ -1268,47 +1251,47 @@ function drawProtein(){
     const b=$("protAutoBtn"); if(b) b.onclick=protUseAuto;
   }
   const mp=$("mpCurrent"); if(mp) mp.textContent=t(own ? 'prot.byhand' : 'prot.auto');
-  document.querySelectorAll('#segSex button').forEach(b=>b.classList.toggle('on', b.dataset.s===settings.sex));
+  document.querySelectorAll('#segSex button').forEach(b=>b.classList.toggle('on', b.dataset.s===S.settings.sex));
   const bn=$("bfNote");
-  if(bn) bn.textContent = t(settings.sex==='female' ? 'bf.female' : 'bf.male');
+  if(bn) bn.textContent = t(S.settings.sex==='female' ? 'bf.female' : 'bf.male');
 }
 async function protUseAuto(){
-  settings.protFloor=null;
+  S.settings.protFloor=null;
   await persistSettings(); render();
   flash(tf('msg.protauto',{n:protTarget()}));
 }
 async function setProtManual(){
   const v=num($("manualProt").value);
   if(v==null||v<30||v>400){ flash(t('msg.enterfloor'),true); return; }
-  settings.protFloor=Math.round(v);
+  S.settings.protFloor=Math.round(v);
   $("manualProt").value='';
   await persistSettings(); render();
-  flash(tf('msg.floorset',{n:settings.protFloor}));
+  flash(tf('msg.floorset',{n:S.settings.protFloor}));
 }
 async function setSex(sx){
-  settings.sex = (sx==='female') ? 'female' : 'male';
+  S.settings.sex = (sx==='female') ? 'female' : 'male';
   await persistSettings();
   let n=0;
-  entries.forEach(e=>{
+  S.entries.forEach(e=>{
     if(!e.meas) return;
     if(e.bfSrc==='manual') return;
     const h=e.height!=null?e.height:lastNumOf(x=>x.height);
-    const v=bfNavy(e.meas, h, settings.sex);
+    const v=bfNavy(e.meas, h, S.settings.sex);
     if(v!=null && (e.bf==null || Math.abs(v-e.bf)>0.05)){ e.bf=v; n++; }
   });
   if(n) await persist();
   render();
   bfModeSet(bfMode(), false);
-  flash(tf('msg.sexset',{sex:t('prof.'+settings.sex)})+(settings.protFloor==null?(' · '+tf('msg.protauto',{n:protTarget()})):'')+(n?(' · '+tn('msg.recalcd',n)):''));
+  flash(tf('msg.sexset',{sex:t('prof.'+S.settings.sex)})+(S.settings.protFloor==null?(' · '+tf('msg.protauto',{n:protTarget()})):'')+(n?(' · '+tn('msg.recalcd',n)):''));
 }
 
 function drawColl(){
   const wrap=$("collWrap"); if(!wrap) return;
   const q=($("collSearch")?$("collSearch").value:'').trim().toLowerCase();
   const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
-  const pool=CATALOGUE.filter(hit).sort(exOrder);
+  const pool=S.catalogue.filter(hit).sort(exOrder);
   const row=ex=>{
-    const days=entries.filter(e=>liftsOf(e,ex.key).length).length;
+    const days=S.entries.filter(e=>liftsOf(e,ex.key).length).length;
     const inDays=DAYS.filter(d=>sessionEx(d.key).indexOf(ex.key)>=0).map(d=>dayShort(d.key));
     const bits=[loadDesc(ex)];
     bits.push((ex.prim && ex.prim.length) ? ex.prim.map(m=>t('mus.'+m)).join(', ') : t('coll.nomus'));
@@ -1328,20 +1311,20 @@ function drawColl(){
 function drawReview(){
   const grid=$("revGrid"); if(!grid) return;
   const today=localDate(), start=weekStart(today), todayIdx=new Date(today+'T12:00:00').getDay();
-  const wk=entries.filter(e=>e.date>=start && e.date<=today), ptg=protTarget(), pok=protOk(), tgt=settings.kcalTarget;
+  const wk=S.entries.filter(e=>e.date>=start && e.date<=today), ptg=protTarget(), pok=protOk(), tgt=S.settings.kcalTarget;
   const done=wk.filter(trained), planned=sessionTarget(), cr=calRecommend(), rec=cr.enough ? cr.target : null;
   const plannedSoFar=DAYS.filter((d,i)=>i<=todayIdx && sessionEx(d.key).length).length;
   const recs=[];
-  CATALOGUE.forEach(ex=>{
-    const all=entries.map(e=>({date:e.date, sets:liftsOf(e,ex.key)})).filter(s=>s.sets.length);
+  S.catalogue.forEach(ex=>{
+    const all=S.entries.map(e=>({date:e.date, sets:liftsOf(e,ex.key)})).filter(s=>s.sets.length);
     const before=all.filter(s=>s.date<start), inWk=all.filter(s=>s.date>=start);
     if(before.length && inWk.length && recordsBeaten(ex, recordsOf(ex,before), recordsOf(ex,inWk)).length) recs.push(ex.short||ex.name);
   });
-  const wp=entries.filter(e=>e.weight!=null), dW=weekTrendChange(wp,start), wIn=wp.some(e=>e.date>=start);
+  const wp=S.entries.filter(e=>e.weight!=null), dW=weekTrendChange(wp,start), wIn=wp.some(e=>e.date>=start);
   const kd=wk.filter(e=>kcalOf(e)!=null), pd=wk.filter(e=>protOf(e)!=null);
   const kAvg=kd.length ? Math.round(kd.reduce((a,e)=>a+kcalOf(e),0)/kd.length) : null;
   const pAvg=pd.length ? Math.round(pd.reduce((a,e)=>a+protOf(e),0)/pd.length) : null;
-  const w=weekVolume(), mv=w.vol, mute=settings.volMute||[], lo=settings.volLo, hi=settings.volHi;
+  const w=weekVolume(), mv=w.vol, mute=S.settings.volMute||[], lo=S.settings.volLo, hi=S.settings.volHi;
   const tagged=MUSCLE_KEYS.some(k=>mv[k]>0);
   const cnt={ok:0, track:0, low:0, sofar:0, high:0, muted:0};
   MUSCLE_KEYS.forEach(k=>{ cnt[weekState(k, w, lo, hi, mute)]++; });
@@ -1358,7 +1341,7 @@ function drawReview(){
   if(!wk.length) one=t('rev.one.empty');
   else if(plannedSoFar && done.length<plannedSoFar) one=tf('rev.one.sessions',{n:done.length, planned:plannedSoFar});
   else if(pd.length>=3 && pAvg<pok) one=tf('rev.one.protein',{avg:pAvg, ok:pok});
-  else if(rec!=null && !settings.kcalOwn && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
+  else if(rec!=null && !S.settings.kcalOwn && Math.abs(rec-tgt)>=100) one=tf('rev.one.target',{rec:rec.toLocaleString(), target:tgt.toLocaleString()});
   else if(kd.length>=4 && Math.abs(kAvg-tgt)>tgt*0.1) one=tf(kAvg>tgt?'rev.one.over':'rev.one.under',{avg:kAvg.toLocaleString(), target:tgt.toLocaleString()});
   else if(gap) one=tf('rev.one.muscle',{name:t('mus.'+gap.key)});
   else one=t('rev.one.ok');
@@ -1366,7 +1349,7 @@ function drawReview(){
 }
 
 const BACKUP_DAYS = 14;
-let lastBackup=null, bakSnoozed=false;
+let bakSnoozed=false;
 let instPrompt=null;
 const INST_SNOOZE='tally:instSnooze';
 const instIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
@@ -1418,15 +1401,15 @@ function instLater(){ try{ localStorage.setItem(INST_SNOOZE, String(Date.now()))
 window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); instPrompt=e; drawInstall(); });
 window.addEventListener('appinstalled', ()=>{ instPrompt=null; drawInstall(); flash(t('inst.done')); });
 async function loadBackupDate(){
-  try{ const v=await STORE.get(BKEY); lastBackup=(typeof v==='string' && validDate(v)) ? v : null; }catch(e){ lastBackup=null; }
+  try{ const v=await STORE.get(BKEY); S.lastBackup=(typeof v==='string' && validDate(v)) ? v : null; }catch(e){ S.lastBackup=null; }
 }
-async function markBackedUp(){ lastBackup=localDate(); try{ await STORE.set(BKEY, lastBackup); }catch(e){} drawBackup(); }
-const backupAge = () => lastBackup ? dnum(localDate())-dnum(lastBackup) : null;
+async function markBackedUp(){ S.lastBackup=localDate(); try{ await STORE.set(BKEY, S.lastBackup); }catch(e){} drawBackup(); }
+const backupAge = () => S.lastBackup ? dnum(localDate())-dnum(S.lastBackup) : null;
 function backupDue(){
-  if(!entries.length) return false;
+  if(!S.entries.length) return false;
   const age=backupAge();
-  if(age==null) return dnum(localDate())-dnum(entries[0].date)>=7;
-  return age>=BACKUP_DAYS && entries.some(e=>e.date>lastBackup);
+  if(age==null) return dnum(localDate())-dnum(S.entries[0].date)>=7;
+  return age>=BACKUP_DAYS && S.entries.some(e=>e.date>S.lastBackup);
 }
 function drawBackup(){
   const age=backupAge(), line=$("bakLine");
@@ -1438,7 +1421,7 @@ function drawBackup(){
 }
 function bakFromNudge(){
   saveBackupFile();
-  if(lastBackup!==localDate()) $("bakNudgeText").textContent=$("syncMsg").textContent || t('sync.writefail');
+  if(S.lastBackup!==localDate()) $("bakNudgeText").textContent=$("syncMsg").textContent || t('sync.writefail');
 }
 
 function drawVersion(){
@@ -1457,10 +1440,10 @@ let guideMus=null, guideAll=false, guideMode='p', guideEq='';
 const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
 function libOwned(l){
   const nm=t('lib.'+l.key).toLowerCase();
-  return CATALOGUE.find(x=>x.lib===l.key || x.name.toLowerCase()===nm) || null;
+  return S.catalogue.find(x=>x.lib===l.key || x.name.toLowerCase()===nm) || null;
 }
 const libLive = l => { const o=libOwned(l); return !!o && !o.retired; };
-const libUsable = l => !gym.set || libAvailable(l, gym.have);
+const libUsable = l => !S.gym.set || libAvailable(l, S.gym.have);
 function sxLibRow(l){
   const ok=libUsable(l), have=sxOwned(l);
   const eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.noeq');
@@ -1482,7 +1465,7 @@ function drawSxWeek(){
   const wrap=$("sxWeek"); if(!wrap) return;
   const start=weekStart(), today=localDate(), cnt={}, plain=new Set();
   MUSCLE_KEYS.forEach(k=>cnt[k]=0);
-  entries.filter(e=>e.date>=start && e.date<=today && e.mob).forEach(e=>Object.keys(e.mob).forEach(k=>{
+  S.entries.filter(e=>e.date>=start && e.date<=today && e.mob).forEach(e=>Object.keys(e.mob).forEach(k=>{
     const st=stretchByKey(k); if(!st) return;
     if(!st.mus || !st.mus.length){ plain.add(st.name); return; }
     st.mus.forEach(m=>{ if(m in cnt) cnt[m]++; });
@@ -1511,8 +1494,8 @@ function libRow(l){
 }
 function weekVolume(){
   const today=localDate(), start=weekStart(today), todayIdx=new Date(today+'T12:00:00').getDay();
-  const done=muscleVolume(entries.filter(e=>e.date>=start && e.date<=today), exByKey);
-  const cur=entries.find(e=>e.date===today);
+  const done=muscleVolume(S.entries.filter(e=>e.date>=start && e.date<=today), exByKey);
+  const cur=S.entries.find(e=>e.date===today);
   const plan={}; MUSCLE_KEYS.forEach(k=>plan[k]=0);
   DAYS.forEach((d,i)=>{
     if(i<todayIdx) return;
@@ -1528,7 +1511,7 @@ function weekVolume(){
 }
 function drawGuide(){
   const wrap=$("volWrap"); if(!wrap) return;
-  const lo=settings.volLo, hi=settings.volHi, mute=settings.volMute||[];
+  const lo=S.settings.volLo, hi=S.settings.volHi, mute=S.settings.volMute||[];
   const w=weekVolume(), vol=w.vol;
   const stOf=k=>weekState(k, w, lo, hi, mute);
   [["volLo",lo],["volHi",hi]].forEach(([id,v])=>{ const el=$(id); if(el && document.activeElement!==el) el.value=v; });
@@ -1549,7 +1532,7 @@ function drawGuide(){
   const names=w.untagged.map(k=>{ const ex=exByKey(k); return ex ? ex.name : k; });
   const start=weekStart();
   $("volNote").textContent = names.length ? tf('guide.untagged',{list:names.join(', ')})
-    : (entries.some(e=>e.date>=start && Object.keys(e.lifts||{}).length) ? '' : t('guide.novol'));
+    : (S.entries.some(e=>e.date>=start && Object.keys(e.lifts||{}).length) ? '' : t('guide.novol'));
 
   const low=MUSCLES.filter(m=>w.proj[m.key]<lo && mute.indexOf(m.key)<0).sort((a,b)=>w.proj[a.key]-w.proj[b.key]);
   const focus=low.slice(0,4);
@@ -1577,7 +1560,7 @@ function drawGuide(){
   $("browseEq").innerHTML=`<option value="">${esc(tf('guide.eq.any',{n:pool.length}))}</option>`
     + eqOpts.map(q=>`<option value="${q}"${q===guideEq?' selected':''}>${esc(tf('guide.eq.item',{name:t(q==='none'?'guide.eq.none':'eq.'+q), n:eqN(q)}))}</option>`).join('');
   $("browseEq").value=guideEq;
-  const ab=$("browseAll"); ab.style.display=gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
+  const ab=$("browseAll"); ab.style.display=S.gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
   const mn=t('mus.'+guideMus);
   $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : guideMode==='x' ? 'guide.count.x' : 'guide.count', list.length, {name:mn});
   $("browseWrap").innerHTML = list.length ? (guideMode==='x' ? list.map(sxLibRow).join('') : bwSplit(list, l=>l.lv, libRow, 'reclbl'))
@@ -1595,65 +1578,65 @@ async function libToCollection(k){
   const def=normCustomEx({key:cxKeyFor(name), name:name, group:muscleGrp(l.p[0]), def:0,
     added:l.ld==='bw', unit:l.ld==='sec' ? 'sec' : null, prim:l.p, sec:l.s, lib:k});
   if(!def) return null;
-  customEx.push(def);
-  if(!await persistCatalogue()){ customEx.pop(); rebuildCatalogue(); return null; }
+  S.customEx.push(def);
+  if(!await persistCatalogue()){ S.customEx.pop(); rebuildCatalogue(); return null; }
   return def.key;
 }
 async function guideAdd(k){
   if(await libToCollection(k)) render();
 }
 async function volMuteToggle(k){
-  const m=settings.volMute||(settings.volMute=[]), i=m.indexOf(k);
+  const m=S.settings.volMute||(S.settings.volMute=[]), i=m.indexOf(k);
   if(i>=0) m.splice(i,1); else m.push(k);
   await persistSettings(); render();
 }
 async function volBandPick(v){
   const [lo,hi]=v.split('-').map(Number);
-  settings.volLo=lo; settings.volHi=hi; await persistSettings(); render();
+  S.settings.volLo=lo; S.settings.volHi=hi; await persistSettings(); render();
 }
 async function volBandSet(){
   const lo=parseInt($("volLo").value,10), hi=parseInt($("volHi").value,10);
-  if(!isNaN(lo) && !isNaN(hi) && lo>=0 && hi<=100 && lo<hi){ settings.volLo=lo; settings.volHi=hi; await persistSettings(); }
+  if(!isNaN(lo) && !isNaN(hi) && lo>=0 && hi<=100 && lo<hi){ S.settings.volLo=lo; S.settings.volHi=hi; await persistSettings(); }
   render();
 }
 
 function drawGym(){
   const wrap=$("gymWrap"); if(!wrap) return;
   const item=q=>{
-    const on=gym.have.indexOf(q)>=0, n=ALL_LIBS().filter(l=>l.eq.indexOf(q)>=0).length;
+    const on=S.gym.have.indexOf(q)>=0, n=ALL_LIBS().filter(l=>l.eq.indexOf(q)>=0).length;
     return `<button type="button" class="gymitem${on?' on':''}" data-eq="${q}"><span class="box"></span>`
       + `<span>${esc(t('eq.'+q))}<span class="sub">${esc(tn('gym.uses',n))}</span></span></button>`;
   };
   wrap.innerHTML=EQUIP_GROUPS.map(g=>{
-    const have=g.items.filter(q=>gym.have.indexOf(q)>=0).length;
+    const have=g.items.filter(q=>S.gym.have.indexOf(q)>=0).length;
     return `<div class="gymgrp">${esc(t('gym.grp.'+g.key))}<span>${esc(tf('gym.grp.have',{n:have, total:g.items.length}))}</span></div>`
       + `<div class="gymgrid">${g.items.slice().sort((a,b)=>byName(t('eq.'+a), t('eq.'+b))).map(item).join('')}</div>`;
   }).join('');
-  $("gymCount").textContent = gym.set ? tf('gym.count',{n:ALL_LIBS().filter(l=>libAvailable(l, gym.have)).length, total:ALL_LIBS().length}) : t('gym.unset');
-  $("gymOwn").innerHTML = gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
+  $("gymCount").textContent = S.gym.set ? tf('gym.count',{n:ALL_LIBS().filter(l=>libAvailable(l, S.gym.have)).length, total:ALL_LIBS().length}) : t('gym.unset');
+  $("gymOwn").innerHTML = S.gym.own.map(o=>`<div class="collrow"><div class="collname">${esc(o.name)}</div>`
     + `<button type="button" class="collbtn" data-gdel="${esc(o.key)}" aria-label="${esc(t('btn.remove'))}">✕</button></div>`).join('');
 
 }
 async function gymToggle(q){
-  const i=gym.have.indexOf(q);
-  if(i>=0) gym.have.splice(i,1); else gym.have.push(q);
-  gym.set=true; await persistGym(); render();
+  const i=S.gym.have.indexOf(q);
+  if(i>=0) S.gym.have.splice(i,1); else S.gym.have.push(q);
+  S.gym.set=true; await persistGym(); render();
 }
 async function gymAddOwn(){
   const el=$("gymName"), name=el.value.trim(); if(!name) return;
-  gym=normGym({set:gym.set, have:gym.have, own:gym.own.concat([{name:name}])});
+  S.gym=normGym({set:S.gym.set, have:S.gym.have, own:S.gym.own.concat([{name:name}])});
   el.value=''; await persistGym(); drawGym();
 }
-async function gymDelOwn(k){ gym.own=gym.own.filter(o=>o.key!==k); await persistGym(); drawGym(); }
+async function gymDelOwn(k){ S.gym.own=S.gym.own.filter(o=>o.key!==k); await persistGym(); drawGym(); }
 
 function dayEntry(){
   const date=$("fDate").value;
   if(!date) return null;
-  if(loadFailed){ flash(t('msg.loadfail.save'),true); return null; }
-  let e=entries.find(x=>x.date===date);
+  if(S.loadFailed){ flash(t('msg.loadfail.save'),true); return null; }
+  let e=S.entries.find(x=>x.date===date);
   if(!e){
     e=normEntry({date:date, day:$("fDay").value}); if(!e) return null;
-    entries.push(e); entries.sort((a,b)=>a.date.localeCompare(b.date));
+    S.entries.push(e); S.entries.sort((a,b)=>a.date.localeCompare(b.date));
   }
   return e;
 }
@@ -1665,7 +1648,7 @@ async function toggleFast(){
 }
 function drawFast(){
   const b=$("fastBtn"); if(!b) return;
-  const cur=entries.find(e=>e.date===$("fDate").value), on=!!(cur && cur.fast);
+  const cur=S.entries.find(e=>e.date===$("fDate").value), on=!!(cur && cur.fast);
   b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on));
   b.textContent=t(on?'f.fast.on':'f.fast');
 }
@@ -1680,14 +1663,14 @@ async function setMobLog(key, total, sets){
   drawMob(); stale('history');
 }
 function toggleMob(key){
-  const cur=entries.find(e=>e.date===$("fDate").value);
+  const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.mob && (key in cur.mob));
   const s=stretchByKey(key), n=(s && s.sets) || 1, per=s ? sxTarget(s) : 0, done=on ? mobSetsOf(cur,key) : 0;
   if(on && done>=n) return setMobLog(key, null);
   return setMobLog(key, (on ? cur.mob[key] : 0)+per, done+1);
 }
 function mobSetAdd(key, amount){
-  const cur=entries.find(e=>e.date===$("fDate").value);
+  const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.mob && (key in cur.mob));
   return setMobLog(key, (on ? cur.mob[key] : 0)+amount, (on ? mobSetsOf(cur,key) : 0)+1);
 }
@@ -1706,7 +1689,7 @@ function mobRowHtml(s, mob, gone, ms){
   const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
   return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(s.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
-    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(S.planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="${tgt||0}" value="${on?Math.round(mob[s.key]/done):''}" aria-label="${esc(t(reps?'sx.reps':'sx.hold'))}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${go}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
@@ -1719,7 +1702,7 @@ function dayLogKeys(plan, today, log){
 }
 const logPinned = (plan, key) => (plan[$("fDay").value]||[]).indexOf(key)>=0;
 async function toggleLogPin(kind, key){
-  const plan=kind==='sx'?planSx:planCd, dayKey=$("fDay").value, list=plan[dayKey]||(plan[dayKey]=[]), i=list.indexOf(key);
+  const plan=kind==='sx'?S.planSx:S.planCd, dayKey=$("fDay").value, list=plan[dayKey]||(plan[dayKey]=[]), i=list.indexOf(key);
   if(i>=0){ list.splice(i,1); if(!list.length) delete plan[dayKey]; const today=kind==='sx'?sxToday:cdToday, date=$("fDate").value; (today[date]||(today[date]=[])).push(key); }
   else list.push(key);
   await persistPlan(); if(kind==='sx') drawMob(); else drawCardio();
@@ -1728,10 +1711,10 @@ const pinTag = (pinned, dayKey) => `<button type="button" class="xtag mobpin${pi
 function drawMob(){
   const wrap=$("mobWrap"); if(!wrap) return;
   const date=$("fDate").value;
-  const cur=entries.find(e=>e.date===date);
+  const cur=S.entries.find(e=>e.date===date);
   const mob=(cur && cur.mob)?cur.mob:{};
   const dd=$("mobDate"); if(dd) dd.textContent=fmtDMY(date);
-  const keys=dayLogKeys(planSx, sxToday, mob);
+  const keys=dayLogKeys(S.planSx, sxToday, mob);
   const list=keys.map(stretchByKey).filter(s=>s && !s.retired);
   const orphan=keys.filter(k=>!list.some(s=>s.key===k) && (k in mob));
   if(!list.length && !orphan.length){
@@ -1768,14 +1751,14 @@ async function setCardioLog(key, total, sets){
   drawCardio(); stale('history');
 }
 function toggleCardio(key){
-  const cur=entries.find(e=>e.date===$("fDate").value);
+  const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.cardio && (key in cur.cardio));
   const c=cardioByKey(key), n=(c && c.sets) || 1, per=c ? (c.mins||0) : 0, done=on ? cdSetsOf(cur,key) : 0;
   if(on && done>=n) return setCardioLog(key, null);
   return setCardioLog(key, (on ? cur.cardio[key] : 0)+per, done+1);
 }
 function cdSetAdd(key, mins){
-  const cur=entries.find(e=>e.date===$("fDate").value);
+  const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.cardio && (key in cur.cardio));
   return setCardioLog(key, (on ? cur.cardio[key] : 0)+mins, (on ? cdSetsOf(cur,key) : 0)+1);
 }
@@ -1788,7 +1771,7 @@ function cdRowEdit(row){
 function startCardioTimer(key){
   const c=cardioByKey(key);
   if(!c || !c.mins){ flash(t('msg.needmins')); return; }
-  timerStart({kind:'cardio', key:key, label:c.name, hold:c.mins*60, lead:settings.mobLead||0});
+  timerStart({kind:'cardio', key:key, label:c.name, hold:c.mins*60, lead:S.settings.mobLead||0});
 }
 function cdRowHtml(c, log, gone, ms){
   const on=(c.key in log), sets=c.sets||1, done=on ? ((ms && ms[c.key]) || 1) : 0;
@@ -1796,7 +1779,7 @@ function cdRowHtml(c, log, gone, ms){
   const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
   return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(c.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(planCd,c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(S.planCd,c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="${c.mins||0}" value="${on?Math.round(log[c.key]/done):''}" aria-label="${esc(t('cdx.mins'))}"><span class="mobu">${esc(t('unit.min'))}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
@@ -1805,10 +1788,10 @@ function cdRowHtml(c, log, gone, ms){
 function drawCardio(){
   const wrap=$("cdWrap"); if(!wrap) return;
   const date=$("fDate").value;
-  const cur=entries.find(e=>e.date===date);
+  const cur=S.entries.find(e=>e.date===date);
   const log=(cur && cur.cardio)?cur.cardio:{};
   const dd=$("cdDate"); if(dd) dd.textContent=fmtDMY(date);
-  const keys=dayLogKeys(planCd, cdToday, log);
+  const keys=dayLogKeys(S.planCd, cdToday, log);
   const list=keys.map(cardioByKey).filter(c=>c && !c.retired);
   const orphan=keys.filter(k=>!list.some(c=>c.key===k) && (k in log));
   if(!list.length && !orphan.length){
@@ -1846,11 +1829,11 @@ async function cdSave(){
     if(!upd){ cdMsg(t('msg.badname'),true); return; }
     Object.assign(c, upd);
   }else{
-    if(cardios.some(x=>x.name.toLowerCase()===name.toLowerCase())){ cdMsg(t('msg.onlist'),true); return; }
+    if(S.cardios.some(x=>x.name.toLowerCase()===name.toLowerCase())){ cdMsg(t('msg.onlist'),true); return; }
     const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value, sets:$("cdSets").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
-    cardios.push(c);
-    if(cdPinDay){ (planCd[cdPinDay]||(planCd[cdPinDay]=[])).push(c.key); await persistPlan(); }
+    S.cardios.push(c);
+    if(cdPinDay){ (S.planCd[cdPinDay]||(S.planCd[cdPinDay]=[])).push(c.key); await persistPlan(); }
   }
   const ok=await persistCardio();
   if(!ok){ cdMsg(t('msg.savefail'),true); return; }
@@ -1859,7 +1842,7 @@ async function cdSave(){
 async function cdDelete(){
   if(!cdEditing) return;
   const c=cardioByKey(cdEditing); if(!c) return;
-  const days=entries.filter(e=>e.cardio && (c.key in e.cardio)).length;
+  const days=S.entries.filter(e=>e.cardio && (c.key in e.cardio)).length;
   if(!cdDelArmed){
     cdDelArmed=true;
     $("cdDelete").textContent=t('btn.tapagain');
@@ -1868,9 +1851,9 @@ async function cdDelete(){
     return;
   }
   cdResetDel();
-  cardios=cardios.filter(x=>x.key!==c.key);
-  unpinLog(planCd, c.key); await persistPlan();
-  entries.forEach(e=>{ if(e.cardio && (c.key in e.cardio)){ delete e.cardio[c.key]; if(!Object.keys(e.cardio).length) e.cardio=null; } });
+  S.cardios=S.cardios.filter(x=>x.key!==c.key);
+  unpinLog(S.planCd, c.key); await persistPlan();
+  S.entries.forEach(e=>{ if(e.cardio && (c.key in e.cardio)){ delete e.cardio[c.key]; if(!Object.keys(e.cardio).length) e.cardio=null; } });
   await persistCardio(); await persist();
   cdClose(); render();
   flash(tf('msg.removed',{name:c.name}));
@@ -1919,12 +1902,12 @@ async function sxSave(){
     if(!upd){ sxMsg(t('msg.badname'),true); return; }
     Object.assign(s, upd);
   }else{
-    if(stretches.some(x=>x.name.toLowerCase()===name.toLowerCase())){ sxMsg(t('msg.onlist'),true); return; }
+    if(S.stretches.some(x=>x.name.toLowerCase()===name.toLowerCase())){ sxMsg(t('msg.onlist'),true); return; }
     const s=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null,
       secs:reps?0:v, reps:reps?v:0, sets:$("sxSets").value, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
-    stretches.push(s);
-    if(sxPinDay){ (planSx[sxPinDay]||(planSx[sxPinDay]=[])).push(s.key); await persistPlan(); }
+    S.stretches.push(s);
+    if(sxPinDay){ (S.planSx[sxPinDay]||(S.planSx[sxPinDay]=[])).push(s.key); await persistPlan(); }
   }
   const ok=await persistStretches();
   if(!ok){ sxMsg(t('msg.savefail'),true); return; }
@@ -1933,7 +1916,7 @@ async function sxSave(){
 async function sxDelete(){
   if(!sxEditing) return;
   const s=stretchByKey(sxEditing); if(!s) return;
-  const days=entries.filter(e=>e.mob && (s.key in e.mob)).length;
+  const days=S.entries.filter(e=>e.mob && (s.key in e.mob)).length;
   if(!sxDelArmed){
     sxDelArmed=true;
     $("sxDelete").textContent=t('btn.tapagain');
@@ -1942,9 +1925,9 @@ async function sxDelete(){
     return;
   }
   sxResetDel();
-  stretches=stretches.filter(x=>x.key!==s.key);
-  unpinLog(planSx, s.key); await persistPlan();
-  entries.forEach(e=>{ if(e.mob && (s.key in e.mob)){ delete e.mob[s.key]; if(!Object.keys(e.mob).length) e.mob=null; } });
+  S.stretches=S.stretches.filter(x=>x.key!==s.key);
+  unpinLog(S.planSx, s.key); await persistPlan();
+  S.entries.forEach(e=>{ if(e.mob && (s.key in e.mob)){ delete e.mob[s.key]; if(!Object.keys(e.mob).length) e.mob=null; } });
   await persistStretches(); await persist();
   sxClose(); render();
   flash(tf('msg.removed',{name:s.name}));
@@ -1985,7 +1968,7 @@ function fillForm(date){
 }
 function fillBody(date){
   setDateDisplay(date);
-  const cur=entries.find(e=>e.date===date);
+  const cur=S.entries.find(e=>e.date===date);
   const dayKey=(cur && cur.day) ? cur.day : weekdayKey(date);
   $("fDay").value=dayKey;
   const wHint=lastNumOf(e=>e.weight);
@@ -2006,7 +1989,7 @@ function fillBody(date){
 }
 
 const PAGE_DRAW = {
-  body:     () => { drawBodyStats(); drawWeight(entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
+  body:     () => { drawBodyStats(); drawWeight(S.entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
   workout:  () => { drawPlates(); drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
   guide:    () => drawGuide(),
   gym:      () => drawGym(),
@@ -2022,31 +2005,31 @@ function render(){
   drawPage(curPage);
 }
 function drawBodyStats(){
-  const weighed=entries.filter(e=>e.weight!=null);
+  const weighed=S.entries.filter(e=>e.weight!=null);
   const latestW=weighed.length?weighed[weighed.length-1]:null;
   if(latestW){
     $("wNow").innerHTML=latestW.weight.toFixed(1)+'<small>kg</small>';
     $("wDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.weight,7),'kg') + fmtDelta(t('stat.d30'),deltaOf(e=>e.weight,30),'kg');
   }
-  const bfE=entries.filter(e=>e.bf!=null), lbf=bfE.length?bfE[bfE.length-1]:null;
+  const bfE=S.entries.filter(e=>e.bf!=null), lbf=bfE.length?bfE[bfE.length-1]:null;
   const bfSub=document.querySelector('#bfCard .sub-note');
   if(bfSub) bfSub.textContent=t(lbf && lbf.bfSrc==='manual' ? 'stat.bf.manual' : 'stat.bf.calc');
   if(lbf){
     $("bfNow").innerHTML=lbf.bf.toFixed(1)+'<small>%</small>';
     $("bfDelta").innerHTML = fmtDelta(t('stat.d7'),deltaOf(e=>e.bf,7),'%') + fmtDelta(t('stat.d30'),deltaOf(e=>e.bf,30),'%');
   }
-  const wk7=entries.filter(e=>within7(e.date));
+  const wk7=S.entries.filter(e=>within7(e.date));
   const avg7=get=>{ const v=wk7.map(get).filter(x=>x!=null); return {avg:v.length ? Math.round(v.reduce((a,x)=>a+x,0)/v.length) : null, logged:v.length}; };
   const k7=avg7(kcalOf), p7=avg7(protOf), kcalAvg=k7.avg, protAvg=p7.avg;
   $("mKcal").textContent=kcalAvg!=null?kcalAvg+' kcal':'—';
-  const kb=kcalBand(settings.kcalTarget), ks=kcalState(kcalAvg, settings.kcalTarget);
-  $("mKcalTarget").textContent=tf(ks==='verylow' ? 'stat.targetlow' : 'stat.targetn',{n:settings.kcalTarget, lo:kb.lo, hi:kb.hi, min:kb.min, logged:k7.logged});
+  const kb=kcalBand(S.settings.kcalTarget), ks=kcalState(kcalAvg, S.settings.kcalTarget);
+  $("mKcalTarget").textContent=tf(ks==='verylow' ? 'stat.targetlow' : 'stat.targetn',{n:S.settings.kcalTarget, lo:kb.lo, hi:kb.hi, min:kb.min, logged:k7.logged});
   const dk=$("dKcal"); if(dk){ dk.className='dot '+{ok:'ok', under:'mid', over:'bad', verylow:'bad', none:'no'}[ks]; dk.title=t('dot.kcal.'+ks); dk.setAttribute('aria-label', dk.title); }
   $("mProt").textContent=protAvg!=null?protAvg+' g':'—';
   const lp=$("lProt"); if(lp) lp.textContent=tf('stat.protavg',{target:protTarget(), ok:protOk()});
   setDot("dProt",protAvg==null?0:protAvg,protOk(),Math.round(protOk()*0.8));
   const dp=$("dProt"); if(dp){ dp.title=t(protAvg==null ? 'dot.prot.none' : 'dot.prot.'+dp.className.split(' ')[1]); dp.setAttribute('aria-label', dp.title); }
-  $("mToday").textContent=entries.length?fmtDM(entries[entries.length-1].date):'—';
+  $("mToday").textContent=S.entries.length?fmtDM(S.entries[S.entries.length-1].date):'—';
   calcHint('fKcal'); calcHint('fProt');
 }
 function fmtDelta(lbl, d, unit){
@@ -2231,8 +2214,8 @@ function chartScrubBind(id){
   svg.addEventListener('pointerup', ()=>{ if(id in SCRUB) chartScrubEnd(id, true); });
   svg.addEventListener('pointercancel', ()=>{ if(id in SCRUB) chartScrubEnd(id, false); });
 }
-const entryOn = d => entries.find(e=>e.date===d);
-function prevWith(d, get){ for(let i=entries.length-1;i>=0;i--){ const e=entries[i]; if(e.date<d && get(e)!=null) return e; } return null; }
+const entryOn = d => S.entries.find(e=>e.date===d);
+function prevWith(d, get){ for(let i=S.entries.length-1;i>=0;i--){ const e=S.entries[i]; if(e.date<d && get(e)!=null) return e; } return null; }
 CHART_DETAIL.wChart = d => {
   const e=entryOn(d); if(!e) return '';
   const tr=CHART.wChart.trend && CHART.wChart.trend.get(d), pv=prevWith(d, x=>x.weight);
@@ -2271,7 +2254,7 @@ CHART_DETAIL.cdChart = d => { const e=entryOn(d); return e && e.cardio ? logRows
 
 function exSessions(key){
   const bwFallback=lastNumOf(e=>e.weight)||BW_FALLBACK;
-  return entries.filter(e=>liftsOf(e,key).length)
+  return S.entries.filter(e=>liftsOf(e,key).length)
     .map(e=>({date:e.date, sets:e.lifts[key], bw:(e.weight!=null?e.weight:bwFallback)}))
     .sort((a,b)=>a.date.localeCompare(b.date));
 }
@@ -2292,8 +2275,8 @@ function buildAbsSeries(key){
 }
 function chartCandidates(){
   const plan=planKeys();
-  const lastAt=k=>{ for(let i=entries.length-1;i>=0;i--) if(liftsOf(entries[i],k).length) return entries[i].date; return ''; };
-  return CATALOGUE.filter(ex=>entries.some(e=>inChartWin(e.date) && liftsOf(e,ex.key).length)).sort((a,b)=>{
+  const lastAt=k=>{ for(let i=S.entries.length-1;i>=0;i--) if(liftsOf(S.entries[i],k).length) return S.entries[i].date; return ''; };
+  return S.catalogue.filter(ex=>S.entries.some(e=>inChartWin(e.date) && liftsOf(e,ex.key).length)).sort((a,b)=>{
     const pa=plan.indexOf(a.key), pb=plan.indexOf(b.key);
     if(pa>=0 && pb>=0) return pa-pb;
     if(pa>=0) return -1;
@@ -2303,24 +2286,24 @@ function chartCandidates(){
 }
 function chartSelection(){
   const avail=chartCandidates().map(e=>e.key);
-  const saved=settings.chartEx;
+  const saved=S.settings.chartEx;
   if(saved==null) return avail.filter(k=>planKeys().indexOf(k)>=0).slice(0,MAX_SERIES);
   return saved.filter(k=>avail.indexOf(k)>=0).slice(0,MAX_SERIES);
 }
 async function toggleChartEx(key){
   const avail=chartCandidates().map(e=>e.key);
-  const all=settings.chartEx==null ? chartSelection().slice() : settings.chartEx.slice(), i=all.indexOf(key);
+  const all=S.settings.chartEx==null ? chartSelection().slice() : S.settings.chartEx.slice(), i=all.indexOf(key);
   if(i>=0) all.splice(i,1);
   else{
     if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $("strNote").textContent=t('chart.max'); return; }
     all.push(key);
   }
-  settings.chartEx=all; await persistSettings(); drawStrength();
+  S.settings.chartEx=all; await persistSettings(); drawStrength();
 }
 function absSummary(a){
   const sess=exSessions(a.ex.key), last=sess[sess.length-1];
   const best=Math.max(...sess.map(s=>sessionMetric(a.ex,s.sets,s.bw).val));
-  const wk=entries.filter(e=>within7(e.date) && liftsOf(e,a.ex.key).length);
+  const wk=S.entries.filter(e=>within7(e.date) && liftsOf(e,a.ex.key).length);
   const bwFallback=lastNumOf(e=>e.weight)||BW_FALLBACK;
   const wkTot=wk.reduce((sum,e)=>sum+sessionMetric(a.ex,e.lifts[a.ex.key],(e.weight!=null?e.weight:bwFallback)).val,0);
   const u=a.unit==='kg'?' kg':a.unit==='sec'?' s':' reps';
@@ -2329,7 +2312,7 @@ function absSummary(a){
 }
 function drawStrength(){
   const avail=chartCandidates(), sel=chartSelection(), note=$("strNote"), pick=$("strPick");
-  chartFoldDraw('str', entries.some(trained));
+  chartFoldDraw('str', S.entries.some(trained));
   pick.innerHTML=avail.map(ex=>{
     const i=sel.indexOf(ex.key), on=i>=0;
     return `<button type="button" class="exchip${on?' on':''}" data-k="${esc(ex.key)}" aria-pressed="${on}">`+
@@ -2360,22 +2343,22 @@ const sxName = k => { const s=stretchByKey(k); return s ? s.name : prettyKey(k);
 const cdName = k => { const c=cardioByKey(k); return c ? c.name : prettyKey(k); };
 function logAvail(field){
   const last={};
-  entries.forEach(e=>{ if(inChartWin(e.date) && e[field]) Object.keys(e[field]).forEach(k=>{ last[k]=e.date; }); });
+  S.entries.forEach(e=>{ if(inChartWin(e.date) && e[field]) Object.keys(e[field]).forEach(k=>{ last[k]=e.date; }); });
   return Object.keys(last).sort((a,b)=>last[b].localeCompare(last[a]));
 }
 const sxAvail = () => logAvail('mob'), cdAvail = () => logAvail('cardio');
 function logSelection(setting, avail){
-  const saved=settings[setting];
+  const saved=S.settings[setting];
   return (saved==null ? avail : saved.filter(k=>avail.indexOf(k)>=0)).slice(0,MAX_SERIES);
 }
 async function toggleLogChip(setting, key, avail, redraw, noteId){
-  const all=settings[setting]==null ? avail.slice(0,MAX_SERIES) : settings[setting].slice(), i=all.indexOf(key);
+  const all=S.settings[setting]==null ? avail.slice(0,MAX_SERIES) : S.settings[setting].slice(), i=all.indexOf(key);
   if(i>=0) all.splice(i,1);
   else{
     if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $(noteId).textContent=t('chart.max'); return; }
     all.push(key);
   }
-  settings[setting]=all; await persistSettings(); redraw();
+  S.settings[setting]=all; await persistSettings(); redraw();
 }
 function drawLogTrend(o){
   const avail=o.avail(), sel=logSelection(o.setting, avail);
@@ -2385,16 +2368,16 @@ function drawLogTrend(o){
       `<i class="sw" style="background:${on?LINE_COLORS[i%LINE_COLORS.length]:'transparent'}"></i>${esc(o.name(k))}</button>`;
   }).join('');
   const series=sel.map((k,i)=>({name:o.name(k), color:LINE_COLORS[i%LINE_COLORS.length],
-    points:entries.filter(e=>inChartWin(e.date) && e[o.field] && e[o.field][k]>0).map(e=>({date:e.date, val:e[o.field][k]}))}));
+    points:S.entries.filter(e=>inChartWin(e.date) && e[o.field] && e[o.field][k]>0).map(e=>({date:e.date, val:e[o.field][k]}))}));
   drawMultiLine(o.svg, series, {legend:false, fmt:v=>v.toFixed(0), empty:t(!avail.length ? o.empty : !sel.length ? 'chart.empty.pick' : 'chart.empty.window')});
   $(o.note).textContent = !avail.length ? '' : !sel.length ? t('chart.nosel') : t(o.noteKey);
-  chartFoldDraw(o.fold, entries.some(e=>e[o.field]));
+  chartFoldDraw(o.fold, S.entries.some(e=>e[o.field]));
 }
 const drawSxTrend = () => drawLogTrend({field:'mob', setting:'chartSx', avail:sxAvail, name:sxName, pick:'sxPick', svg:'sxChart', note:'sxNote', fold:'sx', empty:'chart.empty.sx', noteKey:'chart.sxnote'});
 const drawCdTrend = () => drawLogTrend({field:'cardio', setting:'chartCd', avail:cdAvail, name:cdName, pick:'cdPick', svg:'cdChart', note:'cdNote', fold:'cd', empty:'chart.empty.cd', noteKey:'chart.cdnote'});
 const FOLD_CARD = {str:'cardStr', sx:'cardSxTrend', cd:'cardCdTrend'};
 function chartFoldDraw(k, hasAny){
-  const folded = (k in settings.chartFold) ? settings.chartFold[k] : !hasAny;
+  const folded = (k in S.settings.chartFold) ? S.settings.chartFold[k] : !hasAny;
   const card=$(FOLD_CARD[k]); if(!card) return;
   card.classList.toggle('folded', folded);
   const b=card.querySelector('.foldbtn'); b.textContent=folded?'▸':'▾'; b.setAttribute('aria-expanded', String(!folded));
@@ -2402,14 +2385,14 @@ function chartFoldDraw(k, hasAny){
 }
 async function chartFoldToggle(k){
   const card=$(FOLD_CARD[k]);
-  settings.chartFold=Object.assign({}, settings.chartFold, {[k]:!card.classList.contains('folded')});
+  S.settings.chartFold=Object.assign({}, S.settings.chartFold, {[k]:!card.classList.contains('folded')});
   await persistSettings(); chartFoldDraw(k, true); render();
 }
 
 const measName = k => t('m.'+k).replace(/\s*\(.*\)$/,'').toLowerCase();
 function buildBodySeries(){
   return MEAS.map(m=>{
-    const pts=entries.filter(e=>e.meas && e.meas[m.key]!=null).map(e=>({date:e.date, cm:e.meas[m.key]})).sort((a,b)=>a.date.localeCompare(b.date));
+    const pts=S.entries.filter(e=>e.meas && e.meas[m.key]!=null).map(e=>({date:e.date, cm:e.meas[m.key]})).sort((a,b)=>a.date.localeCompare(b.date));
     if(!pts.length) return {name:measName(m.key), points:[]};
     const base=pts[0].cm||1;
     const latest=pts[pts.length-1].cm;
@@ -2418,12 +2401,12 @@ function buildBodySeries(){
 }
 function drawBody(){ drawMultiLine('bodyChart', windowSeries(buildBodySeries()), {refLine:100, fmt:v=>v.toFixed(0), empty:t('chart.empty.size')}); }
 
-const entriesInWindow = () => core.entriesInWindow(entries, settings.calPeriod);
-const kcalTargetFor = tdee => core.kcalTargetFor(tdee, settings.sex, settings.calRate);
-const calRecommend = () => core.calRecommend(entries, settings);
+const entriesInWindow = () => core.entriesInWindow(S.entries, S.settings.calPeriod);
+const kcalTargetFor = tdee => core.kcalTargetFor(tdee, S.settings.sex, S.settings.calRate);
+const calRecommend = () => core.calRecommend(S.entries, S.settings);
 function drawCalibration(){
-  document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(settings.calPeriod)));
-  document.querySelectorAll('#segRate button').forEach(b=>b.classList.toggle('on', b.dataset.r===String(settings.calRate)));
+  document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(S.settings.calPeriod)));
+  document.querySelectorAll('#segRate button').forEach(b=>b.classList.toggle('on', b.dataset.r===String(S.settings.calRate)));
   const out=$("calibOut");
   const r=calRecommend(), c=r.c;
   if(r.target==null){
@@ -2443,8 +2426,8 @@ function drawCalibration(){
   const shaky = (perKg!=null && (perKg<16 || perKg>60)) || c.spanDays<21;
   const meta=v=>'<b style="color:var(--brass-bright)">'+v+'</b>';
   const remark = !r.enough ? tf('calib.early',{d:meta(c.spanDays), w:meta(c.weighIns), k:meta(c.kcalDays)})
-               : r.partial ? tf('calib.partial',{d:meta(c.spanDays), p:meta(settings.calPeriod)}) : '';
-  const goalLbl = settings.calRate!==0 ? tf('calib.for',{rate:(settings.calRate>0?'+':'−')+Math.abs(settings.calRate)+' kg/wk'}) : t('calib.tomaintain');
+               : r.partial ? tf('calib.partial',{d:meta(c.spanDays), p:meta(S.settings.calPeriod)}) : '';
+  const goalLbl = S.settings.calRate!==0 ? tf('calib.for',{rate:(S.settings.calRate>0?'+':'−')+Math.abs(S.settings.calRate)+' kg/wk'}) : t('calib.tomaintain');
   out.innerHTML=`
     <div class="calib-grid">
       <div class="cstat head"><div class="cs-lbl">${t('calib.rec')}</div><div class="cs-val">${target}<span>kcal/day</span></div><div class="cs-sub">${goalLbl}${floored?' · '+t('calib.floored'):''}${r.partial?' · '+t('calib.partialtag'):''}</div></div>
@@ -2455,17 +2438,17 @@ function drawCalibration(){
     <div class="calib-meta">${tf('calib.meta',{w:'<b style="color:var(--brass-bright)">'+c.weighIns+'</b>', k:'<b style="color:var(--brass-bright)">'+c.kcalDays+'</b>', d:'<b style="color:var(--brass-bright)">'+c.spanDays+'</b>'})}</div>
     ${remark?`<div class="calib-need calib-remark">${remark}</div>`:''}
     ${r.enough?`<div class="calib-note">${t(shaky?'calib.shaky':'calib.steady')}</div>`:''}
-    <button class="apply${settings.kcalTarget===target?' done':''}" id="applyBtn">${settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
+    <button class="apply${S.settings.kcalTarget===target?' done':''}" id="applyBtn">${S.settings.kcalTarget===target?tf('calib.applied',{n:target}):tf('calib.apply',{n:target})}</button>`;
   $("applyBtn").onclick=applyTarget;
 }
-async function applyTarget(){ const rec=calRecommend().target; if(rec==null) return; settings.kcalTarget=rec; settings.kcalOwn=false; await persistSettings(); render(); }
+async function applyTarget(){ const rec=calRecommend().target; if(rec==null) return; S.settings.kcalTarget=rec; S.settings.kcalOwn=false; await persistSettings(); render(); }
 
 function drawProg(){
   const wrap=$("progWrap"); wrap.innerHTML='';
-  const plan=planKeys().map(exByKey).filter(Boolean), wk=entries.filter(e=>within7(e.date));
+  const plan=planKeys().map(exByKey).filter(Boolean), wk=S.entries.filter(e=>within7(e.date));
   if(!plan.length){ wrap.innerHTML=`<div class="restnote">${esc(t('prog.empty'))}</div>`; return; }
   plan.forEach(ex=>{
-    const sess=entries.filter(e=>liftsOf(e,ex.key).length).map(e=>({date:e.date,sets:e.lifts[ex.key]}));
+    const sess=S.entries.filter(e=>liftsOf(e,ex.key).length).map(e=>({date:e.date,sets:e.lifts[ex.key]}));
     const col=document.createElement('div'); col.className='pcol';
     let html=`<div class="pname">${esc(ex.name)}</div><div class="ptarget">${esc(exNote(ex))}</div>`;
     const cn=coachNext(ex, sess.map(s=>s.sets));
@@ -2494,7 +2477,7 @@ const HIST_PAGE = 60;
 let histShown = HIST_PAGE;
 function drawHistory(){
   const body=$("histBody"), more=$("histMore");
-  if(!entries.length){ $("histEmpty").style.display='block'; body.innerHTML=''; more.style.display='none'; return; }
+  if(!S.entries.length){ $("histEmpty").style.display='block'; body.innerHTML=''; more.style.display='none'; return; }
   $("histEmpty").style.display='none';
   const no='<span class="dash">·</span>';
   const mobCell=e=>{
@@ -2507,7 +2490,7 @@ function drawHistory(){
     if(reps) bits.push(reps+'\u00d7');
     return '<span class="chk">'+n+'</span>'+(bits.length?' <span class="dash">'+bits.join(' ')+'</span>':'');
   };
-  const rows=entries.slice(-histShown).reverse();
+  const rows=S.entries.slice(-histShown).reverse();
   body.innerHTML=rows.map(e=>{
     const d=DAYS.some(x=>x.key===e.day) ? e.day : null;
     return `<tr>
@@ -2520,13 +2503,13 @@ function drawHistory(){
     <td>${mobCell(e)}</td>
     <td><button class="del" data-d="${e.date}" title="${esc(t('hist.del'))}" aria-label="${esc(t('hist.del'))}">✕</button></td></tr>`;
   }).join('');
-  const left=entries.length-rows.length;
+  const left=S.entries.length-rows.length;
   more.style.display=left ? '' : 'none';
   if(left) more.textContent=tn('hist.more',Math.min(HIST_PAGE,left));
 }
 let delArmed=null, delTimer=null;
 async function removeEntry(date, btn){
-  if(loadFailed){ flash(t('msg.loadfail.del'),true); return; }
+  if(S.loadFailed){ flash(t('msg.loadfail.del'),true); return; }
   if(delArmed!==date){
     if(delTimer) clearTimeout(delTimer);
     document.querySelectorAll('.del').forEach(x=>{ x.textContent='✕'; x.style.color=''; });
@@ -2535,7 +2518,7 @@ async function removeEntry(date, btn){
     return;
   }
   clearTimeout(delTimer); delArmed=null;
-  entries=entries.filter(e=>e.date!==date);
+  S.entries=S.entries.filter(e=>e.date!==date);
   await persist(); fillForm($("fDate").value); render();
 }
 
@@ -2547,13 +2530,13 @@ function readMeas(){
 function bfMode(){ const b=document.querySelector('#segBf button.on'); return b?b.dataset.b:'calc'; }
 function bfCalcFor(cur){
   const h=(cur&&cur.height!=null)?cur.height:lastNumOf(e=>e.height);
-  return bfNavy(cur?cur.meas:null, h, settings.sex);
+  return bfNavy(cur?cur.meas:null, h, S.settings.sex);
 }
 function bfModeSet(m, seed){
   const manual = m==='manual';
   document.querySelectorAll('#segBf button').forEach(b=>b.classList.toggle('on', b.dataset.b===m));
   const row=$("bfManualRow"); if(row) row.style.display = manual ? '' : 'none';
-  const cur=entries.find(e=>e.date===$("fDate").value);
+  const cur=S.entries.find(e=>e.date===$("fDate").value);
   const calc=bfCalcFor(cur);
   const inp=$("fBf");
   if(inp && seed!==false){
@@ -2566,19 +2549,19 @@ function bfModeSet(m, seed){
     : (calc!=null ? tf('body.bf.calc',{n:calc.toFixed(1), girths:bfNeedsText()}) : tf('body.bf.none',{girths:bfNeedsText()}));
 }
 
-const bfNeeds = () => core.bfNeeds(settings.sex);
+const bfNeeds = () => core.bfNeeds(S.settings.sex);
 const bfNeedsText = () => { const n=bfNeeds().map(k=>t('m.'+k).toLowerCase()); return n.length>1 ? n.slice(0,-1).join(', ')+' and '+n[n.length-1] : (n[0]||''); };
 
 function exportObject(extra){
   return Object.assign({app:'tally', version:4, exportedAt:new Date().toISOString(),
-    entries, settings, exercises:customEx, plan:planObject(), stretches:stretches, exEdits:exEdits, cardio:cardios,
-    theme:theme, gym:gym}, extra||{});
+    entries: S.entries, settings: S.settings, exercises:S.customEx, plan:planObject(), stretches:S.stretches, exEdits:S.exEdits, cardio:S.cardios,
+    theme:S.theme, gym:S.gym}, extra||{});
 }
 function exportPayload(){ return JSON.stringify(exportObject()); }
 function doExport(){
   const box=$("exportBox");
   if(box.classList.contains('show')){ box.classList.remove('show'); return; }
-  box.value = entries.length ? exportPayload() : t('sync.nothing');
+  box.value = S.entries.length ? exportPayload() : t('sync.nothing');
   box.classList.add('show'); box.focus(); box.select();
 }
 function smsg(msg,err){ const m=$("syncMsg"); if(!m) return; m.textContent=msg||''; m.className='syncmsg'+(err?' err':''); }
@@ -2601,7 +2584,7 @@ function onFilePicked(ev){
   rd.readAsText(f);
 }
 function saveBackupFile(){
-  if(!entries.length){ smsg(t('sync.nothingyet'),true); return; }
+  if(!S.entries.length){ smsg(t('sync.nothingyet'),true); return; }
   const payload=exportPayload(), name='tally-'+localDate()+'.json';
   if(window.AndroidFile && typeof window.AndroidFile.save==='function'){
     const written=window.AndroidFile.save(name,payload);
@@ -2619,15 +2602,15 @@ function saveBackupFile(){
 
 function refreshManualTarget(){
   const cur=$("mtCurrent"), inp=$("manualKcal");
-  if(cur) cur.textContent=tf('calib.current',{n:settings.kcalTarget})+(settings.kcalOwn?' · '+t('calib.yours'):'');
-  if(inp) inp.placeholder=String(settings.kcalTarget);
+  if(cur) cur.textContent=tf('calib.current',{n:S.settings.kcalTarget})+(S.settings.kcalOwn?' · '+t('calib.yours'):'');
+  if(inp) inp.placeholder=String(S.settings.kcalTarget);
 }
 function setManualTarget(){
   const v=num($("manualKcal").value);
   if(v==null||v<=0){ flash(t('msg.entertarget'),true); return; }
-  settings.kcalTarget=Math.round(v); settings.kcalOwn=true;
+  S.settings.kcalTarget=Math.round(v); S.settings.kcalOwn=true;
   persistSettings(); $("manualKcal").value=''; render();
-  flash(tf('msg.targetset',{n:settings.kcalTarget}));
+  flash(tf('msg.targetset',{n:S.settings.kcalTarget}));
 }
 
 function goalLabel(r){ return r>0?('+'+r+' kg/week'):r<0?('\u2212'+Math.abs(r)+' kg/week'):'maintain'; }
@@ -2641,27 +2624,27 @@ function weeklySlope(list){
 }
 function buildAiReport(){
   const gen=localDate();
-  const weighed=entries.filter(e=>e.weight!=null);
-  const first=entries.length?entries[0].date:'n/a', last=entries.length?entries[entries.length-1].date:'n/a';
+  const weighed=S.entries.filter(e=>e.weight!=null);
+  const first=S.entries.length?S.entries[0].date:'n/a', last=S.entries.length?S.entries[S.entries.length-1].date:'n/a';
   const L=[];
   L.push('=== TRAINING REPORT FOR ANALYSIS ===');
-  L.push('Generated: '+gen+'  |  Data span: '+first+' \u2192 '+last+'  |  '+entries.length+' entries');
+  L.push('Generated: '+gen+'  |  Data span: '+first+' \u2192 '+last+'  |  '+S.entries.length+' entries');
   L.push('Ask: read the plan and selected goal, then assess how the recent weeks track against them. The raw JSON at the end is complete - use it for anything the summary omits.');
   L.push('');
   L.push('--- CURRENT PLAN & SELECTED GOAL ---');
-  L.push('Selected goal (calibration): '+goalLabel(settings.calRate)+'   [options: \u22120.5 / \u22120.25 / maintain / +0.25 / +0.5]');
-  L.push('Calibration window selected: '+periodLabel(settings.calPeriod));
+  L.push('Selected goal (calibration): '+goalLabel(S.settings.calRate)+'   [options: \u22120.5 / \u22120.25 / maintain / +0.25 / +0.5]');
+  L.push('Calibration window selected: '+periodLabel(S.settings.calPeriod));
   L.push('Chart window selected: '+periodLabel(chartPeriod));
-  L.push('Calorie target currently set: '+settings.kcalTarget+' kcal/day'+(settings.kcalOwn?' (set by hand)':' (from the estimate or default)'));
-  L.push('Protein target (daily): '+protTarget()+' g, '+(settings.protFloor!=null?'set by hand':'automatic for '+(settings.sex||'sex not set'))+'; anything from '+protOk()+' g counts as fine');
+  L.push('Calorie target currently set: '+S.settings.kcalTarget+' kcal/day'+(S.settings.kcalOwn?' (set by hand)':' (from the estimate or default)'));
+  L.push('Protein target (daily): '+protTarget()+' g, '+(S.settings.protFloor!=null?'set by hand':'automatic for '+(S.settings.sex||'sex not set'))+'; anything from '+protOk()+' g counts as fine');
   L.push('');
   L.push('--- HOW THESE NUMBERS WERE DERIVED ---');
   L.push('All figures below are estimates from population formulas, not measurements. Not medical advice.');
-  const bfMan=entries.filter(e=>e.bfSrc==='manual').length;
-  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+(settings.sex||'male')+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.'
+  const bfMan=S.entries.filter(e=>e.bfSrc==='manual').length;
+  L.push('Body fat: US Navy girth method (Hodgdon & Beckett), '+(S.settings.sex||'male')+' equation, from logged girths and height. Roughly +/-3-4 points against DEXA.'
     + (bfMan?(' NOTE: '+bfMan+' entr'+(bfMan===1?'y was':'ies were')+' entered by hand instead (scale, DEXA or calipers) and are not girth estimates.'):''));
   const pt=profileTDEE();
-  if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+(settings.sex||'male')+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
+  if(pt) L.push('Starting energy estimate: Mifflin-St Jeor resting rate '+pt.bmr+' kcal (weight '+pt.weight.toFixed(1)+' kg, height '+pt.height+' cm, age '+pt.age+', '+(S.settings.sex||'male')+') x '+pt.mult+' activity = '+pt.tdee+' kcal.');
   L.push('Adaptive maintenance: least-squares weight trend over the window x 7700 kcal/kg, subtracted from mean logged intake. Short windows are distorted by water and glycogen.');
   L.push('Daily target: maintenance + (goal kg/week x 7700 / 7), floored at '+kcalFloor()+' kcal.');
   L.push('Protein: one fixed daily target, 100 g for women and 140 g for men (120 g until sex is set). That is about 1.6 g/kg of a healthy weight for nearly every height; 75% of it matches the 1.2 g/kg low end of current guidelines.');
@@ -2678,18 +2661,18 @@ function buildAiReport(){
   L.push('Latest weight: '+(weighed.length?weighed[weighed.length-1].weight.toFixed(1)+' kg ('+weighed[weighed.length-1].date+')':'n/a'));
   L.push('7-day change: '+(d7?fmtSigned(d7.delta,' kg'):'n/a')+'    30-day change: '+(d30?fmtSigned(d30.delta,' kg'):'n/a'));
   L.push('Trend, all data: '+fmtSigned(slopeAll,' kg/week',2));
-  if(cal.slope!=null) L.push('Trend, calibration window ('+periodLabel(settings.calPeriod)+'): '+fmtSigned(cal.slope*7,' kg/week',2));
+  if(cal.slope!=null) L.push('Trend, calibration window ('+periodLabel(S.settings.calPeriod)+'): '+fmtSigned(cal.slope*7,' kg/week',2));
   if(cal.tdee!=null){
     const rec=kcalTargetFor(cal.tdee);
     L.push('Estimated maintenance (TDEE, back-calculated): '+Math.round(cal.tdee/10)*10+' kcal');
     L.push('Mean intake logged (window): '+Math.round(cal.meanK)+' kcal');
-    L.push('Recommended intake for the selected goal: '+rec+' kcal   (currently set: '+settings.kcalTarget+')');
+    L.push('Recommended intake for the selected goal: '+rec+' kcal   (currently set: '+S.settings.kcalTarget+')');
   } else {
     L.push('Maintenance estimate: not enough overlapping weight+kcal in the selected window yet.');
   }
   L.push('');
-  const wk=entries.filter(e=>within7(e.date));
-  const pAll=entries.filter(e=>e.prot!=null);
+  const wk=S.entries.filter(e=>within7(e.date));
+  const pAll=S.entries.filter(e=>e.prot!=null);
   const protMean=pAll.length?Math.round(pAll.reduce((s,e)=>s+e.prot,0)/pAll.length):null;
   let lowP=null; pAll.forEach(e=>{ if(lowP==null||e.prot<lowP.prot) lowP=e; });
   const wkP=wk.filter(e=>e.prot!=null), wkPhit=wkP.filter(e=>e.prot>=protOk()).length;
@@ -2710,7 +2693,7 @@ function buildAiReport(){
     +(mobReps?(', '+mobReps+' reps'):''));
   if(mobDays.length){
     const per={};
-    entries.filter(e=>e.mob).forEach(e=>Object.keys(e.mob).forEach(k=>{ per[k]=per[k]||{n:0,s:0}; per[k].n++; per[k].s+=e.mob[k]||0; }));
+    S.entries.filter(e=>e.mob).forEach(e=>Object.keys(e.mob).forEach(k=>{ per[k]=per[k]||{n:0,s:0}; per[k].n++; per[k].s+=e.mob[k]||0; }));
     L.push('Mobility by stretch (all logged): '+Object.keys(per).map(k=>{
       const st=stretchByKey(k), nm=st?st.name:k;
       const unit = per[k].s ? (sxIsReps(st) ? (' ('+per[k].s+' reps)') : (' ('+Math.round(per[k].s/60)+' min)')) : '';
@@ -2720,29 +2703,29 @@ function buildAiReport(){
   L.push('');
   L.push('--- STRENGTH (latest logged session per movement) ---');
   const pk=planKeys();
-  const logged=CATALOGUE.filter(ex=>entries.some(e=>liftsOf(e,ex.key).length))
+  const logged=S.catalogue.filter(ex=>S.entries.some(e=>liftsOf(e,ex.key).length))
     .sort((a,b)=>(pk.indexOf(a.key)<0?99:pk.indexOf(a.key))-(pk.indexOf(b.key)<0?99:pk.indexOf(b.key)));
-  if(logged.length){ logged.forEach(ex=>{ const s=lastSessionOf(ex.key); const d=[...entries].reverse().find(e=>liftsOf(e,ex.key).length);
+  if(logged.length){ logged.forEach(ex=>{ const s=lastSessionOf(ex.key); const d=[...S.entries].reverse().find(e=>liftsOf(e,ex.key).length);
     L.push(ex.name+(pk.indexOf(ex.key)<0?' [off plan]':'')+': '+fmtSets(ex.key,s)+'  ('+(d?d.date:'?')+')'); }); }
   else L.push('No movements logged yet.');
   L.push('');
   L.push('--- BODY MEASUREMENTS (cm) ---');
-  const measE=entries.filter(e=>e.meas);
+  const measE=S.entries.filter(e=>e.meas);
   if(measE.length){
     const lm=measE[measE.length-1], fm=measE[0];
     L.push('Latest ('+lm.date+'): '+MEAS.map(m=>measName(m.key)+' '+(lm.meas[m.key]!=null?lm.meas[m.key]:'-')).join(' \u00b7 '));
     const dl=MEAS.map(m=>{ const a=fm.meas[m.key], b=lm.meas[m.key]; return (a!=null&&b!=null)?measName(m.key)+' '+fmtSigned(b-a,'',1):null; }).filter(Boolean);
     if(dl.length) L.push('Change since '+fm.date+': '+dl.join(' \u00b7 '));
-    const bfE=entries.filter(e=>e.bf!=null);
+    const bfE=S.entries.filter(e=>e.bf!=null);
     if(bfE.length) L.push('Body fat (Navy est, latest): '+bfE[bfE.length-1].bf.toFixed(1)+'%');
   } else L.push('No measurements logged.');
   L.push('');
   L.push('--- DATA QUALITY FLAGS ---');
   const flags=[];
-  const fasts=entries.filter(e=>e.fast).map(e=>e.date+' ('+(e.kcal!=null?e.kcal+' kcal':'nothing logged, counted as 0')+')');
+  const fasts=S.entries.filter(e=>e.fast).map(e=>e.date+' ('+(e.kcal!=null?e.kcal+' kcal':'nothing logged, counted as 0')+')');
   if(fasts.length) L.push('Fasting days, marked by the user (real data, not errors): '+fasts.join(', '));
   L.push('Low-calorie days are taken as logged. A day with no food logged and no fasting mark is left out of averages, not counted as 0.');
-  entries.forEach(e=>{ const w=weekdayKey(e.date); if(e.day&&e.day!==w) flags.push(e.date+': tagged \''+e.day+'\' but that date is '+w+' - counts toward the wrong weekly pattern'); });
+  S.entries.forEach(e=>{ const w=weekdayKey(e.date); if(e.day&&e.day!==w) flags.push(e.date+': tagged \''+e.day+'\' but that date is '+w+' - counts toward the wrong weekly pattern'); });
   const dsince=d=>d?Math.round(dnum(gen)-dnum(d)):null;
   const lastW=weighed.length?weighed[weighed.length-1].date:null;
   const lastM=measE.length?measE[measE.length-1].date:null;
@@ -2758,7 +2741,7 @@ function buildAiReport(){
   return L.join('\n');
 }
 function copyForAi(){
-  if(!entries.length){ smsg(t('sync.noreport'),true); return; }
+  if(!S.entries.length){ smsg(t('sync.noreport'),true); return; }
   const box=$("aiBox");
   const text=buildAiReport();
   box.value=text; box.classList.add('show'); box.focus(); box.select();
@@ -2788,8 +2771,8 @@ async function loadImport(){
   const incoming=normEntries(list);
   const btn=$("loadBtn");
   if(!importArmed){
-    importArmed=true; if(btn) btn.textContent=tf('sync.tapreplace',{a:entries.length, b:incoming.length});
-    smsg(tf('sync.readn',{n:incoming.length, seen:list.length, have:entries.length}));
+    importArmed=true; if(btn) btn.textContent=tf('sync.tapreplace',{a:S.entries.length, b:incoming.length});
+    smsg(tf('sync.readn',{n:incoming.length, seen:list.length, have:S.entries.length}));
     importTimer=setTimeout(()=>{ resetImportBtn(); smsg(t('sync.timedout')); },8000);
     return;
   }
@@ -2797,71 +2780,70 @@ async function loadImport(){
   await saveUndo();
   await applyImport(Array.isArray(data) ? {entries:list} : data);
   $("importBox").classList.remove('show'); $("loadBtn").classList.remove('show'); $("exportBox").classList.remove('show');
-  smsg(tn('sync.imported',entries.length));
-  flash(tn('sync.imported',entries.length));
+  smsg(tn('sync.imported',S.entries.length));
+  flash(tn('sync.imported',S.entries.length));
 }
 const isObj = x => !!x && typeof x==='object' && !Array.isArray(x);
 async function applyImport(data){
-  entries=normEntries(data.entries);
+  S.entries=normEntries(data.entries);
   if(Array.isArray(data.exercises)){
-    const byKey=new Map(customEx.map(x=>[x.key,x]));
+    const byKey=new Map(S.customEx.map(x=>[x.key,x]));
     data.exercises.forEach(x=>{ const c=normCustomEx(x); if(c) byKey.set(c.key,c); });
-    customEx=[...byKey.values()];
+    S.customEx=[...byKey.values()];
     await persistCatalogue();
   }
   if(Array.isArray(data.stretches)){
-    const byKey=new Map(stretches.map(s=>[s.key,s]));
+    const byKey=new Map(S.stretches.map(s=>[s.key,s]));
     data.stretches.forEach(x=>{ const s=normStretch(x); if(s) byKey.set(s.key,s); });
-    stretches=[...byKey.values()];
+    S.stretches=[...byKey.values()];
     await persistStretches();
   }
-  if(isObj(data.exEdits)){ exEdits=Object.assign(exEdits, normExEdits(data.exEdits)); await persistExEdits(); }
-  if(Array.isArray(data.cardio)){ const bk=new Map(cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); cardios=[...bk.values()]; await persistCardio(); }
-  if(isObj(data.theme)){ theme=normTheme(data.theme); await persistTheme(); }
-  if(isObj(data.gym)){ gym=normGym(data.gym); await persistGym(); }
-  if(isObj(data.plan)){ planExtras=normPlan(data.plan); planSets=normPlanSets(data.plan.sets); planLogsInit(data.plan); await persistPlan(); }
-  if(isObj(data.settings)){ settings=normSettings(data.settings); await persistSettings(); }
+  if(isObj(data.exEdits)){ S.exEdits=Object.assign(S.exEdits, normExEdits(data.exEdits)); await persistExEdits(); }
+  if(Array.isArray(data.cardio)){ const bk=new Map(S.cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); S.cardios=[...bk.values()]; await persistCardio(); }
+  if(isObj(data.theme)){ S.theme=normTheme(data.theme); await persistTheme(); }
+  if(isObj(data.gym)){ S.gym=normGym(data.gym); await persistGym(); }
+  if(isObj(data.plan)){ S.planExtras=normPlan(data.plan); S.planSets=normPlanSets(data.plan.sets); planLogsInit(data.plan); await persistPlan(); }
+  if(isObj(data.settings)){ S.settings=normSettings(data.settings); await persistSettings(); }
   await persist();
   fillForm($("fDate").value); render();
 }
-
-let undoSnap=null, undoArmed=false, undoTimer=null;
+let undoArmed=false, undoTimer=null;
 async function saveUndo(){
-  undoSnap={at:localDate(), n:entries.length, data:exportObject()};
-  try{ await STORE.set(UKEY, JSON.stringify(undoSnap)); }catch(e){ undoSnap=null; }
+  S.undoSnap={at:localDate(), n:S.entries.length, data:exportObject()};
+  try{ await STORE.set(UKEY, JSON.stringify(S.undoSnap)); }catch(e){ S.undoSnap=null; }
 }
 async function loadUndo(){
   try{
     const v=await STORE.get(UKEY), u=v ? JSON.parse(v) : null;
-    undoSnap=(u && u.at===localDate() && u.data && Array.isArray(u.data.entries)) ? u : null;
-    if(v && !undoSnap) await STORE.set(UKEY,'');
-  }catch(e){ undoSnap=null; }
+    S.undoSnap=(u && u.at===localDate() && u.data && Array.isArray(u.data.entries)) ? u : null;
+    if(v && !S.undoSnap) await STORE.set(UKEY,'');
+  }catch(e){ S.undoSnap=null; }
 }
 function drawUndo(){
   const b=$("undoBtn"); if(!b) return;
-  b.style.display=undoSnap ? '' : 'none';
-  if(undoSnap && !undoArmed) b.textContent=tn('sync.undo',undoSnap.n);
+  b.style.display=S.undoSnap ? '' : 'none';
+  if(S.undoSnap && !undoArmed) b.textContent=tn('sync.undo',S.undoSnap.n);
 }
 async function undoImport(){
-  if(!undoSnap) return;
+  if(!S.undoSnap) return;
   if(!undoArmed){
     undoArmed=true; $("undoBtn").textContent=t('sync.undo.again');
     undoTimer=setTimeout(()=>{ undoArmed=false; drawUndo(); },4000);
     return;
   }
   clearTimeout(undoTimer); undoArmed=false;
-  const snap=undoSnap; undoSnap=null;
+  const snap=S.undoSnap; S.undoSnap=null;
   try{ await STORE.set(UKEY,''); }catch(e){}
   await applyImport(snap.data);
   drawUndo();
-  smsg(tn('sync.undone',entries.length)); flash(tn('sync.undone',entries.length));
+  smsg(tn('sync.undone',S.entries.length)); flash(tn('sync.undone',S.entries.length));
 }
 
 async function saveEntry(){
   const date=$("fDate").value;
   if(!date){ flash(t('msg.pickdate'),true); return; }
-  if(loadFailed){ flash(t('msg.loadfail.save'),true); return; }
-  const prev=entries.find(e=>e.date===date)||{};
+  if(S.loadFailed){ flash(t('msg.loadfail.save'),true); return; }
+  const prev=S.entries.find(e=>e.date===date)||{};
   const fWeight=num($("fWeight").value), fHeight=num($("fHeight").value);
   calcSettle("fKcal"); calcSettle("fProt");
   const fkcal=calcVal($("fKcal").value), fprot=calcVal($("fProt").value);
@@ -2869,7 +2851,7 @@ async function saveEntry(){
   if(!Object.keys(meas).length) meas=null;
   const height=fHeight!=null?fHeight:(prev.height ?? lastNumOf(e=>e.height));
   const fBf=num($("fBf").value);
-  const bfNow=bfNavy(meas, height, settings.sex);
+  const bfNow=bfNavy(meas, height, S.settings.sex);
   const manualBf = (bfMode()==='manual' && fBf!=null && fBf>0 && fBf<70) ? fBf : null;
   const bf = manualBf!=null ? manualBf : (bfNow!=null ? bfNow : (prev.bf ?? null));
   const bfSrc = manualBf!=null ? 'manual' : (bfNow!=null ? null : (prev.bfSrc || null));
@@ -2884,9 +2866,9 @@ async function saveEntry(){
   }));
   const hasData = !!entry && (entry.fast||entry.weight!=null||entry.kcal!=null||entry.prot!=null||!!entry.mob||!!entry.cardio||!!entry.meas||Object.keys(entry.lifts).length>0);
   if(!hasData){ flash(t('msg.nothingtosave'),true); return; }
-  const i=entries.findIndex(e=>e.date===date);
-  if(i>=0) entries[i]=entry; else entries.push(entry);
-  entries.sort((a,b)=>a.date.localeCompare(b.date));
+  const i=S.entries.findIndex(e=>e.date===date);
+  if(i>=0) S.entries[i]=entry; else S.entries.push(entry);
+  S.entries.sort((a,b)=>a.date.localeCompare(b.date));
   const ok=await persist(); render();
   if(ok){
     const rec=recordsNewOn(date);
@@ -2940,9 +2922,9 @@ function flash(msg,err){
   $("dpCancel").onclick=dpClose;
   $("dpToday").onclick=()=>dpPick(localDate());
   $("dpWrap").onclick=ev=>{ if(ev.target===$("dpWrap")) dpClose(); };
-  $("fDay").onchange=()=>buildExForm(entries.find(e=>e.date===$("fDate").value), $("fDay").value);
-  document.querySelectorAll('#segPeriod button').forEach(b=>b.onclick=()=>{ settings.calPeriod=+b.dataset.p; persistSettings(); render(); });
-  document.querySelectorAll('#segRate button').forEach(b=>b.onclick=()=>{ settings.calRate=+b.dataset.r; persistSettings(); render(); });
+  $("fDay").onchange=()=>buildExForm(S.entries.find(e=>e.date===$("fDate").value), $("fDay").value);
+  document.querySelectorAll('#segPeriod button').forEach(b=>b.onclick=()=>{ S.settings.calPeriod=+b.dataset.p; persistSettings(); render(); });
+  document.querySelectorAll('#segRate button').forEach(b=>b.onclick=()=>{ S.settings.calRate=+b.dataset.r; persistSettings(); render(); });
   document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>showPage(b.dataset.pg));
   $("dayPrev").onclick=()=>shiftDay(-1);
   $("dayNext").onclick=()=>shiftDay(1);
@@ -2974,8 +2956,8 @@ function flash(msg,err){
   $("bakNow").onclick=bakFromNudge;
   $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
-  $("plGoal").oninput=()=>{ const v=num($("plGoal").value); plGoal=(v!=null && v>0) ? v : null; $("plOut").innerHTML=plResultHtml(settings.plates.unit, plBarOf()); const a=$("plUse"); if(a) a.onclick=()=>{ plGoal=+a.dataset.v; drawPlates(); }; };
-  document.querySelectorAll('#plUnit button').forEach(b=>b.onclick=async()=>{ const P=settings.plates; if(P.unit===b.dataset.u) return;
+  $("plGoal").oninput=()=>{ const v=num($("plGoal").value); plGoal=(v!=null && v>0) ? v : null; $("plOut").innerHTML=plResultHtml(S.settings.plates.unit, plBarOf()); const a=$("plUse"); if(a) a.onclick=()=>{ plGoal=+a.dataset.v; drawPlates(); }; };
+  document.querySelectorAll('#plUnit button').forEach(b=>b.onclick=async()=>{ const P=S.settings.plates; if(P.unit===b.dataset.u) return;
     if(plGoal!=null) plGoal=Math.round((b.dataset.u==='lb' ? plGoal/LB : plGoal*LB)*2)/2; P.unit=b.dataset.u; await persistSettings(); drawPlates(); });
   let resizeW=window.innerWidth, resizeT=null;
   window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(()=>{ if(window.innerWidth!==resizeW){ resizeW=window.innerWidth; render(); } }, 200); });
@@ -3013,7 +2995,7 @@ function flash(msg,err){
   ['wChart','bodyChart','strChart','sxChart','cdChart'].forEach(chartScrubBind);
   document.querySelectorAll('.foldhead').forEach(h=>h.onclick=()=>chartFoldToggle(h.querySelector('.foldbtn').dataset.fold));
   $("sched").onclick=ev=>{ const el=ev.target.closest('.day'); if(!el) return;
-    $("fDay").value=el.dataset.day; buildExForm(entries.find(e=>e.date===$("fDate").value), el.dataset.day); };
+    $("fDay").value=el.dataset.day; buildExForm(S.entries.find(e=>e.date===$("fDate").value), el.dataset.day); };
   $("dpGrid").onclick=ev=>{ const b=ev.target.closest('[data-d]'); if(b) dpPick(b.dataset.d); };
   const pressed=b=>b.setAttribute('aria-pressed', b.classList.contains('on') ? 'true' : 'false');
   document.querySelectorAll('.seg button').forEach(pressed);
@@ -3055,13 +3037,13 @@ function flash(msg,err){
   await loadCatalogue(); await loadExEdits(); await loadPlan(); await loadStretches(); await loadCardio(); await loadGym(); await loadBackupDate(); await loadUndo();
   await load(); await loadSettings();
   const rec=await recoverMovements(); await recoverStretches(); await recoverCardio();
-  planLogsInit(planRaw); await persistPlan();
+  planLogsInit(S.planRaw); await persistPlan();
   if(rec) flash(tn('msg.rebuilt',rec));
   syncRestSegs(); drawExactNotice();
   applyLang();
   fillForm(today); render();
   $("abCard").innerHTML=aboutHtml();
-  if(loadFailed) flash(t('msg.loadfail.read'),true);
+  if(S.loadFailed) flash(t('msg.loadfail.read'),true);
   else abMaybeShow();
  }catch(err){
   console.error('init failed',err);
