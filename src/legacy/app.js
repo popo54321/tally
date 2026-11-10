@@ -20,6 +20,7 @@ import { SKEY, XKEY, PKEY, SXKEY, EKEY, TKEY, CDKEY, GKEY, BKEY, UKEY, ABOUT_KEY
   normEntry, normEntries, mergeDay, normPlates, normSettings, normTheme, normCustomEx, normExEdits, normCardio, normStretch, normDayLists, everyDay, normGym } from '../store/schema';
 import { MEAS } from '../data/measurements';
 import { S } from '../state/app';
+import { V, HIST_PAGE } from '../ui/view';
 import * as P from '../state/persist';
 import { rebuildCatalogue, exByKey, stretchByKey, cardioByKey, activeStretches, activeCardio, purgeOldNamespace } from '../state/persist';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
@@ -100,11 +101,10 @@ const effAge = () => core.effAge(S.settings.age, S.settings.ageSet);
 const protAuto = () => core.protAuto(S.settings.sex);
 const protTarget = () => core.protTarget(S.settings.sex, S.settings.protFloor);
 const protOk = () => core.protOk(S.settings.sex, S.settings.protFloor);
-let chartPeriod = 28;
 
 function chartWindowStart(){
-  if(chartPeriod==='all' || !S.entries.length) return null;
-  return dnum(S.entries[S.entries.length-1].date)-(chartPeriod-1);
+  if(V.chartPeriod==='all' || !S.entries.length) return null;
+  return dnum(S.entries[S.entries.length-1].date)-(V.chartPeriod-1);
 }
 function inChartWin(dateStr){ const s=chartWindowStart(); return s===null || dnum(dateStr)>=s; }
 function windowSeries(series){
@@ -112,8 +112,8 @@ function windowSeries(series){
   if(s===null) return series;
   return series.map(z=>Object.assign({},z,{points:z.points.filter(p=>dnum(p.date)>=s)}));
 }
-function setChartPeriod(p){ chartPeriod=(p==='all')?'all':+p; syncChartSegs(); render(); }
-function syncChartSegs(){ document.querySelectorAll('.chartseg button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(chartPeriod))); }
+function setChartPeriod(p){ V.chartPeriod=(p==='all')?'all':+p; syncChartSegs(); render(); }
+function syncChartSegs(){ document.querySelectorAll('.chartseg button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(V.chartPeriod))); }
 
 const $ = id => document.getElementById(id);
 function calcHint(id){
@@ -157,10 +157,9 @@ const loadCatalogue = P.loadCatalogue, persistCatalogue = P.saveCatalogue;
 const prettyKey = k => P.prettyKey(k, t('ex.movement'));
 const recoverMovements = () => P.recoverMovements(t('ex.movement'), t('msg.recoverednote'));
 const PAGES=['body','workout','guide','gym','settings','history'];
-let curPage='body';
 function showPage(k){
   if(PAGES.indexOf(k)<0) k='body';
-  curPage=k;
+  V.curPage=k;
   PAGES.forEach(p=>{ const el=$('pg-'+p); if(el) el.classList.toggle('on', p===k); });
   document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on', b.dataset.pg===k));
   const bar=$("dayBar"); if(bar) bar.classList.toggle('off', k!=='body' && k!=='workout');
@@ -346,8 +345,6 @@ function fmtSets(key, sets){
   if(sets.every(s=>ld(s)===first)) return (first ? first+' — ' : '')+sets.map(s=>rp(s.reps)).join(', ');
   return sets.map(s=>{ const l=ld(s); return (l ? l+'×' : '')+rp(s.reps); }).join('  ');
 }
-
-let plGoal=null;
 const plBarOf = () => S.settings.plates.bar;
 const plBarKg = id => id==='own' ? (S.settings.plates.barOwn||0) : PL_BARS.find(b=>b.id===id).kg;
 const plFmt = (kg, unit) => { const v=unit==='lb' ? kg/LB : kg; return (Math.round(v*100)/100).toString(); };
@@ -355,7 +352,7 @@ const plLabel = id => plFmt(plateKg(id), id.slice(0,2))+' '+id.slice(0,2);
 function drawPlates(){
   const P=S.settings.plates, card=$("cardPlates"); if(!card) return;
   const unit=P.unit, bar=plBarOf();
-  const gi=$("plGoal"); if(document.activeElement!==gi) gi.value=plGoal==null ? '' : String(plGoal);
+  const gi=$("plGoal"); if(document.activeElement!==gi) gi.value=V.plGoal==null ? '' : String(V.plGoal);
   document.querySelectorAll('#plUnit button').forEach(b=>b.classList.toggle('on', b.dataset.u===unit));
   const chip=(id, lbl, on)=>`<button type="button" class="exchip${on?' on':''}" data-id="${esc(id)}"><span class="sw"${on?' style="background:var(--line)"':''}></span>${esc(lbl)}</button>`;
   $("plBar").innerHTML=PL_BARS.map(b=>b.id==='own'
@@ -368,13 +365,13 @@ function drawPlates(){
   card.querySelectorAll('#plKg .exchip, #plLb .exchip').forEach(b=>b.onclick=()=>plToggle(b.dataset.id));
   $("plSetupSum").textContent=tf('pl.setup',{n:P.have.length});
   $("plOut").innerHTML=plResultHtml(unit, bar);
-  const alt=$("plUse"); if(alt) alt.onclick=()=>{ plGoal=+alt.dataset.v; drawPlates(); };
+  const alt=$("plUse"); if(alt) alt.onclick=()=>{ V.plGoal=+alt.dataset.v; drawPlates(); };
 }
 function plResultHtml(unit, bar){
   const P=S.settings.plates, other=unit==='kg' ? 'lb' : 'kg';
-  if(plGoal==null || !(plGoal>0)) return `<div class="sxnote">${esc(t('pl.empty'))}</div>`;
+  if(V.plGoal==null || !(V.plGoal>0)) return `<div class="sxnote">${esc(t('pl.empty'))}</div>`;
   if(bar==='own' && S.settings.plates.barOwn==null) return `<div class="sxnote">${esc(t('pl.ownfirst'))}</div>`;
-  const goalKg=unit==='lb' ? plGoal*LB : plGoal, barKg=plBarKg(bar);
+  const goalKg=unit==='lb' ? V.plGoal*LB : V.plGoal, barKg=plBarKg(bar);
   if(goalKg>(unit==='lb' ? 2000*LB : 1000)) return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
   const r=plateSolve(goalKg, barKg, P.have);
   if(r.err==='under') return `<div class="sxnote">${esc(tf('pl.under',{bar:plFmt(barKg,unit)+' '+unit}))}</div>`;
@@ -389,7 +386,7 @@ function plResultHtml(unit, bar){
   let h=`<div class="plres"><div class="plhead">${esc(t(m.side.length ? 'pl.each' : 'pl.eachnone'))}</div>${viz}<div class="pllist">${esc(list)}</div>`
     +`<div class="pltot">${esc(tf(bar==='none' ? 'pl.totnobar' : 'pl.tot',{tot, other:totO, bar:plFmt(barKg,unit)+' '+unit, side:plFmt(m.side.reduce((a,p)=>a+p.kg,0),unit)+' '+unit}))}</div>`;
   if(!r.exact){
-    h+=`<div class="plalt"><span>${esc(tf('pl.notexact',{goal:plGoal+' '+unit}))}</span>`;
+    h+=`<div class="plalt"><span>${esc(tf('pl.notexact',{goal:V.plGoal+' '+unit}))}</span>`;
     if(r.alt){ const v=Math.round((unit==='lb' ? r.alt.totalKg/LB : r.alt.totalKg)*100)/100; h+=`<button type="button" class="plbtn" id="plUse" data-v="${v}">${esc(tf('pl.useup',{w:v+' '+unit}))}</button>`; }
     h+='</div>';
   }
@@ -520,8 +517,6 @@ function readExForm(){
   });
   return lifts;
 }
-
-let shManaging=false;
 function loadDesc(ex){
   if(ex.unit==='sec') return t('load.seconds');
   if(ex.added) return t('load.bwkg');
@@ -532,20 +527,19 @@ function shShow(mode){
   const list=mode!=='form';
   $("shListMode").style.display=list?'':'none';
   $("shFormMode").style.display=list?'none':'';
-  $("shTitle").textContent=t(list?(shManaging?'sh.title.manage':'sh.title.add'):'sh.title.new');
+  $("shTitle").textContent=t(list?(V.shManaging?'sh.title.manage':'sh.title.add'):'sh.title.new');
   if(list) shRenderList();
 }
-let dlgReturn=null;
 function dlgOpen(id){
-  dlgReturn=document.activeElement;
+  V.dlgReturn=document.activeElement;
   const w=$(id); w.classList.add('show');
   const d=w.firstElementChild; if(d && d.focus) d.focus({preventScroll:true});
 }
 function dlgClose(id){
   const w=$(id); if(!w || !w.classList.contains('show')) return;
   w.classList.remove('show');
-  if(dlgReturn && document.contains(dlgReturn) && dlgReturn.focus) dlgReturn.focus({preventScroll:true});
-  dlgReturn=null;
+  if(V.dlgReturn && document.contains(V.dlgReturn) && V.dlgReturn.focus) V.dlgReturn.focus({preventScroll:true});
+  V.dlgReturn=null;
 }
 const aboutHtml = () => ['why','parts','logging','origin','gym','yours'].map(k=>`<section class="ab-sec${k==='parts'?' key':''}">${t('about.'+k)}</section>`).join('');
 function abOpen(){ $("abText").innerHTML=aboutHtml(); $("abText").scrollTop=0; dlgOpen("abWrap"); }
@@ -558,12 +552,11 @@ function tallyBack(){
   if(!open) return false;
   open[1](); return true;
 }
-let kpKind='sx', sxPinDay=null, cdPinDay=null;
 const kpCfg = k => k==='sx'
   ? {lib:SX_LIB, mine:activeStretches, plan:S.planSx, today:sxToday, libName:l=>t('sxlib.'+l.key), owned:sxOwned, fromLib:sxFromLib, draw:()=>drawMob(), log:'mob'}
   : {lib:CD_LIB, mine:activeCardio,    plan:S.planCd, today:cdToday, libName:l=>t('cdlib.'+l.key), owned:cdOwned, fromLib:cdFromLib, draw:()=>drawCardio(), log:'cardio'};
 function kpOpen(kind){
-  kpKind=kind;
+  V.kpKind=kind;
   $("kpTitle").textContent=t(kind==='sx'?'kp.title.sx':'kp.title.cd');
   $("kpNew").textContent=t(kind==='sx'?'sx.new':'cdx.new');
   $("kpSearch").value=''; $("kpSearch").placeholder=t(kind==='sx'?'kp.search.sx':'kp.search.cd');
@@ -572,31 +565,31 @@ function kpOpen(kind){
 function kpClose(){ dlgClose("kpWrap"); }
 const sxSub = l => (l.mode==='reps' ? tn('mob.repsn',l.tgt) : tf('mob.holdn',{n:l.tgt}));
 function kpRender(){
-  const c=kpCfg(kpKind), q=$("kpSearch").value.trim(), dayKey=$("fDay").value;
+  const c=kpCfg(V.kpKind), q=$("kpSearch").value.trim(), dayKey=$("fDay").value;
   const cur=S.entries.find(e=>e.date===$("fDate").value), log=(cur && cur[c.log]) || {};
   const shown=new Set(dayLogKeys(c.plan, c.today, log));
   const pinBtn=(attr,k)=>`<button class="sh-pin" ${attr}="${esc(k)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>`;
   const mine=c.mine().filter(x=>!shown.has(x.key) && (!q || qMatch(q, x.name))).sort((a,b)=>byName(a.name,b.name));
-  const mineRow=x=>`<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(kpKind==='sx' ? (sxTarget(x) ? (sxIsReps(x)?tn('mob.repsn',sxTarget(x)):tf('mob.holdn',{n:sxTarget(x)})) : t('mob.nohold')) : (x.mins?tf('cd.target',{n:x.mins}):t('cd.notarget')))}</span></div>${pinBtn('data-kpin',x.key)}<button class="sh-add" data-kadd="${esc(x.key)}">${esc(t('btn.add'))}</button></div>`;
+  const mineRow=x=>`<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(V.kpKind==='sx' ? (sxTarget(x) ? (sxIsReps(x)?tn('mob.repsn',sxTarget(x)):tf('mob.holdn',{n:sxTarget(x)})) : t('mob.nohold')) : (x.mins?tf('cd.target',{n:x.mins}):t('cd.notarget')))}</span></div>${pinBtn('data-kpin',x.key)}<button class="sh-add" data-kadd="${esc(x.key)}">${esc(t('btn.add'))}</button></div>`;
   const lib=c.lib.filter(l=>!c.owned(l) && (!q || qMatch(q, c.libName(l)+' '+(l.mus||[]).map(m=>t('mus.'+m)).join(' ')+(l.lv?' '+t('lv.'+l.lv):''))))
     .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || (a.lv||0)-(b.lv||0) || byName(c.libName(a),c.libName(b)));
   const libRowK=l=>{ const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.noeq');
-    const sub=kpKind==='sx' ? l.mus.map(m=>t('mus.'+m)).join(', ')+' · '+sxSub(l) : tf('cd.target',{n:l.mins});
-    return `<div class="sh-row${ok?'':' off'}"><div class="nm">${esc(c.libName(l))}${kpKind==='sx'?lvTag(l.lv):''}<span>${esc(sub)} · ${esc(ok?eq:tf('guide.needs',{list:eq}))}</span></div>${pinBtn('data-lpin',l.key)}<button class="sh-add" data-ladd="${esc(l.key)}">${esc(t('btn.add'))}</button></div>`; };
-  $("kpList").innerHTML = (mine.length ? `<div class="sh-grp">${esc(t(kpKind==='sx'?'kp.mine.sx':'kp.mine.cd'))}</div>`+mine.map(mineRow).join('') : '')
+    const sub=V.kpKind==='sx' ? l.mus.map(m=>t('mus.'+m)).join(', ')+' · '+sxSub(l) : tf('cd.target',{n:l.mins});
+    return `<div class="sh-row${ok?'':' off'}"><div class="nm">${esc(c.libName(l))}${V.kpKind==='sx'?lvTag(l.lv):''}<span>${esc(sub)} · ${esc(ok?eq:tf('guide.needs',{list:eq}))}</span></div>${pinBtn('data-lpin',l.key)}<button class="sh-add" data-ladd="${esc(l.key)}">${esc(t('btn.add'))}</button></div>`; };
+  $("kpList").innerHTML = (mine.length ? `<div class="sh-grp">${esc(t(V.kpKind==='sx'?'kp.mine.sx':'kp.mine.cd'))}</div>`+mine.map(mineRow).join('') : '')
     + (lib.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+lib.map(libRowK).join('') : '')
     || `<div class="sh-empty">${esc(q?tf('nomatch',{q:q}):t('kp.empty'))}</div>`;
 }
 async function kpPick(key, pin){
-  const c=kpCfg(kpKind), dayKey=$("fDay").value, date=$("fDate").value;
+  const c=kpCfg(V.kpKind), dayKey=$("fDay").value, date=$("fDate").value;
   if(pin){ const l=c.plan[dayKey]||(c.plan[dayKey]=[]); if(l.indexOf(key)<0) l.push(key); await persistPlan(); }
   else (c.today[date]||(c.today[date]=[])).push(key);
   kpClose(); c.draw();
-  const x=kpKind==='sx'?stretchByKey(key):cardioByKey(key);
+  const x=V.kpKind==='sx'?stretchByKey(key):cardioByKey(key);
   flash(pin ? tf('msg.pinned',{name:x?x.name:'', day:dayShort(dayKey)}) : tf('msg.exadded',{name:x?x.name:''}));
 }
-async function kpLibPick(libKey, pin){ const key=await kpCfg(kpKind).fromLib(libKey); if(key) kpPick(key, pin); }
-function kpNew(){ kpClose(); if(kpKind==='sx'){ sxPinDay=$("fDay").value; sxOpen(null); } else { cdPinDay=$("fDay").value; cdOpen(null); } }
+async function kpLibPick(libKey, pin){ const key=await kpCfg(V.kpKind).fromLib(libKey); if(key) kpPick(key, pin); }
+function kpNew(){ kpClose(); if(V.kpKind==='sx'){ V.sxPinDay=$("fDay").value; sxOpen(null); } else { V.cdPinDay=$("fDay").value; cdOpen(null); } }
 const sxOwned = l => S.stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
 const cdOwned = l => S.cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;
 async function sxFromLib(k){
@@ -618,7 +611,7 @@ async function cdFromLib(k){
   S.cardios.push(x); await persistCardio(); return x.key;
 }
 function shOpen(){
-  shManaging=false; shMsg('');
+  V.shManaging=false; shMsg('');
   $("shSearch").value='';
   dlgOpen("shWrap");
   shShow('list');
@@ -631,7 +624,7 @@ function shRenderList(){
   const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
   const row=ex=>{
     const pinned=(S.planExtras[dayKey]||[]).indexOf(ex.key)>=0;
-    if(shManaging){
+    if(V.shManaging){
       const days=S.entries.filter(e=>liftsOf(e,ex.key).length).length;
       return `<div class="sh-row">
         <div class="nm">${esc(ex.name)}<span>${esc(loadDesc(ex))} · ${esc(days?tn('coll.sessions',days):t('coll.never'))}${ex.retired?' · '+esc(t('coll.hidden')):''}</span></div>
@@ -645,7 +638,7 @@ function shRenderList(){
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t('btn.add'))}</button>
       </div>`;
   };
-  const pool = S.catalogue.filter(hit).filter(ex=>shManaging || (!ex.retired && !onForm(ex.key))).sort(exOrder);
+  const pool = S.catalogue.filter(hit).filter(ex=>V.shManaging || (!ex.retired && !onForm(ex.key))).sort(exOrder);
   const lrow=l=>{
     const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.bodyweight');
     return `<div class="sh-row${ok?'':' off'}">
@@ -654,14 +647,14 @@ function shRenderList(){
         <button class="sh-add" data-libadd="${l.key}">${esc(t('btn.add'))}</button>
       </div>`;
   };
-  const found = (q && !shManaging) ? LIB.filter(l=>!libLive(l) && qMatch(q, t('lib.'+l.key)+' '+l.p.concat(l.s).map(k=>t('mus.'+k)).join(' ')+(l.lv?' '+t('lv.'+l.lv):'')))
+  const found = (q && !V.shManaging) ? LIB.filter(l=>!libLive(l) && qMatch(q, t('lib.'+l.key)+' '+l.p.concat(l.s).map(k=>t('mus.'+k)).join(' ')+(l.lv?' '+t('lv.'+l.lv):'')))
     .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || libOrder(a,b)).slice(0,60) : [];
   const libPart = found.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+bwSplit(found, l=>l.lv, lrow, 'sh-grp')
-    : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}</div>` : '';
+    : (!q && !V.shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}</div>` : '';
   box.innerHTML = (pool.length || found.length)
     ? (pool.length ? `<div class="sh-grp">${esc(t('sh.yours'))}</div>`+bwSplit(pool, exLv, row, 'sh-grp') : '')+libPart
-    : (!q && !shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}<br>${esc(t('sh.tapnew'))}</div>`
-    : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`+libPart;
+    : (!q && !V.shManaging) ? `<div class="sh-empty">${esc(tf('sh.libhint',{n:LIB.length}))}<br>${esc(t('sh.tapnew'))}</div>`
+    : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${V.shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`+libPart;
 
 }
 async function shLibPick(k, pin){
@@ -703,18 +696,17 @@ async function shRetire(key){
   shMsg(tf(hide?'msg.hidden':'msg.shown',{name:ex.name}));
   flash(tf(hide?'msg.hidden.short':'msg.shown.short',{name:ex.name}));
 }
-let shDelArmed=null, shDelTimer=null;
-function shResetDel(){ shDelArmed=null; if(shDelTimer) clearTimeout(shDelTimer); const b=$("shDelete"); if(b) b.textContent=t('btn.remove'); }
+function shResetDel(){ V.shDelArmed=null; if(V.shDelTimer) clearTimeout(V.shDelTimer); const b=$("shDelete"); if(b) b.textContent=t('btn.remove'); }
 async function shDelete(){
-  const key=shEditing; if(!key) return;
+  const key=V.shEditing; if(!key) return;
   const ex=exByKey(key); if(!ex) return;
   const days=S.entries.filter(e=>liftsOf(e,key).length).length;
-  if(shDelArmed!==key){
-    shDelArmed=key;
+  if(V.shDelArmed!==key){
+    V.shDelArmed=key;
     $("shDelete").textContent=t('btn.tapagain');
     const what = days ? tn('sh.del.clears',days,{name:ex.name}) : tf('sh.del.removes',{name:ex.name});
     shMsg(what+' '+t('sh.del.custom')+' '+t('notreversible'), true);
-    shDelTimer=setTimeout(shResetDel,4000);
+    V.shDelTimer=setTimeout(shResetDel,4000);
     return;
   }
   shResetDel();
@@ -726,8 +718,6 @@ async function shDelete(){
   shClose(); fillForm($("fDate").value); render();
   flash(tf('msg.removed',{name:ex.name})+(days?(' · '+tn('msg.cleared',days)):''));
 }
-let shEditing=null;
-let shAddToDay=true;
 function shGroupSet(k){
   const g=$("shGroup"); if(!g) return;
   if(!g.children.length){
@@ -800,19 +790,19 @@ function shCoachRead(){
   return {repMin:mn, repMax:mx, step:$("shStep").value};
 }
 function shNew(){
-  shEditing=null; shResetDel();
+  V.shEditing=null; shResetDel();
   $("shName").value=''; $("shShort").value=''; $("shNote").value=''; $("shDef").value='';
   shGroupSet('other');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m==='kg'));
   shCoachFill(null); shMusDraw([],[]);
   $("shDelete").style.display='none';
-  $("shCreate").textContent=t(shAddToDay?'sh.createadd':'sh.addcoll');
+  $("shCreate").textContent=t(V.shAddToDay?'sh.createadd':'sh.addcoll');
   shMsg(''); shShow('form');
   $("shName").focus();
 }
 function shEdit(key){
   const ex=exByKey(key); if(!ex) return;
-  shEditing=key; shResetDel();
+  V.shEditing=key; shResetDel();
   $("shName").value=ex.name; $("shShort").value=ex.short||''; $("shNote").value=ex.note||'';
   $("shDef").value=ex.def!=null?ex.def:'';
   shGroupSet(groupOf(ex));
@@ -831,13 +821,13 @@ async function shCreate(){
   if(coach===undefined){ shMsg(t('sh.coach.bad'),true); $("shMin").focus(); return; }
 
   const mode=shModeGet(), mus=shMusRead();
-  if(shEditing){
-    const ed=S.exEdits[shEditing]||(S.exEdits[shEditing]={});
+  if(V.shEditing){
+    const ed=S.exEdits[V.shEditing]||(S.exEdits[V.shEditing]={});
     ed.name=name.slice(0,40);
     if(short) ed.short=short.slice(0,16); else delete ed.short;
     if(note) ed.note=note.slice(0,60); else delete ed.note;
     ed.group=shGroupGet();
-    const own=S.customEx.find(x=>x.key===shEditing);
+    const own=S.customEx.find(x=>x.key===V.shEditing);
     if(own){
       const d=parseFloat($("shDef").value);
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
@@ -856,9 +846,9 @@ async function shCreate(){
   const existing=S.catalogue.find(x=>x.name.toLowerCase()===lower);
   if(existing){
     if(existing.retired){ unhide(existing.key); await persistExEdits(); }
-    if(shAddToDay) addMovementToForm(existing.key);
+    if(V.shAddToDay) addMovementToForm(existing.key);
     shClose(); render();
-    flash(tf('msg.already',{name:existing.name})+(shAddToDay?' — '+t('msg.addedthat'):''));
+    flash(tf('msg.already',{name:existing.name})+(V.shAddToDay?' — '+t('msg.addedthat'):''));
     return;
   }
   const def=normCustomEx({
@@ -871,15 +861,12 @@ async function shCreate(){
   S.customEx.push(def);
   const ok=await persistCatalogue();
   if(!ok){ S.customEx.pop(); rebuildCatalogue(); shMsg(t('msg.savefail.ex'),true); return; }
-  if(shAddToDay) addMovementToForm(def.key);
+  if(V.shAddToDay) addMovementToForm(def.key);
   shClose();
   render();
-  flash(shAddToDay ? tf('msg.created',{name:def.name})
+  flash(V.shAddToDay ? tf('msg.created',{name:def.name})
                    : tf('msg.createdcoll',{name:def.name}));
 }
-
-let tmr = null;
-let restTimer=null, audioCtx=null;
 function restRemaining(endAt, now){ return (endAt==null) ? 0 : Math.max(0, Math.round((endAt-now)/1000)); }
 function fmtClock(s){ return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0'); }
 const hasAlarm = () => { try{ return !!(window.AndroidAlarm && window.AndroidAlarm.schedule); }catch(e){ return false; } };
@@ -896,28 +883,28 @@ function alarmCancel(){
 }
 function audioWake(){
   try{ const AC=window.AudioContext||window.webkitAudioContext;
-    if(AC && S.settings.restSound){ if(!audioCtx) audioCtx=new AC(); if(audioCtx.state==='suspended') audioCtx.resume(); } }catch(e){}
+    if(AC && S.settings.restSound){ if(!V.audioCtx) V.audioCtx=new AC(); if(V.audioCtx.state==='suspended') V.audioCtx.resume(); } }catch(e){}
 }
 function beep(n, freq){
   if(!S.settings.restSound) return;
   try{
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
-    if(!audioCtx) audioCtx=new AC();
-    if(audioCtx.state==='suspended') audioCtx.resume();
-    const t0=audioCtx.currentTime+0.06;
+    if(!V.audioCtx) V.audioCtx=new AC();
+    if(V.audioCtx.state==='suspended') V.audioCtx.resume();
+    const t0=V.audioCtx.currentTime+0.06;
     for(let i=0;i<(n||3);i++){
-      const o=audioCtx.createOscillator(), g=audioCtx.createGain(), at=t0+i*0.30;
+      const o=V.audioCtx.createOscillator(), g=V.audioCtx.createGain(), at=t0+i*0.30;
       o.type='square'; o.frequency.value=freq||1760;
       g.gain.setValueAtTime(0.0001,at);
       g.gain.exponentialRampToValueAtTime(0.9,at+0.01);
       g.gain.exponentialRampToValueAtTime(0.0001,at+0.20);
-      o.connect(g); g.connect(audioCtx.destination); o.start(at); o.stop(at+0.22);
+      o.connect(g); g.connect(V.audioCtx.destination); o.start(at); o.stop(at+0.22);
     }
   }catch(e){}
 }
 function timerStart(o){
   const lead=Math.max(0, o.lead||0), hold=Math.max(1, Math.round(o.hold||0));
-  tmr={ kind:o.kind, key:o.key||null, label:o.label||'', lead:lead, hold:hold,
+  V.tmr={ kind:o.kind, key:o.key||null, label:o.label||'', lead:lead, hold:hold,
         phase: lead>0 ? 'lead' : 'hold',
         total: lead>0 ? lead : hold,
         endAt: Date.now() + (lead>0?lead:hold)*1000,
@@ -927,33 +914,33 @@ function timerStart(o){
   $("restBar").classList.add('show');
   document.body.classList.add('resting');
   audioWake();
-  tmr.alarmLabel = (o.kind==='stretch') ? tf('rest.alarm.stretch',{name:tmr.label})
-                 : (o.kind==='cardio')  ? tf('rest.alarm.cardio',{name:tmr.label})
+  V.tmr.alarmLabel = (o.kind==='stretch') ? tf('rest.alarm.stretch',{name:V.tmr.label})
+                 : (o.kind==='cardio')  ? tf('rest.alarm.cardio',{name:V.tmr.label})
                  : t('rest.alarm.rest');
-  alarmSet(lead+hold, tmr.alarmLabel);
-  if(restTimer) clearInterval(restTimer);
-  restTimer=setInterval(timerTick,250);
+  alarmSet(lead+hold, V.tmr.alarmLabel);
+  if(V.restTimer) clearInterval(V.restTimer);
+  V.restTimer=setInterval(timerTick,250);
   timerTick();
 }
 function timerTick(){
-  if(!tmr) return;
+  if(!V.tmr) return;
   const now=Date.now();
-  if(tmr.doneAt!=null){ if(now-tmr.doneAt>10000) timerStop(); return; }
-  const left=(tmr.leftPaused!=null)?tmr.leftPaused:restRemaining(tmr.endAt,now);
+  if(V.tmr.doneAt!=null){ if(now-V.tmr.doneAt>10000) timerStop(); return; }
+  const left=(V.tmr.leftPaused!=null)?V.tmr.leftPaused:restRemaining(V.tmr.endAt,now);
   $("restNum").textContent=fmtClock(left);
-  $("restWho").textContent = tmr.phase==='lead' ? (t('rest.getready')+' · '+tmr.label) : tmr.label;
-  $("restFill").style.width=(tmr.total>0?Math.max(0,Math.min(100,left/tmr.total*100)):0)+'%';
-  $("restBar").classList.toggle('lead', tmr.phase==='lead');
-  if(tmr.leftPaused==null && left<=0){
-    if(tmr.phase==='lead'){
-      tmr.phase='hold'; tmr.total=tmr.hold; tmr.endAt=Date.now()+tmr.hold*1000;
+  $("restWho").textContent = V.tmr.phase==='lead' ? (t('rest.getready')+' · '+V.tmr.label) : V.tmr.label;
+  $("restFill").style.width=(V.tmr.total>0?Math.max(0,Math.min(100,left/V.tmr.total*100)):0)+'%';
+  $("restBar").classList.toggle('lead', V.tmr.phase==='lead');
+  if(V.tmr.leftPaused==null && left<=0){
+    if(V.tmr.phase==='lead'){
+      V.tmr.phase='hold'; V.tmr.total=V.tmr.hold; V.tmr.endAt=Date.now()+V.tmr.hold*1000;
       beep(1,1320);
       timerTick();
     } else timerFinish();
   }
 }
 function timerFinish(){
-  const z=tmr;
+  const z=V.tmr;
   z.doneAt=Date.now(); z.endAt=null; z.phase='done';
   $("restNum").textContent='0:00';
   $("restWho").textContent = (z.kind==='stretch') ? (tf('rest.held',{n:z.hold})+' · '+z.label)
@@ -967,32 +954,32 @@ function timerFinish(){
   if(z.kind==='cardio' && z.key) cdSetAdd(z.key, Math.round(z.hold/60));
 }
 function timerStop(){
-  if(restTimer){ clearInterval(restTimer); restTimer=null; }
+  if(V.restTimer){ clearInterval(V.restTimer); V.restTimer=null; }
   alarmCancel();
-  tmr=null;
+  V.tmr=null;
   $("restBar").classList.remove('show'); $("restBar").classList.remove('done'); $("restBar").classList.remove('lead');
   document.body.classList.remove('resting');
 }
 function restPause(){
-  if(!tmr || tmr.doneAt!=null) return;
-  if(tmr.leftPaused!=null){
-    tmr.endAt=Date.now()+tmr.leftPaused*1000; tmr.leftPaused=null; $("restPause").textContent=t('rest.pause');
-    alarmSet(restRemaining(tmr.endAt,Date.now())+(tmr.phase==='lead'?tmr.hold:0), tmr.alarmLabel);
+  if(!V.tmr || V.tmr.doneAt!=null) return;
+  if(V.tmr.leftPaused!=null){
+    V.tmr.endAt=Date.now()+V.tmr.leftPaused*1000; V.tmr.leftPaused=null; $("restPause").textContent=t('rest.pause');
+    alarmSet(restRemaining(V.tmr.endAt,Date.now())+(V.tmr.phase==='lead'?V.tmr.hold:0), V.tmr.alarmLabel);
   }else{
-    tmr.leftPaused=restRemaining(tmr.endAt,Date.now()); tmr.endAt=null; $("restPause").textContent=t('rest.resume');
+    V.tmr.leftPaused=restRemaining(V.tmr.endAt,Date.now()); V.tmr.endAt=null; $("restPause").textContent=t('rest.resume');
     alarmCancel();
   }
   timerTick();
 }
 function restNudge(sec){
-  if(!tmr || tmr.doneAt!=null) return;
-  if(tmr.leftPaused!=null) tmr.leftPaused=Math.max(0,tmr.leftPaused+sec);
-  else if(tmr.endAt!=null) tmr.endAt=Math.max(Date.now(), tmr.endAt+sec*1000);
+  if(!V.tmr || V.tmr.doneAt!=null) return;
+  if(V.tmr.leftPaused!=null) V.tmr.leftPaused=Math.max(0,V.tmr.leftPaused+sec);
+  else if(V.tmr.endAt!=null) V.tmr.endAt=Math.max(Date.now(), V.tmr.endAt+sec*1000);
   else return;
-  const left=(tmr.leftPaused!=null)?tmr.leftPaused:restRemaining(tmr.endAt,Date.now());
-  if(left>tmr.total) tmr.total=left;
-  if(tmr.phase==='hold') tmr.hold=Math.max(tmr.hold,left);
-  if(tmr.leftPaused==null) alarmSet(left+(tmr.phase==='lead'?tmr.hold:0), tmr.alarmLabel);
+  const left=(V.tmr.leftPaused!=null)?V.tmr.leftPaused:restRemaining(V.tmr.endAt,Date.now());
+  if(left>V.tmr.total) V.tmr.total=left;
+  if(V.tmr.phase==='hold') V.tmr.hold=Math.max(V.tmr.hold,left);
+  if(V.tmr.leftPaused==null) alarmSet(left+(V.tmr.phase==='lead'?V.tmr.hold:0), V.tmr.alarmLabel);
   timerTick();
 }
 function restLen(){
@@ -1021,8 +1008,8 @@ async function toggleRestSound(){
   S.settings.restSound=!S.settings.restSound;
   syncRestSegs(); await persistSettings(); drawExactNotice();
   if(!S.settings.restSound) alarmCancel();
-  else if(tmr && tmr.doneAt==null && tmr.leftPaused==null){
-    alarmSet(restRemaining(tmr.endAt,Date.now())+(tmr.phase==='lead'?tmr.hold:0), tmr.alarmLabel);
+  else if(V.tmr && V.tmr.doneAt==null && V.tmr.leftPaused==null){
+    alarmSet(restRemaining(V.tmr.endAt,Date.now())+(V.tmr.phase==='lead'?V.tmr.hold:0), V.tmr.alarmLabel);
   }
   if(S.settings.restSound){ audioWake(); beep(1); }
 }
@@ -1187,31 +1174,29 @@ function drawReview(){
 }
 
 const BACKUP_DAYS = 14;
-let bakSnoozed=false;
-let instPrompt=null;
 const INST_SNOOZE='tally:instSnooze';
 const instIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 const instDone = () => !!window.AndroidFile || location.protocol==='file:' || navigator.standalone===true
   || !!(window.matchMedia && matchMedia('(display-mode: standalone)').matches);
 function instSnoozed(){ try{ const v=+localStorage.getItem(INST_SNOOZE); return !!v && Date.now()-v<30*864e5; }catch(e){ return false; } }
 function drawInstall(){
-  const done=instDone(), can=!done && (!!instPrompt || instIOS);
+  const done=instDone(), can=!done && (!!V.instPrompt || instIOS);
   const nudge=$("instNudge");
   if(nudge){
     nudge.style.display = (can && !instSnoozed()) ? '' : 'none';
     $("instText").textContent = t(instIOS ? 'inst.nudge.ios' : 'inst.nudge');
-    $("instNow").style.display = instPrompt ? '' : 'none';
+    $("instNow").style.display = V.instPrompt ? '' : 'none';
   }
   const card=$("cardInstall");
   if(card){
     card.style.display = done ? 'none' : '';
-    $("instHow").textContent = t(instIOS ? 'inst.ios' : instPrompt ? 'inst.android' : 'inst.manual');
-    $("instBtn").style.display = instPrompt ? '' : 'none';
+    $("instHow").textContent = t(instIOS ? 'inst.ios' : V.instPrompt ? 'inst.android' : 'inst.manual');
+    $("instBtn").style.display = V.instPrompt ? '' : 'none';
   }
 }
 async function instGo(){
-  if(!instPrompt) return;
-  const p=instPrompt; instPrompt=null;
+  if(!V.instPrompt) return;
+  const p=V.instPrompt; V.instPrompt=null;
   p.prompt();
   try{ await p.userChoice; }catch(e){}
   drawInstall();
@@ -1236,8 +1221,8 @@ async function updCheck(){
   setTimeout(()=>{ if(!found && !reg.installing && !reg.waiting) updMsg(t('upd.latest')); }, 4000);
 }
 function instLater(){ try{ localStorage.setItem(INST_SNOOZE, String(Date.now())); }catch(e){} drawInstall(); }
-window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); instPrompt=e; drawInstall(); });
-window.addEventListener('appinstalled', ()=>{ instPrompt=null; drawInstall(); flash(t('inst.done')); });
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); V.instPrompt=e; drawInstall(); });
+window.addEventListener('appinstalled', ()=>{ V.instPrompt=null; drawInstall(); flash(t('inst.done')); });
 const loadBackupDate = P.loadBackupDate;
 async function markBackedUp(){ await P.saveBackupDate(); drawBackup(); }
 const backupAge = () => S.lastBackup ? dnum(localDate())-dnum(S.lastBackup) : null;
@@ -1251,7 +1236,7 @@ function drawBackup(){
   const age=backupAge(), line=$("bakLine");
   if(line) line.textContent = age==null ? t('bak.never') : age===0 ? t('bak.today') : age===1 ? t('bak.yesterday') : tf('bak.ago',{n:age});
   const bar=$("bakNudge"); if(!bar) return;
-  const show=backupDue() && !bakSnoozed;
+  const show=backupDue() && !V.bakSnoozed;
   bar.style.display = show ? '' : 'none';
   if(show) $("bakNudgeText").textContent = age==null ? t('bak.nudge.never') : tf('bak.nudge.ago',{n:age});
 }
@@ -1271,8 +1256,6 @@ function drawVersion(){
     if(k) el.textContent=line+' · '+tf('ver.build',{id:k.slice(6,13)});
   }).catch(()=>{});
 }
-
-let guideMus=null, guideAll=false, guideMode='p', guideEq='';
 const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
 function libOwned(l){
   const nm=t('lib.'+l.key).toLowerCase();
@@ -1289,7 +1272,7 @@ function sxLibRow(l){
 }
 function drawCdLib(){
   const wrap=$("cdLibWrap"); if(!wrap) return;
-  const show=l=>guideAll || libUsable(l);
+  const show=l=>V.guideAll || libUsable(l);
   const list=CD_LIB.slice().sort((a,b)=>(show(b)?1:0)-(show(a)?1:0) || byName(t('cdlib.'+a.key),t('cdlib.'+b.key)));
   wrap.innerHTML=list.map(l=>{
     const ok=libUsable(l), have=cdOwned(l), eq=l.eq.length ? l.eq.map(q=>t('eq.'+q)).join(', ') : t('guide.noeq');
@@ -1382,25 +1365,25 @@ function drawGuide(){
       }).join('')
       + (low.length>focus.length ? `<div class="sxnote">${esc(tf('guide.rec.more',{n:low.length-focus.length}))}</div>` : '');
 
-  if(!guideMus || MUSCLE_KEYS.indexOf(guideMus)<0) guideMus = low.length ? low[0].key : 'chest';
-  $("browseMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${m.key===guideMus?' on':''}" data-pick="${m.key}">${esc(t('mus.'+m.key))}</button>`).join('');
-  const show=l=>guideAll || libUsable(l);
-  const eqHit=l=>!guideEq || (guideEq==='none' ? !l.eq.length : l.eq.indexOf(guideEq)>=0);
-  const prim=LIB.filter(l=>l.p.indexOf(guideMus)>=0 && show(l)), sec=LIB.filter(l=>l.s.indexOf(guideMus)>=0 && show(l));
-  const sxs=SX_LIB.filter(l=>l.mus.indexOf(guideMus)>=0 && show(l));
-  const pools={p:prim, s:sec, x:sxs}, pool=pools[guideMode]||prim;
-  const list=pool.filter(eqHit).sort(guideMode==='x' ? (a,b)=>a.lv-b.lv || byName(t('sxlib.'+a.key),t('sxlib.'+b.key)) : libOrder);
-  $("browseMode").innerHTML=['p','s','x'].map(m=>`<button type="button" class="${m===guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:pools[m].filter(eqHit).length}))}</button>`).join('');
+  if(!V.guideMus || MUSCLE_KEYS.indexOf(V.guideMus)<0) V.guideMus = low.length ? low[0].key : 'chest';
+  $("browseMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${m.key===V.guideMus?' on':''}" data-pick="${m.key}">${esc(t('mus.'+m.key))}</button>`).join('');
+  const show=l=>V.guideAll || libUsable(l);
+  const eqHit=l=>!V.guideEq || (V.guideEq==='none' ? !l.eq.length : l.eq.indexOf(V.guideEq)>=0);
+  const prim=LIB.filter(l=>l.p.indexOf(V.guideMus)>=0 && show(l)), sec=LIB.filter(l=>l.s.indexOf(V.guideMus)>=0 && show(l));
+  const sxs=SX_LIB.filter(l=>l.mus.indexOf(V.guideMus)>=0 && show(l));
+  const pools={p:prim, s:sec, x:sxs}, pool=pools[V.guideMode]||prim;
+  const list=pool.filter(eqHit).sort(V.guideMode==='x' ? (a,b)=>a.lv-b.lv || byName(t('sxlib.'+a.key),t('sxlib.'+b.key)) : libOrder);
+  $("browseMode").innerHTML=['p','s','x'].map(m=>`<button type="button" class="${m===V.guideMode?'on':''}" data-mode="${m}">${esc(tf('guide.mode.'+m,{n:pools[m].filter(eqHit).length}))}</button>`).join('');
   const eqN=q=>pool.filter(l=>q==='none' ? !l.eq.length : l.eq.indexOf(q)>=0).length;
-  const eqOpts=['none'].concat(EQUIP).filter(q=>q===guideEq || eqN(q)>0);
+  const eqOpts=['none'].concat(EQUIP).filter(q=>q===V.guideEq || eqN(q)>0);
   $("browseEq").innerHTML=`<option value="">${esc(tf('guide.eq.any',{n:pool.length}))}</option>`
-    + eqOpts.map(q=>`<option value="${q}"${q===guideEq?' selected':''}>${esc(tf('guide.eq.item',{name:t(q==='none'?'guide.eq.none':'eq.'+q), n:eqN(q)}))}</option>`).join('');
-  $("browseEq").value=guideEq;
-  const ab=$("browseAll"); ab.style.display=S.gym.set ? '' : 'none'; ab.textContent=t(guideAll ? 'guide.all.off' : 'guide.all.on');
-  const mn=t('mus.'+guideMus);
-  $("browseCount").textContent=tn(guideMode==='s' ? 'guide.count.s' : guideMode==='x' ? 'guide.count.x' : 'guide.count', list.length, {name:mn});
-  $("browseWrap").innerHTML = list.length ? (guideMode==='x' ? list.map(sxLibRow).join('') : bwSplit(list, l=>l.lv, libRow, 'reclbl'))
-    : `<div class="restnote">${esc(guideEq ? t('guide.none.eq') : tf(guideMode==='s' ? 'guide.none.s' : guideMode==='x' ? 'guide.none.x' : 'guide.none',{name:mn}))}</div>`;
+    + eqOpts.map(q=>`<option value="${q}"${q===V.guideEq?' selected':''}>${esc(tf('guide.eq.item',{name:t(q==='none'?'guide.eq.none':'eq.'+q), n:eqN(q)}))}</option>`).join('');
+  $("browseEq").value=V.guideEq;
+  const ab=$("browseAll"); ab.style.display=S.gym.set ? '' : 'none'; ab.textContent=t(V.guideAll ? 'guide.all.off' : 'guide.all.on');
+  const mn=t('mus.'+V.guideMus);
+  $("browseCount").textContent=tn(V.guideMode==='s' ? 'guide.count.s' : V.guideMode==='x' ? 'guide.count.x' : 'guide.count', list.length, {name:mn});
+  $("browseWrap").innerHTML = list.length ? (V.guideMode==='x' ? list.map(sxLibRow).join('') : bwSplit(list, l=>l.lv, libRow, 'reclbl'))
+    : `<div class="restnote">${esc(V.guideEq ? t('guide.none.eq') : tf(V.guideMode==='s' ? 'guide.none.s' : V.guideMode==='x' ? 'guide.none.x' : 'guide.none',{name:mn}))}</div>`;
   drawSxWeek(); drawCdLib();
 }
 async function libToCollection(k){
@@ -1642,11 +1625,10 @@ function drawCardio(){
   const tot=$("cdTot");
   if(tot) tot.textContent = n ? (tf('done.n',{n:n})+(mins?(' · '+mins+' '+t('unit.min')):'')) : t('nothingyet');
 }
-let cdEditing=null, cdDelArmed=false, cdDelTimer=null;
 function cdMsg(msg,err){ const m=$("cdMsg"); if(!m) return; m.textContent=msg||''; m.className='sh-msg'+(err?' err':''); }
-function cdResetDel(){ cdDelArmed=false; if(cdDelTimer) clearTimeout(cdDelTimer); const b=$("cdDelete"); if(b) b.textContent=t('btn.remove'); }
+function cdResetDel(){ V.cdDelArmed=false; if(V.cdDelTimer) clearTimeout(V.cdDelTimer); const b=$("cdDelete"); if(b) b.textContent=t('btn.remove'); }
 function cdOpen(key){
-  cdEditing=key||null; cdResetDel();
+  V.cdEditing=key||null; cdResetDel();
   const c=key?cardioByKey(key):null;
   $("cdTitle").textContent=t(c?'cdx.edit':'cdx.new');
   $("cdName").value=c?c.name:'';
@@ -1655,12 +1637,12 @@ function cdOpen(key){
   cdMsg(''); dlgOpen("cdWrapSheet");
   if(!c) $("cdName").focus();
 }
-function cdClose(){ dlgClose("cdWrapSheet"); cdPinDay=null; cdResetDel(); cdMsg(''); cdEditing=null; }
+function cdClose(){ dlgClose("cdWrapSheet"); V.cdPinDay=null; cdResetDel(); cdMsg(''); V.cdEditing=null; }
 async function cdSave(){
   const name=$("cdName").value.trim();
   if(!name){ cdMsg(t('msg.needname'),true); $("cdName").focus(); return; }
-  if(cdEditing){
-    const c=cardioByKey(cdEditing); if(!c){ cdClose(); return; }
+  if(V.cdEditing){
+    const c=cardioByKey(V.cdEditing); if(!c){ cdClose(); return; }
     const upd=normCardio({key:c.key, name:name, mins:$("cdMins").value, sets:$("cdSets").value, lib:c.lib, retired:c.retired});
     if(!upd){ cdMsg(t('msg.badname'),true); return; }
     Object.assign(c, upd);
@@ -1669,21 +1651,21 @@ async function cdSave(){
     const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value, sets:$("cdSets").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
     S.cardios.push(c);
-    if(cdPinDay){ (S.planCd[cdPinDay]||(S.planCd[cdPinDay]=[])).push(c.key); await persistPlan(); }
+    if(V.cdPinDay){ (S.planCd[V.cdPinDay]||(S.planCd[V.cdPinDay]=[])).push(c.key); await persistPlan(); }
   }
   const ok=await persistCardio();
   if(!ok){ cdMsg(t('msg.savefail'),true); return; }
   cdClose(); drawCardio();
 }
 async function cdDelete(){
-  if(!cdEditing) return;
-  const c=cardioByKey(cdEditing); if(!c) return;
+  if(!V.cdEditing) return;
+  const c=cardioByKey(V.cdEditing); if(!c) return;
   const days=S.entries.filter(e=>e.cardio && (c.key in e.cardio)).length;
-  if(!cdDelArmed){
-    cdDelArmed=true;
+  if(!V.cdDelArmed){
+    V.cdDelArmed=true;
     $("cdDelete").textContent=t('btn.tapagain');
     cdMsg(days ? tn('del.clears',days,{name:c.name})+' '+t('notreversible') : tf('del.removes',{name:c.name}), true);
-    cdDelTimer=setTimeout(cdResetDel, 4000);
+    V.cdDelTimer=setTimeout(cdResetDel, 4000);
     return;
   }
   cdResetDel();
@@ -1694,10 +1676,8 @@ async function cdDelete(){
   cdClose(); render();
   flash(tf('msg.removed',{name:c.name}));
 }
-
-let sxEditing=null, sxDelArmed=false, sxDelTimer=null;
 function sxMsg(msg,err){ const m=$("sxMsg"); if(!m) return; m.textContent=msg||''; m.className='sh-msg'+(err?' err':''); }
-function sxResetDel(){ sxDelArmed=false; if(sxDelTimer) clearTimeout(sxDelTimer); const b=$("sxDelete"); if(b) b.textContent=t('btn.remove'); }
+function sxResetDel(){ V.sxDelArmed=false; if(V.sxDelTimer) clearTimeout(V.sxDelTimer); const b=$("sxDelete"); if(b) b.textContent=t('btn.remove'); }
 function sxModeSet(m){
   const reps = m==='reps';
   document.querySelectorAll('#sxMode button').forEach(b=>b.classList.toggle('on', b.dataset.m===m));
@@ -1706,14 +1686,14 @@ function sxModeSet(m){
   const inp=$("sxSecs");
   if(inp){
     inp.max=reps?999:3600; inp.step=reps?1:5; inp.placeholder=reps?'10':'45';
-    const cur = sxEditing ? stretchByKey(sxEditing) : null;
+    const cur = V.sxEditing ? stretchByKey(V.sxEditing) : null;
     const v = cur ? (reps ? cur.reps : cur.secs) : (reps ? 10 : 45);
     inp.value = v || '';
   }
 }
 const sxModeGet = () => { const b=document.querySelector('#sxMode button.on'); return b?b.dataset.m:'sec'; };
 function sxOpen(key){
-  sxEditing=key||null; sxResetDel();
+  V.sxEditing=key||null; sxResetDel();
   const s=key?stretchByKey(key):null;
   const mode = sxIsReps(s) ? 'reps' : 'sec';
   $("sxTitle").textContent=t(s?'sx.edit':'sx.new');
@@ -1723,7 +1703,7 @@ function sxOpen(key){
   sxMsg(''); dlgOpen("sxWrap");
   if(!s) $("sxName").focus();
 }
-function sxClose(){ dlgClose("sxWrap"); sxResetDel(); sxMsg(''); sxEditing=null; sxPinDay=null; }
+function sxClose(){ dlgClose("sxWrap"); sxResetDel(); sxMsg(''); V.sxEditing=null; V.sxPinDay=null; }
 const sxMusGet = () => [...document.querySelectorAll('#sxMus .mchip.on')].map(b=>b.dataset.m);
 function sxMusSet(list){ $("sxMus").innerHTML=MUSCLES.map(m=>`<button type="button" class="mchip${(list||[]).indexOf(m.key)>=0?' on':''}" data-m="${m.key}">${esc(t('mus.'+m.key))}</button>`).join(''); }
 async function sxSave(){
@@ -1731,8 +1711,8 @@ async function sxSave(){
   if(!name){ sxMsg(t('msg.needname'),true); $("sxName").focus(); return; }
   const reps = sxModeGet()==='reps';
   const v = $("sxSecs").value;
-  if(sxEditing){
-    const s=stretchByKey(sxEditing); if(!s){ sxClose(); return; }
+  if(V.sxEditing){
+    const s=stretchByKey(V.sxEditing); if(!s){ sxClose(); return; }
     const upd=normStretch({key:s.key, name:name, unit:reps?'reps':null,
       secs:reps?s.secs:v, reps:reps?v:s.reps, sets:$("sxSets").value, mus:sxMusGet(), lib:s.lib, retired:s.retired});
     if(!upd){ sxMsg(t('msg.badname'),true); return; }
@@ -1743,21 +1723,21 @@ async function sxSave(){
       secs:reps?0:v, reps:reps?v:0, sets:$("sxSets").value, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
     S.stretches.push(s);
-    if(sxPinDay){ (S.planSx[sxPinDay]||(S.planSx[sxPinDay]=[])).push(s.key); await persistPlan(); }
+    if(V.sxPinDay){ (S.planSx[V.sxPinDay]||(S.planSx[V.sxPinDay]=[])).push(s.key); await persistPlan(); }
   }
   const ok=await persistStretches();
   if(!ok){ sxMsg(t('msg.savefail'),true); return; }
   sxClose(); drawMob();
 }
 async function sxDelete(){
-  if(!sxEditing) return;
-  const s=stretchByKey(sxEditing); if(!s) return;
+  if(!V.sxEditing) return;
+  const s=stretchByKey(V.sxEditing); if(!s) return;
   const days=S.entries.filter(e=>e.mob && (s.key in e.mob)).length;
-  if(!sxDelArmed){
-    sxDelArmed=true;
+  if(!V.sxDelArmed){
+    V.sxDelArmed=true;
     $("sxDelete").textContent=t('btn.tapagain');
     sxMsg(days ? tn('del.clears',days,{name:s.name})+' '+t('notreversible') : tf('del.removes',{name:s.name}), true);
-    sxDelTimer=setTimeout(sxResetDel, 4000);
+    V.sxDelTimer=setTimeout(sxResetDel, 4000);
     return;
   }
   sxResetDel();
@@ -1770,27 +1750,26 @@ async function sxDelete(){
 }
 
 const DP_MONTH=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-let dpY=0, dpM=0;
 function setDateDisplay(ds){ const b=$("dateBtn"); if(b) b.textContent=fmtDMY(ds); }
 function dpOpen(){
   const d=new Date(($("fDate").value||localDate())+'T12:00:00');
-  dpY=d.getFullYear(); dpM=d.getMonth();
+  V.dpY=d.getFullYear(); V.dpM=d.getMonth();
   dpRender(); dlgOpen("dpWrap");
 }
 function dpClose(){ dlgClose("dpWrap"); }
-function dpShift(n){ dpM+=n; if(dpM<0){dpM=11;dpY--;} else if(dpM>11){dpM=0;dpY++;} dpRender(); }
+function dpShift(n){ V.dpM+=n; if(V.dpM<0){V.dpM=11;V.dpY--;} else if(V.dpM>11){V.dpM=0;V.dpY++;} dpRender(); }
 function dpPick(ds){ $("fDate").value=ds; dpClose(); fillForm(ds); }
 function dpRender(){
   const sel=$("fDate").value, today=localDate();
-  const lead=new Date(dpY,dpM,1).getDay();
-  const days=new Date(dpY,dpM+1,0).getDate();
+  const lead=new Date(V.dpY,V.dpM,1).getDay();
+  const days=new Date(V.dpY,V.dpM+1,0).getDate();
   let h=DAYS.map(d=>`<div class="dp-dow">${esc(dayShort(d.key))}</div>`).join('');
   for(let i=0;i<lead;i++) h+='<button type="button" class="dp-day blank" disabled></button>';
   for(let d=1;d<=days;d++){
-    const ds=dpY+'-'+String(dpM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const ds=V.dpY+'-'+String(V.dpM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     h+=`<button type="button" class="dp-day${ds===sel?' sel':''}${ds===today?' today':''}" data-d="${ds}" aria-label="${fmtDMY(ds)}">${d}</button>`;
   }
-  $("dpTitle").textContent=t('mon.'+DP_MONTH[dpM])+' '+dpY;
+  $("dpTitle").textContent=t('mon.'+DP_MONTH[V.dpM])+' '+V.dpY;
   $("dpGrid").innerHTML=h;
 
 }
@@ -1834,11 +1813,11 @@ const PAGE_DRAW = {
 };
 const stalePages = new Set();
 function drawPage(k){ if(stalePages.delete(k)) PAGE_DRAW[k](); }
-function stale(k){ stalePages.add(k); if(k===curPage) drawPage(k); }
+function stale(k){ stalePages.add(k); if(k===V.curPage) drawPage(k); }
 function render(){
   drawSched(); drawBackup(); drawInstall(); drawUpdate(); syncChartSegs();
   PAGES.forEach(p=>stalePages.add(p));
-  drawPage(curPage);
+  drawPage(V.curPage);
 }
 function drawBodyStats(){
   const weighed=S.entries.filter(e=>e.weight!=null);
@@ -2309,8 +2288,6 @@ function drawProg(){
   });
 }
 
-const HIST_PAGE = 60;
-let histShown = HIST_PAGE;
 function drawHistory(){
   const body=$("histBody"), more=$("histMore");
   if(!S.entries.length){ $("histEmpty").style.display='block'; body.innerHTML=''; more.style.display='none'; return; }
@@ -2326,7 +2303,7 @@ function drawHistory(){
     if(reps) bits.push(reps+'\u00d7');
     return '<span class="chk">'+n+'</span>'+(bits.length?' <span class="dash">'+bits.join(' ')+'</span>':'');
   };
-  const rows=S.entries.slice(-histShown).reverse();
+  const rows=S.entries.slice(-V.histShown).reverse();
   body.innerHTML=rows.map(e=>{
     const d=DAYS.some(x=>x.key===e.day) ? e.day : null;
     return `<tr>
@@ -2343,17 +2320,16 @@ function drawHistory(){
   more.style.display=left ? '' : 'none';
   if(left) more.textContent=tn('hist.more',Math.min(HIST_PAGE,left));
 }
-let delArmed=null, delTimer=null;
 async function removeEntry(date, btn){
   if(S.loadFailed){ flash(t('msg.loadfail.del'),true); return; }
-  if(delArmed!==date){
-    if(delTimer) clearTimeout(delTimer);
+  if(V.delArmed!==date){
+    if(V.delTimer) clearTimeout(V.delTimer);
     document.querySelectorAll('.del').forEach(x=>{ x.textContent='✕'; x.style.color=''; });
     if(btn){ btn.textContent=t('msg.deleteq'); btn.style.color='var(--rust)'; }
-    delArmed=date; delTimer=setTimeout(()=>{ delArmed=null; if(btn){ btn.textContent='✕'; btn.style.color=''; } },3000);
+    V.delArmed=date; V.delTimer=setTimeout(()=>{ V.delArmed=null; if(btn){ btn.textContent='✕'; btn.style.color=''; } },3000);
     return;
   }
-  clearTimeout(delTimer); delArmed=null;
+  clearTimeout(V.delTimer); V.delArmed=null;
   S.entries=S.entries.filter(e=>e.date!==date);
   await persist(); fillForm($("fDate").value); render();
 }
@@ -2466,7 +2442,7 @@ function buildAiReport(){
   L.push('--- CURRENT PLAN & SELECTED GOAL ---');
   L.push('Selected goal (calibration): '+goalLabel(S.settings.calRate)+'   [options: \u22120.5 / \u22120.25 / maintain / +0.25 / +0.5]');
   L.push('Calibration window selected: '+periodLabel(S.settings.calPeriod));
-  L.push('Chart window selected: '+periodLabel(chartPeriod));
+  L.push('Chart window selected: '+periodLabel(V.chartPeriod));
   L.push('Calorie target currently set: '+S.settings.kcalTarget+' kcal/day'+(S.settings.kcalOwn?' (set by hand)':' (from the estimate or default)'));
   L.push('Protein target (daily): '+protTarget()+' g, '+(S.settings.protFloor!=null?'set by hand':'automatic for '+(S.settings.sex||'sex not set'))+'; anything from '+protOk()+' g counts as fine');
   L.push('');
@@ -2567,7 +2543,7 @@ function buildAiReport(){
   flags.forEach(f=>L.push('- '+f));
   L.push('');
   L.push('--- RAW DATA (JSON, complete, loss-less) ---');
-  L.push(JSON.stringify(exportObject({selection:{chartPeriod:chartPeriod}})));
+  L.push(JSON.stringify(exportObject({selection:{chartPeriod:V.chartPeriod}})));
   L.push('');
   L.push('=== END REPORT ===');
   return L.join('\n');
@@ -2590,8 +2566,7 @@ function doImport(){
   btn.classList.toggle('show', showing);
   if(showing){ box.value=''; box.focus(); }
 }
-let importArmed=false, importTimer=null;
-function resetImportBtn(){ importArmed=false; if(importTimer) clearTimeout(importTimer); const b=$("loadBtn"); if(b) b.textContent=t('sync.load'); }
+function resetImportBtn(){ V.importArmed=false; if(V.importTimer) clearTimeout(V.importTimer); const b=$("loadBtn"); if(b) b.textContent=t('sync.load'); }
 async function loadImport(){
   const raw=$("importBox").value.trim();
   if(!raw){ smsg(t('sync.noload'),true); return; }
@@ -2602,10 +2577,10 @@ async function loadImport(){
   if(!list){ resetImportBtn(); smsg(t('sync.noentries'),true); return; }
   const incoming=normEntries(list);
   const btn=$("loadBtn");
-  if(!importArmed){
-    importArmed=true; if(btn) btn.textContent=tf('sync.tapreplace',{a:S.entries.length, b:incoming.length});
+  if(!V.importArmed){
+    V.importArmed=true; if(btn) btn.textContent=tf('sync.tapreplace',{a:S.entries.length, b:incoming.length});
     smsg(tf('sync.readn',{n:incoming.length, seen:list.length, have:S.entries.length}));
-    importTimer=setTimeout(()=>{ resetImportBtn(); smsg(t('sync.timedout')); },8000);
+    V.importTimer=setTimeout(()=>{ resetImportBtn(); smsg(t('sync.timedout')); },8000);
     return;
   }
   resetImportBtn();
@@ -2639,21 +2614,20 @@ async function applyImport(data){
   await persist();
   fillForm($("fDate").value); render();
 }
-let undoArmed=false, undoTimer=null;
 const saveUndo = P.saveUndo, loadUndo = P.loadUndo;
 function drawUndo(){
   const b=$("undoBtn"); if(!b) return;
   b.style.display=S.undoSnap ? '' : 'none';
-  if(S.undoSnap && !undoArmed) b.textContent=tn('sync.undo',S.undoSnap.n);
+  if(S.undoSnap && !V.undoArmed) b.textContent=tn('sync.undo',S.undoSnap.n);
 }
 async function undoImport(){
   if(!S.undoSnap) return;
-  if(!undoArmed){
-    undoArmed=true; $("undoBtn").textContent=t('sync.undo.again');
-    undoTimer=setTimeout(()=>{ undoArmed=false; drawUndo(); },4000);
+  if(!V.undoArmed){
+    V.undoArmed=true; $("undoBtn").textContent=t('sync.undo.again');
+    V.undoTimer=setTimeout(()=>{ V.undoArmed=false; drawUndo(); },4000);
     return;
   }
-  clearTimeout(undoTimer); undoArmed=false;
+  clearTimeout(V.undoTimer); V.undoArmed=false;
   const snap=S.undoSnap; S.undoSnap=null;
   try{ await STORE.set(UKEY,''); }catch(e){}
   await applyImport(snap.data);
@@ -2700,12 +2674,11 @@ async function saveEntry(){
   fillBody(date);
   if($("exportBox").classList.contains('show')) $("exportBox").value=exportPayload();
 }
-let flashTimer=null;
 function flash(msg,err){
   const els=['savedMsg','savedMsg2'].map($).filter(Boolean);
   els.forEach(m=>{ m.textContent=msg; m.style.color=err?'var(--rust)':'var(--orange)'; m.classList.add('show'); });
-  clearTimeout(flashTimer);
-  flashTimer=setTimeout(()=>els.forEach(m=>m.classList.remove('show')),2400);
+  clearTimeout(V.flashTimer);
+  V.flashTimer=setTimeout(()=>els.forEach(m=>m.classList.remove('show')),2400);
 }
 
 
@@ -2752,16 +2725,16 @@ function flash(msg,err){
   $("dayNext").onclick=()=>shiftDay(1);
   $("dayToday").onclick=()=>{ $("fDate").value=localDate(); fillForm(localDate()); render(); };
   showPage('body');
-  $("addMoveBtn").onclick=()=>{ shAddToDay=true; shOpen(); };
-  $("addWorkoutBtn").onclick=()=>{ shAddToDay=false; shOpen(); shNew(); };
+  $("addMoveBtn").onclick=()=>{ V.shAddToDay=true; shOpen(); };
+  $("addWorkoutBtn").onclick=()=>{ V.shAddToDay=false; shOpen(); shNew(); };
   $("collSearch").oninput=drawColl;
   $("shClose").onclick=shClose;
   $("shSearch").oninput=shRenderList;
   $("shNewBtn").onclick=shNew;
-  $("shCancelNew").onclick=()=>{ shMsg(''); shResetDel(); shEditing=null; shShow('list'); };
+  $("shCancelNew").onclick=()=>{ shMsg(''); shResetDel(); V.shEditing=null; shShow('list'); };
   $("shCreate").onclick=shCreate;
   $("shDelete").onclick=shDelete;
-  $("shManageBtn").onclick=()=>{ shManaging=!shManaging; shMsg(''); shShow('list'); };
+  $("shManageBtn").onclick=()=>{ V.shManaging=!V.shManaging; shMsg(''); shShow('list'); };
   $("shWrap").onclick=ev=>{ if(ev.target===$("shWrap")) shClose(); };
   document.querySelectorAll('#shMode button').forEach(b=>b.onclick=()=>{
     document.querySelectorAll('#shMode button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
@@ -2772,15 +2745,15 @@ function flash(msg,err){
   $("shStep").addEventListener('input', shCoachSync);
   $("volLo").addEventListener('change', volBandSet);
   $("volHi").addEventListener('change', volBandSet);
-  $("browseAll").onclick=()=>{ guideAll=!guideAll; drawGuide(); };
-  $("browseEq").onchange=()=>{ guideEq=$("browseEq").value; drawGuide(); };
+  $("browseAll").onclick=()=>{ V.guideAll=!V.guideAll; drawGuide(); };
+  $("browseEq").onchange=()=>{ V.guideEq=$("browseEq").value; drawGuide(); };
   $("gymAdd").onclick=gymAddOwn;
   $("bakNow").onclick=bakFromNudge;
-  $("bakLater").onclick=()=>{ bakSnoozed=true; drawBackup(); };
+  $("bakLater").onclick=()=>{ V.bakSnoozed=true; drawBackup(); };
   $("updCheck").onclick=updCheck;
-  $("plGoal").oninput=()=>{ const v=num($("plGoal").value); plGoal=(v!=null && v>0) ? v : null; $("plOut").innerHTML=plResultHtml(S.settings.plates.unit, plBarOf()); const a=$("plUse"); if(a) a.onclick=()=>{ plGoal=+a.dataset.v; drawPlates(); }; };
+  $("plGoal").oninput=()=>{ const v=num($("plGoal").value); V.plGoal=(v!=null && v>0) ? v : null; $("plOut").innerHTML=plResultHtml(S.settings.plates.unit, plBarOf()); const a=$("plUse"); if(a) a.onclick=()=>{ V.plGoal=+a.dataset.v; drawPlates(); }; };
   document.querySelectorAll('#plUnit button').forEach(b=>b.onclick=async()=>{ const P=S.settings.plates; if(P.unit===b.dataset.u) return;
-    if(plGoal!=null) plGoal=Math.round((b.dataset.u==='lb' ? plGoal/LB : plGoal*LB)*2)/2; P.unit=b.dataset.u; await persistSettings(); drawPlates(); });
+    if(V.plGoal!=null) V.plGoal=Math.round((b.dataset.u==='lb' ? V.plGoal/LB : V.plGoal*LB)*2)/2; P.unit=b.dataset.u; await persistSettings(); drawPlates(); });
   let resizeW=window.innerWidth, resizeT=null;
   window.addEventListener('resize', ()=>{ clearTimeout(resizeT); resizeT=setTimeout(()=>{ if(window.innerWidth!==resizeW){ resizeW=window.innerWidth; render(); } }, 200); });
   $("sizeDown").onclick=()=>textScale(-1); $("sizeUp").onclick=()=>textScale(1); $("sizeReset").onclick=()=>textScale(0);
@@ -2788,7 +2761,7 @@ function flash(msg,err){
   $("abX").onclick=abClose; $("abOk").onclick=abClose; $("abNever").onclick=abNever;
   $("abWrap").onclick=ev=>{ if(ev.target===$("abWrap")) abClose(); };
   $("instNow").onclick=instGo; $("instBtn").onclick=instGo; $("instLater").onclick=instLater;
-  $("histMore").onclick=()=>{ histShown+=HIST_PAGE; drawHistory(); };
+  $("histMore").onclick=()=>{ V.histShown+=HIST_PAGE; drawHistory(); };
   $("histBody").onclick=ev=>{ const b=ev.target.closest('.del'); if(b) removeEntry(b.dataset.d, b); };
   $("undoBtn").onclick=undoImport;
   $("restExactBtn").onclick=openExactSettings;
@@ -2799,16 +2772,16 @@ function flash(msg,err){
     if(ev.target.closest('.mobpin')) toggleLogPin('cd',k); else if(ev.target.closest('.mobtick')) toggleCardio(k); else if(ev.target.closest('.mobgo')) startCardioTimer(k); else if(ev.target.closest('.mobedit')) cdOpen(k); };
   $("cdWrap").onchange=ev=>{ const inp=ev.target.closest('.mobsec,.mobn'); if(inp) cdRowEdit(inp.closest('.mobrow')); };
   $("collWrap").onclick=ev=>{ const b=ev.target.closest('[data-cedit],[data-cret]'); if(!b) return;
-    if(b.dataset.cedit){ shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
+    if(b.dataset.cedit){ V.shAddToDay=false; shOpen(); shEdit(b.dataset.cedit); } else shRetire(b.dataset.cret); };
   $("shList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
     if(d.add) shPick(d.add,false); else if(d.pin) shPick(d.pin,true); else if(d.libadd) shLibPick(d.libadd,false); else if(d.libpin) shLibPick(d.libpin,true); else if(d.ret) shRetire(d.ret); else if(d.edit) shEdit(d.edit); };
   $("pg-guide").onclick=async ev=>{ const b=ev.target.closest('[data-add],[data-mute],[data-pick],[data-band],[data-mode],[data-sxadd],[data-cdadd],[data-sxmus]'); if(!b) return; const d=b.dataset;
     if(d.sxadd){ const k=await sxFromLib(d.sxadd); if(k){ render(); flash(tf('msg.libadded',{name:stretchByKey(k).name})); } return; }
     if(d.cdadd){ const k=await cdFromLib(d.cdadd); if(k){ render(); flash(tf('msg.libadded',{name:cardioByKey(k).name})); } return; }
-    if(d.sxmus){ guideMus=d.sxmus; guideMode='x'; drawGuide(); const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); return; }
+    if(d.sxmus){ V.guideMus=d.sxmus; V.guideMode='x'; drawGuide(); const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); return; }
     if(d.add) guideAdd(d.add); else if(d.mute) volMuteToggle(d.mute); else if(d.band) volBandPick(d.band);
-    else if(d.mode){ guideMode=d.mode; drawGuide(); }
-    else { guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
+    else if(d.mode){ V.guideMode=d.mode; drawGuide(); }
+    else { V.guideMus=d.pick; drawGuide(); if(b.classList.contains('volname')){ const c=$("cardBrowse"); if(c) c.scrollIntoView({behavior:'smooth', block:'start'}); } } };
   $("gymWrap").onclick=ev=>{ const b=ev.target.closest('[data-eq]'); if(b) gymToggle(b.dataset.eq); };
   $("gymOwn").onclick=ev=>{ const b=ev.target.closest('[data-gdel]'); if(b) gymDelOwn(b.dataset.gdel); };
   $("strPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleChartEx(b.dataset.k); };
@@ -2851,7 +2824,7 @@ function flash(msg,err){
   $("restStop").onclick=timerStop;
   $("restMinus").onclick=()=>restNudge(-15);
   $("restPlus").onclick=()=>restNudge(30);
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(restTimer) timerTick(); drawExactNotice(); });
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(V.restTimer) timerTick(); drawExactNotice(); });
   document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); } });
   await purgeOldNamespace();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
