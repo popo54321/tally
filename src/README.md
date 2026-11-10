@@ -6,7 +6,7 @@ exist to keep the code easy to change.
 
 | Folder | Job | May use |
 |---|---|---|
-| `core/` | Pure maths: dates, units, weight trend, calorie estimate, protein aim, body fat, strength scores, next-session suggestions, weekly sets per muscle, plate maths, fasting rules. No screen, no storage, no clock: everything it needs comes in as arguments. | `core/`, `data/` |
+| `core/` | Pure maths: dates, units, weight trend, calorie estimate, protein aim, body fat, strength scores, next-session suggestions, weekly sets per muscle, plate maths, fasting rules. No screen and no storage: everything it needs comes in as arguments ("today" defaults to the phone's clock). | `core/`, `data/` |
 | `data/` | Fixed lists: the lift, stretch and cardio libraries, equipment, muscles, colour themes. | `data/` |
 | `i18n/` | Every word the app shows. | nothing |
 | `store/` | The only code that reads or writes saved data: storage access, format versions, upgrading older data, packing old months into half-year bundles, backup import and export. | `core/`, `data/` |

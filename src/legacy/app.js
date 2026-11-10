@@ -1,3 +1,6 @@
+// The 8.1 code, moving out piece by piece into the folders described in src/README.md.
+import { localDate, daysAgo, within7, dnum, validDate, weekdayKey, fmtDMY, fmtDM, fmtTick } from '../core/dates';
+import { num, roundTo, fmtSigned, calcVal } from '../core/numbers';
 const APP_VERSION = '8.1';
 const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
@@ -1095,7 +1098,6 @@ function sessionEx(dayKey){
   return (planExtras[dayKey]||[]).filter((k,i,a)=>{ const ex=exByKey(k); return ex && !ex.retired && a.indexOf(k)===i; });
 }
 const planKeys = () => { const s=new Set(); DAYS.forEach(d=>sessionEx(d.key).forEach(k=>s.add(k))); return [...s]; };
-function weekdayKey(dateStr){ return DAYS[new Date(dateStr+'T12:00:00').getDay()].key; }
 
 const LINE_COLORS = ['#0d59d1','#f7801e','#ffc21a','#e11d2a','#8b2fc9','#1b9fd8','#2fb84a','#d6006e','#141430'];
 
@@ -1162,30 +1164,6 @@ function setChartPeriod(p){ chartPeriod=(p==='all')?'all':+p; syncChartSegs(); r
 function syncChartSegs(){ document.querySelectorAll('.chartseg button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(chartPeriod))); }
 
 const $ = id => document.getElementById(id);
-const num = v => { const n=parseFloat(v); return isNaN(n)?null:n; };
-function calcVal(v){
-  const s=String(v==null?'':v).replace(/\s+/g,'');
-  if(!s) return null;
-  const tok=s.match(/\d+\.?\d*|\.\d+|[+\-*/]/g);
-  if(!tok || tok.join('')!==s) return null;
-  const flat=[];
-  for(let i=0;i<tok.length;i++){
-    const x=tok[i];
-    if(x==='*'||x==='/'){
-      const a=flat.pop(), b=parseFloat(tok[++i]);
-      if(typeof a!=='number'||isNaN(a)||isNaN(b)||(x==='/'&&b===0)) return null;
-      flat.push(x==='*'?a*b:a/b);
-    } else if(x==='+'||x==='-') flat.push(x);
-    else flat.push(parseFloat(x));
-  }
-  let acc=null, op='+';
-  for(const x of flat){
-    if(x==='+'||x==='-'){ op=x; continue; }
-    if(typeof x!=='number'||isNaN(x)) return null;
-    acc = (acc==null) ? (op==='-'?-x:x) : (op==='+'?acc+x:acc-x);
-  }
-  return (acc==null||!isFinite(acc)) ? null : Math.round(acc*10)/10;
-}
 function calcHint(id){
   const el=$(id), out=$(id+'Sum'); if(!el||!out) return;
   const raw=el.value.trim(), v=calcVal(raw);
@@ -1217,19 +1195,6 @@ function calcAdd(id){
 }
 const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const dnum = d => Math.floor(Date.parse(d)/86400000);
-const fmtDMY = ds => ds ? ds.slice(8,10)+'/'+ds.slice(5,7)+'/'+ds.slice(0,4) : '—';
-const fmtDM = ds => ds.slice(8,10)+'/'+ds.slice(5,7);
-const fmtTick = dn => { const d=new Date(dn*86400000); return d.getUTCDate()+'/'+(d.getUTCMonth()+1); };
-const roundTo = (v, dp) => { const f=Math.pow(10, dp==null?1:dp); return Math.round(v*f)/f; };
-function fmtSigned(v,u,dp){
-  if(v==null) return 'n/a';
-  const r=roundTo(v,dp);
-  return (r>0?'+':r<0?'−':'±')+Math.abs(r).toFixed(dp==null?1:dp)+(u||'');
-}
-const localDate = d => { d=d||new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-function daysAgo(n){ const d=new Date(); d.setDate(d.getDate()-n); return localDate(d); }
-const within7 = d => d>=daysAgo(6) && d<=localDate();
 
 const hasWS = (typeof window!=='undefined') && window.storage && typeof window.storage.get==='function';
 const STORE = hasWS ? {
@@ -1243,7 +1208,6 @@ const STORE = hasWS ? {
 };
 let loadFailed=false;
 
-function validDate(s){ return typeof s==='string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && !isNaN(Date.parse(s)); }
 const SAFE_KEY = /^[A-Za-z0-9_-]{1,64}$/;
 function normEntry(e){
   if(!e || !validDate(e.date)) return null;

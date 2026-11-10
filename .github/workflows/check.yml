@@ -29,6 +29,9 @@ jobs:
       - name: Type-check, layer rules, build
         run: npm run check
 
+      - name: Same answers as 8.1 on random inputs
+        run: node tests/equiv.mjs
+
       - name: Photograph 8.1 and the rebuild, then compare
         run: |
           node tests/record.mjs old

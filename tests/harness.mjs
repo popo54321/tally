@@ -16,8 +16,8 @@ export function fixture(name) {
 }
 
 // Open one app ('old' or 'new') with the given stored data (key -> string).
-export async function openApp(browser, base, target, { store = {}, viewport = 'phone', scale = null } = {}) {
-  const ctx = await browser.newContext({ viewport: VIEWPORTS[viewport] || viewport, deviceScaleFactor: 1,
+export async function openApp(browser, base, target, { store = {}, viewport = 'phone', scale = null, bypassCSP = false } = {}) {
+  const ctx = await browser.newContext({ viewport: VIEWPORTS[viewport] || viewport, deviceScaleFactor: 1, bypassCSP,
     timezoneId: 'Asia/Bangkok', locale: 'en-GB', serviceWorkers: 'block', reducedMotion: 'reduce' });
   await ctx.addInitScript(({ store, scale }) => {
     try {
