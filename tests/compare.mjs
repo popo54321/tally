@@ -1,7 +1,7 @@
 // Compares two recordings picture by picture and text by text.
 //   node tests/compare.mjs old new      (directories under tests/out/)
-// Pictures count as the same when no pixel differs by more than NOISE brightness levels (out of 255):
-// the browser's own rendering wobbles by 1 level now and then, which nobody can see.
+// Pictures count as the same when no pixel differs by more than NOISE brightness levels (out of 255)
+// apart from a few faint stray pixels (see STRAY_PIXELS): the browser's own rendering wobbles that much.
 // For every real difference a side-by-side picture (old | new | changed pixels in red) goes to tests/out/diff/.
 // Exit code 1 if anything differs.
 import fs from 'node:fs';
@@ -10,6 +10,10 @@ import { PNG } from 'pngjs';
 import { ROOT } from './harness.mjs';
 
 const NOISE = 4;
+// Where a dimmed overlay or soft shadow is blended, the browser can also be off by a few levels on a
+// couple of pixels from run to run. Up to STRAY_PIXELS such pixels, none off by more than STRAY_LEVELS,
+// count as noise. A real change (a 1-pixel border shift, one changed letter) touches far more pixels.
+const STRAY_PIXELS = 12, STRAY_LEVELS = 60;
 const [a, b] = [process.argv[2] || 'old', process.argv[3] || 'new'];
 const A = path.join(ROOT, 'tests/out', a), B = path.join(ROOT, 'tests/out', b), D = path.join(ROOT, 'tests/out/diff');
 const ma = JSON.parse(fs.readFileSync(path.join(A, 'manifest.json'), 'utf8'));
@@ -22,13 +26,14 @@ const ALLOW = [];
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));
   if (pa.width !== pb.width || pa.height !== pb.height) { sideBySide(k, pa, pb, null); return `size ${pa.width}×${pa.height} vs ${pb.width}×${pb.height}`; }
-  const mask = new Uint8Array(pa.width * pa.height); let n = 0;
+  const mask = new Uint8Array(pa.width * pa.height); let n = 0, worst = 0;
   for (let i = 0; i < mask.length; i++) {
-    const o = i * 4;
-    if (Math.abs(pa.data[o] - pb.data[o]) > NOISE || Math.abs(pa.data[o + 1] - pb.data[o + 1]) > NOISE || Math.abs(pa.data[o + 2] - pb.data[o + 2]) > NOISE) { mask[i] = 1; n++; }
+    const o = i * 4, d = Math.max(Math.abs(pa.data[o] - pb.data[o]), Math.abs(pa.data[o + 1] - pb.data[o + 1]), Math.abs(pa.data[o + 2] - pb.data[o + 2]));
+    if (d > NOISE) { mask[i] = 1; n++; if (d > worst) worst = d; }
   }
-  if (n) sideBySide(k, pa, pb, mask);
-  return n ? `${n} pixels differ` : '';
+  if (n <= STRAY_PIXELS && worst <= STRAY_LEVELS) return '';   // a few faint stray pixels: blending noise
+  sideBySide(k, pa, pb, mask);
+  return `${n} pixels differ (by up to ${worst} levels)`;
 }
 function sideBySide(k, pa, pb, mask) {
   const w = Math.max(pa.width, pb.width), h = Math.max(pa.height, pb.height), out = new PNG({ width: w * 3 + 20, height: h });

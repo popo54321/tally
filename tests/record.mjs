@@ -42,6 +42,12 @@ const ACTS = [
   { name: 'fold-strength', page: 'workout', run: async p => { await p.click('button[data-fold="str"]'); return '#cardStr'; } },
 ];
 
+// Wait until short-lived things are over: the 'Saved'/'Imported' message (gone after 2.4 s) and two screen refreshes.
+async function settle(page) {
+  await page.waitForFunction(() => !document.querySelector('.saved.show'), null, { timeout: 5000 }).catch(() => {});
+  await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
+  await page.waitForTimeout(250);
+}
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);
@@ -80,6 +86,7 @@ try {
       await page.click('#importBtn');
       await page.fill('#importBox', fs.readFileSync(path.join(ROOT, 'tests/fixtures', run.importFile + '.json'), 'utf8'));
       await page.click('#loadBtn'); await page.waitForTimeout(100); await page.click('#loadBtn'); await page.waitForTimeout(400);
+      await settle(page);
       await snap(page, '#syncMsg', path.join(dir, 'import-message'), manifest);
       await showPage(page, 'body');
     }
@@ -105,7 +112,7 @@ try {
       const o = await openApp(browser, url, target, run);
       await showPage(o.page, act.page);
       const sel = await act.run(o.page);
-      await o.page.waitForTimeout(150);
+      await o.page.waitForTimeout(150); await settle(o.page);
       await snap(o.page, sel, path.join(dir, 'acts', act.name), manifest);
       errors.push(...o.errors);
       await o.ctx.close();
