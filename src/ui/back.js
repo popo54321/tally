@@ -6,9 +6,10 @@ import { dpClose } from './datepicker';
 import { kpClose } from './picker';
 import { shClose } from './movements';
 import { sxClose } from './mobility';
+import { cpClose } from './copyday';
 
 export function tallyBack(){
-  const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose]]
+  const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose],['cpWrap',cpClose]]
     .find(([id])=>{ const el=$(id); return el && el.classList.contains('show'); });
   if(!open) return false;
   open[1](); return true;

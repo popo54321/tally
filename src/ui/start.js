@@ -29,6 +29,7 @@ import { mobRowEdit, sxClose, sxDelete, sxModeSet, sxOpen, sxSave, toggleLogPin,
 import { openExactSettings } from '../platform/alarm';
 import { render, shiftDay, showPage } from './nav';
 import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick, shMsg, shNew, shOpen, shPick, shRangeTyped, shRenderList, shResetDel, shRetire, shShow } from './movements';
+import { initCopyDay, cpClose } from './copyday';
 
 (async function(){
  try{
@@ -153,6 +154,7 @@ import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick
   $("addCardioBtn").onclick=()=>kpOpen('cd');
   $("sxMus").onclick=ev=>{ const b=ev.target.closest('.mchip'); if(b) b.classList.toggle('on'); };
   $("kpX").onclick=kpClose; $("kpNew").onclick=kpNew;
+  initCopyDay();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
@@ -173,7 +175,7 @@ import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick
   $("restMinus").onclick=()=>restNudge(-15);
   $("restPlus").onclick=()=>restNudge(30);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(V.restTimer) timerTick(); drawExactNotice(); });
-  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); } });
+  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); cpClose(); } });
   await purgeOldNamespace();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   await loadTheme();

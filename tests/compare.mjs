@@ -46,7 +46,10 @@ function sideBySide(k, pa, pb, mask) {
   const f = path.join(D, k + '.png'); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, PNG.sync.write(out));
 }
 
-const keys = [...new Set([...Object.keys(ma), ...Object.keys(mb)])].sort();
+// Pictures of what the rebuild adds on purpose have nothing to compare with in 8.1.
+const NEW_ONLY = k => k.startsWith('new-only');
+const fresh = Object.keys(mb).filter(NEW_ONLY);
+const keys = [...new Set([...Object.keys(ma), ...Object.keys(mb)])].filter(k => !NEW_ONLY(k)).sort();
 let same = 0; const bad = [];
 for (const k of keys) {
   if (ALLOW.some(r => r.test(k))) { same++; continue; }
@@ -62,5 +65,5 @@ for (const k of keys) {
   }
   if (notes.length) bad.push(`${k}: ${notes.join(', ')}`); else same++;
 }
-console.log(`${same} of ${keys.length} the same`);
+console.log(`${same} of ${keys.length} the same` + (fresh.length ? ` (plus ${fresh.length} pictures of the new copy-a-day feature, not compared)` : ''));
 if (bad.length) { console.log(bad.join('\n') + `\nSide-by-side pictures: tests/out/diff/`); process.exitCode = 1; }

@@ -99,6 +99,9 @@
   .prec b{color:var(--ink);font-weight:600}
   .pnext b{color:var(--brass-bright);font-weight:600}
   .muschips{display:flex;flex-wrap:wrap;gap:6px}
+  .copyrow{display:flex;justify-content:flex-end;margin:-6px 0 14px}
+  .copyrow .ghostbtn{padding:7px 12px}
+  .cpwhat{margin:0 0 12px;color:var(--ink-dim)}
   .mchip{background:var(--panel-2);border:1.5px solid var(--line-soft);border-radius:7px;color:var(--txt-faint);
     font-family:var(--font-mono);font-size:11px;padding:7px 9px;cursor:pointer;min-height:34px}
   .mchip.p{background:var(--brass);border-color:var(--brass);color:#fff}

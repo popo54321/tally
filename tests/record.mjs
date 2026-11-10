@@ -25,12 +25,19 @@ for (const scen of ['full-male', 'full-female', 'sparse'])
 RUNS.push({ name: 'old-shapes-phone', store: { ...fixture('old-shapes'), ...SEEN }, viewport: 'phone', pages: true });
 RUNS.push({ name: 'import-v4-phone', store: SEEN, viewport: 'phone', pages: true, importFile: 'backup-v4' });
 RUNS.push({ name: 'import-days-phone', store: SEEN, viewport: 'phone', pages: ['body', 'history'], importFile: 'backup-days-only' });
+if (target === 'new') RUNS.push({ name: 'new-only-copyday', store: { ...fixture('full-male'), ...SEEN }, viewport: 'phone', pages: ['workout'], newOnly: true, acts: true, actList: 'copy' });
 RUNS.push({ name: 'new-user-phone', store: {}, viewport: 'phone', pages: false, welcome: true });
 RUNS.push({ name: 'empty-phone', store: SEEN, viewport: 'phone', pages: true });
 for (const preset of ['min', 'bold', 'zen', 'cyber', 'tact']) if (!quick)
   RUNS.push({ name: `theme-${preset}`, store: { ...fixture('full-male'), 'tally:theme:v1': JSON.stringify({ font: preset, colors: {}, preset }) }, viewport: 'phone', pages: ['body', 'workout'], themePreset: preset });
 
 // Things to do on the page before photographing; each returns the element(s) to photograph.
+const COPY_ACTS = [
+  { name: 'copy-dialog', page: 'workout', run: async p => { await p.selectOption('#fDay', 'mon'); await p.click('#copyDayBtn'); await p.click('#cpDays button[data-d="thu"]'); return 'viewport'; } },
+  { name: 'copy-done', page: 'workout', run: async p => { await p.selectOption('#fDay', 'mon'); await p.click('#copyDayBtn'); await p.click('#cpDays button[data-d="thu"]'); await p.click('#cpDays button[data-d="sat"]'); await p.click('#cpGo'); await p.waitForTimeout(300); return '#cpWrap .sh'; } },
+  { name: 'copy-replace-note', page: 'workout', run: async p => { await p.selectOption('#fDay', 'wed'); await p.click('#copyDayBtn'); await p.click('#cpMode button[data-m="replace"]'); return '#cpWrap .sh'; } },
+  { name: 'copy-empty-day', page: 'workout', run: async p => { await p.selectOption('#fDay', 'sun'); await p.click('#copyDayBtn'); return '#cpWrap .sh'; } },
+];
 const ACTS = [
   { name: 'datepicker', page: 'body', run: async p => { await p.click('#dateBtn'); return '#dpWrap'; } },
   { name: 'kcal-typed', page: 'body', run: async p => { await p.fill('#fKcal', '480+650'); await p.fill('#fProt', '27'); return '#fKcal >> xpath=ancestor::div[contains(@class,"form-grid")]'; } },
@@ -48,6 +55,9 @@ async function settle(page) {
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   await page.waitForTimeout(250);
 }
+// The rebuild adds one thing on purpose: the "Copy this day to…" row. It is hidden while comparing
+// with 8.1, and photographed on its own in the new-only runs below.
+async function hideNew(page) { await page.addStyleTag({ content: '.copyrow{display:none!important}' }); }
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);
@@ -80,6 +90,7 @@ try {
     if (only && !run.name.includes(only)) continue;
     const dir = path.join(OUT, run.name);
     const { ctx, page, errors } = await openApp(browser, url, target, run);
+    if (target === 'new' && !run.newOnly) await hideNew(page);
     if (run.welcome) await snap(page, 'viewport', path.join(dir, 'welcome'), manifest);
     if (run.importFile) {   // paste a backup into Settings > Import and confirm, like a person would
       await showPage(page, 'settings');
@@ -108,8 +119,9 @@ try {
       }
     }
     await ctx.close();
-    if (run.acts) for (const act of ACTS) {
+    if (run.acts) for (const act of (run.actList === 'copy' ? COPY_ACTS : ACTS)) {
       const o = await openApp(browser, url, target, run);
+      if (target === 'new' && !run.newOnly) await hideNew(o.page);
       await showPage(o.page, act.page);
       const sel = await act.run(o.page);
       await o.page.waitForTimeout(150); await settle(o.page);

@@ -9,10 +9,11 @@
     "record:old": "node tests/record.mjs old",
     "record:new": "node tests/record.mjs new",
     "compare": "node tests/compare.mjs old new",
-    "test": "npm run check && node tests/equiv.mjs && node tests/storage.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
+    "test": "npm run check && node tests/equiv.mjs && node tests/storage.mjs && node tests/copyday.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
     "fixtures": "node tests/fixtures/generate.mjs",
     "equiv": "node tests/equiv.mjs",
-    "storage": "node tests/storage.mjs"
+    "storage": "node tests/storage.mjs",
+    "copyday": "node tests/copyday.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

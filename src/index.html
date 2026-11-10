@@ -199,6 +199,7 @@
     <div class="card col-12" id="cardLog">
       <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
       <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
+      <div class="copyrow"><button type="button" class="ghostbtn" id="copyDayBtn" data-i18n="copy.btn">Copy this day to…</button></div>
       <div class="restctl">
         <div class="seg" id="segRest">
           <button type="button" data-s="60">60s</button><button type="button" data-s="90">90s</button><button type="button" data-s="120">2m</button><button type="button" data-s="180">3m</button>
@@ -618,6 +619,27 @@
   </div>
 </div>
 
+<div class="shwrap" id="cpWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="cpTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="cpTitle">Copy this day</div>
+      <button type="button" class="sh-x" id="cpX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list sh-form">
+      <div class="sxnote cpwhat" id="cpWhat"></div>
+      <div class="field"><label data-i18n="copy.to">Copy to</label><div class="muschips" id="cpDays"></div></div>
+      <div class="field"><label data-i18n="copy.how">If a day already has a plan</label>
+        <div class="seg" id="cpMode"><button type="button" data-m="add" data-i18n="copy.add">Add to it</button><button type="button" data-m="replace" data-i18n="copy.replace">Replace it</button></div>
+      </div>
+      <div class="sxnote" id="cpHowNote"></div>
+    </div>
+    <div class="sh-foot">
+      <button type="button" id="cpUndo" data-i18n="copy.undo" style="display:none">Undo</button>
+      <button type="button" class="prim" id="cpGo" data-i18n="copy.go">Copy</button>
+    </div>
+    <div class="sh-msg" id="cpMsg" role="status"></div>
+  </div>
+</div>
 <div class="shwrap" id="sxWrap">
   <div class="sh" role="dialog" aria-modal="true" aria-labelledby="sxTitle" tabindex="-1">
     <div class="sh-head">
