@@ -1,0 +1,15 @@
+{
+  "name": "tally",
+  "private": true,
+  "type": "module",
+  "description": "Tally — Your Private Training & Body Log",
+  "scripts": {
+    "record:old": "node tests/record.mjs old",
+    "record:new": "node tests/record.mjs new",
+    "compare": "node tests/compare.mjs old new",
+    "fixtures": "node tests/fixtures/generate.mjs"
+  },
+  "devDependencies": {
+    "pngjs": "7.0.0"
+  }
+}

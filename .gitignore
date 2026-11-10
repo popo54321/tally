@@ -10,3 +10,5 @@ Keys/
 .env
 .env.*
 android/build/
+tests/out/
+node_modules/
