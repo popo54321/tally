@@ -2,8 +2,9 @@
 import { localDate, daysAgo, within7, dnum, validDate, weekdayKey, fmtDMY, fmtDM, fmtTick } from '../core/dates';
 import { num, roundTo, fmtSigned, calcVal } from '../core/numbers';
 import * as core from '../core/index';
-import { KCAL_PER_KG, DEF_TARGET, CAL_RATES, CAL_PERIODS, CAL_NEED, ACTIVITY, mifflinBMR, kcalOf, protOf } from '../core/nutrition';
+import { DEF_TARGET, CAL_RATES, CAL_PERIODS, ACTIVITY, mifflinBMR, kcalOf, protOf } from '../core/nutrition';
 import { bfNavy } from '../core/body';
+import { trendWeights, weekTrendChange, calcCalibration } from '../core/trend';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
 const KEY = "tally:entries:v1";
@@ -1565,21 +1566,13 @@ function groupTarget(group){
 const sessionTarget = () => DAYS.filter(d=>sessionEx(d.key).length>0).length;
 const activeGroups = () => GROUPS.filter(g=>groupTarget(g.key)>0);
 const trained = e => !!(e.lifts && Object.keys(e.lifts).length);
-function lastNumOf(get){ for(let i=entries.length-1;i>=0;i--){ const v=get(entries[i]); if(v!=null) return v; } return null; }
+const lastNumOf = get => core.lastNumOf(entries, get);
 function lastSessionOf(key, dayKey){
   if(dayKey){ for(let i=entries.length-1;i>=0;i--){ const e=entries[i]; if(e.day===dayKey){ const s=liftsOf(e,key); if(s.length) return s; } } }
   for(let i=entries.length-1;i>=0;i--){ const s=liftsOf(entries[i],key); if(s.length) return s; }
   return null;
 }
-function deltaOf(get, days){
-  const arr=entries.filter(e=>get(e)!=null);
-  if(arr.length<2) return null;
-  const latest=arr[arr.length-1], target=dnum(latest.date)-days;
-  const cand=arr.slice(0,-1);
-  let best=cand[0], bd=Math.abs(dnum(best.date)-target);
-  cand.forEach(e=>{const d=Math.abs(dnum(e.date)-target); if(d<bd){bd=d;best=e;}});
-  return {delta:get(latest)-get(best)};
-}
+const deltaOf = (get, days) => core.deltaOf(entries, get, days);
 
 function workSets(sets){
   const ws=(sets||[]).filter(s=>s && s.reps>0 && typeof s.kg==='number');
@@ -3246,19 +3239,6 @@ function chartColors(){
           line:v('--orange'), dot:v('--panel'), ink:v('--ink')};
 }
 
-function trendWeights(pts){
-  let tr=null, prev=null;
-  return (pts||[]).map(p=>{
-    if(tr==null) tr=p.w;
-    else tr+=(1-Math.pow(0.9, Math.max(1, p.t-prev)))*(p.w-tr);
-    prev=p.t; return Math.round(tr*100)/100;
-  });
-}
-function weekTrendChange(wp, start){
-  const trs=trendWeights(wp.map(e=>({t:dnum(e.date), w:e.weight})));
-  let iB=-1; wp.forEach((e,i)=>{ if(e.date<start) iB=i; });
-  return (iB>=0 && iB<wp.length-1) ? Math.round((trs[trs.length-1]-trs[iB])*100)/100 : null;
-}
 function chartSize(svg, baseH){
   const W=Math.max(170, Math.round(svg.clientWidth || (svg.parentNode && svg.parentNode.clientWidth) || 760));
   const H=Math.round(Math.max(170, Math.min(baseH, W*0.62)));
@@ -3608,37 +3588,9 @@ function buildBodySeries(){
 }
 function drawBody(){ drawMultiLine('bodyChart', windowSeries(buildBodySeries()), {refLine:100, fmt:v=>v.toFixed(0), empty:t('chart.empty.size')}); }
 
-function entriesInWindow(){
-  if(!entries.length) return [];
-  const anchor=dnum(entries[entries.length-1].date);
-  return entries.filter(e=>dnum(e.date)>=anchor-(settings.calPeriod-1));
-}
-function calcCalibration(win){
-  const wd=win.filter(e=>e.weight!=null).map(e=>({t:dnum(e.date),w:e.weight})).sort((a,b)=>a.t-b.t);
-  const kdAll=win.filter(e=>kcalOf(e)!=null).map(kcalOf);
-  const out={weighIns:wd.length,kcalDays:kdAll.length,spanDays:0,slope:null,meanK:null,tdee:null};
-  if(wd.length>=2){
-    const firstT=wd[0].t, lastT=wd[wd.length-1].t;
-    out.spanDays=lastT-firstT+1;
-    const n=wd.length,tbar=wd.reduce((s,p)=>s+p.t,0)/n,wbar=wd.reduce((s,p)=>s+p.w,0)/n;
-    let nu=0,de=0; wd.forEach(p=>{nu+=(p.t-tbar)*(p.w-wbar);de+=(p.t-tbar)**2;});
-    if(de>0) out.slope=nu/de;
-    const kdAlign=win.filter(e=>kcalOf(e)!=null && dnum(e.date)>=firstT && dnum(e.date)<=lastT-1).map(kcalOf);
-    if(kdAlign.length) out.meanK=kdAlign.reduce((s,k)=>s+k,0)/kdAlign.length;
-  }else if(kdAll.length){
-    out.meanK=kdAll.reduce((s,k)=>s+k,0)/kdAll.length;
-  }
-  if(out.slope!=null && out.meanK!=null) out.tdee=out.meanK-out.slope*KCAL_PER_KG;
-  return out;
-}
+const entriesInWindow = () => core.entriesInWindow(entries, settings.calPeriod);
 const kcalTargetFor = tdee => core.kcalTargetFor(tdee, settings.sex, settings.calRate);
-function calRecommend(){
-  const c=calcCalibration(entriesInWindow());
-  const enough = c.tdee!=null && c.spanDays>=CAL_NEED.span && c.weighIns>=CAL_NEED.weighIns && c.kcalDays>=CAL_NEED.kcalDays;
-  const has = c.tdee!=null;
-  return {c:c, enough:enough, partial: has && c.spanDays<settings.calPeriod,
-          target: has ? kcalTargetFor(c.tdee) : null, floored: has && c.tdee+settings.calRate*KCAL_PER_KG/7<kcalFloor()};
-}
+const calRecommend = () => core.calRecommend(entries, settings);
 function drawCalibration(){
   document.querySelectorAll('#segPeriod button').forEach(b=>b.classList.toggle('on', b.dataset.p===String(settings.calPeriod)));
   document.querySelectorAll('#segRate button').forEach(b=>b.classList.toggle('on', b.dataset.r===String(settings.calRate)));

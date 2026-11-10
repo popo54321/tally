@@ -7,6 +7,22 @@ const messy = r => pick(r, [() => dateStr(r), () => '2026-02-30', () => '', () =
 const sexOf = r => pick(r, ['male', 'female', null, undefined]);
 const numish = r => pick(r, [() => r() * 400 - 100, () => int(r, -5, 3000), () => String(r() * 90), () => '', () => null, () => 'abc', () => -0, () => 1e-9])();
 
+
+// A random log: 0-200 days, oldest first, with weigh-ins, food and fasting days scattered through it.
+const randDays = r => {
+  const n = int(r, 0, 200), out = []; let t = Date.parse('2026-11-10') - n * 864e5, w = 60 + r() * 50;
+  for (let i = 0; i < n; i++) {
+    t += 864e5 * (r() < 0.2 ? int(r, 2, 6) : 1); if (t > Date.parse('2026-11-10')) break;
+    const e = { date: new Date(t).toISOString().slice(0, 10) }; w += (r() - 0.52) * 0.6;
+    if (r() < 0.7) e.weight = Math.round(w * 10) / 10;
+    if (r() < 0.05) e.fast = true;
+    if (r() < 0.65) e.kcal = int(r, 0, 4200);
+    if (r() < 0.1) e.bf = Math.round((10 + r() * 25) * 10) / 10;
+    out.push(e);
+  }
+  return out;
+};
+
 export const CASES = [
   { name: 'calcVal', old: 'calcVal', new: 'Core.calcVal', seed: 1, runs: 6000, gen: r => {
       const parts = []; const n = int(r, 1, 6);
@@ -42,4 +58,10 @@ export const CASES = [
       const all = ['kg50', 'kg25', 'kg20', 'kg15', 'kg10', 'kg5', 'kg2.5', 'kg2', 'kg1.25', 'kg1', 'kg0.5', 'kg0.25', 'lb55', 'lb45', 'lb35', 'lb25', 'lb10', 'lb5', 'lb2.5', 'lb1.25'];
       const have = all.filter(() => r() < 0.4);
       return [pick(r, [r() * 300, int(r, 0, 1200), 20, 0]), pick(r, [20, 15, 10, 45 * 0.45359237, 0, r() * 30]), have]; } },
+
+  // batch 3: weight trend and calorie estimate, on random logs
+  { name: 'trendWeights', old: 'trendWeights', new: 'Core.trendWeights', runs: 1500, gen: r => [pick(r, [null, randDays(r).filter(e => e.weight != null).map(e => ({ t: Math.floor(Date.parse(e.date) / 864e5), w: e.weight }))])] },
+  { name: 'weekTrendChange', old: 'weekTrendChange', new: 'Core.weekTrendChange', runs: 1500, gen: r => { const d = randDays(r).filter(e => e.weight != null); return [d, d.length ? d[Math.floor(r() * d.length)].date : '2026-11-01']; } },
+  { name: 'lastNumOf/deltaOf', old: "(E,n)=>{entries=E;return [lastNumOf(e=>e.weight),lastNumOf(e=>e.kcal),deltaOf(e=>e.weight,n),deltaOf(e=>e.bf,n)]}", new: '(E,n)=>[Core.lastNumOf(E,e=>e.weight),Core.lastNumOf(E,e=>e.kcal),Core.deltaOf(E,e=>e.weight,n),Core.deltaOf(E,e=>e.bf,n)]', runs: 1500, gen: r => [randDays(r), pick(r, [7, 30, 1, 0])] },
+  { name: 'calRecommend', old: "(E,p,s,c)=>{entries=E;settings.calPeriod=p;settings.sex=s;settings.calRate=c;return calRecommend()}", new: '(E,p,s,c)=>Core.calRecommend(E,{calPeriod:p,sex:s,calRate:c})', runs: 2000, gen: r => [randDays(r), pick(r, [14, 28, 91]), sexOf(r), pick(r, [-0.5, -0.25, 0, 0.25, 0.5])] },
 ];
