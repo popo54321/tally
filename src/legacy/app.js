@@ -12,9 +12,10 @@ import { FONTS, THEME_VARS, THEME_PRESETS, HEXRE, TEXT_SCALES } from '../data/th
 import { EQUIP, EQUIP_GROUPS } from '../data/equipment';
 import { LIB, SX_LIB, CD_LIB, libByKey, sxLibByKey, cdLibByKey } from '../data/library';
 import { hexRgb, rgbHex, luminance, contrast, legibleFaint } from '../core/colour';
+import { STORE } from '../store/kv';
+import { DaysStore } from '../store/days';
 import { LB, PL_KG, PL_LB, PL_ALL, PL_DEF, PL_BARS, PL_BAR_IDS, plateKg, plateSolve } from '../core/plates';
 const APP_VERSION = '8.1';
-const KEY = "tally:entries:v1";
 const SKEY = "tally:settings:v1";
 const XKEY = "tally:exercises:v1";
 const PKEY = "tally:plan:v1";
@@ -303,16 +304,6 @@ function calcAdd(id){
 const cap = s => s.charAt(0).toUpperCase()+s.slice(1);
 const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
-const hasWS = (typeof window!=='undefined') && window.storage && typeof window.storage.get==='function';
-const STORE = hasWS ? {
-  async get(k){ const r=await window.storage.get(k); return (r && 'value' in r) ? r.value : null; },
-  async set(k,v){ await window.storage.set(k,v); },
-  async list(p){ const r=await window.storage.list(p); return (r && r.keys) ? r.keys : []; }
-} : {
-  async get(k){ return localStorage.getItem(k); },
-  async set(k,v){ localStorage.setItem(k,v); },
-  async list(p){ const out=[]; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(!p||k.indexOf(p)===0) out.push(k); } return out; }
-};
 let loadFailed=false;
 
 const SAFE_KEY = /^[A-Za-z0-9_-]{1,64}$/;
@@ -384,25 +375,17 @@ async function purgeOldNamespace(){
     return old.length;
   }catch(e){ return 0; }
 }
+const DAYS_STORE = new DaysStore(STORE, () => localDate());
 async function load(){
   loadFailed=false; entries=[];
-  let keys=null, haveList=false;
-  try{ keys=await STORE.list('tally:'); haveList=true; }
-  catch(e){ haveList=false; console.error('storage list unavailable',e); }
-  if(haveList){
-    if(keys.indexOf(KEY)>=0){
-      try{ const v=await STORE.get(KEY); if(v) entries=JSON.parse(v); }
-      catch(e){ loadFailed=true; console.error('entry read failed',e); entries=[]; return; }
-    }
-  } else {
-    try{ const v=await STORE.get(KEY); if(v) entries=JSON.parse(v); }
-    catch(e){ entries=[]; }
-  }
-  if(!Array.isArray(entries)) entries=[];
-  entries=normEntries(entries);
+  const r=await DAYS_STORE.load();
+  if(r.failed){ loadFailed=true; return; }
+  entries=normEntries(r.days);
+  // First start after the update (copy the 8.1 days into the new layout) or a month old enough to pack.
+  if(r.needsWrite){ try{ await DAYS_STORE.save(entries); }catch(e){ console.error('day storage update failed',e); } }
 }
 async function persist(){
-  try{ await STORE.set(KEY, JSON.stringify(entries)); return true; }
+  try{ await DAYS_STORE.save(entries); return true; }
   catch(e){ console.error('save failed',e); flash(t('msg.savefail'),true); return false; }
 }
 const KNOWN_SETTINGS=['kcalTarget','kcalOwn','chartEx','chartSx','chartCd','chartFold','restSec','restSound','mobLead','sex','protFloor','age','ageSet','activity','volLo','volHi','volMute','calRate','calPeriod','plates'];
