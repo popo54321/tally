@@ -57,7 +57,7 @@ async function settle(page) {
 }
 // The rebuild adds one thing on purpose: the "Copy this day to…" row. It is hidden while comparing
 // with 8.1, and photographed on its own in the new-only runs below.
-async function hideNew(page) { await page.addStyleTag({ content: '.copyrow{display:none!important}' }); }
+async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow{display:none!important}' }); }
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);

@@ -30,6 +30,7 @@ import { openExactSettings } from '../platform/alarm';
 import { render, shiftDay, showPage } from './nav';
 import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick, shMsg, shNew, shOpen, shPick, shRangeTyped, shRenderList, shResetDel, shRetire, shShow } from './movements';
 import { initCopyDay, cpClose } from './copyday';
+import { initTour } from './tour';
 
 (async function(){
  try{
@@ -155,6 +156,7 @@ import { initCopyDay, cpClose } from './copyday';
   $("sxMus").onclick=ev=>{ const b=ev.target.closest('.mchip'); if(b) b.classList.toggle('on'); };
   $("kpX").onclick=kpClose; $("kpNew").onclick=kpNew;
   initCopyDay();
+  initTour();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;

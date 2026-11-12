@@ -119,7 +119,7 @@ export const CASES = [
   { name: 'colour contrast', old: '(a,b,c)=>[contrast(hexRgb(a),hexRgb(b)),luminance(hexRgb(c)),rgbHex(hexRgb(a)),legibleFaint(a,b,[c,b])]', new: '(a,b,c)=>[Core.contrast(Core.hexRgb(a),Core.hexRgb(b)),Core.luminance(Core.hexRgb(c)),Core.rgbHex(Core.hexRgb(a)),Core.legibleFaint(a,b,[c,b])]', gen: r => [hex(r), hex(r), hex(r)] },
 
   // step 5: text
-  { name: 'all 8.1 text identical (except copy-a-day and the 9.1 estimate wording)', old: '()=>JSON.stringify(Object.fromEntries(Object.entries(LANG.en).filter(([k])=>k!=="meth.adapt.b")))', new: '()=>JSON.stringify(Object.fromEntries(Object.entries(Core.EN).filter(([k])=>!k.startsWith("copy.") && !/^calib[.](basis|blend|noformula|range)/.test(k) && k!=="meth.adapt.b")))', runs: 1, gen: () => [] },
+  { name: 'all 8.1 text identical (except copy-a-day and the 9.1 estimate wording)', old: '()=>JSON.stringify(Object.fromEntries(Object.entries(LANG.en).filter(([k])=>k!=="meth.adapt.b")))', new: '()=>JSON.stringify(Object.fromEntries(Object.entries(Core.EN).filter(([k])=>!k.startsWith("copy.") && !k.startsWith("tour.") && !/^calib[.](basis|blend|noformula|range)/.test(k) && k!=="meth.adapt.b")))', runs: 1, gen: () => [] },
   { name: 't/tf/tn', old: '(k,v,n)=>[t(k),tf(k,v),tn(k,n,v)]', new: '(k,v,n)=>[Core.t(k),Core.tf(k,v),Core.tn(k,n,v)]', gen: r => [pick(r, ['stat.targetn', 'sync.imported', 'pl.useup', 'nope.key', 'rev.one.over', 'f.left.kcal', 'tdee.title', 'sync.undo']), pick(r, [undefined, { n: int(r, 0, 3), w: '1 kg', avg: 5, target: '2,000' }, { goal: 'x' }]), int(r, 0, 3)] },
 
   // step 5: tidying saved data, on messy input

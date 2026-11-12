@@ -28,7 +28,7 @@ const ALLOW = [/\/body\/06-card$/, /\/settings\/\d+-cardMethods$/, /\/history\/\
 const SHIFTED = [/\/body\/07-cardProfile$/, /\/settings\/\d+-cardAbout$/];
 // The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
 // Every other word on the card must still match, and the picture is then not compared.
-const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.1';
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.2';
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));

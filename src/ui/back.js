@@ -7,8 +7,10 @@ import { kpClose } from './picker';
 import { shClose } from './movements';
 import { sxClose } from './mobility';
 import { cpClose } from './copyday';
+import { tourOpen, endTour } from './tour';
 
 export function tallyBack(){
+  if(tourOpen()){ endTour(); return true; }
   const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose],['cpWrap',cpClose]]
     .find(([id])=>{ const el=$(id); return el && el.classList.contains('show'); });
   if(!open) return false;

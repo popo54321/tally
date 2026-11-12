@@ -13,7 +13,7 @@ import { muscleVolume, weekStart } from '../core/volume';
 import { t, tf } from '../i18n/index';
 import { $, esc, flash } from './dom';
 
-export const APP_VERSION = '9.1';
+export const APP_VERSION = '9.2';
 export const kcalFloor = () => core.kcalFloor(S.settings.sex);
 export const kcalBand = target => core.kcalBand(target, S.settings.sex);
 export const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
