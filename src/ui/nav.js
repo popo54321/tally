@@ -19,6 +19,7 @@ import { drawProg } from './progression';
 import { drawReview } from './review';
 import { drawTheme } from './theme';
 import { drawUndo, drawVersion } from './sync';
+import { foldApplyAll } from './fold';
 
 export const PAGES=['body','workout','guide','gym','settings','history'];
 export function showPage(k){
@@ -48,7 +49,7 @@ export const stalePages = new Set();
 export function drawPage(k){ if(stalePages.delete(k)) PAGE_DRAW[k](); }
 export function stale(k){ stalePages.add(k); if(k===V.curPage) drawPage(k); }
 export function render(){
-  drawSched(); drawBackup(); drawInstall(); drawUpdate(); syncChartSegs();
+  drawSched(); drawBackup(); drawInstall(); drawUpdate(); syncChartSegs(); foldApplyAll();
   PAGES.forEach(p=>stalePages.add(p));
   drawPage(V.curPage);
 }

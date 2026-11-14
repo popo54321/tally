@@ -31,6 +31,7 @@ import { render, shiftDay, showPage } from './nav';
 import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick, shMsg, shNew, shOpen, shPick, shRangeTyped, shRenderList, shResetDel, shRetire, shShow } from './movements';
 import { initCopyDay, cpClose } from './copyday';
 import { initTour } from './tour';
+import { initFold } from './fold';
 
 (async function(){
  try{
@@ -138,6 +139,7 @@ import { initTour } from './tour';
   $("sxPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleLogChip('chartSx', b.dataset.k, sxAvail(), drawSxTrend, 'sxNote'); };
   $("cdPick").onclick=ev=>{ const b=ev.target.closest('.exchip'); if(b) toggleLogChip('chartCd', b.dataset.k, cdAvail(), drawCdTrend, 'cdNote'); };
   ['wChart','bodyChart','strChart','sxChart','cdChart'].forEach(chartScrubBind);
+  initFold();
   document.querySelectorAll('.foldhead').forEach(h=>h.onclick=()=>chartFoldToggle(h.querySelector('.foldbtn').dataset.fold));
   $("sched").onclick=ev=>{ const el=ev.target.closest('.day'); if(!el) return;
     $("fDay").value=el.dataset.day; buildExForm(S.entries.find(e=>e.date===$("fDate").value), el.dataset.day); };

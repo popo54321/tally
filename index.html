@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-Z3Jfw+PJ2F2G/HO7DG77nVGVam0SQ6kFqx5eC86HzSs='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-ezy+9qZMAqtlu1qH8uEPxl0a4u6ec4XL7Z/ajBNS5iU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -436,8 +436,13 @@
   .chbub text{fill:var(--panel);font-family:var(--font-mono);text-anchor:middle}
   .foldhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer}
   .foldbtn{flex:none;background:var(--panel-2);border:2px solid var(--line);border-radius:8px;color:var(--ink);font-size:13px;line-height:1;padding:6px 10px;cursor:pointer;min-height:32px;min-width:38px}
-  .card.folded > :not(.foldhead){display:none}
+  .card.folded:not(.hasfold) > :not(.foldhead){display:none}
   .card.folded .foldhead .lbl{margin-bottom:0}
+  .foldlbl{padding-right:50px;cursor:pointer}
+  .plsides{margin:-2px 0 14px}
+  .foldbtn.corner{position:absolute;top:13px;right:13px}
+  .card.hasfold.folded > :not(.foldlbl):not(.foldbtn){display:none}
+  .card.hasfold.folded > .foldlbl{margin-bottom:0}
   .chartnote{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);margin-top:9px;line-height:1.65}
   .chartnote b{color:var(--ink-dim);font-weight:500}
 
@@ -794,6 +799,8 @@
       </div>
       <div class="ctl-lbl" data-i18n="pl.bar">Bar</div>
       <div class="exchips" id="plBar"></div>
+      <div class="plsides"><div class="ctl-lbl" data-i18n="pl.sides">Plates go on</div>
+        <div class="seg" id="plSides"><button type="button" data-s="2" data-i18n="pl.sides.both">Both sides</button><button type="button" data-s="1" data-i18n="pl.sides.one">One side</button></div></div>
       <div id="plOut"></div>
       <details class="plsetup" id="plSetup">
         <summary id="plSetupSum">Your plates</summary>
@@ -1341,8 +1348,8 @@
   ];
   var PL_BAR_IDS = PL_BARS.map((b) => b.id);
   var plateKg = (id) => id.slice(0, 2) === "lb" ? parseFloat(id.slice(2)) * LB : parseFloat(id.slice(2));
-  function plateSolve(goalKg, barKg, have) {
-    const sideKg = (goalKg - barKg) / 2;
+  function plateSolve(goalKg, barKg, have, sides = 2) {
+    const sideKg = (goalKg - barKg) / sides;
     if (sideKg < -1e-6) return { err: "under" };
     if (!have.length) return { err: "none" };
     const inLb = have.every((id) => id.slice(0, 2) === "lb"), toU = (kg) => kg / (inLb ? LB : 1) * 100;
@@ -1366,7 +1373,7 @@
         side.push(ps[i]);
         v -= ps[i].u;
       }
-      return { side, totalKg: barKg + 2 * side.reduce((a, p) => a + p.kg, 0) };
+      return { side, totalKg: barKg + sides * side.reduce((a, p) => a + p.kg, 0) };
     };
     for (let d = 0; d <= tol; d++) for (const v of [T - d, T + d]) if (v >= 0 && v <= max && best[v] !== 65535) return { exact: true, main: build2(v) };
     let lo = -1, hi = -1;
@@ -2416,6 +2423,38 @@
     { key: "cardio", items: ["treadmill", "exercise_bike", "bicycle", "rower", "elliptical", "stair_climber", "ski_erg", "air_bike", "pool", "jump_rope", "battle_ropes", "punch_bag", "foam_roller", "stretch_strap", "massage_ball", "stick"] }
   ];
 
+  // src/data/folds.ts
+  var FOLD_KEYS = [
+    // Body
+    "cardBody",
+    "stat_bw",
+    "bfCard",
+    "stat_nutr",
+    "chart_weight",
+    "chart_size",
+    "calib_title",
+    "cardProfile",
+    // Workout
+    "cardLog",
+    "cardPlates",
+    "cardMob",
+    "cardCardio",
+    "cardColl",
+    "cardProg",
+    "str",
+    "sx",
+    "cd",
+    // Guide
+    "cardVol",
+    "cardSxWeek",
+    "cardRec",
+    "cardBrowse",
+    "cardCdLib",
+    // My Gym
+    "cardGym"
+  ];
+  var CHART_FOLDS = ["str", "sx", "cd"];
+
   // src/data/themes.ts
   var FONTS = [
     {
@@ -2694,7 +2733,8 @@
       have,
       bar: PL_BAR_IDS.indexOf(x.bar) >= 0 ? x.bar : "kg20",
       barOwn: own > 0 && own <= 100 ? Math.round(own * 100) / 100 : null,
-      unit: x.unit === "lb" ? "lb" : "kg"
+      unit: x.unit === "lb" ? "lb" : "kg",
+      sides: x.sides === 1 ? 1 : 2
     };
   }
   var KNOWN_SETTINGS = ["kcalTarget", "kcalOwn", "chartEx", "chartSx", "chartCd", "chartFold", "restSec", "restSound", "mobLead", "sex", "protFloor", "age", "ageSet", "activity", "volLo", "volHi", "volMute", "calRate", "calPeriod", "plates"];
@@ -2711,7 +2751,7 @@
       return o;
     };
     const fold = {};
-    if (s.chartFold && typeof s.chartFold === "object") ["str", "sx", "cd"].forEach((k2) => {
+    if (s.chartFold && typeof s.chartFold === "object") FOLD_KEYS.forEach((k2) => {
       if (typeof s.chartFold[k2] === "boolean") fold[k2] = s.chartFold[k2];
     });
     return {
@@ -5158,6 +5198,15 @@
     "tour.backup.b": "Everything stays on this phone and nowhere else. Save a backup file now and then, and use it to move to a new phone.",
     "tour.again.h": "That is it",
     "tour.again.b": "Run this tour again any time from here.",
+    "fold.hide": "Hide this section",
+    "fold.show": "Show this section",
+    "pl.sides": "Plates go on",
+    "pl.sides.both": "Both sides",
+    "pl.sides.one": "One side",
+    "pl.one": "One side · all the plates go here, heaviest first",
+    "pl.onenone": "One side",
+    "pl.tot1": "Total {tot} ({other}) = bar {bar} + {side} on one side",
+    "pl.totnobar1": "Total {tot} ({other}), all on one side",
     "copy.btn": "Copy this day to…",
     "copy.title": "Copy {day}",
     "copy.what": "{day}: {list}. Planned set counts come too.",
@@ -5412,7 +5461,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.2";
+  var APP_VERSION = "9.3";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -7200,6 +7249,63 @@
     if (S.lastBackup !== localDate()) $("bakNudgeText").textContent = $("syncMsg").textContent || t("sync.writefail");
   }
 
+  // src/ui/fold.ts
+  var PAGES = ["pg-body", "pg-workout", "pg-guide", "pg-gym"];
+  var btnOf = (k) => document.querySelector(`.foldbtn[data-fold="${k}"]`);
+  function keyOf(card, lbl) {
+    if (card.id) return card.id;
+    return (lbl.getAttribute("data-i18n-html") || lbl.getAttribute("data-i18n") || "").replace(/\W/g, "_");
+  }
+  function initFold() {
+    for (const p of PAGES) document.querySelectorAll(`#${p} > .card`).forEach((card) => {
+      if (card.querySelector(":scope > .foldhead, :scope > .foldbtn")) return;
+      const lbl = card.querySelector(":scope > .lbl");
+      if (!lbl) return;
+      const key = keyOf(card, lbl);
+      if (FOLD_KEYS.indexOf(key) < 0) return;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "foldbtn corner";
+      b.dataset.fold = key;
+      b.setAttribute("aria-expanded", "true");
+      card.classList.add("hasfold");
+      lbl.classList.add("foldlbl");
+      lbl.after(b);
+      lbl.addEventListener("click", () => {
+        void foldToggle(key);
+      });
+      b.addEventListener("click", () => {
+        void foldToggle(key);
+      });
+    });
+  }
+  function foldDraw(k, folded) {
+    const b = btnOf(k);
+    if (!b) return;
+    const card = b.closest(".card");
+    card.classList.toggle("folded", folded);
+    b.textContent = folded ? "▸" : "▾";
+    b.setAttribute("aria-expanded", String(!folded));
+    const chart = CHART_FOLDS.indexOf(k) >= 0;
+    b.title = t(folded ? chart ? "chart.unfold" : "fold.show" : chart ? "chart.fold" : "fold.hide");
+    b.setAttribute("aria-label", b.title);
+  }
+  function foldApplyAll() {
+    document.querySelectorAll(".foldbtn[data-fold]").forEach((b) => {
+      const k = b.dataset.fold;
+      if (CHART_FOLDS.indexOf(k) < 0) foldDraw(k, S.settings.chartFold[k] === true);
+    });
+  }
+  async function foldToggle(k) {
+    const b = btnOf(k);
+    if (!b) return;
+    const folded = b.closest(".card").classList.contains("folded");
+    S.settings.chartFold = Object.assign({}, S.settings.chartFold, { [k]: !folded });
+    await persistSettings();
+    foldDraw(k, !folded);
+    render();
+  }
+
   // src/ui/charts.js
   function chartWindowStart() {
     if (V.chartPeriod === "all" || !S.entries.length) return null;
@@ -7709,25 +7815,10 @@
   }
   var drawSxTrend = () => drawLogTrend({ field: "mob", setting: "chartSx", avail: sxAvail, name: sxName, pick: "sxPick", svg: "sxChart", note: "sxNote", fold: "sx", empty: "chart.empty.sx", noteKey: "chart.sxnote" });
   var drawCdTrend = () => drawLogTrend({ field: "cardio", setting: "chartCd", avail: cdAvail, name: cdName, pick: "cdPick", svg: "cdChart", note: "cdNote", fold: "cd", empty: "chart.empty.cd", noteKey: "chart.cdnote" });
-  var FOLD_CARD = { str: "cardStr", sx: "cardSxTrend", cd: "cardCdTrend" };
   function chartFoldDraw(k, hasAny) {
-    const folded = k in S.settings.chartFold ? S.settings.chartFold[k] : !hasAny;
-    const card = $(FOLD_CARD[k]);
-    if (!card) return;
-    card.classList.toggle("folded", folded);
-    const b = card.querySelector(".foldbtn");
-    b.textContent = folded ? "▸" : "▾";
-    b.setAttribute("aria-expanded", String(!folded));
-    b.title = t(folded ? "chart.unfold" : "chart.fold");
-    b.setAttribute("aria-label", b.title);
+    foldDraw(k, k in S.settings.chartFold ? S.settings.chartFold[k] : !hasAny);
   }
-  async function chartFoldToggle(k) {
-    const card = $(FOLD_CARD[k]);
-    S.settings.chartFold = Object.assign({}, S.settings.chartFold, { [k]: !card.classList.contains("folded") });
-    await persistSettings();
-    chartFoldDraw(k, true);
-    render();
-  }
+  var chartFoldToggle = foldToggle;
   function buildBodySeries() {
     return MEAS.map((m) => {
       const pts = S.entries.filter((e) => e.meas && e.meas[m.key] != null).map((e) => ({ date: e.date, cm: e.meas[m.key] })).sort((a, b) => a.date.localeCompare(b.date));
@@ -8950,6 +9041,14 @@
     const gi = $("plGoal");
     if (document.activeElement !== gi) gi.value = V.plGoal == null ? "" : String(V.plGoal);
     document.querySelectorAll("#plUnit button").forEach((b) => b.classList.toggle("on", b.dataset.u === unit));
+    document.querySelectorAll("#plSides button").forEach((b) => {
+      b.classList.toggle("on", +b.dataset.s === P.sides);
+      b.onclick = async () => {
+        P.sides = +b.dataset.s === 1 ? 1 : 2;
+        await persistSettings();
+        drawPlates();
+      };
+    });
     const chip = (id, lbl, on) => `<button type="button" class="exchip${on ? " on" : ""}" data-id="${esc(id)}"><span class="sw"${on ? ' style="background:var(--line)"' : ""}></span>${esc(lbl)}</button>`;
     $("plBar").innerHTML = PL_BARS.map((b) => b.id === "own" ? chip("own", t("pl.bar.own"), bar === "own") + (bar === "own" ? `<input class="plown" id="plOwn" type="number" min="0" max="100" step="0.5" inputmode="decimal" placeholder="kg" aria-label="${esc(t("pl.bar.ownkg"))}" value="${P.barOwn == null ? "" : P.barOwn}">` : "") : chip(b.id, b.id === "none" ? t("pl.bar.none") : plLabel(b.id), bar === b.id)).join("");
     $("plBar").querySelectorAll(".exchip").forEach((b) => b.onclick = () => plSetBar(b.dataset.id));
@@ -8978,7 +9077,7 @@
     if (bar === "own" && S.settings.plates.barOwn == null) return `<div class="sxnote">${esc(t("pl.ownfirst"))}</div>`;
     const goalKg = unit === "lb" ? V.plGoal * LB : V.plGoal, barKg = plBarKg(bar);
     if (goalKg > (unit === "lb" ? 2e3 * LB : 1e3)) return `<div class="sxnote">${esc(t("pl.big"))}</div>`;
-    const r = plateSolve(goalKg, barKg, P.have);
+    const one = P.sides === 1, r = plateSolve(goalKg, barKg, P.have, one ? 1 : 2);
     if (r.err === "under") return `<div class="sxnote">${esc(tf("pl.under", { bar: plFmt(barKg, unit) + " " + unit }))}</div>`;
     if (r.err === "none") return `<div class="sxnote">${esc(t("pl.noplates"))}</div>`;
     if (r.err === "big") return `<div class="sxnote">${esc(t("pl.big"))}</div>`;
@@ -8992,7 +9091,7 @@
     const viz = m.side.length ? '<div class="plviz"><span class="sleeve"></span>' + m.side.map((p) => `<span class="plate${p.id.slice(0, 2) === "lb" ? " lb" : ""}" style="height:${Math.round(26 + 70 * Math.sqrt(p.kg / maxKg))}px">${esc(plFmt(p.kg, p.id.slice(0, 2)))}</span>`).join("") + '<span class="collar"></span></div>' : "";
     const list = m.side.length ? groups.map((g) => (g.n > 1 ? g.n + " × " : "") + plLabel(g.id)).join(" + ") : t("pl.nothing");
     const tot = plFmt(m.totalKg, unit) + " " + unit, totO = plFmt(m.totalKg, other) + " " + other;
-    let h = `<div class="plres"><div class="plhead">${esc(t(m.side.length ? "pl.each" : "pl.eachnone"))}</div>${viz}<div class="pllist">${esc(list)}</div><div class="pltot">${esc(tf(bar === "none" ? "pl.totnobar" : "pl.tot", { tot, other: totO, bar: plFmt(barKg, unit) + " " + unit, side: plFmt(m.side.reduce((a, p) => a + p.kg, 0), unit) + " " + unit }))}</div>`;
+    let h = `<div class="plres"><div class="plhead">${esc(t(m.side.length ? one ? "pl.one" : "pl.each" : one ? "pl.onenone" : "pl.eachnone"))}</div>${viz}<div class="pllist">${esc(list)}</div><div class="pltot">${esc(tf(bar === "none" ? one ? "pl.totnobar1" : "pl.totnobar" : one ? "pl.tot1" : "pl.tot", { tot, other: totO, bar: plFmt(barKg, unit) + " " + unit, side: plFmt(m.side.reduce((a, p) => a + p.kg, 0), unit) + " " + unit }))}</div>`;
     if (!r.exact) {
       h += `<div class="plalt"><span>${esc(tf("pl.notexact", { goal: V.plGoal + " " + unit }))}</span>`;
       if (r.alt) {
@@ -9093,11 +9192,11 @@
   }
 
   // src/ui/nav.js
-  var PAGES = ["body", "workout", "guide", "gym", "settings", "history"];
+  var PAGES2 = ["body", "workout", "guide", "gym", "settings", "history"];
   function showPage(k) {
-    if (PAGES.indexOf(k) < 0) k = "body";
+    if (PAGES2.indexOf(k) < 0) k = "body";
     V.curPage = k;
-    PAGES.forEach((p) => {
+    PAGES2.forEach((p) => {
       const el2 = $("pg-" + p);
       if (el2) el2.classList.toggle("on", p === k);
     });
@@ -9160,7 +9259,8 @@
     drawInstall();
     drawUpdate();
     syncChartSegs();
-    PAGES.forEach((p) => stalePages.add(p));
+    foldApplyAll();
+    PAGES2.forEach((p) => stalePages.add(p));
     drawPage(V.curPage);
   }
   function drawSched() {
@@ -9209,10 +9309,16 @@
   var steps = [];
   var at = 0;
   var root = null;
+  var opened = [];
   var visible = (el2) => !!el2 && el2.offsetParent !== null && el2.getBoundingClientRect().height > 0;
   function target(s) {
     showPage(s.page);
     let el2 = document.querySelector(s.sel);
+    const shut = el2 && el2.closest(".card.folded");
+    if (shut) {
+      shut.classList.remove("folded");
+      opened.push(shut);
+    }
     if (el2 && s.card) el2 = el2.closest(".card");
     return visible(el2) ? el2 : null;
   }
@@ -9302,6 +9408,8 @@
     if (!root) return;
     root.remove();
     root = null;
+    opened.forEach((c) => c.classList.add("folded"));
+    opened = [];
     window.removeEventListener("resize", reflow);
     showPage("body");
     window.scrollTo(0, 0);
@@ -9785,6 +9893,7 @@
         if (b) toggleLogChip("chartCd", b.dataset.k, cdAvail(), drawCdTrend, "cdNote");
       };
       ["wChart", "bodyChart", "strChart", "sxChart", "cdChart"].forEach(chartScrubBind);
+      initFold();
       document.querySelectorAll(".foldhead").forEach((h) => h.onclick = () => chartFoldToggle(h.querySelector(".foldbtn").dataset.fold));
       $("sched").onclick = (ev) => {
         const el2 = ev.target.closest(".day");

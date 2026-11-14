@@ -9,6 +9,7 @@ import { fmtSigned } from '../core/numbers';
 import { kcalOf } from '../core/nutrition';
 import { t, tf } from '../i18n/index';
 import { trendWeights } from '../core/trend';
+import { foldDraw, foldToggle } from './fold';
 import { $, esc } from './dom';
 import { LINE_COLORS, MAX_SERIES, byName, cdName, cdSetsOf, dayShort, fmtSets, lastNumOf, liftsOf, measName, mobSetsOf, persistSettings, planKeys, sxIsReps, sxName, trained } from './shared';
 import { render } from './nav';
@@ -336,19 +337,8 @@ export function drawLogTrend(o){
 }
 export const drawSxTrend = () => drawLogTrend({field:'mob', setting:'chartSx', avail:sxAvail, name:sxName, pick:'sxPick', svg:'sxChart', note:'sxNote', fold:'sx', empty:'chart.empty.sx', noteKey:'chart.sxnote'});
 export const drawCdTrend = () => drawLogTrend({field:'cardio', setting:'chartCd', avail:cdAvail, name:cdName, pick:'cdPick', svg:'cdChart', note:'cdNote', fold:'cd', empty:'chart.empty.cd', noteKey:'chart.cdnote'});
-export const FOLD_CARD = {str:'cardStr', sx:'cardSxTrend', cd:'cardCdTrend'};
-export function chartFoldDraw(k, hasAny){
-  const folded = (k in S.settings.chartFold) ? S.settings.chartFold[k] : !hasAny;
-  const card=$(FOLD_CARD[k]); if(!card) return;
-  card.classList.toggle('folded', folded);
-  const b=card.querySelector('.foldbtn'); b.textContent=folded?'▸':'▾'; b.setAttribute('aria-expanded', String(!folded));
-  b.title=t(folded?'chart.unfold':'chart.fold'); b.setAttribute('aria-label', b.title);
-}
-export async function chartFoldToggle(k){
-  const card=$(FOLD_CARD[k]);
-  S.settings.chartFold=Object.assign({}, S.settings.chartFold, {[k]:!card.classList.contains('folded')});
-  await persistSettings(); chartFoldDraw(k, true); render();
-}
+export function chartFoldDraw(k, hasAny){ foldDraw(k, (k in S.settings.chartFold) ? S.settings.chartFold[k] : !hasAny); }
+export const chartFoldToggle = foldToggle;
 export function buildBodySeries(){
   return MEAS.map(m=>{
     const pts=S.entries.filter(e=>e.meas && e.meas[m.key]!=null).map(e=>({date:e.date, cm:e.meas[m.key]})).sort((a,b)=>a.date.localeCompare(b.date));

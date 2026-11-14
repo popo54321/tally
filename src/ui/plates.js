@@ -16,6 +16,7 @@ export function drawPlates(){
   const unit=P.unit, bar=plBarOf();
   const gi=$("plGoal"); if(document.activeElement!==gi) gi.value=V.plGoal==null ? '' : String(V.plGoal);
   document.querySelectorAll('#plUnit button').forEach(b=>b.classList.toggle('on', b.dataset.u===unit));
+  document.querySelectorAll('#plSides button').forEach(b=>{ b.classList.toggle('on', +b.dataset.s===P.sides); b.onclick=async()=>{ P.sides=+b.dataset.s===1 ? 1 : 2; await persistSettings(); drawPlates(); }; });
   const chip=(id, lbl, on)=>`<button type="button" class="exchip${on?' on':''}" data-id="${esc(id)}"><span class="sw"${on?' style="background:var(--line)"':''}></span>${esc(lbl)}</button>`;
   $("plBar").innerHTML=PL_BARS.map(b=>b.id==='own'
       ? chip('own', t('pl.bar.own'), bar==='own')+(bar==='own' ? `<input class="plown" id="plOwn" type="number" min="0" max="100" step="0.5" inputmode="decimal" placeholder="kg" aria-label="${esc(t('pl.bar.ownkg'))}" value="${P.barOwn==null?'':P.barOwn}">` : '')
@@ -35,7 +36,7 @@ export function plResultHtml(unit, bar){
   if(bar==='own' && S.settings.plates.barOwn==null) return `<div class="sxnote">${esc(t('pl.ownfirst'))}</div>`;
   const goalKg=unit==='lb' ? V.plGoal*LB : V.plGoal, barKg=plBarKg(bar);
   if(goalKg>(unit==='lb' ? 2000*LB : 1000)) return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
-  const r=plateSolve(goalKg, barKg, P.have);
+  const one=P.sides===1, r=plateSolve(goalKg, barKg, P.have, one ? 1 : 2);
   if(r.err==='under') return `<div class="sxnote">${esc(tf('pl.under',{bar:plFmt(barKg,unit)+' '+unit}))}</div>`;
   if(r.err==='none') return `<div class="sxnote">${esc(t('pl.noplates'))}</div>`;
   if(r.err==='big') return `<div class="sxnote">${esc(t('pl.big'))}</div>`;
@@ -45,8 +46,8 @@ export function plResultHtml(unit, bar){
   const viz=m.side.length ? '<div class="plviz"><span class="sleeve"></span>'+m.side.map(p=>`<span class="plate${p.id.slice(0,2)==='lb'?' lb':''}" style="height:${Math.round(26+70*Math.sqrt(p.kg/maxKg))}px">${esc(plFmt(p.kg, p.id.slice(0,2)))}</span>`).join('')+'<span class="collar"></span></div>' : '';
   const list=m.side.length ? groups.map(g=>(g.n>1 ? g.n+' × ' : '')+plLabel(g.id)).join(' + ') : t('pl.nothing');
   const tot=plFmt(m.totalKg,unit)+' '+unit, totO=plFmt(m.totalKg,other)+' '+other;
-  let h=`<div class="plres"><div class="plhead">${esc(t(m.side.length ? 'pl.each' : 'pl.eachnone'))}</div>${viz}<div class="pllist">${esc(list)}</div>`
-    +`<div class="pltot">${esc(tf(bar==='none' ? 'pl.totnobar' : 'pl.tot',{tot, other:totO, bar:plFmt(barKg,unit)+' '+unit, side:plFmt(m.side.reduce((a,p)=>a+p.kg,0),unit)+' '+unit}))}</div>`;
+  let h=`<div class="plres"><div class="plhead">${esc(t(m.side.length ? (one ? 'pl.one' : 'pl.each') : (one ? 'pl.onenone' : 'pl.eachnone')))}</div>${viz}<div class="pllist">${esc(list)}</div>`
+    +`<div class="pltot">${esc(tf(bar==='none' ? (one ? 'pl.totnobar1' : 'pl.totnobar') : (one ? 'pl.tot1' : 'pl.tot'),{tot, other:totO, bar:plFmt(barKg,unit)+' '+unit, side:plFmt(m.side.reduce((a,p)=>a+p.kg,0),unit)+' '+unit}))}</div>`;
   if(!r.exact){
     h+=`<div class="plalt"><span>${esc(tf('pl.notexact',{goal:V.plGoal+' '+unit}))}</span>`;
     if(r.alt){ const v=Math.round((unit==='lb' ? r.alt.totalKg/LB : r.alt.totalKg)*100)/100; h+=`<button type="button" class="plbtn" id="plUse" data-v="${v}">${esc(tf('pl.useup',{w:v+' '+unit}))}</button>`; }

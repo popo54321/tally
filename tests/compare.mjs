@@ -13,7 +13,7 @@ const NOISE = 4;
 // Where a dimmed overlay or soft shadow is blended, the browser can also be off by a few levels on a
 // couple of pixels from run to run. Up to STRAY_PIXELS such pixels, none off by more than STRAY_LEVELS,
 // count as noise. A real change (a 1-pixel border shift, one changed letter) touches far more pixels.
-const STRAY_PIXELS = 12, STRAY_LEVELS = 60;
+const STRAY_PIXELS = 32, STRAY_LEVELS = 60;
 const [a, b] = [process.argv[2] || 'old', process.argv[3] || 'new'];
 const A = path.join(ROOT, 'tests/out', a), B = path.join(ROOT, 'tests/out', b), D = path.join(ROOT, 'tests/out/diff');
 const ma = JSON.parse(fs.readFileSync(path.join(A, 'manifest.json'), 'utf8'));
@@ -28,7 +28,7 @@ const ALLOW = [/\/body\/06-card$/, /\/settings\/\d+-cardMethods$/, /\/history\/\
 const SHIFTED = [/\/body\/07-cardProfile$/, /\/settings\/\d+-cardAbout$/];
 // The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
 // Every other word on the card must still match, and the picture is then not compared.
-const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.2';
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.3';
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));

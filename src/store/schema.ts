@@ -9,6 +9,7 @@ import { MUSCLE_KEYS, muscleList, GROUP_KEYS } from '../data/muscles';
 import { MEAS } from '../data/measurements';
 import { libByKey, sxLibByKey, cdLibByKey } from '../data/library';
 import { EQUIP } from '../data/equipment';
+import { FOLD_KEYS } from '../data/folds';
 import { FONTS, THEME_VARS, HEXRE, TEXT_SCALES } from '../data/themes';
 import type { Day } from '../core/types';
 
@@ -111,7 +112,7 @@ export function normPlates(x: Any) {
   const have = Array.isArray(x.have) ? PL_ALL.filter(id => x.have.indexOf(id) >= 0) : PL_DEF.slice();
   const own = parseFloat(x.barOwn);
   return { have, bar: PL_BAR_IDS.indexOf(x.bar) >= 0 ? x.bar : 'kg20', barOwn: (own > 0 && own <= 100) ? Math.round(own * 100) / 100 : null,
-    unit: x.unit === 'lb' ? 'lb' : 'kg' };
+    unit: x.unit === 'lb' ? 'lb' : 'kg', sides: x.sides === 1 ? 1 : 2 };
 }
 export const KNOWN_SETTINGS = ['kcalTarget', 'kcalOwn', 'chartEx', 'chartSx', 'chartCd', 'chartFold', 'restSec', 'restSound', 'mobLead', 'sex', 'protFloor', 'age', 'ageSet', 'activity', 'volLo', 'volHi', 'volMute', 'calRate', 'calPeriod', 'plates'];
 export function normSettings(s: Any) {
@@ -119,7 +120,7 @@ export function normSettings(s: Any) {
   const k = parseFloat(s.kcalTarget), band = volBand(s);
   const r = parseInt(s.restSec, 10);
   const keyList = (a: Any) => { if (!Array.isArray(a)) return null; const o: string[] = []; a.forEach((x: Any) => { if (typeof x === 'string' && x && o.indexOf(x) < 0 && o.length < 200) o.push(x); }); return o; };
-  const fold: Record<string, boolean> = {}; if (s.chartFold && typeof s.chartFold === 'object') ['str', 'sx', 'cd'].forEach(k => { if (typeof s.chartFold[k] === 'boolean') fold[k] = s.chartFold[k]; });
+  const fold: Record<string, boolean> = {}; if (s.chartFold && typeof s.chartFold === 'object') FOLD_KEYS.forEach(k => { if (typeof s.chartFold[k] === 'boolean') fold[k] = s.chartFold[k]; });
   return {
     kcalTarget: (isNaN(k) || k <= 0) ? DEF_TARGET : Math.round(k),
     kcalOwn: !!s.kcalOwn,

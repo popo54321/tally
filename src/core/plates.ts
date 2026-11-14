@@ -14,9 +14,12 @@ export interface Plate { id: string; kg: number; u: number }
 export interface Loading { side: Plate[]; totalKg: number }
 export type PlateResult = { err: 'under' | 'none' | 'big' } | { exact: true; main: Loading } | { exact: false; main: Loading | null; alt: Loading | null };
 
-/** Fewest plates per side that land closest to the goal. Works in the plates' own unit (lb if every plate is lb), to 0.01. */
-export function plateSolve(goalKg: number, barKg: number, have: string[]): PlateResult {
-  const sideKg = (goalKg - barKg) / 2;
+/**
+ * Fewest plates per side that land closest to the goal. Works in the plates' own unit (lb if every plate is lb), to 0.01.
+ * 'sides' is 2 for a bar or machine loaded evenly on both sides, 1 for a machine plated on one side only.
+ */
+export function plateSolve(goalKg: number, barKg: number, have: string[], sides: 1 | 2 = 2): PlateResult {
+  const sideKg = (goalKg - barKg) / sides;
   if (sideKg < -1e-6) return { err: 'under' };
   if (!have.length) return { err: 'none' };
   const inLb = have.every(id => id.slice(0, 2) === 'lb'), toU = (kg: number) => kg / (inLb ? LB : 1) * 100;
@@ -28,7 +31,7 @@ export function plateSolve(goalKg: number, barKg: number, have: string[]): Plate
   best[0] = 0;
   for (let v = 1; v <= max; v++) for (let i = 0; i < ps.length; i++) { const q = v - ps[i].u; if (q >= 0 && best[q] !== 65535 && best[q] + 1 < best[v]) { best[v] = best[q] + 1; from[v] = i; } }
   const tol = inLb || have.every(id => id.slice(0, 2) === 'kg') ? 0 : 2;
-  const build = (v: number): Loading => { const side: Plate[] = []; while (v > 0) { const i = from[v]; side.push(ps[i]); v -= ps[i].u; } return { side, totalKg: barKg + 2 * side.reduce((a, p) => a + p.kg, 0) }; };
+  const build = (v: number): Loading => { const side: Plate[] = []; while (v > 0) { const i = from[v]; side.push(ps[i]); v -= ps[i].u; } return { side, totalKg: barKg + sides * side.reduce((a, p) => a + p.kg, 0) }; };
   for (let d = 0; d <= tol; d++) for (const v of [T - d, T + d]) if (v >= 0 && v <= max && best[v] !== 65535) return { exact: true, main: build(v) };
   let lo = -1, hi = -1;
   for (let v = T; v >= 0; v--) if (best[v] !== 65535) { lo = v; break; }

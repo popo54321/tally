@@ -44,6 +44,12 @@ jobs:
       - name: How to use tour
         run: node tests/tour.mjs
 
+      - name: Folding cards
+        run: node tests/fold.mjs
+
+      - name: Plate calculator, both sides or one side
+        run: node tests/plates.mjs
+
       - name: Photograph 8.1 and the rebuild, then compare
         run: |
           node tests/record.mjs old

@@ -406,8 +406,13 @@
   .chbub text{fill:var(--panel);font-family:var(--font-mono);text-anchor:middle}
   .foldhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;cursor:pointer}
   .foldbtn{flex:none;background:var(--panel-2);border:2px solid var(--line);border-radius:8px;color:var(--ink);font-size:13px;line-height:1;padding:6px 10px;cursor:pointer;min-height:32px;min-width:38px}
-  .card.folded > :not(.foldhead){display:none}
+  .card.folded:not(.hasfold) > :not(.foldhead){display:none}
   .card.folded .foldhead .lbl{margin-bottom:0}
+  .foldlbl{padding-right:50px;cursor:pointer}
+  .plsides{margin:-2px 0 14px}
+  .foldbtn.corner{position:absolute;top:13px;right:13px}
+  .card.hasfold.folded > :not(.foldlbl):not(.foldbtn){display:none}
+  .card.hasfold.folded > .foldlbl{margin-bottom:0}
   .chartnote{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint);margin-top:9px;line-height:1.65}
   .chartnote b{color:var(--ink-dim);font-weight:500}
 

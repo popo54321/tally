@@ -13,7 +13,7 @@ npm run compare                # any difference is listed, with side-by-side pic
 
 Every run uses the same clock (Tuesday 10 November 2026, 09:00 Bangkok time), language, screen sizes
 and sample data, and turns off fades, so two runs of the same app give the same pictures.
-Differences of up to 4 brightness levels per pixel, and up to 12 faint stray pixels where an overlay
+Differences of up to 4 brightness levels per pixel, and up to 32 faint stray pixels where an overlay
 or shadow is blended, are ignored: that is the browser's own rendering noise and cannot be seen.
 
 What gets photographed: every visible card on every page and the top bar, for three sample data

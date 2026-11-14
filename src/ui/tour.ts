@@ -31,10 +31,14 @@ const STEPS: Step[] = [
 ];
 
 let steps: Step[] = [], at = 0, root: HTMLElement | null = null;
+/** Folded cards opened while the tour points inside them; folded again when it ends. */
+let opened: HTMLElement[] = [];
 const visible = (el: Element | null): el is HTMLElement => !!el && (el as HTMLElement).offsetParent !== null && el.getBoundingClientRect().height > 0;
 function target(s: Step): HTMLElement | null {
   showPage(s.page);
   let el = document.querySelector(s.sel) as HTMLElement | null;
+  const shut = el && el.closest('.card.folded') as HTMLElement | null;
+  if (shut) { shut.classList.remove('folded'); opened.push(shut); }
   if (el && s.card) el = el.closest('.card') as HTMLElement | null;
   return visible(el) ? el : null;
 }
@@ -98,6 +102,7 @@ export function startTour(): void {
 export async function endTour(): Promise<void> {
   if (!root) return;
   root.remove(); root = null;
+  opened.forEach(c => c.classList.add('folded')); opened = [];
   window.removeEventListener('resize', reflow);
   showPage('body'); window.scrollTo(0, 0);
   try { await STORE.set(TOUR_KEY, '1'); } catch (e) { /* the tour simply shows again next time */ }
