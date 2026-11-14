@@ -168,6 +168,7 @@
   .baknudge{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:2px solid var(--warn);border-radius:10px;
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
+  .updnudge{border-color:var(--brass)}
   .instnudge{border-color:var(--brass)}
   .sizerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 4px}
   .sizebtn{min-width:52px;font-size:14px;font-weight:700}

@@ -40,6 +40,12 @@
     <button type="button" class="ghostbtn" id="bakNow" data-i18n="bak.now">Save backup</button>
     <button type="button" class="bakskip" id="bakLater" data-i18n="bak.later">Not now</button>
   </div>
+  <div class="baknudge updnudge" id="updNudge" style="display:none">
+    <span id="updNudgeText"></span>
+    <button type="button" class="ghostbtn" id="updNudgeGo" data-i18n="upd.go">Update</button>
+    <button type="button" class="ghostbtn" id="updNudgeAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
+    <button type="button" class="bakskip" id="updNudgeLater" data-i18n="upd.later">Later</button>
+  </div>
 
   <div class="sched" id="sched"></div>
 
@@ -394,8 +400,11 @@
       <div class="donrow">
         <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
         <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <button type="button" class="ghostbtn" id="updInstall" style="display:none">Update</button>
+        <button type="button" class="ghostbtn" id="updAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
         <span class="donsub" id="updMsg"></span>
       </div>
+      <div class="donrow" id="updAutoRow" style="display:none"><button type="button" class="ghostbtn" id="updAuto" aria-pressed="true">Automatic check: On</button></div>
     </div>
     <div class="card col-12">
       <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>

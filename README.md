@@ -24,13 +24,18 @@ full screen with no browser bars, works with no signal, and behaves like any oth
 
 There is also a native Android app: download the `.apk` from the
 [latest release](https://github.com/popo54321/tally/releases/latest) and install it over any
-earlier version. Your data stays.
+earlier version. Your data stays. From 9.7 on, it checks for new versions and updates itself
+(Settings → Version & Updates).
 
 ## Your data
 
-**Everything stays on your device.** There is no account, no server, and the app makes no network
-request of its own — once it has loaded, it never talks to anything. Nobody, including whoever
-hosts this page, can see what you log.
+**Your data is 100% offline.** It stays on your device: there is no account and no server, and
+nothing you log is ever sent anywhere. Nobody, including whoever hosts this page, can see what you log.
+
+Tally only goes online to update itself. The web app fetches its newest version when you open it
+with a connection. The Android app asks GitHub once a day which version is the newest and, when you
+tap Update, downloads it; that check sends nothing about you, and the app's page itself is blocked
+from going online at all.
 
 That cuts both ways: **nothing is backed up for you.**
 

@@ -44,7 +44,7 @@ public final class AlarmReceiver extends BroadcastReceiver {
         } catch (Exception e) { return false; }
     }
 
-    private static int smallIcon(Context ctx) {
+    static int smallIcon(Context ctx) {
         try {
             int id = ctx.getResources().getIdentifier(
                     "ic_tally_mono", "drawable", ctx.getPackageName());

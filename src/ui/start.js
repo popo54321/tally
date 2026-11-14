@@ -35,6 +35,7 @@ import { initFold } from './fold';
 import { initCoachApply } from './coachapply';
 import { drawDayRoutines, initRoutines, routineNameFor } from './routines';
 import { loadRoutines } from '../state/routines';
+import { initSelfUpdate } from './selfupdate';
 
 (async function(){
  try{
@@ -165,6 +166,7 @@ import { loadRoutines } from '../state/routines';
   initTour();
   initCoachApply();
   initRoutines();
+  initSelfUpdate();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;

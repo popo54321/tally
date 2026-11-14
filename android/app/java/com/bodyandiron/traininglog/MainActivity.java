@@ -20,6 +20,8 @@ public class MainActivity extends Activity {
     private static final int REQ_NOTIF = 4712;
 
     static volatile boolean inForeground = false;
+    /** The running activity, so update progress can reach the page. */
+    static volatile MainActivity current = null;
 
     private WebView web;
     private ValueCallback<Uri[]> pendingPick;
@@ -47,6 +49,8 @@ public class MainActivity extends Activity {
         web.setWebChromeClient(new FileChooserClient(this));
         web.addJavascriptInterface(new FileSaver(this), "AndroidFile");
         web.addJavascriptInterface(new AlarmBridge(this), "AndroidAlarm");
+        web.addJavascriptInterface(new Updater(this), "AndroidUpdate");
+        current = this;
 
         setContentView(web, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
@@ -61,7 +65,23 @@ public class MainActivity extends Activity {
     }
 
     @Override
-    protected void onResume() { super.onResume(); inForeground = true; }
+    protected void onResume() {
+        super.onResume(); inForeground = true;
+        // back from Android's settings or installer: let the page redraw its update state
+        if (web != null) web.evaluateJavascript("window.tallyUpdateEvent&&window.tallyUpdateEvent({type:'resume'})", null);
+    }
+
+    @Override
+    protected void onDestroy() { if (current == this) current = null; super.onDestroy(); }
+
+    /** Passes an update event (JSON) to the page, from any thread. */
+    static void event(final String json) {
+        final MainActivity a = current;
+        if (a == null || a.web == null) return;
+        a.runOnUiThread(new Runnable() { public void run() {
+            a.web.evaluateJavascript("window.tallyUpdateEvent&&window.tallyUpdateEvent(" + json + ")", null);
+        } });
+    }
 
     @Override
     protected void onPause() { inForeground = false; super.onPause(); }

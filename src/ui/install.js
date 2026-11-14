@@ -3,6 +3,8 @@ import { V } from '../ui/view';
 import { t, tf } from '../i18n/index';
 import { $, flash } from './dom';
 import { APP_VERSION } from './shared';
+import { hasUpdater } from '../platform/update';
+import { draw as drawSelfUpdate, selfUpdateCheck } from './selfupdate';
 
 export const INST_SNOOZE='tally:instSnooze';
 export const instIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
@@ -32,14 +34,16 @@ export async function instGo(){
   drawInstall();
 }
 export function drawUpdate(){
-  const android=!!window.AndroidFile;
+  const android=!!window.AndroidFile, self=hasUpdater();
   $("updNow").textContent=tf('upd.now',{v:APP_VERSION});
-  $("updHow").textContent=t(android ? 'upd.android' : 'upd.web');
-  $("updGet").style.display = android ? '' : 'none';
-  $("updCheck").style.display = android ? 'none' : '';
+  $("updHow").textContent=t(self ? 'upd.android' : android ? 'upd.android.manual' : 'upd.web');
+  $("updGet").style.display = android && !self ? '' : 'none';
+  $("updCheck").style.display = android && !self ? 'none' : '';
+  if(self) drawSelfUpdate();
 }
 export const updMsg = m => { $("updMsg").textContent=m||''; };
 export async function updCheck(){
+  if(hasUpdater()){ selfUpdateCheck(); return; }
   const sw=navigator.serviceWorker;
   const reg=sw ? await sw.getRegistration().catch(()=>null) : null;
   if(!reg){ location.reload(); return; }

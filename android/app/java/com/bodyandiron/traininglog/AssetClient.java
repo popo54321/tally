@@ -25,7 +25,9 @@ final class AssetClient extends WebViewClient {
     @Override
     public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
         Uri u = req.getUrl();
-        if (u == null || !MainActivity.HOST.equals(u.getHost())) return null;
+        // The page loads only its own files. Anything else is refused here, so the app's internet permission
+        // (for updates, in Updater) can never be used by the page.
+        if (u == null || !MainActivity.HOST.equals(u.getHost())) return notFound();
 
         String path = u.getPath();
         if (path == null || path.equals("/")) path = "/index.html";

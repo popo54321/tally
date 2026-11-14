@@ -65,6 +65,9 @@ jobs:
       - name: Routines (workout, stretch, cardio), supersets, older versions, backups
         run: node tests/routines.mjs
 
+      - name: Android self-update screens (with a stand-in for the native updater)
+        run: node tests/selfupdate.mjs
+
       - name: Photograph the baseline version and the current build, then compare
         run: |
           node tests/record.mjs base
@@ -78,3 +81,30 @@ jobs:
           name: picture-differences
           path: tests/out/diff/
           if-no-files-found: ignore
+
+  # The Android app built and signed with a throwaway key, so native code (Updater.java and friends) is
+  # compiled and packaged on every push, not first at release time. Nothing is published.
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "build-tools;34.0.0" "platforms;android-34" > /dev/null
+
+      - name: Build with a throwaway key
+        working-directory: android
+        run: |
+          export KEYSTORE="$RUNNER_TEMP/test.keystore" KEYSTORE_PASS=throwaway
+          keytool -genkeypair -keystore "$KEYSTORE" -storepass "$KEYSTORE_PASS" -keypass "$KEYSTORE_PASS" \
+            -alias bodyandiron -dname "CN=Tally test build" -keyalg RSA -keysize 2048 -validity 2 > /dev/null 2>&1
+          VN=$(grep -o "APP_VERSION = [\"'][0-9][0-9.]*" ../index.html | head -1 | grep -o "[0-9][0-9.]*$")
+          PAGE=../index.html bash build.sh 1 "$VN"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump permissions "build/tally-$VN.apk"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump xmltree --file AndroidManifest.xml "build/tally-$VN.apk" | grep -E "UpdateReceiver|MY_PACKAGE_REPLACED"
+

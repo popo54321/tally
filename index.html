@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-c7TW8PbOjnCGDbB776g3rU2BThNfj2XVAmJuB4a98pg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-BmzV7H7kcDELpk38osLqzWadmLJHSz7XiURL5OGzb9I='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -198,6 +198,7 @@
   .baknudge{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--panel);border:2px solid var(--warn);border-radius:10px;
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
+  .updnudge{border-color:var(--brass)}
   .instnudge{border-color:var(--brass)}
   .sizerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 4px}
   .sizebtn{min-width:52px;font-size:14px;font-weight:700}
@@ -664,6 +665,12 @@
     <button type="button" class="ghostbtn" id="bakNow" data-i18n="bak.now">Save backup</button>
     <button type="button" class="bakskip" id="bakLater" data-i18n="bak.later">Not now</button>
   </div>
+  <div class="baknudge updnudge" id="updNudge" style="display:none">
+    <span id="updNudgeText"></span>
+    <button type="button" class="ghostbtn" id="updNudgeGo" data-i18n="upd.go">Update</button>
+    <button type="button" class="ghostbtn" id="updNudgeAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
+    <button type="button" class="bakskip" id="updNudgeLater" data-i18n="upd.later">Later</button>
+  </div>
 
   <div class="sched" id="sched"></div>
 
@@ -1018,8 +1025,11 @@
       <div class="donrow">
         <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
         <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <button type="button" class="ghostbtn" id="updInstall" style="display:none">Update</button>
+        <button type="button" class="ghostbtn" id="updAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
         <span class="donsub" id="updMsg"></span>
       </div>
+      <div class="donrow" id="updAutoRow" style="display:none"><button type="button" class="ghostbtn" id="updAuto" aria-pressed="true">Automatic check: On</button></div>
     </div>
     <div class="card col-12">
       <div class="lbl" data-i18n="sync.title">Sync Between Devices</div>
@@ -5304,7 +5314,27 @@
     "theme.title": 'Appearance <span class="sub-note">· font and colours, saved on this device</span>',
     "unit.min": "min",
     "unit.reps": "reps",
-    "upd.android": "This app never connects to the internet, so it cannot check by itself. The button opens the download page in your browser: if the version there is newer than yours, download the .apk and install it over this one. Your data stays.",
+    "upd.android": "Tally checks for a new version once a day and updates itself when you tap Update. Your data is 100% offline: it stays on this phone and is never sent anywhere. The check only asks GitHub which version is the newest.",
+    "upd.android.manual": "Your data is 100% offline: it stays on this phone. The button opens the download page in your browser: if the version there is newer than yours, download the .apk and install it over this one. Your data stays.",
+    "upd.avail": "Tally {v} is available",
+    "upd.install": "Update to {v}",
+    "upd.down": "Downloading… {n}%",
+    "upd.installing": "Installing. Android may ask you to confirm, then closes Tally to update it.",
+    "upd.confirm": "Tap Update in Android’s prompt. Tally closes to update, and a notification opens it again.",
+    "upd.cancelled": "Update cancelled. Tap Update to try again.",
+    "upd.allow": "Android needs your OK once: allow “Install unknown apps” for Tally, come back, then tap Update again.",
+    "upd.allowbtn": "Allow updates",
+    "upd.err.offline": "Could not check. Are you online?",
+    "upd.err.net": "Could not download the update. Check your connection and try again, or get it from the download page.",
+    "upd.err.verify": "The download did not check out as a genuine Tally update, so it was not installed.",
+    "upd.err.notnewer": "You already have this version or a newer one.",
+    "upd.err.install": "Android could not install the update. You can get it from the download page instead.",
+    "upd.err.other": "Could not check right now. Try again later.",
+    "upd.auto.on": "Automatic check: on",
+    "upd.auto.off": "Automatic check: off",
+    "upd.nudge": "Tally {v} is ready",
+    "upd.go": "Update",
+    "upd.later": "Later",
     "upd.check": "Check for update",
     "upd.checking": "Checking…",
     "upd.found": "New version found. Reloading…",
@@ -5313,7 +5343,7 @@
     "upd.now": "You have Tally {v}",
     "upd.offline": "Could not check. Are you online?",
     "upd.title": "Version & Updates",
-    "upd.web": "The web app updates itself whenever you open it with a connection. Tap below to check right now.",
+    "upd.web": "The web app updates itself whenever you open it with a connection. Your data is 100% offline: it stays on this device. Tap below to check right now.",
     "ver.android": "Android app",
     "ver.app": "Tally",
     "ver.build": "build {id}",
@@ -5364,7 +5394,7 @@
     "tour.install.h": "Put Tally on your home screen",
     "tour.install.b": "Installed, Tally opens full screen like any other app and works with no signal.",
     "tour.backup.h": "Keep a backup",
-    "tour.backup.b": "Everything stays on this phone and nowhere else. Save a backup file now and then, and use it to move to a new phone.",
+    "tour.backup.b": "Your data is 100% offline: it stays on this phone and nowhere else. Save a backup file now and then, and use it to move to a new phone.",
     "tour.again.h": "That is it",
     "tour.again.b": "Run this tour again any time from here.",
     "fold.hide": "Hide this section",
@@ -5492,18 +5522,18 @@
   var cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   var esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function applyLang() {
-    document.querySelectorAll("[data-i18n]").forEach((el3) => {
-      el3.textContent = t(el3.getAttribute("data-i18n"));
+    document.querySelectorAll("[data-i18n]").forEach((el4) => {
+      el4.textContent = t(el4.getAttribute("data-i18n"));
     });
-    document.querySelectorAll("[data-i18n-html]").forEach((el3) => {
-      el3.innerHTML = t(el3.getAttribute("data-i18n-html"));
+    document.querySelectorAll("[data-i18n-html]").forEach((el4) => {
+      el4.innerHTML = t(el4.getAttribute("data-i18n-html"));
     });
-    document.querySelectorAll("[data-i18n-ph]").forEach((el3) => {
-      el3.placeholder = t(el3.getAttribute("data-i18n-ph"));
+    document.querySelectorAll("[data-i18n-ph]").forEach((el4) => {
+      el4.placeholder = t(el4.getAttribute("data-i18n-ph"));
     });
-    document.querySelectorAll("[data-i18n-title]").forEach((el3) => {
-      el3.title = t(el3.getAttribute("data-i18n-title"));
-      if (!/[A-Za-z0-9]/.test(el3.textContent)) el3.setAttribute("aria-label", el3.title);
+    document.querySelectorAll("[data-i18n-title]").forEach((el4) => {
+      el4.title = t(el4.getAttribute("data-i18n-title"));
+      if (!/[A-Za-z0-9]/.test(el4.textContent)) el4.setAttribute("aria-label", el4.title);
     });
   }
   function fmtDelta(lbl, d, unit) {
@@ -5580,15 +5610,15 @@
     });
     return iB >= 0 && iB < wp.length - 1 ? Math.round((trs[trs.length - 1] - trs[iB]) * 100) / 100 : null;
   }
-  function lastNumOf(days, get) {
+  function lastNumOf(days, get2) {
     for (let i = days.length - 1; i >= 0; i--) {
-      const v = get(days[i]);
+      const v = get2(days[i]);
       if (v != null) return v;
     }
     return null;
   }
-  function deltaOf(days, get, n) {
-    const arr = days.filter((e) => get(e) != null);
+  function deltaOf(days, get2, n) {
+    const arr = days.filter((e) => get2(e) != null);
     if (arr.length < 2) return null;
     const latest = arr[arr.length - 1], target2 = dnum(latest.date) - n;
     const cand = arr.slice(0, -1);
@@ -5600,7 +5630,7 @@
         best = e;
       }
     });
-    return { delta: get(latest) - get(best) };
+    return { delta: get2(latest) - get2(best) };
   }
   function entriesInWindow(days, period) {
     if (!days.length) return [];
@@ -5927,7 +5957,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.6";
+  var APP_VERSION = "9.7";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -6081,7 +6111,7 @@
   var sessionTarget = () => DAYS2.filter((d) => sessionEx(d.key).length > 0).length;
   var activeGroups = () => GROUPS.filter((g) => groupTarget(g.key) > 0);
   var trained = (e) => !!(e.lifts && Object.keys(e.lifts).length);
-  var lastNumOf2 = (get) => lastNumOf(S.entries, get);
+  var lastNumOf2 = (get2) => lastNumOf(S.entries, get2);
   function lastSessionOf(key, dayKey) {
     if (dayKey) {
       for (let i = S.entries.length - 1; i >= 0; i--) {
@@ -6098,7 +6128,7 @@
     }
     return null;
   }
-  var deltaOf2 = (get, days) => deltaOf(S.entries, get, days);
+  var deltaOf2 = (get2, days) => deltaOf(S.entries, get2, days);
   var sessionsBefore = (key, date) => S.entries.filter((e) => e.date < date).map((e) => liftsOf(e, key)).filter((s) => s.length);
   function fmtLoad(ex, kg) {
     if (ex.added) return kg > 0 ? "BW+" + kg : "BW";
@@ -6281,8 +6311,8 @@
     return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
   }
   function drawExactNotice() {
-    const el3 = $("restExact");
-    if (el3) el3.style.display = S.settings.restSound && exactAlarmsOff() ? "" : "none";
+    const el4 = $("restExact");
+    if (el4) el4.style.display = S.settings.restSound && exactAlarmsOff() ? "" : "none";
   }
   function audioWake() {
     try {
@@ -7115,9 +7145,9 @@
         <button class="sh-add" data-libadd="${l.key}">${esc(t("btn.add"))}</button>
       </div>`;
     };
-    const found = q && !V.shManaging ? LIB.filter((l) => !libLive(l) && qMatch(q, t("lib." + l.key) + " " + l.p.concat(l.s).map((k) => t("mus." + k)).join(" ") + (l.lv ? " " + t("lv." + l.lv) : ""))).sort((a, b) => (libUsable(b) ? 1 : 0) - (libUsable(a) ? 1 : 0) || libOrder(a, b)).slice(0, 60) : [];
-    const libPart = found.length ? `<div class="sh-grp">${esc(t("sh.lib"))}</div>` + bwSplit(found, (l) => l.lv, lrow, "sh-grp") : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}</div>` : "";
-    box.innerHTML = pool2.length || found.length ? (pool2.length ? `<div class="sh-grp">${esc(t("sh.yours"))}</div>` + bwSplit(pool2, exLv, row, "sh-grp") : "") + libPart : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}<br>${esc(t("sh.tapnew"))}</div>` : `<div class="sh-empty">${esc(tf("nomatch", { q }))}${V.shManaging ? "" : "<br>" + esc(t("sh.tapnew"))}</div>` + libPart;
+    const found2 = q && !V.shManaging ? LIB.filter((l) => !libLive(l) && qMatch(q, t("lib." + l.key) + " " + l.p.concat(l.s).map((k) => t("mus." + k)).join(" ") + (l.lv ? " " + t("lv." + l.lv) : ""))).sort((a, b) => (libUsable(b) ? 1 : 0) - (libUsable(a) ? 1 : 0) || libOrder(a, b)).slice(0, 60) : [];
+    const libPart = found2.length ? `<div class="sh-grp">${esc(t("sh.lib"))}</div>` + bwSplit(found2, (l) => l.lv, lrow, "sh-grp") : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}</div>` : "";
+    box.innerHTML = pool2.length || found2.length ? (pool2.length ? `<div class="sh-grp">${esc(t("sh.yours"))}</div>` + bwSplit(pool2, exLv, row, "sh-grp") : "") + libPart : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}<br>${esc(t("sh.tapnew"))}</div>` : `<div class="sh-empty">${esc(tf("nomatch", { q }))}${V.shManaging ? "" : "<br>" + esc(t("sh.tapnew"))}</div>` + libPart;
   }
   async function shLibPick(k) {
     const key = await libToCollection(k);
@@ -7472,18 +7502,18 @@
     const w = weekVolume(), vol = w.vol;
     const stOf = (k) => weekState(k, w, lo, hi, mute);
     [["volLo", lo], ["volHi", hi]].forEach(([id, v]) => {
-      const el3 = $(id);
-      if (el3 && document.activeElement !== el3) el3.value = v;
+      const el4 = $(id);
+      if (el4 && document.activeElement !== el4) el4.value = v;
     });
-    const pct = (v) => Math.min(100, v / hi * 100);
+    const pct2 = (v) => Math.min(100, v / hi * 100);
     const pre = VOL_PRESETS.find((x) => x.lo === lo && x.hi === hi);
     $("volPre").innerHTML = VOL_PRESETS.map((x) => `<button type="button" class="mchip${x === pre ? " on" : ""}" data-band="${x.lo}-${x.hi}">${esc(t("guide.pre." + x.key))} ${x.lo}–${x.hi}</button>`).join("");
     $("volHelp").innerHTML = esc(t(pre ? "guide.pre." + pre.key + ".note" : "guide.pre.custom.note")) + "<br><br>" + esc(t("guide.help"));
     wrap.innerHTML = ["push", "pull", "legs", "core"].map((g) => `<div class="volgrp">${esc(groupName(g))}</div>` + MUSCLES.filter((m) => m.grp === g).map((m) => {
       const k = m.key, st = stOf(k);
       const mb = st === "low" || st === "sofar" || st === "muted" ? `<button type="button" class="volmute" data-mute="${k}">${esc(t(st === "muted" ? "guide.unmute" : "guide.mute"))}</button>` : "<span></span>";
-      const plan = w.proj[k] > vol[k] ? `<b style="width:${pct(w.proj[k])}%"></b>` : "";
-      return `<div class="volrow ${st}"><button type="button" class="volname" data-pick="${k}">${esc(t("mus." + k))}</button><div class="voltrack">${plan}<i style="width:${pct(vol[k])}%"></i></div><div class="volnum">${fmtSetsN(vol[k])}</div><div class="volstate">${esc(t("guide.st." + st))}</div>${mb}</div>`;
+      const plan = w.proj[k] > vol[k] ? `<b style="width:${pct2(w.proj[k])}%"></b>` : "";
+      return `<div class="volrow ${st}"><button type="button" class="volname" data-pick="${k}">${esc(t("mus." + k))}</button><div class="voltrack">${plan}<i style="width:${pct2(vol[k])}%"></i></div><div class="volnum">${fmtSetsN(vol[k])}</div><div class="volstate">${esc(t("guide.st." + st))}</div>${mb}</div>`;
     }).join("")).join("");
     const names = w.untagged.map((k) => {
       const ex = exByKey(k);
@@ -8125,10 +8155,10 @@
     });
   }
   var entryOn = (d) => S.entries.find((e) => e.date === d);
-  function prevWith(d, get) {
+  function prevWith(d, get2) {
     for (let i = S.entries.length - 1; i >= 0; i--) {
       const e = S.entries[i];
-      if (e.date < d && get(e) != null) return e;
+      if (e.date < d && get2(e) != null) return e;
     }
     return null;
   }
@@ -8775,18 +8805,18 @@
 
   // src/ui/sync.js
   function drawVersion() {
-    const el3 = $("appVer");
-    if (!el3) return;
+    const el4 = $("appVer");
+    if (!el4) return;
     const android = !!window.AndroidFile;
     const line = tf("ver.line", {
       name: t("ver.app"),
       v: APP_VERSION,
       where: t(android ? "ver.android" : location.protocol === "file:" ? "ver.file" : "ver.web")
     });
-    el3.textContent = line;
+    el4.textContent = line;
     if (!android && window.caches && caches.keys) caches.keys().then((ks) => {
       const k = ks.find((x) => /^tally-[0-9a-f]{12}$/.test(x));
-      if (k) el3.textContent = line + " · " + tf("ver.build", { id: k.slice(6, 13) });
+      if (k) el4.textContent = line + " · " + tf("ver.build", { id: k.slice(6, 13) });
     }).catch(() => {
     });
   }
@@ -9236,9 +9266,9 @@
 
   // src/ui/body.js
   function calcHint(id) {
-    const el3 = $(id), out = $(id + "Sum");
-    if (!el3 || !out) return;
-    const raw = el3.value.trim(), v = calcVal(raw);
+    const el4 = $(id), out = $(id + "Sum");
+    if (!el4 || !out) return;
+    const raw = el4.value.trim(), v = calcVal(raw);
     out.textContent = v != null && /[+*/-]/.test(raw.slice(1)) ? "= " + v : "";
     calcLeft(id, raw ? calcVal(raw.replace(/[+*/-]+$/, "")) : 0);
   }
@@ -9256,19 +9286,19 @@
     out.innerHTML = esc(head) + " · <b>" + esc(tail) + "</b>";
   }
   function calcSettle(id) {
-    const el3 = $(id);
-    if (!el3) return;
-    const v = calcVal(el3.value);
-    if (v != null && /[+*/-]/.test(el3.value.trim().slice(1))) el3.value = v;
+    const el4 = $(id);
+    if (!el4) return;
+    const v = calcVal(el4.value);
+    if (v != null && /[+*/-]/.test(el4.value.trim().slice(1))) el4.value = v;
     calcHint(id);
   }
   function calcAdd(id) {
-    const el3 = $(id);
-    if (!el3) return;
-    el3.value = el3.value.trim().replace(/[+*/-]$/, "") + "+";
-    el3.focus();
+    const el4 = $(id);
+    if (!el4) return;
+    el4.value = el4.value.trim().replace(/[+*/-]$/, "") + "+";
+    el4.focus();
     try {
-      el3.setSelectionRange(el3.value.length, el3.value.length);
+      el4.setSelectionRange(el4.value.length, el4.value.length);
     } catch (e) {
     }
     calcHint(id);
@@ -9328,8 +9358,8 @@
     const tg = protTarget2(), ok = protOk2(), own = S.settings.protFloor != null;
     const out = $("protOut");
     if (out) {
-      const why = own ? tf("prot.why.own", { g: protAuto2() }) : t(S.settings.sex ? "prot.why." + S.settings.sex : "prot.why.unset");
-      out.innerHTML = `<div class="calib-line">${tf("prot.aim", { g: "<b>" + tg + " g</b>" })}<span class="calib-sub">${esc(tf("prot.okfrom", { g: ok }))}</span></div><div class="calib-meta">${esc(why)}</div><div class="calib-meta">${esc(tf("prot.relax", { ok }))}</div>` + (own ? `<button class="apply" id="protAutoBtn">${esc(tf("prot.useauto", { g: protAuto2() }))}</button>` : "");
+      const why2 = own ? tf("prot.why.own", { g: protAuto2() }) : t(S.settings.sex ? "prot.why." + S.settings.sex : "prot.why.unset");
+      out.innerHTML = `<div class="calib-line">${tf("prot.aim", { g: "<b>" + tg + " g</b>" })}<span class="calib-sub">${esc(tf("prot.okfrom", { g: ok }))}</span></div><div class="calib-meta">${esc(why2)}</div><div class="calib-meta">${esc(tf("prot.relax", { ok }))}</div>` + (own ? `<button class="apply" id="protAutoBtn">${esc(tf("prot.useauto", { g: protAuto2() }))}</button>` : "");
       const b = $("protAutoBtn");
       if (b) b.onclick = protUseAuto;
     }
@@ -9441,8 +9471,8 @@
       $("bfDelta").innerHTML = fmtDelta(t("stat.d7"), deltaOf2((e) => e.bf, 7), "%") + fmtDelta(t("stat.d30"), deltaOf2((e) => e.bf, 30), "%");
     }
     const wk7 = S.entries.filter((e) => within7(e.date));
-    const avg7 = (get) => {
-      const v = wk7.map(get).filter((x) => x != null);
+    const avg7 = (get2) => {
+      const v = wk7.map(get2).filter((x) => x != null);
       return { avg: v.length ? Math.round(v.reduce((a, x) => a + x, 0) / v.length) : null, logged: v.length };
     };
     const k7 = avg7(kcalOf), p7 = avg7(protOf), kcalAvg = k7.avg, protAvg = p7.avg;
@@ -9532,19 +9562,19 @@
     return bfNavy(cur ? cur.meas : null, h, S.settings.sex);
   }
   function bfModeSet(m, seed) {
-    const manual = m === "manual";
+    const manual2 = m === "manual";
     document.querySelectorAll("#segBf button").forEach((b) => b.classList.toggle("on", b.dataset.b === m));
     const row = $("bfManualRow");
-    if (row) row.style.display = manual ? "" : "none";
+    if (row) row.style.display = manual2 ? "" : "none";
     const cur = S.entries.find((e) => e.date === $("fDate").value);
     const calc = bfCalcFor(cur);
     const inp = $("fBf");
     if (inp && seed !== false) {
-      if (manual) inp.value = cur && cur.bfSrc === "manual" && cur.bf != null ? cur.bf : calc != null ? calc.toFixed(1) : "";
+      if (manual2) inp.value = cur && cur.bfSrc === "manual" && cur.bf != null ? cur.bf : calc != null ? calc.toFixed(1) : "";
       else inp.value = "";
     }
     const note = $("bfSrcNote");
-    if (note) note.textContent = manual ? "" : calc != null ? tf("body.bf.calc", { n: calc.toFixed(1), girths: bfNeedsText() }) : tf("body.bf.none", { girths: bfNeedsText() });
+    if (note) note.textContent = manual2 ? "" : calc != null ? tf("body.bf.calc", { n: calc.toFixed(1), girths: bfNeedsText() }) : tf("body.bf.none", { girths: bfNeedsText() });
   }
   function refreshManualTarget() {
     const cur = $("mtCurrent"), inp = $("manualKcal");
@@ -9671,10 +9701,10 @@
     render();
   }
   async function gymAddOwn() {
-    const el3 = $("gymName"), name = el3.value.trim();
+    const el4 = $("gymName"), name = el4.value.trim();
     if (!name) return;
     S.gym = normGym({ set: S.gym.set, have: S.gym.have, own: S.gym.own.concat([{ name }]) });
-    el3.value = "";
+    el4.value = "";
     await persistGym();
     drawGym();
   }
@@ -9759,6 +9789,219 @@
     render();
   }
 
+  // src/platform/update.js
+  var native = () => {
+    try {
+      return window.AndroidUpdate && typeof window.AndroidUpdate.check === "function" ? window.AndroidUpdate : null;
+    } catch (e) {
+      return null;
+    }
+  };
+  var hasUpdater = () => !!native();
+  var listeners = [];
+  var onUpdateEvent = (fn) => {
+    listeners.push(fn);
+  };
+  window.tallyUpdateEvent = (ev) => {
+    listeners.forEach((f) => {
+      try {
+        f(ev || {});
+      } catch (e) {
+      }
+    });
+  };
+  var updaterCheck = () => {
+    const n = native();
+    try {
+      return !!(n && n.check());
+    } catch (e) {
+      return false;
+    }
+  };
+  var updaterInstall = (url) => {
+    const n = native();
+    try {
+      return !!(n && n.install(url));
+    } catch (e) {
+      return false;
+    }
+  };
+  var updaterCanInstall = () => {
+    const n = native();
+    try {
+      return !!(n && n.canInstall());
+    } catch (e) {
+      return false;
+    }
+  };
+  var updaterAllow = () => {
+    const n = native();
+    try {
+      if (n) n.allowInstalls();
+    } catch (e) {
+    }
+  };
+  function newerVersion(a, b) {
+    const pa = String(a || "").split(".").map(Number), pb = String(b || "").split(".").map(Number);
+    if (pa.some(isNaN) || pb.some(isNaN) || !pa.length) return false;
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const x = pa[i] || 0, y = pb[i] || 0;
+      if (x !== y) return x > y;
+    }
+    return false;
+  }
+
+  // src/ui/selfupdate.ts
+  var AUTO_KEY = "tally:updAuto";
+  var LAST_KEY = "tally:updLast";
+  var SKIP_KEY = "tally:updSkip";
+  var AUTO_EVERY = 20 * 3600 * 1e3;
+  var phase = "idle";
+  var pct = 0;
+  var why = "";
+  var manual = false;
+  var found = null;
+  var get = (k) => {
+    try {
+      return localStorage.getItem(k);
+    } catch (e) {
+      return null;
+    }
+  };
+  var put = (k, v) => {
+    try {
+      localStorage.setItem(k, v);
+    } catch (e) {
+    }
+  };
+  var el2 = (id) => $(id);
+  var autoOn = () => get(AUTO_KEY) !== "0";
+  function check(byHand) {
+    if (phase === "checking" || phase === "downloading" || phase === "installing") return;
+    manual = byHand;
+    if (!updaterCheck()) return;
+    put(LAST_KEY, String(Date.now()));
+    if (byHand) {
+      phase = "checking";
+      draw();
+    }
+  }
+  function install() {
+    if (!found) return;
+    if (!updaterCanInstall()) {
+      phase = "allow";
+      draw();
+      return;
+    }
+    if (updaterInstall(found.url)) {
+      phase = "downloading";
+      pct = 0;
+      draw();
+    }
+  }
+  function handle(ev) {
+    switch (ev.type) {
+      case "check":
+        if (!ev.ok) {
+          if (manual) {
+            phase = "error";
+            why = "offline";
+          } else phase = found ? "found" : "idle";
+          break;
+        }
+        if (ev.url && newerVersion(ev.version, APP_VERSION)) {
+          found = { version: String(ev.version), url: ev.url };
+          phase = "found";
+        } else phase = manual ? "latest" : "idle";
+        break;
+      case "progress":
+        phase = "downloading";
+        pct = Math.max(0, Math.min(100, ev.pct || 0));
+        break;
+      case "installing":
+        phase = "installing";
+        break;
+      case "confirm":
+        phase = "confirm";
+        break;
+      case "cancelled":
+        phase = "cancelled";
+        break;
+      case "error":
+        if (ev.why === "allow") phase = "allow";
+        else {
+          phase = "error";
+          why = ev.why || "install";
+        }
+        break;
+      case "resume":
+        break;
+      // back from Android's settings or installer: just redraw
+      default:
+        return;
+    }
+    draw();
+  }
+  function draw() {
+    if (!hasUpdater()) return;
+    const msg3 = el2("updMsg"), go3 = el2("updInstall"), allow = el2("updAllow"), getBtn = el2("updGet"), auto = el2("updAuto"), row = el2("updAutoRow");
+    const busy = phase === "checking" || phase === "downloading" || phase === "installing";
+    if (msg3) msg3.textContent = phase === "checking" ? t("upd.checking") : phase === "latest" ? t("upd.latest") : phase === "found" ? tf("upd.avail", { v: found.version }) : phase === "downloading" ? tf("upd.down", { n: pct }) : phase === "installing" ? t("upd.installing") : phase === "confirm" ? t("upd.confirm") : phase === "cancelled" ? t("upd.cancelled") : phase === "allow" ? t("upd.allow") : phase === "error" ? t("upd.err." + why) : "";
+    if (go3) {
+      go3.style.display = found && (phase === "found" || phase === "cancelled" || phase === "allow" || phase === "error" && why !== "offline") ? "" : "none";
+      if (found) go3.textContent = tf("upd.install", { v: found.version });
+    }
+    if (allow) allow.style.display = phase === "allow" ? "" : "none";
+    if (getBtn) getBtn.style.display = phase === "error" && (why === "install" || why === "verify" || why === "net") ? "" : "none";
+    const chk = el2("updCheck");
+    if (chk) {
+      chk.style.display = "";
+      chk.disabled = busy;
+    }
+    if (row) row.style.display = "";
+    if (auto) {
+      auto.textContent = t(autoOn() ? "upd.auto.on" : "upd.auto.off");
+      auto.setAttribute("aria-pressed", String(autoOn()));
+    }
+    const bar = el2("updNudge");
+    if (bar) {
+      const show2 = !!found && get(SKIP_KEY) !== found.version && (phase === "found" || phase === "downloading" || phase === "installing" || phase === "confirm" || phase === "allow");
+      bar.style.display = show2 ? "" : "none";
+      if (show2) {
+        const txt = el2("updNudgeText");
+        if (txt) txt.textContent = phase === "found" ? tf("upd.nudge", { v: found.version }) : msg3 ? msg3.textContent : "";
+        const g = el2("updNudgeGo");
+        if (g) g.style.display = phase === "found" ? "" : "none";
+        const a = el2("updNudgeAllow");
+        if (a) a.style.display = phase === "allow" ? "" : "none";
+      }
+    }
+  }
+  function initSelfUpdate() {
+    if (!hasUpdater()) return;
+    onUpdateEvent(handle);
+    const on = (id, fn) => {
+      const b = el2(id);
+      if (b) b.onclick = fn;
+    };
+    on("updInstall", install);
+    on("updNudgeGo", install);
+    on("updAllow", updaterAllow);
+    on("updNudgeAllow", updaterAllow);
+    on("updNudgeLater", () => {
+      if (found) put(SKIP_KEY, found.version);
+      draw();
+    });
+    on("updAuto", () => {
+      put(AUTO_KEY, autoOn() ? "0" : "1");
+      draw();
+    });
+    draw();
+    const last = +(get(LAST_KEY) || 0);
+    if (autoOn() && !(Date.now() - last < AUTO_EVERY)) setTimeout(() => check(false), 2500);
+  }
+  var selfUpdateCheck = () => check(true);
+
   // src/ui/install.js
   var INST_SNOOZE = "tally:instSnooze";
   var instIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
@@ -9798,16 +10041,21 @@
     drawInstall();
   }
   function drawUpdate() {
-    const android = !!window.AndroidFile;
+    const android = !!window.AndroidFile, self = hasUpdater();
     $("updNow").textContent = tf("upd.now", { v: APP_VERSION });
-    $("updHow").textContent = t(android ? "upd.android" : "upd.web");
-    $("updGet").style.display = android ? "" : "none";
-    $("updCheck").style.display = android ? "none" : "";
+    $("updHow").textContent = t(self ? "upd.android" : android ? "upd.android.manual" : "upd.web");
+    $("updGet").style.display = android && !self ? "" : "none";
+    $("updCheck").style.display = android && !self ? "none" : "";
+    if (self) draw();
   }
   var updMsg = (m) => {
     $("updMsg").textContent = m || "";
   };
   async function updCheck() {
+    if (hasUpdater()) {
+      selfUpdateCheck();
+      return;
+    }
     const sw = navigator.serviceWorker;
     const reg = sw ? await sw.getRegistration().catch(() => null) : null;
     if (!reg) {
@@ -9815,9 +10063,9 @@
       return;
     }
     updMsg(t("upd.checking"));
-    let found = false;
+    let found2 = false;
     sw.addEventListener("controllerchange", () => {
-      found = true;
+      found2 = true;
       updMsg(t("upd.found"));
       setTimeout(() => location.reload(), 600);
     }, { once: true });
@@ -9828,7 +10076,7 @@
       return;
     }
     setTimeout(() => {
-      if (!found && !reg.installing && !reg.waiting) updMsg(t("upd.latest"));
+      if (!found2 && !reg.installing && !reg.waiting) updMsg(t("upd.latest"));
     }, 4e3);
   }
   function instLater() {
@@ -10020,8 +10268,8 @@
     if (PAGES2.indexOf(k) < 0) k = "body";
     V.curPage = k;
     PAGES2.forEach((p) => {
-      const el3 = $("pg-" + p);
-      if (el3) el3.classList.toggle("on", p === k);
+      const el4 = $("pg-" + p);
+      if (el4) el4.classList.toggle("on", p === k);
     });
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.pg === k));
     const bar = $("dayBar");
@@ -10137,17 +10385,17 @@
   var at = 0;
   var root = null;
   var opened = [];
-  var visible = (el3) => !!el3 && el3.offsetParent !== null && el3.getBoundingClientRect().height > 0;
+  var visible = (el4) => !!el4 && el4.offsetParent !== null && el4.getBoundingClientRect().height > 0;
   function target(s) {
     showPage(s.page);
-    let el3 = document.querySelector(s.sel);
-    const shut = el3 && el3.closest(".card.folded");
+    let el4 = document.querySelector(s.sel);
+    const shut = el4 && el4.closest(".card.folded");
     if (shut) {
       shut.classList.remove("folded");
       opened.push(shut);
     }
-    if (el3 && s.card) el3 = el3.closest(".card");
-    return visible(el3) ? el3 : null;
+    if (el4 && s.card) el4 = el4.closest(".card");
+    return visible(el4) ? el4 : null;
   }
   function build() {
     const r = document.createElement("div");
@@ -10166,10 +10414,10 @@
     r.querySelector("#tourNext").onclick = () => go(1);
     return r;
   }
-  function place(el3) {
+  function place(el4) {
     if (!root) return;
     const ring = root.querySelector(".tour-ring"), card = root.querySelector(".tour-card");
-    const b = el3.getBoundingClientRect(), pad = 6, vh = window.innerHeight, vw = window.innerWidth;
+    const b = el4.getBoundingClientRect(), pad = 6, vh = window.innerHeight, vw = window.innerWidth;
     const top = Math.max(4, b.top - pad), bottom = Math.min(vh - 4, b.bottom + pad);
     Object.assign(ring.style, { top: top + "px", left: Math.max(4, b.left - pad) + "px", width: Math.min(vw - 8, b.width + pad * 2) + "px", height: Math.max(24, bottom - top) + "px" });
     const roomBelow = vh - bottom, roomAbove = top;
@@ -10179,8 +10427,8 @@
   }
   function show() {
     if (!root) return;
-    const s = steps[at], el3 = target(s);
-    if (!el3) {
+    const s = steps[at], el4 = target(s);
+    if (!el4) {
       steps.splice(at, 1);
       if (at >= steps.length) {
         void endTour();
@@ -10189,9 +10437,9 @@
       show();
       return;
     }
-    const tall = el3.getBoundingClientRect().height > window.innerHeight * 0.5;
-    if (tall) window.scrollTo(0, el3.getBoundingClientRect().top + window.scrollY - 12);
-    else el3.scrollIntoView({ block: "center" });
+    const tall = el4.getBoundingClientRect().height > window.innerHeight * 0.5;
+    if (tall) window.scrollTo(0, el4.getBoundingClientRect().top + window.scrollY - 12);
+    else el4.scrollIntoView({ block: "center" });
     $("tourCount").textContent = tf("tour.count", { n: at + 1, of: steps.length });
     $("tourTitle").textContent = t("tour." + s.key + ".h");
     $("tourText").textContent = t("tour." + s.key + ".b");
@@ -10200,7 +10448,7 @@
     $("tourBack").disabled = at === 0;
     $("tourNext").textContent = t(at === steps.length - 1 ? "tour.done" : "tour.next");
     requestAnimationFrame(() => {
-      place(el3);
+      place(el4);
       root.querySelector(".tour-card").focus({ preventScroll: true });
     });
   }
@@ -10216,8 +10464,8 @@
   }
   var reflow = () => {
     if (root && steps[at]) {
-      const el3 = target(steps[at]);
-      if (el3) place(el3);
+      const el4 = target(steps[at]);
+      if (el4) place(el4);
     }
   };
   function tourOpen() {
@@ -10331,34 +10579,34 @@
   var picked2 = /* @__PURE__ */ new Set();
   var mode = "add";
   var undo = null;
-  var el2 = (id) => $(id);
+  var el3 = (id) => $(id);
   var msg2 = (m) => {
-    el2("cpMsg").textContent = m;
+    el3("cpMsg").textContent = m;
   };
   var andList = (xs) => xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1];
-  function draw() {
+  function draw2() {
     const empty = dayPlanEmpty(from), p = dayPlan(from);
-    el2("cpTitle").textContent = tf("copy.title", { day: dayName(from) });
-    el2("cpWhat").textContent = empty ? tf("copy.empty", { day: dayName(from) }) : tf("copy.what", { day: dayName(from), list: andList([[p.lifts.length, "copy.lifts"], [p.sx.length, "copy.sx"], [p.cd.length, "copy.cd"]].filter(([n]) => n > 0).map(([n, k]) => tn(k, n))) });
-    el2("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked2.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked2.has(d)}">${esc(dayShort(d))}</button>`).join("");
-    el2("cpDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
+    el3("cpTitle").textContent = tf("copy.title", { day: dayName(from) });
+    el3("cpWhat").textContent = empty ? tf("copy.empty", { day: dayName(from) }) : tf("copy.what", { day: dayName(from), list: andList([[p.lifts.length, "copy.lifts"], [p.sx.length, "copy.sx"], [p.cd.length, "copy.cd"]].filter(([n]) => n > 0).map(([n, k]) => tn(k, n))) });
+    el3("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked2.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked2.has(d)}">${esc(dayShort(d))}</button>`).join("");
+    el3("cpDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
       const d = b.dataset.d;
       if (picked2.has(d)) picked2.delete(d);
       else picked2.add(d);
-      draw();
+      draw2();
     });
-    el2("cpMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode));
-    el2("cpHowNote").textContent = mode === "add" ? t("copy.add.note") : tf("copy.replace.note", { day: dayName(from) });
-    el2("cpGo").disabled = empty;
-    el2("cpUndo").style.display = undo ? "" : "none";
+    el3("cpMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode));
+    el3("cpHowNote").textContent = mode === "add" ? t("copy.add.note") : tf("copy.replace.note", { day: dayName(from) });
+    el3("cpGo").disabled = empty;
+    el3("cpUndo").style.display = undo ? "" : "none";
   }
   function cpOpen() {
-    from = el2("fDay").value || "mon";
+    from = el3("fDay").value || "mon";
     picked2 = /* @__PURE__ */ new Set();
     mode = "add";
     undo = null;
     msg2("");
-    draw();
+    draw2();
     dlgOpen("cpWrap");
   }
   function cpClose() {
@@ -10375,7 +10623,7 @@
     undo = await copyDayRoutines(from, to, mode);
     msg2(tf("copy.done", { day: dayName(from), days: to.map((d) => dayShort(d)).join(", ") }));
     picked2 = /* @__PURE__ */ new Set();
-    draw();
+    draw2();
     render();
   }
   async function undoCopy() {
@@ -10383,24 +10631,24 @@
     await restoreWeek(undo);
     undo = null;
     msg2(t("copy.undone"));
-    draw();
+    draw2();
     render();
   }
   function initCopyDay() {
-    el2("copyDayBtn").onclick = cpOpen;
-    el2("cpX").onclick = cpClose;
-    el2("cpWrap").onclick = (ev) => {
-      if (ev.target === el2("cpWrap")) cpClose();
+    el3("copyDayBtn").onclick = cpOpen;
+    el3("cpX").onclick = cpClose;
+    el3("cpWrap").onclick = (ev) => {
+      if (ev.target === el3("cpWrap")) cpClose();
     };
-    el2("cpGo").onclick = () => {
+    el3("cpGo").onclick = () => {
       void go2();
     };
-    el2("cpUndo").onclick = () => {
+    el3("cpUndo").onclick = () => {
       void undoCopy();
     };
-    el2("cpMode").querySelectorAll("button").forEach((b) => b.onclick = () => {
+    el3("cpMode").querySelectorAll("button").forEach((b) => b.onclick = () => {
       mode = b.dataset.m === "replace" ? "replace" : "add";
-      draw();
+      draw2();
     });
   }
 
@@ -10685,10 +10933,10 @@
       initFold();
       document.querySelectorAll(".foldhead").forEach((h) => h.onclick = () => chartFoldToggle(h.querySelector(".foldbtn").dataset.fold));
       $("sched").onclick = (ev) => {
-        const el3 = ev.target.closest(".day");
-        if (!el3) return;
-        $("fDay").value = el3.dataset.day;
-        buildExForm(S.entries.find((e) => e.date === $("fDate").value), el3.dataset.day);
+        const el4 = ev.target.closest(".day");
+        if (!el4) return;
+        $("fDay").value = el4.dataset.day;
+        buildExForm(S.entries.find((e) => e.date === $("fDate").value), el4.dataset.day);
       };
       $("dpGrid").onclick = (ev) => {
         const b = ev.target.closest("[data-d]");
@@ -10724,6 +10972,7 @@
       initTour();
       initCoachApply();
       initRoutines();
+      initSelfUpdate();
       $("kpWrap").onclick = (ev) => {
         if (ev.target === $("kpWrap")) kpClose();
       };
@@ -10816,8 +11065,8 @@
       return true;
     }
     const open2 = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose]].find(([id]) => {
-      const el3 = $(id);
-      return el3 && el3.classList.contains("show");
+      const el4 = $(id);
+      return el4 && el4.classList.contains("show");
     });
     if (!open2) return false;
     open2[1]();

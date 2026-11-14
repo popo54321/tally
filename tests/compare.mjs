@@ -68,7 +68,9 @@ for (const k of keys) {
     }
   }
   if (!notes.length) { same++; continue; }
-  const e = expected(k);
+  let e = expected(k);
+  // 'moved' entries allow the picture to shift (a card above grew), but every word must still match
+  if (e && e.moved && x && y && x.txt !== y.txt) e = null;
   (e ? meant : bad).push(`${k}: ${notes.join(', ')}${e ? ` [on purpose: ${e.why}]` : ''}`);
 }
 const b = baseline();

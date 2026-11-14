@@ -82,5 +82,5 @@ jobs:
             gh release upload "v$VN" "$APK" --clobber
           else
             gh release create "v$VN" "$APK" --title "Tally $VN" --target "$GITHUB_SHA" \
-              --notes "Tally $VN for Android, signed with the same key as every earlier build. Install it over the Tally you have (named Tally Pro before 7.2): your data stays."
+              --notes "Tally $VN for Android, signed with the same key as every earlier build. Install it over the Tally you have (named Tally Pro before 7.2): your data stays. From 9.7 on, Tally updates itself: Settings → Version & Updates. Your data is 100% offline."
           fi
