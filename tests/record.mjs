@@ -57,7 +57,7 @@ async function settle(page) {
 }
 // The rebuild adds things on purpose: the "Copy this day to…" row, the How to use button and the fold button on every card. It is hidden while comparing
 // with 8.1, and photographed on its own in the new-only runs below.
-async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow,.plsides,.foldbtn.corner{display:none!important}.foldlbl{padding-right:0!important}' }); }
+async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow,.plsides,.liftday,.foldbtn.corner{display:none!important}.foldlbl{padding-right:0!important}' }); }
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);

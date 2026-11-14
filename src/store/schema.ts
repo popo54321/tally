@@ -3,7 +3,7 @@
 import { DAY_KEYS, validDate, weekdayKey } from '../core/dates';
 import { DEF_TARGET, CAL_RATES, CAL_PERIODS, ACTIVITY } from '../core/nutrition';
 import { PL_ALL, PL_DEF, PL_BAR_IDS } from '../core/plates';
-import { STEP_DEF } from '../core/strength';
+import { STEP_DEF, HEAD_DEF } from '../core/strength';
 import { volBand } from '../core/volume';
 import { MUSCLE_KEYS, muscleList, GROUP_KEYS } from '../data/muscles';
 import { MEAS } from '../data/measurements';
@@ -167,6 +167,7 @@ export function normTheme(x: Any) {
 
 // ---- movements, stretches, cardio ----
 
+const headOf = (v: Any): number => { const h = parseInt(v, 10); return (isNaN(h) || h < 0 || h > 20) ? HEAD_DEF : h; };
 export function normCustomEx(x: Any) {
   if (!x || typeof x !== 'object') return null;
   const key = (typeof x.key === 'string') ? x.key : '';
@@ -189,6 +190,7 @@ export function normCustomEx(x: Any) {
     repMin: ranged ? rMin : null,
     repMax: ranged ? rMax : null,
     step: ranged ? ((isNaN(st) || st < 0 || st > 50) ? STEP_DEF(unit) : Math.round(st * 100) / 100) : null,
+    head: (ranged && unit !== 'sec') ? headOf(x.head) : null,
     prim, sec,
     lib: (typeof x.lib === 'string' && libByKey(x.lib)) ? x.lib as string : null,
     retired: !!x.retired, custom: true };

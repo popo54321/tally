@@ -1,5 +1,5 @@
 // The add-movement sheet and movement editor.
-import { CLEAN_TO_STEP, GOALS, STEP_DEF, goalOfRange } from '../core/strength';
+import { CLEAN_TO_STEP, GOALS, HEAD_DEF, STEP_DEF, goalOfRange } from '../core/strength';
 import { GROUPS, MUSCLES } from '../data/muscles';
 import { LIB } from '../data/library';
 import { S } from '../state/app';
@@ -176,6 +176,7 @@ export function shGoalPick(g){
   const p=GOALS.find(x=>x.key===g);
   if(p){ $("shMin").value=p.min; $("shMax").value=p.max; }
   if(g!=='off' && $("shStep").value==='') $("shStep").value=STEP_DEF(shModeGet()==='sec'?'sec':null);
+  if(g!=='off' && $("shHead").value==='') $("shHead").value=HEAD_DEF;
   shGoalSet(g); shCoachSync();
 }
 export function shCoachSync(){
@@ -184,13 +185,15 @@ export function shCoachSync(){
   document.querySelectorAll('#shGoal button').forEach(b=>{ b.style.display=(sec && GOALS.some(x=>x.key===b.dataset.g))?'none':''; });
   const g=shGoalGet();
   $("shRangeRow").style.display = g==='off' ? 'none' : '';
-  const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10), st=parseFloat($("shStep").value);
+  const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10), st=parseFloat($("shStep").value), hd=parseInt($("shHead").value,10);
+  $("shHeadF").style.display = (!sec && st>0) ? '' : 'none';
   const unit=t(sec?'sh.coach.secs':'sh.coach.reps');
   let note;
   if(g==='off') note=t('sh.coach.off');
   else if(isNaN(mn) || isNaN(mx) || mn<1 || mx<mn) note=t('sh.coach.bad');
   else if(!(st>0)) note=tf('sh.coach.repsonly',{min:mn, max:mx, unit:unit, n:CLEAN_TO_STEP});
-  else note=tf('sh.coach.on',{min:mn, max:mx, unit:unit, step:st, n:CLEAN_TO_STEP});
+  else note=tf('sh.coach.on',{min:mn, max:mx, unit:unit, step:st, n:CLEAN_TO_STEP})
+    + (!sec && hd>0 ? ' '+tf('sh.coach.head',{min:mn, top:mx+hd, max:mx, head:hd}) : '');
   $("shCoachNote").textContent=note;
   coachApplyDraw();
 }
@@ -199,14 +202,15 @@ export function shCoachFill(ex){
   $("shMin").value = has ? ex.repMin : '';
   $("shMax").value = has ? ex.repMax : '';
   $("shStep").value = (has && ex.step!=null) ? ex.step : '';
+  $("shHead").value = has ? (ex.head!=null ? ex.head : HEAD_DEF) : '';
   shGoalSet(has ? goalOfRange(ex.repMin, ex.repMax) : 'off');
   shCoachSync();
 }
 export function shCoachRead(){
-  if(shGoalGet()==='off') return {repMin:null, repMax:null, step:null};
+  if(shGoalGet()==='off') return {repMin:null, repMax:null, step:null, head:null};
   const mn=parseInt($("shMin").value,10), mx=parseInt($("shMax").value,10);
   if(isNaN(mn) || isNaN(mx) || mn<1 || mx<mn) return undefined;
-  return {repMin:mn, repMax:mx, step:$("shStep").value};
+  return {repMin:mn, repMax:mx, step:$("shStep").value, head:$("shHead").value};
 }
 export function shNew(){
   V.shEditing=null; shResetDel();
@@ -252,7 +256,7 @@ export async function shCreate(){
       own.added = mode==='bw'; own.unit = mode==='sec' ? 'sec' : null;
       own.def = (isNaN(d)||d<0) ? 0 : d;
       const chk=normCustomEx(Object.assign({}, own, coach, mus));
-      if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; own.prim=chk.prim; own.sec=chk.sec; }
+      if(chk){ own.repMin=chk.repMin; own.repMax=chk.repMax; own.step=chk.step; own.head=chk.head; own.prim=chk.prim; own.sec=chk.sec; }
       await persistCatalogue();
     }
     await persistExEdits();

@@ -3,11 +3,11 @@ import { BW_FALLBACK, exVolume, sessionMetric } from '../core/strength';
 import { MEAS } from '../data/measurements';
 import { S } from '../state/app';
 import { V } from '../ui/view';
-import { dnum, fmtDM, fmtDMY, fmtTick, weekdayKey, within7 } from '../core/dates';
+import { dnum, fmtDM, fmtDMY, fmtTick, localDate, weekdayKey, within7 } from '../core/dates';
 import { exByKey, stretchByKey } from '../state/persist';
 import { fmtSigned } from '../core/numbers';
 import { kcalOf } from '../core/nutrition';
-import { t, tf } from '../i18n/index';
+import { t, tf, tn } from '../i18n/index';
 import { trendWeights } from '../core/trend';
 import { foldDraw, foldToggle } from './fold';
 import { $, esc, flash } from './dom';
@@ -278,8 +278,18 @@ export function absSummary(a){
   return `<b>${esc(t(a.lbl))}</b> · ${esc(tf('chart.abs',{unit:a.unit}))}<br>`+
     `${esc(t('prog.last'))} ${fmtDM(last.date)} · ${esc(fmtSets(a.ex.key,last.sets))} — ${esc(tf('chart.best',{n:Math.round(best).toLocaleString()+u}))} · ${esc(tf('chart.7day',{n:Math.round(wkTot).toLocaleString()+u}))}`;
 }
+/** 'Lifted today: 4,820 kg across 18 sets' under the strength trend's title (body weight counts for bodyweight movements; holds count as sets only). */
+export function liftedToday(){
+  const e=entryOn(localDate()), bw=lastNumOf(x=>x.weight)||BW_FALLBACK;
+  let kg=0, n=0;
+  if(e && e.lifts) Object.keys(e.lifts).forEach(k=>{ const ex=exByKey(k), sets=liftsOf(e,k); if(!ex || !sets.length) return;
+    n+=sets.length; if(ex.unit!=='sec') kg+=exVolume(ex, sets, e.weight!=null?e.weight:bw); });
+  return {kg:Math.round(kg), n};
+}
 export function drawStrength(){
   const avail=chartCandidates(), sel=chartSelection(), note=$("strNote"), pick=$("strPick");
+  const today=liftedToday();
+  $("strToday").innerHTML = !S.entries.some(trained) ? '' : today.n ? tn('chart.today', today.n, {kg:today.kg.toLocaleString()}) : esc(t('chart.today.none'));
   chartFoldDraw('str', S.entries.some(trained));
   pick.innerHTML=avail.map(ex=>{
     const i=sel.indexOf(ex.key), on=i>=0;

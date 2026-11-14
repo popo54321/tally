@@ -116,7 +116,8 @@ export function coachLine(ex, plan){
   const sec=ex.unit==='sec';
   const v={min:ex.repMin, max:ex.repMax, unit:t(sec?'sh.coach.secs':'sh.coach.reps'), step:ex.step, n:CLEAN_TO_STEP,
            inc:repInc(ex), left:Math.max(1, CLEAN_TO_STEP-(plan.run||0)), aim:plan.targets[0],
-           last:plan.last ? plan.last.reps.map(r=>sec?r+'s':r).join(', ') : ''};
+           last:plan.last ? plan.last.reps.map(r=>sec?r+'s':r).join(', ') : '',
+           top:plan.top, fail:plan.fail!=null ? fmtLoad(ex, plan.fail) : ''};
   const msg = plan.kind==='reps' && sec ? tf('coach.secs', v) : tf('coach.'+plan.kind, v);
   const L = plan.kind==='first' ? '' : fmtLoad(ex, plan.load);
   return `<b>${esc(t('coach.next'))}</b> · ${L?`<b>${esc(L)}</b> · `:''}${esc(msg)}`;

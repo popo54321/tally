@@ -51,13 +51,13 @@ export function initCoachApply(): void {
 }
 
 /** Copies the coaching to every picked movement and saves; returns how many changed. */
-export async function coachApplySave(coach: { repMin: number | null; repMax: number | null; step: unknown }): Promise<number> {
+export async function coachApplySave(coach: { repMin: number | null; repMax: number | null; step: unknown; head?: unknown }): Promise<number> {
   let n = 0;
   for (const k of picked) {
     const own = S.customEx.find(x => x.key === k); if (!own) continue;
     const chk = normCustomEx(Object.assign({}, own, coach));
     if (!chk) continue;
-    own.repMin = chk.repMin; own.repMax = chk.repMax; own.step = chk.step; n++;
+    own.repMin = chk.repMin; own.repMax = chk.repMax; own.step = chk.step; own.head = chk.head; n++;
   }
   if (n) await persistCatalogue();
   picked = new Set(); open = false;

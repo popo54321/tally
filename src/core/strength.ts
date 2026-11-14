@@ -2,7 +2,7 @@
 import type { LiftSet } from './types';
 
 /** The parts of a movement these calculations need. */
-export interface Move { key?: string; unit?: string | null; added?: boolean; repMin?: number | null; repMax?: number | null; step?: number | null; def?: number | null }
+export interface Move { key?: string; unit?: string | null; added?: boolean; repMin?: number | null; repMax?: number | null; step?: number | null; def?: number | null; head?: number | null }
 
 /** Rep ranges for each goal. */
 export const GOALS = [
@@ -18,6 +18,8 @@ export const goalOfRange = (mn: number | null | undefined, mx: number | null | u
 export const STEP_DEF = (unit: string | null | undefined): number => unit === 'sec' ? 0 : 2.5;
 /** Sessions at the top of the range, at the same load, before the load goes up. */
 export const CLEAN_TO_STEP = 2;
+/** Headroom: after a weight step that was too big, reps above the top of the range needed before trying it again. */
+export const HEAD_DEF = 2;
 export const repInc = (ex: Move | null | undefined): number => (ex && ex.unit === 'sec') ? 5 : 1;
 
 /** The heaviest load of a session and the reps done at it. */
@@ -28,7 +30,7 @@ export function workSets(sets: LiftSet[] | null | undefined): { load: number; re
   return { load: top, reps: ws.filter(s => s.kg === top).map(s => s.reps) };
 }
 
-export type CoachPlan = { kind: string; load: number; targets: number[]; last: { load: number; reps: number[] } | null; run?: number };
+export type CoachPlan = { kind: string; load: number; targets: number[]; last: { load: number; reps: number[] } | null; run?: number; fail?: number; top?: number };
 
 /**
  * What to do next time, from earlier sessions (oldest first): build reps within the range, repeat a clean
@@ -42,6 +44,20 @@ export function coachNext(ex: Move | null | undefined, sessions: LiftSet[][] | n
   const last = hist[hist.length - 1];
   const clean = (w: { reps: number[] }) => w.reps.every(r => r >= mx);
   const climb = (w: { reps: number[] }) => { const aim = Math.min(mx, Math.max(mn, Math.min(...w.reps) + inc)); return w.reps.map(() => aim); };
+  // Headroom: a step up where a set fell below the range was too big. Go back to the weight before it and
+  // build every set to the top of the range plus the headroom, then try the heavier weight again.
+  const head = ex.unit === 'sec' ? 0 : (ex.head == null ? HEAD_DEF : ex.head);
+  if (step > 0 && head > 0) {
+    let j = -1;
+    for (let i = hist.length - 1; i >= 1; i--) if (hist[i].load > hist[i - 1].load && hist[i].reps.some(r => r < mn)) { j = i; break; }
+    if (j >= 0 && hist.slice(j + 1).every(w => w.load < hist[j].load)) {
+      const top = mx + head, fail = hist[j].load;
+      const build = (w: { reps: number[] }) => { const aim = Math.min(top, Math.max(mn, Math.min(...w.reps) + inc)); return w.reps.map(() => aim); };
+      if (j === hist.length - 1) return { kind: 'back', load: hist[j - 1].load, targets: build(hist[j - 1]), last, fail, top };
+      if (last.reps.every(r => r >= top)) return { kind: 'retry', load: Math.round((last.load + step) * 100) / 100, targets: last.reps.map(() => mn), last, fail, top };
+      return { kind: 'climb', load: last.load, targets: build(last), last, fail, top };
+    }
+  }
   if (last.reps.some(r => r < mn)) return { kind: 'floor', load: last.load, targets: climb(last), last };
   if (!clean(last)) return { kind: 'reps', load: last.load, targets: climb(last), last };
   let run = 0;

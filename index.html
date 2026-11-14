@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-k+KMFDZaEnaGxm8Nmf0dQ6DaU8xf62Y3aIy7tfcPjjE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-M2Rx5jvAF5Rn4/vn/thu41WssQYTMMBOXQIhcfUJCg0='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -124,7 +124,7 @@
   .setrow input.aim::placeholder{color:var(--brass);opacity:.85}
   .coachline{font-family:var(--font-mono);font-size:11px;line-height:1.5;color:var(--ink-dim);margin:-2px 0 8px}
   .coachline b{color:var(--brass-bright);font-weight:600}
-  .coachgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .coachgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:10px;margin-top:10px}
   .prec,.pnext{font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--ink-dim);margin-top:5px}
   .prec b{color:var(--ink);font-weight:600}
   .pnext b{color:var(--brass-bright);font-weight:600}
@@ -441,6 +441,8 @@
   .foldlbl{padding-right:50px;cursor:pointer}
   .plsides{margin:-2px 0 14px}
   .coachapply{margin-top:10px}
+  .liftday{font-size:.82em;opacity:.8;margin:-4px 0 10px}
+  .liftday:empty{display:none}
   .coachapply #shApplyBox{margin-top:10px}
   .cabtns{display:flex;gap:8px;margin:8px 0 10px}
   .cabtns .ghostbtn{padding:6px 12px}
@@ -854,6 +856,7 @@
     <div class="card col-12" id="cardStr">
       <div class="foldhead"><div class="lbl" data-i18n-html="chart.str">Strength Trend <span class="sub-note">· tap a movement to plot it · up to 8 at once · press and drag on the chart to pick a day</span></div><button type="button" class="foldbtn" data-fold="str" aria-expanded="true">▾</button></div>
       <div class="chartwin"><div class="seg chartseg"><button data-p="14">14 d</button><button data-p="28">28 d</button><button data-p="91">91 d</button><button data-p="all">All</button></div></div>
+      <div class="liftday" id="strToday"></div>
       <div class="exchips" id="strPick"></div>
       <div class="chartwrap"><svg id="strChart" viewBox="0 0 760 260"></svg></div>
       <div class="chartpick" data-chart="strChart"></div>
@@ -1187,6 +1190,7 @@
             <div class="field"><label for="shMin" data-i18n="sh.coach.from">From</label><input type="number" min="1" inputmode="numeric" id="shMin"></div>
             <div class="field"><label for="shMax" data-i18n="sh.coach.to">To</label><input type="number" min="1" inputmode="numeric" id="shMax"></div>
             <div class="field"><label for="shStep" data-i18n="sh.coach.step">Step · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shStep"></div>
+            <div class="field" id="shHeadF"><label for="shHead" data-i18n="sh.coach.headlbl">Headroom</label><input type="number" min="0" max="20" inputmode="numeric" id="shHead"></div>
           </div>
           <div class="sxnote" id="shCoachNote"></div>
           <div class="coachapply"><button type="button" class="ghostbtn" id="shApplyBtn" aria-expanded="false">Apply this coaching to other movements…</button>
@@ -1481,6 +1485,7 @@
   };
   var STEP_DEF = (unit) => unit === "sec" ? 0 : 2.5;
   var CLEAN_TO_STEP = 2;
+  var HEAD_DEF = 2;
   var repInc = (ex) => ex && ex.unit === "sec" ? 5 : 1;
   function workSets(sets) {
     const ws = (sets || []).filter((s) => s && s.reps > 0 && typeof s.kg === "number");
@@ -1499,6 +1504,24 @@
       const aim = Math.min(mx, Math.max(mn, Math.min(...w.reps) + inc));
       return w.reps.map(() => aim);
     };
+    const head = ex.unit === "sec" ? 0 : ex.head == null ? HEAD_DEF : ex.head;
+    if (step > 0 && head > 0) {
+      let j = -1;
+      for (let i = hist.length - 1; i >= 1; i--) if (hist[i].load > hist[i - 1].load && hist[i].reps.some((r) => r < mn)) {
+        j = i;
+        break;
+      }
+      if (j >= 0 && hist.slice(j + 1).every((w) => w.load < hist[j].load)) {
+        const top = mx + head, fail = hist[j].load;
+        const build2 = (w) => {
+          const aim = Math.min(top, Math.max(mn, Math.min(...w.reps) + inc));
+          return w.reps.map(() => aim);
+        };
+        if (j === hist.length - 1) return { kind: "back", load: hist[j - 1].load, targets: build2(hist[j - 1]), last, fail, top };
+        if (last.reps.every((r) => r >= top)) return { kind: "retry", load: Math.round((last.load + step) * 100) / 100, targets: last.reps.map(() => mn), last, fail, top };
+        return { kind: "climb", load: last.load, targets: build2(last), last, fail, top };
+      }
+    }
     if (last.reps.some((r) => r < mn)) return { kind: "floor", load: last.load, targets: climb(last), last };
     if (!clean(last)) return { kind: "reps", load: last.load, targets: climb(last), last };
     let run = 0;
@@ -2806,6 +2829,10 @@
     }
     return out;
   }
+  var headOf = (v) => {
+    const h = parseInt(v, 10);
+    return isNaN(h) || h < 0 || h > 20 ? HEAD_DEF : h;
+  };
   function normCustomEx(x) {
     if (!x || typeof x !== "object") return null;
     const key = typeof x.key === "string" ? x.key : "";
@@ -2830,6 +2857,7 @@
       repMin: ranged ? rMin : null,
       repMax: ranged ? rMax : null,
       step: ranged ? isNaN(st) || st < 0 || st > 50 ? STEP_DEF(unit) : Math.round(st * 100) / 100 : null,
+      head: ranged && unit !== "sec" ? headOf(x.head) : null,
       prim,
       sec,
       lib: typeof x.lib === "string" && libByKey(x.lib) ? x.lib : null,
@@ -3795,6 +3823,9 @@
     "chart.fold": "Hide this chart",
     "chart.indexed": "<b>Indexed</b> · each movement starts at 100 on its own first logged session, so movements with very different loads share one axis. The baseline ignores the window, so every window agrees. Select one movement on its own for absolute kg, reps or seconds.",
     "chart.max": "Eight at once is the limit — untap one first.",
+    "chart.today": "Lifted today: <b>{kg} kg</b> across {n} sets",
+    "chart.today.1": "Lifted today: <b>{kg} kg</b> across 1 set",
+    "chart.today.none": "Nothing lifted yet today.",
     "chart.swap": "Eight at once is the limit, so {name} made way.",
     "chart.nosel": "Nothing selected.",
     "chart.pickday": "Pick a date",
@@ -3805,6 +3836,9 @@
     "chart.trend": "trend",
     "chart.unfold": "Show this chart",
     "chart.weight": 'Weight Trend <span class="sub-note">· the line is the smoothed trend; the dots are each weigh-in · press and drag on the chart to pick a day</span>',
+    "coach.back": "{fail} was a step too far (last time {last}); back to this weight, at least {aim} on every set, and once every set reaches {top}, try {fail} again",
+    "coach.climb": "same weight, at least {aim} on every set (last time {last}); once every set reaches {top}, try {fail} again",
+    "coach.retry": "every set reached {top}: try the heavier weight again",
     "coach.confirm": "same weight, every set reached {max}; {left} more like that and it goes up",
     "coach.first": "first session: find a weight you can do for {min}–{max} {unit}",
     "coach.floor": "same weight, get every set to at least {aim} first (last time {last})",
@@ -4910,6 +4944,8 @@
     "sh.bw": "Bodyweight +kg",
     "sh.coach": "Coaching · what the next session suggests",
     "sh.coach.bad": "Fill in both ends of the range, the smaller number first.",
+    "sh.coach.head": "Headroom {head}: if a step up is too heavy and a set falls below {min}, it goes back to the old weight until every set reaches {top}, then tries again.",
+    "sh.coach.headlbl": "Headroom",
     "sh.coach.from": "From",
     "sh.coach.off": "Off. Each session starts from last time's weights, as before.",
     "sh.coach.on": "{min}–{max} {unit}. Once every set reaches {max} in {n} sessions running, the weight goes up {step} kg and you start again from the bottom.",
@@ -5640,7 +5676,9 @@
       inc: repInc(ex),
       left: Math.max(1, CLEAN_TO_STEP - (plan.run || 0)),
       aim: plan.targets[0],
-      last: plan.last ? plan.last.reps.map((r) => sec ? r + "s" : r).join(", ") : ""
+      last: plan.last ? plan.last.reps.map((r) => sec ? r + "s" : r).join(", ") : "",
+      top: plan.top,
+      fail: plan.fail != null ? fmtLoad(ex, plan.fail) : ""
     };
     const msg2 = plan.kind === "reps" && sec ? tf("coach.secs", v) : tf("coach." + plan.kind, v);
     const L = plan.kind === "first" ? "" : fmtLoad(ex, plan.load);
@@ -6591,6 +6629,7 @@
       own.repMin = chk.repMin;
       own.repMax = chk.repMax;
       own.step = chk.step;
+      own.head = chk.head;
       n++;
     }
     if (n) await persistCatalogue();
@@ -6812,6 +6851,7 @@
       $("shMax").value = p.max;
     }
     if (g !== "off" && $("shStep").value === "") $("shStep").value = STEP_DEF(shModeGet() === "sec" ? "sec" : null);
+    if (g !== "off" && $("shHead").value === "") $("shHead").value = HEAD_DEF;
     shGoalSet(g);
     shCoachSync();
   }
@@ -6823,13 +6863,14 @@
     });
     const g = shGoalGet();
     $("shRangeRow").style.display = g === "off" ? "none" : "";
-    const mn = parseInt($("shMin").value, 10), mx = parseInt($("shMax").value, 10), st = parseFloat($("shStep").value);
+    const mn = parseInt($("shMin").value, 10), mx = parseInt($("shMax").value, 10), st = parseFloat($("shStep").value), hd = parseInt($("shHead").value, 10);
+    $("shHeadF").style.display = !sec && st > 0 ? "" : "none";
     const unit = t(sec ? "sh.coach.secs" : "sh.coach.reps");
     let note;
     if (g === "off") note = t("sh.coach.off");
     else if (isNaN(mn) || isNaN(mx) || mn < 1 || mx < mn) note = t("sh.coach.bad");
     else if (!(st > 0)) note = tf("sh.coach.repsonly", { min: mn, max: mx, unit, n: CLEAN_TO_STEP });
-    else note = tf("sh.coach.on", { min: mn, max: mx, unit, step: st, n: CLEAN_TO_STEP });
+    else note = tf("sh.coach.on", { min: mn, max: mx, unit, step: st, n: CLEAN_TO_STEP }) + (!sec && hd > 0 ? " " + tf("sh.coach.head", { min: mn, top: mx + hd, max: mx, head: hd }) : "");
     $("shCoachNote").textContent = note;
     coachApplyDraw();
   }
@@ -6838,14 +6879,15 @@
     $("shMin").value = has ? ex.repMin : "";
     $("shMax").value = has ? ex.repMax : "";
     $("shStep").value = has && ex.step != null ? ex.step : "";
+    $("shHead").value = has ? ex.head != null ? ex.head : HEAD_DEF : "";
     shGoalSet(has ? goalOfRange(ex.repMin, ex.repMax) : "off");
     shCoachSync();
   }
   function shCoachRead() {
-    if (shGoalGet() === "off") return { repMin: null, repMax: null, step: null };
+    if (shGoalGet() === "off") return { repMin: null, repMax: null, step: null, head: null };
     const mn = parseInt($("shMin").value, 10), mx = parseInt($("shMax").value, 10);
     if (isNaN(mn) || isNaN(mx) || mn < 1 || mx < mn) return void 0;
-    return { repMin: mn, repMax: mx, step: $("shStep").value };
+    return { repMin: mn, repMax: mx, step: $("shStep").value, head: $("shHead").value };
   }
   function shNew() {
     V.shEditing = null;
@@ -6919,6 +6961,7 @@
           own.repMin = chk.repMin;
           own.repMax = chk.repMax;
           own.step = chk.step;
+          own.head = chk.head;
           own.prim = chk.prim;
           own.sec = chk.sec;
         }
@@ -7819,8 +7862,21 @@
     const u = a.unit === "kg" ? " kg" : a.unit === "sec" ? " s" : " reps";
     return `<b>${esc(t(a.lbl))}</b> · ${esc(tf("chart.abs", { unit: a.unit }))}<br>${esc(t("prog.last"))} ${fmtDM(last.date)} · ${esc(fmtSets(a.ex.key, last.sets))} — ${esc(tf("chart.best", { n: Math.round(best).toLocaleString() + u }))} · ${esc(tf("chart.7day", { n: Math.round(wkTot).toLocaleString() + u }))}`;
   }
+  function liftedToday() {
+    const e = entryOn(localDate()), bw = lastNumOf2((x) => x.weight) || BW_FALLBACK;
+    let kg = 0, n = 0;
+    if (e && e.lifts) Object.keys(e.lifts).forEach((k) => {
+      const ex = exByKey(k), sets = liftsOf(e, k);
+      if (!ex || !sets.length) return;
+      n += sets.length;
+      if (ex.unit !== "sec") kg += exVolume(ex, sets, e.weight != null ? e.weight : bw);
+    });
+    return { kg: Math.round(kg), n };
+  }
   function drawStrength() {
     const avail = chartCandidates(), sel = chartSelection(), note = $("strNote"), pick = $("strPick");
+    const today = liftedToday();
+    $("strToday").innerHTML = !S.entries.some(trained) ? "" : today.n ? tn("chart.today", today.n, { kg: today.kg.toLocaleString() }) : esc(t("chart.today.none"));
     chartFoldDraw("str", S.entries.some(trained));
     pick.innerHTML = avail.map((ex) => {
       const i = sel.indexOf(ex.key), on = i >= 0;
@@ -9802,6 +9858,7 @@
       });
       document.querySelectorAll("#shGoal button").forEach((b) => b.onclick = () => shGoalPick(b.dataset.g));
       ["shMin", "shMax"].forEach((id) => $(id).addEventListener("input", shRangeTyped));
+      $("shHead").oninput = shCoachSync;
       $("shStep").addEventListener("input", shCoachSync);
       $("volLo").addEventListener("change", volBandSet);
       $("volHi").addEventListener("change", volBandSet);

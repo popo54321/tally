@@ -56,6 +56,9 @@ jobs:
       - name: Full strength chart swaps out the oldest movement
         run: node tests/chartpick.mjs
 
+      - name: Coaching headroom and lifted today
+        run: node tests/headroom.mjs
+
       - name: Photograph 8.1 and the rebuild, then compare
         run: |
           node tests/record.mjs old

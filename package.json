@@ -9,7 +9,7 @@
     "record:old": "node tests/record.mjs old",
     "record:new": "node tests/record.mjs new",
     "compare": "node tests/compare.mjs old new",
-    "test": "npm run check && node tests/equiv.mjs && node tests/estimate.mjs && node tests/storage.mjs && node tests/copyday.mjs && node tests/tour.mjs && node tests/fold.mjs && node tests/plates.mjs && node tests/coachapply.mjs && node tests/chartpick.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
+    "test": "npm run check && node tests/equiv.mjs && node tests/estimate.mjs && node tests/storage.mjs && node tests/copyday.mjs && node tests/tour.mjs && node tests/fold.mjs && node tests/plates.mjs && node tests/coachapply.mjs && node tests/chartpick.mjs && node tests/headroom.mjs && node tests/record.mjs old && node tests/record.mjs new && node tests/compare.mjs old new",
     "fixtures": "node tests/fixtures/generate.mjs",
     "equiv": "node tests/equiv.mjs",
     "storage": "node tests/storage.mjs",

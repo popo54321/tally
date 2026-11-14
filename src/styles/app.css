@@ -94,7 +94,7 @@
   .setrow input.aim::placeholder{color:var(--brass);opacity:.85}
   .coachline{font-family:var(--font-mono);font-size:11px;line-height:1.5;color:var(--ink-dim);margin:-2px 0 8px}
   .coachline b{color:var(--brass-bright);font-weight:600}
-  .coachgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+  .coachgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:10px;margin-top:10px}
   .prec,.pnext{font-family:var(--font-mono);font-size:10.5px;line-height:1.5;color:var(--ink-dim);margin-top:5px}
   .prec b{color:var(--ink);font-weight:600}
   .pnext b{color:var(--brass-bright);font-weight:600}
@@ -411,6 +411,8 @@
   .foldlbl{padding-right:50px;cursor:pointer}
   .plsides{margin:-2px 0 14px}
   .coachapply{margin-top:10px}
+  .liftday{font-size:.82em;opacity:.8;margin:-4px 0 10px}
+  .liftday:empty{display:none}
   .coachapply #shApplyBox{margin-top:10px}
   .cabtns{display:flex;gap:8px;margin:8px 0 10px}
   .cabtns .ghostbtn{padding:6px 12px}

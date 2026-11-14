@@ -94,6 +94,7 @@ import { initCoachApply } from './coachapply';
   });
   document.querySelectorAll('#shGoal button').forEach(b=>b.onclick=()=>shGoalPick(b.dataset.g));
   ['shMin','shMax'].forEach(id=>$(id).addEventListener('input', shRangeTyped));
+  $("shHead").oninput=shCoachSync;
   $("shStep").addEventListener('input', shCoachSync);
   $("volLo").addEventListener('change', volBandSet);
   $("volHi").addEventListener('change', volBandSet);

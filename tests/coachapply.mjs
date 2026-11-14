@@ -38,7 +38,9 @@ try {
   ok([a, b].every(k => s[k].repMin === 6 && s[k].repMax === 8 && s[k].step === 2.5), 'both ticked movements got 6–8, step 2.5');
   ok(s[c].repMin === before[c].repMin && s[c].repMax === before[c].repMax, 'an unticked movement is left alone');
   ok(/also set on 2 more movements/.test(await p.textContent('#flash, .flash, body')), 'the message says how many more were set');
-  ok([a, b].every(k => JSON.stringify({ ...s[k], repMin: 0, repMax: 0, step: 0 }) === JSON.stringify({ ...before[k], repMin: 0, repMax: 0, step: 0 })), 'nothing else about them changed');
+  ok([a, b].every(k => s[k].head === s.cx_barbellbenchpress.head && s[k].head === 2), 'and the same headroom (2)');
+  const rest = o => JSON.stringify(Object.keys(o).filter(f => !['repMin', 'repMax', 'step', 'head'].includes(f)).sort().map(f => [f, o[f]]));
+  ok([a, b].every(k => rest(s[k]) === rest(before[k])), 'nothing else about them changed');
   // Select all, then Off, clears coaching everywhere of that kind
   await edit(p, 'cx_barbellbenchpress'); await p.waitForTimeout(200);
   ok(/^Apply this coaching/.test(await p.textContent('#shApplyBtn')), 'reopening starts with nothing ticked');
