@@ -14,7 +14,7 @@ import { t, tf } from '../i18n/index';
 import { $, esc, flash } from './dom';
 import { dayRoutines, planItem, saveRoutines } from '../state/routines';
 
-export const APP_VERSION = '9.5';
+export const APP_VERSION = '9.6';
 export const kcalFloor = () => core.kcalFloor(S.settings.sex);
 export const kcalBand = target => core.kcalBand(target, S.settings.sex);
 export const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
@@ -30,6 +30,8 @@ export const byName = (a,b) => String(a).localeCompare(String(b), undefined, {se
 export const libOrder = (a,b) => (a.lv||0)-(b.lv||0) || byName(t('lib.'+a.key), t('lib.'+b.key));
 export const exOrder = (a,b) => (exLv(a)||0)-(exLv(b)||0) || byName(a.name, b.name);
 export const qWords = x => { const w=String(x||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean); return w.concat(w.slice(1).map((v,i)=>w[i]+v)); };
+/** Two names are the same one, whatever the letter case or apostrophe style (' or ’). */
+export const sameName = (a, b) => { const f=x=>String(x==null?'':x).trim().toLowerCase().replace(/[’‘`]/g,"'"); return f(a)===f(b); };
 export const qMatch = (q, text) => { const h=qWords(text); return String(q||'').toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).every(p=>h.some(w=>w.indexOf(p)===0)); };
 export const libAvailable = (l, have) => l.eq.every(q=>have.indexOf(q)>=0);
 export function cxKeyFor(name){
@@ -177,8 +179,8 @@ export function fmtSets(key, sets){
 export const loadBackupDate = P.loadBackupDate;
 export const fmtSetsN = n => (n%1 ? n.toFixed(1) : String(n));
 export function libOwned(l){
-  const nm=t('lib.'+l.key).toLowerCase();
-  return S.catalogue.find(x=>x.lib===l.key || x.name.toLowerCase()===nm) || null;
+  const nm=t('lib.'+l.key);
+  return S.catalogue.find(x=>x.lib===l.key || sameName(x.name, nm)) || null;
 }
 export const libLive = l => { const o=libOwned(l); return !!o && !o.retired; };
 export const libUsable = l => !S.gym.set || libAvailable(l, S.gym.have);

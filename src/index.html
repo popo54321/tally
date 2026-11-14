@@ -62,7 +62,7 @@
 
   <div class="grid page on" id="pg-body">
     <div class="card col-12" id="cardBody">
-      <div class="lbl" data-i18n="body.title">Body &amp; food</div>
+      <div class="lbl" data-i18n="body.title">Body &amp; Food</div>
       <div class="form-grid">
         <div class="field"><label data-i18n="f.weight">Weight (kg)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fWeight" placeholder="kg"></div>
         <div class="field"><label data-i18n="f.height">Height (cm)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fHeight" placeholder="cm"></div>
@@ -92,7 +92,7 @@
 
       <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n="body.bf">Body fat</div>
       <div class="seg segwrap" id="segBf">
-        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I'll enter it</button>
+        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I’ll enter it</button>
       </div>
       <div class="meas-grid" id="bfManualRow" style="display:none">
         <div class="field"><label for="fBf" data-i18n="body.bfpct">Body fat (%)</label><input type="number" min="1" max="70" step="0.1" inputmode="decimal" id="fBf" placeholder="%"></div>
@@ -197,7 +197,7 @@
 
   <div class="grid page" id="pg-workout">
     <div class="card col-12" id="cardLog">
-      <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
+      <div class="lbl" data-i18n-html="log.title">Workout Sets <span class="sub-note">· weight × reps</span></div>
       <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
       <div class="dayrt" id="dayRt"><div class="dayrthead"><span class="ctl-lbl" data-i18n="rt.dayhead">Routines</span><span id="dayRtList"></span></div>
         <div class="dayrtbtns"><button type="button" class="ghostbtn" id="dayRtAdd" aria-expanded="false">Add a routine…</button><button type="button" class="ghostbtn" id="dayRtManage" data-i18n="rt.manage">Make or edit routines</button></div>
@@ -211,7 +211,7 @@
         <button type="button" class="reststart" id="restStart" data-i18n="log.startrest">Start rest</button>
         <button type="button" class="restsnd" id="restSnd" data-i18n-title="log.beeptip" title="Beep when a timer finishes">Beep</button>
       </div>
-      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
+      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer’s alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
       <div id="exWrap"></div>
       <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
       <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
@@ -263,7 +263,7 @@
     </div>
 
     <div class="card col-12" id="cardRoutines">
-      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span></div>
+      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day’s log</span></div>
       <div id="rtWrap">
         <div class="seg" id="rtKind"><button type="button" data-k="lift" data-i18n="rt.tab.lift">Workout</button><button type="button" data-k="sx" data-i18n="rt.tab.sx">Stretch</button><button type="button" data-k="cd" data-i18n="rt.tab.cd">Cardio</button></div>
         <div id="rtList"><div id="rtRows"></div><button type="button" class="addmove" id="rtNew">+ New workout routine</button></div>
@@ -416,7 +416,7 @@
         <button class="ghostbtn" id="aiBtn" data-i18n="sync.ai">Copy for your AI to analyse</button>
       </div>
       <textarea id="aiBox" class="aibox" readonly></textarea>
-      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
+      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device’s data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
     </div>
 
     <div class="card col-12" id="cardTheme">
@@ -439,7 +439,7 @@
     </div>
 
     <div class="card col-12" id="cardMethods">
-      <div class="lbl" data-i18n="meth.title">Where these numbers come from</div>
+      <div class="lbl" data-i18n="meth.title">Where These Numbers Come From</div>
       <div class="methods">
         <div class="method">
           <div class="m-h" data-i18n="meth.bf.h">Body fat · US Navy girth method</div>
@@ -490,7 +490,7 @@
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
-          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night’s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>

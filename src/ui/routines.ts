@@ -9,7 +9,7 @@ import { PLAN_SETS_DEF } from '../store/schema';
 import { addToDay, dayRoutines, deleteRoutine, newRoutineId, putRoutine, removeFromDay, routineById, routineDays, saveRoutines } from '../state/routines';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { byName, dayName, dayShort, sxIsReps } from './shared';
+import { byName, dayName, dayShort, sameName, sxIsReps } from './shared';
 import { render } from './nav';
 import { buildExForm } from './workout-log';
 import { drawMob } from './mobility';
@@ -137,7 +137,7 @@ async function save(): Promise<void> {
   const d = draft!; const name = el<HTMLInputElement>('rtName').value.trim().slice(0, NAME_MAX);
   if (!name) { msg(t('rt.needname'), true); el('rtName').focus(); return; }
   if (!d.items.length) { msg(t('rt.needitems'), true); return; }
-  const clash = S.routines[d.kind].find(r => r.id !== d.id && r.name.toLowerCase() === name.toLowerCase());
+  const clash = S.routines[d.kind].find(r => r.id !== d.id && sameName(r.name, name));
   if (clash) { msg(tf('rt.clash', { name }), true); return; }
   putRoutine(d.kind, { id: d.id, name, items: d.items }, [...d.days]);
   const ok = await saveRoutines();

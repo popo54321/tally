@@ -9,7 +9,7 @@ import { normCustomEx } from '../store/schema';
 import { t, tf, tn } from '../i18n/index';
 import { $, bwSplit, esc, flash, lvTag } from './dom';
 import { addMovementToForm } from './workout-log';
-import { cxKeyFor, dayShort, exLv, exNote, exOrder, groupName, groupOf, libLive, libOrder, libUsable, liftsOf, persist, persistCatalogue, persistExEdits, persistPlan, persistSettings, qMatch } from './shared';
+import { cxKeyFor, dayShort, exLv, exNote, exOrder, groupName, groupOf, libLive, libOrder, libUsable, liftsOf, persist, persistCatalogue, persistExEdits, persistPlan, persistSettings, qMatch, sameName } from './shared';
 import { dlgClose, dlgOpen } from './dialog';
 import { fillForm } from './body';
 import { libToCollection } from './guide';
@@ -246,8 +246,7 @@ export async function shCreate(){
     return;
   }
 
-  const lower=name.toLowerCase();
-  const existing=S.catalogue.find(x=>x.name.toLowerCase()===lower);
+  const existing=S.catalogue.find(x=>sameName(x.name, name));
   if(existing){
     if(existing.retired){ unhide(existing.key); await persistExEdits(); }
     if(V.shAddToDay) addMovementToForm(existing.key);

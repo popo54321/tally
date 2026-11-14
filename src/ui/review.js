@@ -5,7 +5,7 @@ import { fmtSigned } from '../core/numbers';
 import { kcalOf, protOf } from '../core/nutrition';
 import { localDate } from '../core/dates';
 import { recordsOf } from '../core/strength';
-import { t, tf } from '../i18n/index';
+import { t, tf, tn } from '../i18n/index';
 import { weekStart, weekState } from '../core/volume';
 import { weekTrendChange } from '../core/trend';
 import { $, esc } from './dom';
@@ -36,8 +36,8 @@ export function drawReview(){
       cell(t('rev.sessions'), done.length+(planned?`<span>/ ${planned}</span>`:''), t(planned?'rev.planned':'rev.noplan'))
     + cell(t('rev.records'), String(recs.length), recs.length ? recs.slice(0,3).join(', ')+(recs.length>3?' …':'') : t('rev.norecs'))
     + cell(t('rev.weight'), dW==null ? '—' : fmtSigned(dW)+'<span>kg</span>', t(dW!=null ? 'rev.trendwk' : wIn ? 'rev.notrend' : 'rev.noweigh'))
-    + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tf('rev.kcalsub',{target:tgt.toLocaleString(), n:kd.length}))
-    + cell(t('rev.protein'), pAvg==null ? '—' : pAvg+'<span>g</span>', tf('rev.protsub',{target:ptg, ok:pok, n:pd.length}))
+    + cell(t('rev.food'), kAvg==null ? '—' : kAvg.toLocaleString()+'<span>kcal</span>', tn('rev.kcalsub', kd.length, {target:tgt.toLocaleString()}))
+    + cell(t('rev.protein'), pAvg==null ? '—' : pAvg+'<span>g</span>', tn('rev.protsub', pd.length, {target:ptg, ok:pok}))
     + cell(t('rev.muscles'), tagged ? String(cnt.ok) : '—', tagged ? tf('rev.mussub',{track:cnt.track, under:cnt.low+cnt.sofar, over:cnt.high, muted:cnt.muted}) : t('rev.nomus'));
   const gap=tagged ? MUSCLES.find(m=>w.proj[m.key]===0 && mute.indexOf(m.key)<0) : null;
   let one;

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-+gUPvIeVuDEJtRBggqbiObqE/XiBu79nKgBYDETo/tI='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-c7TW8PbOjnCGDbB776g3rU2BThNfj2XVAmJuB4a98pg='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -686,7 +686,7 @@
 
   <div class="grid page on" id="pg-body">
     <div class="card col-12" id="cardBody">
-      <div class="lbl" data-i18n="body.title">Body &amp; food</div>
+      <div class="lbl" data-i18n="body.title">Body &amp; Food</div>
       <div class="form-grid">
         <div class="field"><label data-i18n="f.weight">Weight (kg)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fWeight" placeholder="kg"></div>
         <div class="field"><label data-i18n="f.height">Height (cm)</label><input type="number" min="0" step="0.1" inputmode="decimal" id="fHeight" placeholder="cm"></div>
@@ -716,7 +716,7 @@
 
       <div class="lbl" style="margin-top:22px;margin-bottom:4px" data-i18n="body.bf">Body fat</div>
       <div class="seg segwrap" id="segBf">
-        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I'll enter it</button>
+        <button type="button" data-b="calc" data-i18n="body.bf.mode.calc">Work it out for me</button><button type="button" data-b="manual" data-i18n="body.bf.mode.manual">I’ll enter it</button>
       </div>
       <div class="meas-grid" id="bfManualRow" style="display:none">
         <div class="field"><label for="fBf" data-i18n="body.bfpct">Body fat (%)</label><input type="number" min="1" max="70" step="0.1" inputmode="decimal" id="fBf" placeholder="%"></div>
@@ -821,7 +821,7 @@
 
   <div class="grid page" id="pg-workout">
     <div class="card col-12" id="cardLog">
-      <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
+      <div class="lbl" data-i18n-html="log.title">Workout Sets <span class="sub-note">· weight × reps</span></div>
       <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
       <div class="dayrt" id="dayRt"><div class="dayrthead"><span class="ctl-lbl" data-i18n="rt.dayhead">Routines</span><span id="dayRtList"></span></div>
         <div class="dayrtbtns"><button type="button" class="ghostbtn" id="dayRtAdd" aria-expanded="false">Add a routine…</button><button type="button" class="ghostbtn" id="dayRtManage" data-i18n="rt.manage">Make or edit routines</button></div>
@@ -835,7 +835,7 @@
         <button type="button" class="reststart" id="restStart" data-i18n="log.startrest">Start rest</button>
         <button type="button" class="restsnd" id="restSnd" data-i18n-title="log.beeptip" title="Beep when a timer finishes">Beep</button>
       </div>
-      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
+      <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer’s alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
       <div id="exWrap"></div>
       <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
       <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
@@ -887,7 +887,7 @@
     </div>
 
     <div class="card col-12" id="cardRoutines">
-      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span></div>
+      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day’s log</span></div>
       <div id="rtWrap">
         <div class="seg" id="rtKind"><button type="button" data-k="lift" data-i18n="rt.tab.lift">Workout</button><button type="button" data-k="sx" data-i18n="rt.tab.sx">Stretch</button><button type="button" data-k="cd" data-i18n="rt.tab.cd">Cardio</button></div>
         <div id="rtList"><div id="rtRows"></div><button type="button" class="addmove" id="rtNew">+ New workout routine</button></div>
@@ -1040,7 +1040,7 @@
         <button class="ghostbtn" id="aiBtn" data-i18n="sync.ai">Copy for your AI to analyse</button>
       </div>
       <textarea id="aiBox" class="aibox" readonly></textarea>
-      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
+      <div class="synctip" data-i18n-html="sync.tip"><b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device’s data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.</div>
     </div>
 
     <div class="card col-12" id="cardTheme">
@@ -1063,7 +1063,7 @@
     </div>
 
     <div class="card col-12" id="cardMethods">
-      <div class="lbl" data-i18n="meth.title">Where these numbers come from</div>
+      <div class="lbl" data-i18n="meth.title">Where These Numbers Come From</div>
       <div class="methods">
         <div class="method">
           <div class="m-h" data-i18n="meth.bf.h">Body fat · US Navy girth method</div>
@@ -1114,7 +1114,7 @@
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.coach.h">Next-session suggestions · patient double progression</div>
-          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
+          <div class="m-b" data-i18n-html="meth.coach.b">Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night’s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.</div>
         </div>
         <div class="method">
           <div class="m-h" data-i18n="meth.rec.h">Records · estimated one-rep max</div>
@@ -3812,11 +3812,11 @@
     "body.bf": "Body fat",
     "body.bf.calc": "{n}% from your {girths}",
     "body.bf.mode.calc": "Work it out for me",
-    "body.bf.mode.manual": "I'll enter it",
+    "body.bf.mode.manual": "I’ll enter it",
     "body.bf.none": "Log {girths} and this fills itself in.",
     "body.bfpct": "Body fat (%)",
     "body.meas": 'Body Measurements · cm <span class="sub-note">· all optional · last value shown as a hint, saved only if you type it</span>',
-    "body.title": "Body & food",
+    "body.title": "Body & Food",
     "btn.add": "Add",
     "btn.back": "Back",
     "btn.cancel": "Cancel",
@@ -3855,8 +3855,8 @@
     "calib.need.head": "Not enough to estimate yet: it needs at least two weigh-ins on different days, with kcal logged in between.",
     "calib.need.kcaldays": "{n} days with kcal",
     "calib.need.keep": "Keep logging weight (most days) and kcal. The estimate appears as soon as it can be worked out, and firms up over about two weeks.",
-    "calib.need.sofar": "Have so far: {list}.",
-    "calib.need.trend": "Current weight trend: {kg}.",
+    "calib.need.sofar": "Have so far: {list}",
+    "calib.need.trend": "Current weight trend: {kg}",
     "calib.need.weighins": "{n} weigh-ins",
     "calib.overwindow": "over the window",
     "calib.ownnote": "The recommended number comes from your own logs, but the method behind it is a general one that suits most people, not worked out for you. If you have your own target, from a coach, a dietitian, a doctor, or one you know works for you, set it here and the app uses yours instead.",
@@ -4160,7 +4160,7 @@
     "guide.eq.any": "Any equipment ({n})",
     "guide.eq.item": "{name} ({n})",
     "guide.eq.none": "No equipment",
-    "guide.eq.title": "Filter by equipment",
+    "guide.eq.title": "Filter by Equipment",
     "guide.in": "In collection",
     "guide.in.sx": "Added",
     "guide.mode.p": "Main target · {n}",
@@ -4272,7 +4272,7 @@
     "lib.dip": "Bar dip",
     "lib.ez_curl": "EZ-bar curl",
     "lib.face_pull": "Face pull",
-    "lib.farmer_carry": "Farmer's carry",
+    "lib.farmer_carry": "Farmer’s carry",
     "lib.front_raise": "Dumbbell front raise",
     "lib.front_squat": "Front squat",
     "lib.glute_bridge": "Glute bridge",
@@ -4795,8 +4795,8 @@
     "lib.ball_jackknife": "Stability ball jackknife",
     "lib.ball_pike": "Stability ball pike",
     "lib.ghd_situp": "GHD sit-up",
-    "lib.captains_knee": "Captain's chair knee raise",
-    "lib.captains_leg": "Captain's chair leg raise",
+    "lib.captains_knee": "Captain’s chair knee raise",
+    "lib.captains_leg": "Captain’s chair leg raise",
     "lib.hanging_oblique": "Hanging oblique knee raise",
     "lib.hanging_l_hold": "Hanging L hold",
     "lib.lying_wiper": "Lying windshield wiper",
@@ -4841,7 +4841,7 @@
     "log.sec": "sec",
     "log.session": "Session",
     "log.startrest": "Timer",
-    "log.title": 'Workout sets <span class="sub-note">· weight × reps</span>',
+    "log.title": 'Workout Sets <span class="sub-note">· weight × reps</span>',
     "m.arm": "Arm (flexed)",
     "m.calf": "Calf",
     "m.chest": "Chest",
@@ -4861,7 +4861,7 @@
     "meth.bmr.h": "Starting energy estimate · Mifflin-St Jeor",
     "meth.cardio.b": "Tally doesn’t estimate calories burned. Machines and watches often overestimate exercise burn, and adding those numbers back to your target can quietly undo a deficit. You don’t need them: your adaptive maintenance estimate is worked out from what you eat and what your weight actually does, so the energy your cardio burns is already in it. Do more cardio and the estimate rises to match within a couple of weeks; do less and it falls. If your cardio changes a lot from week to week, the estimate lags behind by a week or two.",
     "meth.cardio.h": "Cardio and calories",
-    "meth.coach.b": "Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night's sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.",
+    "meth.coach.b": "Each movement can carry a rep range: pick Power (3–6 reps), Muscle (6–8) or Endurance (15–20), or set your own. The coach reads your last session of that movement at its heaviest load, so warm-up sets never count. <br><br><b>Reps first, then load, and one target for every set.</b> At the same weight it asks for one more rep than your weakest set managed, on every set, within the range: last time 7, 6, 7 means at least 7 on all three next time. Straight sets at one weight are prescribed as one number, and the weakest set is exactly what stands between you and the next weight. A set that beats the target is ahead of it, not asked for less. Once every working set reaches the top in <b>two sessions running</b>, it adds the weight step and the target starts again from the bottom. One clean session earns a second go at the same weight rather than a heavier bar: one good day is as often a good night’s sleep as real progress. <br><br>A set below the bottom of the range keeps the weight and makes the bottom the target. Holds climb five seconds at a time. A step of zero means reps only, and at the top it suggests raising the range. <br><br>The suggestions are placeholders. What you type is what is recorded, and the advice itself is never stored: it is read off your history every time, so correcting a past session changes it.",
     "meth.coach.h": "Next-session suggestions · patient double progression",
     "meth.prot.b": "<b>100 g a day for women, 140 g for men.</b> Research puts the point where extra protein stops helping muscle at about 1.6 g per kg of a healthy body weight. For a woman up to about 175 cm that comes to 100 g or less, and for a man up to about 190 cm, 140 g or less, so one number covers nearly everyone who is not a professional athlete. Body fat needs no protein, so carrying more of it does not raise the number.<br><br><b>Anything from three quarters of it is fine.</b> That matches the low end of current guidelines (1.2 g per kg). Muscle responds to what you eat over weeks, not on any single day, so a low day now and then costs nothing.<br><br>Pregnancy and breastfeeding raise the need. Set your own number then, or whenever you have been given one.",
     "meth.prot.h": "Protein · one number, no maths",
@@ -4869,7 +4869,7 @@
     "meth.rec.h": "Records · estimated one-rep max",
     "meth.target.b": "Target = maintenance + (goal kg per week × 7,700 ÷ 7). A goal of −0.5 kg per week is a deficit of about 550 kcal a day. The app will not suggest below 1,500 kcal for men or 1,200 for women, whatever the arithmetic produces, because eating adequately below that is difficult without supervision. <b>The dot next to Energy</b> compares your average with the target: green within a tenth either way, yellow when lower than that, red when more than a tenth over. It is also red under 1,500 kcal a day for men or 1,200 for women (1,200 when sex is not set), whatever your target.",
     "meth.target.h": "Daily target · your goal rate",
-    "meth.title": "Where these numbers come from",
+    "meth.title": "Where These Numbers Come From",
     "metric.reps": "total reps",
     "metric.time": "time under load",
     "metric.volume": "session volume",
@@ -4930,7 +4930,7 @@
     "msg.hidden.short": "{name} hidden",
     "msg.libadded": "{name} added. Pin it to a day from the Workout page.",
     "msg.loadfail.del": "Data failed to load — not deleting",
-    "msg.loadfail.read": "Couldn't read saved data — check storage; avoid saving over it",
+    "msg.loadfail.read": "Couldn’t read saved data — check storage; avoid saving over it",
     "msg.loadfail.save": "Data failed to load — not saving, to avoid overwriting it",
     "msg.needhold": "Give that stretch a hold time first",
     "msg.needmins": "Give that session a target time first",
@@ -5023,7 +5023,7 @@
     "rest.alarm.stretch": "Stretch done · {name}",
     "rest.beep": "Beep",
     "rest.done": "rest done — next set",
-    "rest.exact": "In another app, the timer's alert can arrive minutes late: exact alarms are off for Tally.",
+    "rest.exact": "In another app, the timer’s alert can arrive minutes late: exact alarms are off for Tally.",
     "rest.exact.btn": "Allow exact alarms",
     "rest.getready": "get into position",
     "rest.held": "held {n}s",
@@ -5034,6 +5034,7 @@
     "rest.stop": "Stop the timer",
     "rev.food": "Average intake",
     "rev.kcalsub": "kcal a day · target {target} · {n} days logged",
+    "rev.kcalsub.1": "kcal a day · target {target} · 1 day logged",
     "rev.muscles": "Muscles in range",
     "rev.mussub": "{track} on track · {under} under · {over} over · {muted} muted",
     "rev.nomus": "tag movements with muscles to count this",
@@ -5053,6 +5054,7 @@
     "rev.planned": "of the days your plan trains this week",
     "rev.protein": "Protein",
     "rev.protsub": "a day on average · aim {target} g, {ok} g+ is fine · {n} days logged",
+    "rev.protsub.1": "a day on average · aim {target} g, {ok} g+ is fine · 1 day logged",
     "rev.records": "Records",
     "rev.sessions": "Sessions",
     "rev.title": 'This Week <span class="sub-note">· Sunday to Saturday, so far, and the one thing most worth changing</span>',
@@ -5065,7 +5067,7 @@
     "sh.coach.head": "Headroom {head}: if a step up is too heavy and a set falls below {min}, it goes back to the old weight until every set reaches {top}, then tries again.",
     "sh.coach.headlbl": "Headroom",
     "sh.coach.from": "From",
-    "sh.coach.off": "Off. Each session starts from last time's weights, as before.",
+    "sh.coach.off": "Off. Each session starts from last time’s weights, as before.",
     "sh.coach.on": "{min}–{max} {unit}. Once every set reaches {max} in {n} sessions running, the weight goes up {step} kg and you start again from the bottom.",
     "sh.coach.reps": "reps",
     "sh.coach.repsonly": "{min}–{max} {unit}, no weight step. Once every set reaches {max} in {n} sessions running, it suggests raising the range.",
@@ -5122,7 +5124,7 @@
     "pl.setup": "Your plates · {n} ticked",
     "pl.setupnote": "Tick the plates your gym has. Mix kg and lb if it has both. The calculator assumes there are enough of each to load both sides.",
     "pl.empty": "Type the total you want on the bar or machine.",
-    "pl.ownfirst": "Type your bar's weight in kg next to My own.",
+    "pl.ownfirst": "Type your bar’s weight in kg next to My own.",
     "pl.under": "That is less than the bar on its own ({bar}).",
     "pl.noplates": "Tick at least one plate under Your plates.",
     "pl.big": "That is more than the calculator handles. Try a smaller total.",
@@ -5173,7 +5175,7 @@
     "sxlib.butterfly": "Butterfly stretch",
     "sxlib.camel": "Camel pose",
     "sxlib.cat_cow": "Cat-cow",
-    "sxlib.childs_pose": "Child's pose",
+    "sxlib.childs_pose": "Child’s pose",
     "sxlib.chin_tuck": "Chin tuck",
     "sxlib.cobra": "Cobra stretch",
     "sxlib.cossack_hold": "Cossack squat hold",
@@ -5255,7 +5257,7 @@
     "sxlib.wall_lat": "Wall lat stretch",
     "sxlib.wall_pec": "Wall pec stretch",
     "sxlib.wide_fold": "Wide-leg forward fold",
-    "sxlib.worlds_greatest": "World's greatest stretch",
+    "sxlib.worlds_greatest": "World’s greatest stretch",
     "sxlib.wrist_circles": "Wrist circles",
     "sxlib.wrist_extensor": "Wrist extensor stretch",
     "sxlib.wrist_flexor": "Wrist flexor stretch",
@@ -5271,7 +5273,7 @@
     "sync.load": "Load imported data",
     "sync.noentries": "Unexpected format — no entries found in that data",
     "sync.noload": "Nothing to load — pick a file or paste data first",
-    "sync.noreport": "Nothing to report yet - log some days first",
+    "sync.noreport": "Nothing to report yet: log some days first",
     "sync.nothing": "No entries logged yet — nothing to export.",
     "sync.nothingyet": "Nothing to export yet",
     "sync.notvalid": "Not valid export data — a pasted copy is usually truncated. Use Import from file instead.",
@@ -5283,7 +5285,7 @@
     "sync.savedto": "Saved to Downloads · {path}",
     "sync.tapreplace": "Tap again to replace {a} → {b}",
     "sync.timedout": "Confirmation timed out — tap Load again",
-    "sync.tip": "<b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device's data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.",
+    "sync.tip": "<b>File route — no clipboard.</b> <b>Save backup file</b> writes a .json (into Downloads on the phone). On the other device: <b>Import from file</b>, pick it, then <b>Load imported data</b> twice to confirm.<br><b>Paste route:</b> <b>Export data</b> → copy the box → <b>Import data</b> on the other device → paste → <b>Load</b> twice. Fragile on a phone: long payloads get truncated by the clipboard.<br>Either route overwrites that device’s data.<br>Movements you created travel with the backup, so history stays readable on the other device. They are merged, not replaced — importing an old file cannot strip a movement this device still needs.",
     "sync.title": "Sync Between Devices",
     "sync.undo": "Undo the import · put back the {n} entries from before it",
     "sync.undo.1": "Undo the import · put back the 1 entry from before it",
@@ -5308,7 +5310,7 @@
     "upd.found": "New version found. Reloading…",
     "upd.get": "Get the latest version",
     "upd.latest": "You have the latest version.",
-    "upd.now": "You have Tally {v}.",
+    "upd.now": "You have Tally {v}",
     "upd.offline": "Could not check. Are you online?",
     "upd.title": "Version & Updates",
     "upd.web": "The web app updates itself whenever you open it with a connection. Tap below to check right now.",
@@ -5374,7 +5376,7 @@
     "pl.onenone": "One side",
     "pl.tot1": "Total {tot} ({other}) = bar {bar} + {side} on one side",
     "pl.totnobar1": "Total {tot} ({other}), all on one side",
-    "rt.title": `Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span>`,
+    "rt.title": 'Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day’s log</span>',
     "rt.tab.lift": "Workout",
     "rt.tab.sx": "Stretch",
     "rt.tab.cd": "Cardio",
@@ -5408,7 +5410,7 @@
     "rt.adddone": "Done adding",
     "rt.pool.none.lift": "Every movement in your collection is already in this routine.",
     "rt.pool.none": "Everything on your list is already in this routine.",
-    "rt.toomany": "A routine holds up to {n}.",
+    "rt.toomany": "One routine holds up to {n} items.",
     "rt.sets": "Planned sets",
     "rt.setsu": "sets",
     "rt.up": "Move up",
@@ -5416,8 +5418,8 @@
     "rt.cfg.secs": "Hold, seconds per set",
     "rt.cfg.reps": "Reps per set",
     "rt.cfg.mins": "Minutes per set",
-    "rt.cfg.hint.sx": "Hold time (or reps) and sets for this routine. Left blank, the stretch's own setting (in grey) is used.",
-    "rt.cfg.hint.cd": "Minutes and sets for this routine. Left blank, the cardio's own setting (in grey) is used.",
+    "rt.cfg.hint.sx": "Hold time (or reps) and sets for this routine. Left blank, the stretch’s own setting (in grey) is used.",
+    "rt.cfg.hint.cd": "Minutes and sets for this routine. Left blank, the cardio’s own setting (in grey) is used.",
     "rt.link": "Link as superset",
     "rt.linked": "Superset ✓ · tap to unlink",
     "rt.needname": "Give the routine a name.",
@@ -5464,7 +5466,7 @@
     "copy.add": "Add to it",
     "copy.replace": "Replace it",
     "copy.add.note": "Keeps the routines each day already has and adds the ones it lacks.",
-    "copy.replace.note": "Each ticked day gets exactly {day}'s routines. Routines it had before come off that day (they are not deleted); logged workouts are not touched.",
+    "copy.replace.note": "Each ticked day gets exactly {day}’s routines. Routines it had before come off that day (they are not deleted); logged workouts are not touched.",
     "copy.go": "Copy",
     "copy.pick": "Tick at least one day.",
     "copy.done": "Copied {day} to {days}.",
@@ -5925,7 +5927,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.5";
+  var APP_VERSION = "9.6";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -5946,6 +5948,10 @@
   var qWords = (x) => {
     const w = String(x || "").toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
     return w.concat(w.slice(1).map((v, i) => w[i] + v));
+  };
+  var sameName = (a, b) => {
+    const f = (x) => String(x == null ? "" : x).trim().toLowerCase().replace(/[’‘`]/g, "'");
+    return f(a) === f(b);
   };
   var qMatch = (q, text) => {
     const h = qWords(text);
@@ -6159,8 +6165,8 @@
   var loadBackupDate2 = loadBackupDate;
   var fmtSetsN = (n) => n % 1 ? n.toFixed(1) : String(n);
   function libOwned(l) {
-    const nm = t("lib." + l.key).toLowerCase();
-    return S.catalogue.find((x) => x.lib === l.key || x.name.toLowerCase() === nm) || null;
+    const nm = t("lib." + l.key);
+    return S.catalogue.find((x) => x.lib === l.key || sameName(x.name, nm)) || null;
   }
   var libLive = (l) => {
     const o = libOwned(l);
@@ -6652,7 +6658,7 @@
       }
       Object.assign(s, upd);
     } else {
-      if (S.stretches.some((x) => x.name.toLowerCase() === name.toLowerCase())) {
+      if (S.stretches.some((x) => sameName(x.name, name))) {
         sxMsg(t("msg.onlist"), true);
         return;
       }
@@ -6843,7 +6849,7 @@
       }
       Object.assign(c, upd);
     } else {
-      if (S.cardios.some((x) => x.name.toLowerCase() === name.toLowerCase())) {
+      if (S.cardios.some((x) => sameName(x.name, name))) {
         cdMsg(t("msg.onlist"), true);
         return;
       }
@@ -6945,8 +6951,8 @@
       cdOpen(null);
     }
   }
-  var sxOwned = (l) => S.stretches.find((x) => x.lib === l.key || x.name.toLowerCase() === t("sxlib." + l.key).toLowerCase()) || null;
-  var cdOwned = (l) => S.cardios.find((x) => x.lib === l.key || x.name.toLowerCase() === t("cdlib." + l.key).toLowerCase()) || null;
+  var sxOwned = (l) => S.stretches.find((x) => x.lib === l.key || sameName(x.name, t("sxlib." + l.key))) || null;
+  var cdOwned = (l) => S.cardios.find((x) => x.lib === l.key || sameName(x.name, t("cdlib." + l.key))) || null;
   async function sxFromLib(k) {
     const l = sxLibByKey(k);
     if (!l) return null;
@@ -7359,8 +7365,7 @@
       flash(tf("msg.renamed", { name }) + coachApplyMsg(also2));
       return;
     }
-    const lower = name.toLowerCase();
-    const existing = S.catalogue.find((x) => x.name.toLowerCase() === lower);
+    const existing = S.catalogue.find((x) => sameName(x.name, name));
     if (existing) {
       if (existing.retired) {
         unhide(existing.key);
@@ -8648,7 +8653,7 @@
       msg(t("rt.needitems"), true);
       return;
     }
-    const clash = S.routines[d.kind].find((r) => r.id !== d.id && r.name.toLowerCase() === name.toLowerCase());
+    const clash = S.routines[d.kind].find((r) => r.id !== d.id && sameName(r.name, name));
     if (clash) {
       msg(tf("rt.clash", { name }), true);
       return;
@@ -9996,7 +10001,7 @@
       cnt[weekState(k, w, lo, hi, mute)]++;
     });
     const cell = (lbl, val, sub) => `<div class="cstat"><div class="cs-lbl">${esc(lbl)}</div><div class="cs-val">${val}</div><div class="cs-sub">${esc(sub)}</div></div>`;
-    grid.innerHTML = cell(t("rev.sessions"), done.length + (planned ? `<span>/ ${planned}</span>` : ""), t(planned ? "rev.planned" : "rev.noplan")) + cell(t("rev.records"), String(recs.length), recs.length ? recs.slice(0, 3).join(", ") + (recs.length > 3 ? " …" : "") : t("rev.norecs")) + cell(t("rev.weight"), dW == null ? "—" : fmtSigned(dW) + "<span>kg</span>", t(dW != null ? "rev.trendwk" : wIn ? "rev.notrend" : "rev.noweigh")) + cell(t("rev.food"), kAvg == null ? "—" : kAvg.toLocaleString() + "<span>kcal</span>", tf("rev.kcalsub", { target: tgt.toLocaleString(), n: kd.length })) + cell(t("rev.protein"), pAvg == null ? "—" : pAvg + "<span>g</span>", tf("rev.protsub", { target: ptg, ok: pok, n: pd.length })) + cell(t("rev.muscles"), tagged ? String(cnt.ok) : "—", tagged ? tf("rev.mussub", { track: cnt.track, under: cnt.low + cnt.sofar, over: cnt.high, muted: cnt.muted }) : t("rev.nomus"));
+    grid.innerHTML = cell(t("rev.sessions"), done.length + (planned ? `<span>/ ${planned}</span>` : ""), t(planned ? "rev.planned" : "rev.noplan")) + cell(t("rev.records"), String(recs.length), recs.length ? recs.slice(0, 3).join(", ") + (recs.length > 3 ? " …" : "") : t("rev.norecs")) + cell(t("rev.weight"), dW == null ? "—" : fmtSigned(dW) + "<span>kg</span>", t(dW != null ? "rev.trendwk" : wIn ? "rev.notrend" : "rev.noweigh")) + cell(t("rev.food"), kAvg == null ? "—" : kAvg.toLocaleString() + "<span>kcal</span>", tn("rev.kcalsub", kd.length, { target: tgt.toLocaleString() })) + cell(t("rev.protein"), pAvg == null ? "—" : pAvg + "<span>g</span>", tn("rev.protsub", pd.length, { target: ptg, ok: pok })) + cell(t("rev.muscles"), tagged ? String(cnt.ok) : "—", tagged ? tf("rev.mussub", { track: cnt.track, under: cnt.low + cnt.sofar, over: cnt.high, muted: cnt.muted }) : t("rev.nomus"));
     const gap = tagged ? MUSCLES.find((m) => w.proj[m.key] === 0 && mute.indexOf(m.key) < 0) : null;
     let one;
     if (!wk.length) one = t("rev.one.empty");

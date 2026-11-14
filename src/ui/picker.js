@@ -6,7 +6,7 @@ import { activeCardio, activeStretches, cardioByKey, stretchByKey } from '../sta
 import { normCardio, normStretch } from '../store/schema';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash, lvTag } from './dom';
-import { byName, cdKeyFor, cdToday, dayShort, libUsable, persistCardio, persistPlan, persistStretches, qMatch, sxIsReps, sxKeyFor, sxTarget, sxToday } from './shared';
+import { byName, cdKeyFor, cdToday, dayShort, libUsable, persistCardio, persistPlan, persistStretches, qMatch, sxIsReps, sxKeyFor, sxTarget, sxToday, sameName } from './shared';
 import { cdOpen, drawCardio } from './cardio';
 import { dayLogKeys, drawMob, sxOpen } from './mobility';
 import { dlgClose, dlgOpen } from './dialog';
@@ -47,8 +47,8 @@ export async function kpPick(key){
 }
 export async function kpLibPick(libKey){ const key=await kpCfg(V.kpKind).fromLib(libKey); if(key) kpPick(key); }
 export function kpNew(){ kpClose(); if(V.kpKind==='sx'){ V.sxPinDay=$("fDay").value; sxOpen(null); } else { V.cdPinDay=$("fDay").value; cdOpen(null); } }
-export const sxOwned = l => S.stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
-export const cdOwned = l => S.cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;
+export const sxOwned = l => S.stretches.find(x=>x.lib===l.key || sameName(x.name, t('sxlib.'+l.key))) || null;
+export const cdOwned = l => S.cardios.find(x=>x.lib===l.key || sameName(x.name, t('cdlib.'+l.key))) || null;
 export async function sxFromLib(k){
   const l=sxLibByKey(k); if(!l) return null;
   const have=sxOwned(l);

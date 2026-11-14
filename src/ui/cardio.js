@@ -7,7 +7,7 @@ import { normCardio } from '../store/schema';
 import { num } from '../core/numbers';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { cdEff, cdKeyFor, cdSetsOf, cdToday, dayEntry, dayName, persist, persistCardio, persistPlan, prettyKey } from './shared';
+import { cdEff, cdKeyFor, cdSetsOf, cdToday, dayEntry, dayName, persist, persistCardio, persistPlan, prettyKey, sameName } from './shared';
 import { dayLogKeys, pinTag } from './mobility';
 import { dlgClose, dlgOpen } from './dialog';
 import { render, stale } from './nav';
@@ -102,7 +102,7 @@ export async function cdSave(){
     if(!upd){ cdMsg(t('msg.badname'),true); return; }
     Object.assign(c, upd);
   }else{
-    if(S.cardios.some(x=>x.name.toLowerCase()===name.toLowerCase())){ cdMsg(t('msg.onlist'),true); return; }
+    if(S.cardios.some(x=>sameName(x.name, name))){ cdMsg(t('msg.onlist'),true); return; }
     const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value, sets:$("cdSets").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
     S.cardios.push(c);

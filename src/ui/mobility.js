@@ -8,7 +8,7 @@ import { normStretch } from '../store/schema';
 import { num } from '../core/numbers';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { cdToday, dayEntry, dayName, dayShort, mobSetsOf, persist, persistPlan, persistStretches, sxEff, sxIsReps, sxKeyFor, sxTarget, sxToday } from './shared';
+import { cdToday, dayEntry, dayName, dayShort, mobSetsOf, persist, persistPlan, persistStretches, sxEff, sxIsReps, sxKeyFor, sxTarget, sxToday, sameName } from './shared';
 import { dlgClose, dlgOpen } from './dialog';
 import { drawCardio } from './cardio';
 import { fmtClock } from './rest-timer';
@@ -139,7 +139,7 @@ export async function sxSave(){
     if(!upd){ sxMsg(t('msg.badname'),true); return; }
     Object.assign(s, upd);
   }else{
-    if(S.stretches.some(x=>x.name.toLowerCase()===name.toLowerCase())){ sxMsg(t('msg.onlist'),true); return; }
+    if(S.stretches.some(x=>sameName(x.name, name))){ sxMsg(t('msg.onlist'),true); return; }
     const s=normStretch({key:sxKeyFor(name), name:name, unit:reps?'reps':null,
       secs:reps?0:v, reps:reps?v:0, sets:$("sxSets").value, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
