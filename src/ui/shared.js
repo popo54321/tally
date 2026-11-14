@@ -12,9 +12,9 @@ import { localDate } from '../core/dates';
 import { muscleVolume, weekStart } from '../core/volume';
 import { t, tf } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { dayRoutines, saveRoutines } from '../state/routines';
+import { dayRoutines, planItem, saveRoutines } from '../state/routines';
 
-export const APP_VERSION = '9.4';
+export const APP_VERSION = '9.5';
 export const kcalFloor = () => core.kcalFloor(S.settings.sex);
 export const kcalBand = target => core.kcalBand(target, S.settings.sex);
 export const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
@@ -48,6 +48,20 @@ export function cdKeyFor(name){
 }
 export const sxIsReps = s => !!(s && s.unit==='reps');
 export const sxTarget = s => !s ? 0 : (sxIsReps(s) ? (s.reps||0) : (s.secs||0));
+const sessionDay = () => { const d=$("fDay"); return d ? d.value : ''; };
+/** A stretch with the selected session's routine targets applied (hold or reps, sets), where the routine sets them. */
+export function sxEff(s){
+  const it=s && planItem(sessionDay(), 'sx', s.key); if(!it) return s;
+  const o=Object.assign({}, s); if(it.sets) o.sets=it.sets;
+  if(sxIsReps(s)){ if(it.reps) o.reps=it.reps; } else if(it.secs) o.secs=it.secs;
+  return o;
+}
+/** A cardio with the selected session's routine targets applied (minutes, sets). */
+export function cdEff(c){
+  const it=c && planItem(sessionDay(), 'cd', c.key); if(!it) return c;
+  const o=Object.assign({}, c); if(it.sets) o.sets=it.sets; if(it.mins) o.mins=it.mins;
+  return o;
+}
 export function sxKeyFor(name){
   let base='sx_'+String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'').slice(0,28);
   if(base==='sx_') base='sx_stretch';

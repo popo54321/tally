@@ -7,7 +7,7 @@ import { normCardio } from '../store/schema';
 import { num } from '../core/numbers';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { cdKeyFor, cdSetsOf, cdToday, dayEntry, dayName, persist, persistCardio, persistPlan, prettyKey } from './shared';
+import { cdEff, cdKeyFor, cdSetsOf, cdToday, dayEntry, dayName, persist, persistCardio, persistPlan, prettyKey } from './shared';
 import { dayLogKeys, pinTag } from './mobility';
 import { dlgClose, dlgOpen } from './dialog';
 import { render, stale } from './nav';
@@ -26,7 +26,7 @@ export async function setCardioLog(key, total, sets){
 export function toggleCardio(key){
   const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.cardio && (key in cur.cardio));
-  const c=cardioByKey(key), n=(c && c.sets) || 1, per=c ? (c.mins||0) : 0, done=on ? cdSetsOf(cur,key) : 0;
+  const c=cdEff(cardioByKey(key)), n=(c && c.sets) || 1, per=c ? (c.mins||0) : 0, done=on ? cdSetsOf(cur,key) : 0;
   if(on && done>=n) return setCardioLog(key, null);
   return setCardioLog(key, (on ? cur.cardio[key] : 0)+per, done+1);
 }
@@ -38,15 +38,16 @@ export function cdSetAdd(key, mins){
 export function cdRowEdit(row){
   const per=num(row.querySelector('.mobsec').value), n=num(row.querySelector('.mobn').value);
   if(per==null && n==null) return setCardioLog(row.dataset.k, null);
-  const c=cardioByKey(row.dataset.k), sets=Math.max(1, Math.round(n || (c && c.sets) || 1));
+  const c=cdEff(cardioByKey(row.dataset.k)), sets=Math.max(1, Math.round(n || (c && c.sets) || 1));
   return setCardioLog(row.dataset.k, Math.max(0, per || 0)*sets, sets);
 }
 export function startCardioTimer(key){
-  const c=cardioByKey(key);
+  const c=cdEff(cardioByKey(key));
   if(!c || !c.mins){ flash(t('msg.needmins')); return; }
   timerStart({kind:'cardio', key:key, label:c.name, hold:c.mins*60, lead:S.settings.mobLead||0});
 }
-export function cdRowHtml(c, log, gone, ms){
+export function cdRowHtml(c0, log, gone, ms){
+  const c=cdEff(c0);
   const on=(c.key in log), sets=c.sets||1, done=on ? ((ms && ms[c.key]) || 1) : 0;
   const sub=(c.mins ? tf('cd.target',{n:c.mins}) : t('cd.notarget')) + (sets>1 ? ' × '+tn('mob.setsn',sets) : '') + (on && sets>1 ? ' · '+tf('mob.setsof',{n:done, of:sets}) : '');
   const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');

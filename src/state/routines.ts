@@ -2,7 +2,7 @@
 // small edits (add or remove a routine on a weekday, save one, delete one) happen here.
 import { DAY_KEYS, type DayKey } from '../core/dates';
 import { STORE } from '../store/kv';
-import { RKEY, KINDS, MAX_ROUTINES, emptyRoutines, normRoutines, type Kind, type Routine, type Routines, type RItem } from '../store/routines';
+import { RKEY, KINDS, MAX_ROUTINES, cleanItem, emptyRoutines, normRoutines, type Kind, type Routine, type Routines, type RItem } from '../store/routines';
 import { S } from './app';
 import { savePlan, exByKey, stretchByKey, cardioByKey } from './persist';
 
@@ -65,7 +65,8 @@ export function routinesFromPlan(prev: Routines | null, nameFor: (days: DayKey[]
       // the day's only routine, used on no other day: an older version edited this day's list, so edit it in place
       const own = (R.week[kind][d] || []).length === 1 ? R[kind].find(x => x.id === R.week[kind][d][0]) : null;
       if (own && DAY_KEYS.every(o => o === d || (R.week[kind][o] || []).indexOf(own.id) < 0)) {
-        own.items = want.map(w => { const old = own.items.find(it => it.k === w.k); return Object.assign({}, w, old && old.link ? { link: true } : {}); });
+        // keep what the plan cannot hold (supersets, stretch and cardio targets); movement set counts come from the plan
+        own.items = want.map(w => { const old = own.items.find(it => it.k === w.k); const o = Object.assign({}, old || {}, w); if (kind === 'lift' && !w.sets) delete o.sets; return o; });
         delete own.items[own.items.length - 1].link;
         return;
       }
@@ -130,7 +131,7 @@ export function removeFromDay(kind: Kind, id: string, day: string): void {
 /** Saves a routine (new or changed) and puts it on exactly these weekdays. */
 export function putRoutine(kind: Kind, r: Routine, days: string[]): void {
   const list = S.routines[kind], i = list.findIndex(x => x.id === r.id);
-  const items = r.items.map(it => kind === 'lift' ? Object.assign({ k: it.k }, it.sets ? { sets: it.sets } : {}, it.link ? { link: true } : {}) : { k: it.k });
+  const items = r.items.map(it => cleanItem(kind, it));
   if (items.length) delete (items[items.length - 1] as RItem).link;
   const clean = { id: r.id, name: r.name, items };
   if (i >= 0) list[i] = clean; else list.push(clean);
@@ -163,6 +164,11 @@ export function daySupersets(day: string): string[][] {
     });
   });
   return groups;
+}
+/** The routine entry for a movement, stretch or cardio on a weekday (from the first routine that has it). */
+export function planItem(day: string, kind: Kind, key: string): RItem | null {
+  const r = routineFor(day, kind, key);
+  return r ? r.items.find(it => it.k === key) || null : null;
 }
 /** Which of the day's routines a movement comes from (the first that has it). */
 export function routineFor(day: string, kind: Kind, key: string): Routine | null {

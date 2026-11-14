@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-FQdKzhE6Eo2cgPHG5HKEn/G1zUjumvNj+aWUQDjc2hw='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-+gUPvIeVuDEJtRBggqbiObqE/XiBu79nKgBYDETo/tI='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -462,8 +462,15 @@
   .rtitem.ss{border-left:4px solid var(--brass)}
   .rtn{font-family:var(--font-mono);font-size:11px;color:var(--txt-faint);min-width:16px}
   .rtinm{flex:1;min-width:0;font-size:13px;color:var(--ink)}
-  .rtsets{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-faint)}
-  .rtsets input{width:46px;padding:6px 4px;text-align:center;min-height:34px}
+  .rtmain{flex:1;min-width:0}
+  .rtmain .rtinm{display:block}
+  .rtcfg{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+  .rtf{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-faint)}
+  .rtf input{width:54px;padding:6px 4px;text-align:center;min-height:34px}
+  .rtx{font-size:12px;color:var(--txt-faint)}
+  .rtfx{display:flex;align-items:center;gap:5px}
+  .rtf input{width:50px}
+  .rtcfgnote{margin-top:8px}
   .rtmv,.rtrm{border:1px solid var(--line);background:var(--panel-2);border-radius:6px;min-width:34px;min-height:34px;cursor:pointer;color:var(--ink-dim)}
   .rtmv:disabled{opacity:.35;cursor:default}
   .rtlink{display:block;margin:5px auto 0;border:1px dashed var(--line);background:none;border-radius:6px;font-size:10.5px;padding:5px 12px;color:var(--txt-faint);cursor:pointer;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.4px;min-height:30px}
@@ -3038,6 +3045,20 @@
   // src/store/routines.ts
   var RKEY = "tally:routines:v1";
   var KINDS = ["lift", "sx", "cd"];
+  var ITEM_FIELDS = {
+    lift: { sets: [1, 20] },
+    sx: { secs: [1, 3600], reps: [1, 999], sets: [1, 50] },
+    cd: { mins: [1, 600], sets: [1, 50] }
+  };
+  function cleanItem(kind2, it) {
+    const o = { k: it.k };
+    for (const [f, [lo, hi]] of Object.entries(ITEM_FIELDS[kind2])) {
+      const n = parseInt(it[f], 10);
+      if (n >= lo && n <= hi) o[f] = n;
+    }
+    if (kind2 === "lift" && it.link === true) o.link = true;
+    return o;
+  }
   var ROUTINE_ID = /^r_[a-z0-9]{1,24}$/;
   var MAX_ROUTINES = 60;
   var MAX_ITEMS = 40;
@@ -3056,13 +3077,7 @@
         (Array.isArray(r.items) ? r.items : []).forEach((it) => {
           if (!it || typeof it.k !== "string" || seen.has(it.k) || !exists[kind2](it.k) || items.length >= MAX_ITEMS) return;
           seen.add(it.k);
-          const o = { k: it.k };
-          if (kind2 === "lift") {
-            const n = parseInt(it.sets, 10);
-            if (n >= 1 && n <= 20) o.sets = n;
-            if (it.link === true) o.link = true;
-          }
-          items.push(o);
+          items.push(cleanItem(kind2, it));
         });
         if (items.length) delete items[items.length - 1].link;
         ids.add(r.id);
@@ -5398,6 +5413,11 @@
     "rt.setsu": "sets",
     "rt.up": "Move up",
     "rt.down": "Move down",
+    "rt.cfg.secs": "Hold, seconds per set",
+    "rt.cfg.reps": "Reps per set",
+    "rt.cfg.mins": "Minutes per set",
+    "rt.cfg.hint.sx": "Hold time (or reps) and sets for this routine. Left blank, the stretch's own setting (in grey) is used.",
+    "rt.cfg.hint.cd": "Minutes and sets for this routine. Left blank, the cardio's own setting (in grey) is used.",
     "rt.link": "Link as superset",
     "rt.linked": "Superset ✓ · tap to unlink",
     "rt.needname": "Give the routine a name.",
@@ -5749,7 +5769,9 @@
         if (own && DAY_KEYS.every((o) => o === d || (R.week[kind2][o] || []).indexOf(own.id) < 0)) {
           own.items = want.map((w) => {
             const old = own.items.find((it) => it.k === w.k);
-            return Object.assign({}, w, old && old.link ? { link: true } : {});
+            const o = Object.assign({}, old || {}, w);
+            if (kind2 === "lift" && !w.sets) delete o.sets;
+            return o;
           });
           delete own.items[own.items.length - 1].link;
           return;
@@ -5828,7 +5850,7 @@
   }
   function putRoutine(kind2, r, days) {
     const list = S.routines[kind2], i = list.findIndex((x) => x.id === r.id);
-    const items = r.items.map((it) => kind2 === "lift" ? Object.assign({ k: it.k }, it.sets ? { sets: it.sets } : {}, it.link ? { link: true } : {}) : { k: it.k });
+    const items = r.items.map((it) => cleanItem(kind2, it));
     if (items.length) delete items[items.length - 1].link;
     const clean = { id: r.id, name: r.name, items };
     if (i >= 0) list[i] = clean;
@@ -5874,6 +5896,10 @@
     });
     return groups;
   }
+  function planItem(day, kind2, key) {
+    const r = routineFor(day, kind2, key);
+    return r ? r.items.find((it) => it.k === key) || null : null;
+  }
   function routineFor(day, kind2, key) {
     return dayRoutines(day, kind2).find((r) => r.items.some((it) => it.k === key)) || null;
   }
@@ -5899,7 +5925,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.4";
+  var APP_VERSION = "9.5";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -5942,6 +5968,28 @@
   }
   var sxIsReps = (s) => !!(s && s.unit === "reps");
   var sxTarget = (s) => !s ? 0 : sxIsReps(s) ? s.reps || 0 : s.secs || 0;
+  var sessionDay = () => {
+    const d = $("fDay");
+    return d ? d.value : "";
+  };
+  function sxEff(s) {
+    const it = s && planItem(sessionDay(), "sx", s.key);
+    if (!it) return s;
+    const o = Object.assign({}, s);
+    if (it.sets) o.sets = it.sets;
+    if (sxIsReps(s)) {
+      if (it.reps) o.reps = it.reps;
+    } else if (it.secs) o.secs = it.secs;
+    return o;
+  }
+  function cdEff(c) {
+    const it = c && planItem(sessionDay(), "cd", c.key);
+    if (!it) return c;
+    const o = Object.assign({}, c);
+    if (it.sets) o.sets = it.sets;
+    if (it.mins) o.mins = it.mins;
+    return o;
+  }
   function sxKeyFor(name) {
     let base = "sx_" + String(name || "").toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 28);
     if (base === "sx_") base = "sx_stretch";
@@ -6377,7 +6425,7 @@
     timerStart({ kind: "rest", label: who ? t("rest.rest") + " · " + who : t("rest.rest"), hold: s, lead: 0 });
   }
   function startStretch(key) {
-    const s = stretchByKey(key);
+    const s = sxEff(stretchByKey(key));
     if (!s || sxIsReps(s) || !s.secs) {
       flash(t("msg.needhold"));
       return;
@@ -6441,7 +6489,7 @@
   function toggleMob(key) {
     const cur = S.entries.find((e) => e.date === $("fDate").value);
     const on = !!(cur && cur.mob && key in cur.mob);
-    const s = stretchByKey(key), n = s && s.sets || 1, per = s ? sxTarget(s) : 0, done = on ? mobSetsOf(cur, key) : 0;
+    const s = sxEff(stretchByKey(key)), n = s && s.sets || 1, per = s ? sxTarget(s) : 0, done = on ? mobSetsOf(cur, key) : 0;
     if (on && done >= n) return setMobLog(key, null);
     return setMobLog(key, (on ? cur.mob[key] : 0) + per, done + 1);
   }
@@ -6453,10 +6501,11 @@
   function mobRowEdit(row) {
     const per = num(row.querySelector(".mobsec").value), n = num(row.querySelector(".mobn").value);
     if (per == null && n == null) return setMobLog(row.dataset.k, null);
-    const s = stretchByKey(row.dataset.k), sets = Math.max(1, Math.round(n || s && s.sets || 1));
+    const s = sxEff(stretchByKey(row.dataset.k)), sets = Math.max(1, Math.round(n || s && s.sets || 1));
     return setMobLog(row.dataset.k, Math.max(0, per || 0) * sets, sets);
   }
-  function mobRowHtml(s, mob, gone, ms) {
+  function mobRowHtml(s0, mob, gone, ms) {
+    const s = sxEff(s0);
     const on = s.key in mob;
     const reps = sxIsReps(s), tgt = sxTarget(s), sets = s.sets || 1, done = on ? ms && ms[s.key] || 1 : 0;
     const base = tgt ? reps ? tn("mob.repsn", tgt) : tf("mob.holdn", { n: tgt }) : t(reps ? "mob.noreps" : "mob.nohold");
@@ -6684,7 +6733,7 @@
   function toggleCardio(key) {
     const cur = S.entries.find((e) => e.date === $("fDate").value);
     const on = !!(cur && cur.cardio && key in cur.cardio);
-    const c = cardioByKey(key), n = c && c.sets || 1, per = c ? c.mins || 0 : 0, done = on ? cdSetsOf(cur, key) : 0;
+    const c = cdEff(cardioByKey(key)), n = c && c.sets || 1, per = c ? c.mins || 0 : 0, done = on ? cdSetsOf(cur, key) : 0;
     if (on && done >= n) return setCardioLog(key, null);
     return setCardioLog(key, (on ? cur.cardio[key] : 0) + per, done + 1);
   }
@@ -6696,18 +6745,19 @@
   function cdRowEdit(row) {
     const per = num(row.querySelector(".mobsec").value), n = num(row.querySelector(".mobn").value);
     if (per == null && n == null) return setCardioLog(row.dataset.k, null);
-    const c = cardioByKey(row.dataset.k), sets = Math.max(1, Math.round(n || c && c.sets || 1));
+    const c = cdEff(cardioByKey(row.dataset.k)), sets = Math.max(1, Math.round(n || c && c.sets || 1));
     return setCardioLog(row.dataset.k, Math.max(0, per || 0) * sets, sets);
   }
   function startCardioTimer(key) {
-    const c = cardioByKey(key);
+    const c = cdEff(cardioByKey(key));
     if (!c || !c.mins) {
       flash(t("msg.needmins"));
       return;
     }
     timerStart({ kind: "cardio", key, label: c.name, hold: c.mins * 60, lead: S.settings.mobLead || 0 });
   }
-  function cdRowHtml(c, log, gone, ms) {
+  function cdRowHtml(c0, log, gone, ms) {
+    const c = cdEff(c0);
     const on = c.key in log, sets = c.sets || 1, done = on ? ms && ms[c.key] || 1 : 0;
     const sub = (c.mins ? tf("cd.target", { n: c.mins }) : t("cd.notarget")) + (sets > 1 ? " × " + tn("mob.setsn", sets) : "") + (on && sets > 1 ? " · " + tf("mob.setsof", { n: done, of: sets }) : "");
     const tip = t(sets > 1 && done < sets ? "mob.ticktip.set" : "mob.ticktip");
@@ -8509,6 +8559,20 @@
     const b = $("rtDelete");
     if (b) b.textContent = t("btn.remove");
   }
+  function itemFields(k, it) {
+    const box = (f, ph, unit, aria) => {
+      const [lo, hi] = ITEM_FIELDS[k][f];
+      return `<label class="rtf"><input type="number" min="${lo}" max="${hi}" inputmode="numeric" data-f="${f}" value="${it[f] ?? ""}" placeholder="${ph}" aria-label="${esc(aria)}"><span>${esc(unit)}</span></label>`;
+    };
+    const x = (inner) => `<span class="rtfx"><span class="rtx">×</span>${inner}</span>`;
+    if (k === "lift") return box("sets", PLAN_SETS_DEF, t("rt.setsu"), t("rt.sets"));
+    if (k === "sx") {
+      const s = stretchByKey(it.k), reps = sxIsReps(s);
+      return (reps ? box("reps", s && s.reps || "", t("unit.reps"), t("rt.cfg.reps")) : box("secs", s && s.secs || "", "s", t("rt.cfg.secs"))) + x(box("sets", s && s.sets || 1, t("rt.setsu"), t("rt.sets")));
+    }
+    const c = cardioByKey(it.k);
+    return box("mins", c && c.mins || "", t("unit.min"), t("rt.cfg.mins")) + x(box("sets", c && c.sets || 1, t("rt.setsu"), t("rt.sets")));
+  }
   function drawForm() {
     const d = draft;
     const lift = d.kind === "lift";
@@ -8516,10 +8580,10 @@
     el("rtDelete").style.display = d.isNew ? "none" : "";
     el("rtItems").innerHTML = d.items.length ? d.items.map((it, i) => {
       const last = i === d.items.length - 1, inSS = it.link || i > 0 && d.items[i - 1].link;
-      const row = `<div class="rtitem${inSS ? " ss" : ""}${it.link ? " ssnext" : ""}" data-i="${i}"><span class="rtn">${i + 1}</span><span class="rtinm">${esc(nameOf(d.kind, it.k))}${hiddenOf(d.kind, it.k) ? ' <span class="xtag">' + esc(t("coll.hidden")) + "</span>" : ""}</span>` + (lift ? `<label class="rtsets"><input type="number" min="1" max="20" inputmode="numeric" class="rtset" value="${it.sets || ""}" placeholder="${PLAN_SETS_DEF}" aria-label="${esc(t("rt.sets"))}"><span>${esc(t("rt.setsu"))}</span></label>` : "") + `<button type="button" class="rtmv" data-mv="-1"${i === 0 ? " disabled" : ""} aria-label="${esc(t("rt.up"))}">↑</button><button type="button" class="rtmv" data-mv="1"${last ? " disabled" : ""} aria-label="${esc(t("rt.down"))}">↓</button><button type="button" class="rtrm" aria-label="${esc(t("btn.remove"))}">✕</button></div>`;
+      const row = `<div class="rtitem${inSS ? " ss" : ""}${it.link ? " ssnext" : ""}" data-i="${i}"><span class="rtn">${i + 1}</span><div class="rtmain"><span class="rtinm">${esc(nameOf(d.kind, it.k))}${hiddenOf(d.kind, it.k) ? ' <span class="xtag">' + esc(t("coll.hidden")) + "</span>" : ""}</span><div class="rtcfg">${itemFields(d.kind, it)}</div></div><button type="button" class="rtmv" data-mv="-1"${i === 0 ? " disabled" : ""} aria-label="${esc(t("rt.up"))}">↑</button><button type="button" class="rtmv" data-mv="1"${last ? " disabled" : ""} aria-label="${esc(t("rt.down"))}">↓</button><button type="button" class="rtrm" aria-label="${esc(t("btn.remove"))}">✕</button></div>`;
       const link = lift && !last ? `<button type="button" class="rtlink${it.link ? " on" : ""}" data-link="${i}" aria-pressed="${!!it.link}">${esc(t(it.link ? "rt.linked" : "rt.link"))}</button>` : "";
       return row + link;
-    }).join("") : `<div class="sxnote">${esc(t("rt.noitems"))}</div>`;
+    }).join("") + (lift ? "" : `<div class="sxnote rtcfgnote">${esc(t(d.kind === "sx" ? "rt.cfg.hint.sx" : "rt.cfg.hint.cd"))}</div>`) : `<div class="sxnote">${esc(t("rt.noitems"))}</div>`;
     el("rtItems").querySelectorAll(".rtitem").forEach((row) => {
       const i = +row.dataset.i;
       row.querySelectorAll(".rtmv").forEach((b) => b.onclick = () => move(i, +b.dataset.mv));
@@ -8528,12 +8592,11 @@
         if (d.items.length) delete d.items[d.items.length - 1].link;
         drawForm();
       };
-      const s = row.querySelector(".rtset");
-      if (s) s.oninput = () => {
-        const n = parseInt(s.value, 10);
-        if (n >= 1 && n <= 20) d.items[i].sets = n;
-        else delete d.items[i].sets;
-      };
+      row.querySelectorAll("input[data-f]").forEach((inp) => inp.oninput = () => {
+        const f = inp.dataset.f, [lo, hi] = ITEM_FIELDS[d.kind][f], n = parseInt(inp.value, 10);
+        if (n >= lo && n <= hi) d.items[i][f] = n;
+        else delete d.items[i][f];
+      });
     });
     el("rtItems").querySelectorAll(".rtlink").forEach((b) => b.onclick = () => {
       const i = +b.dataset.link;

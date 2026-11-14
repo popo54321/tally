@@ -432,8 +432,15 @@
   .rtitem.ss{border-left:4px solid var(--brass)}
   .rtn{font-family:var(--font-mono);font-size:11px;color:var(--txt-faint);min-width:16px}
   .rtinm{flex:1;min-width:0;font-size:13px;color:var(--ink)}
-  .rtsets{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-faint)}
-  .rtsets input{width:46px;padding:6px 4px;text-align:center;min-height:34px}
+  .rtmain{flex:1;min-width:0}
+  .rtmain .rtinm{display:block}
+  .rtcfg{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+  .rtf{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-faint)}
+  .rtf input{width:54px;padding:6px 4px;text-align:center;min-height:34px}
+  .rtx{font-size:12px;color:var(--txt-faint)}
+  .rtfx{display:flex;align-items:center;gap:5px}
+  .rtf input{width:50px}
+  .rtcfgnote{margin-top:8px}
   .rtmv,.rtrm{border:1px solid var(--line);background:var(--panel-2);border-radius:6px;min-width:34px;min-height:34px;cursor:pointer;color:var(--ink-dim)}
   .rtmv:disabled{opacity:.35;cursor:default}
   .rtlink{display:block;margin:5px auto 0;border:1px dashed var(--line);background:none;border-radius:6px;font-size:10.5px;padding:5px 12px;color:var(--txt-faint);cursor:pointer;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.4px;min-height:30px}

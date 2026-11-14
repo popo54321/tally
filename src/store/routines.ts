@@ -6,8 +6,26 @@ import { DAY_KEYS } from '../core/dates';
 export const RKEY = 'tally:routines:v1';
 export type Kind = 'lift' | 'sx' | 'cd';
 export const KINDS: Kind[] = ['lift', 'sx', 'cd'];
-/** One entry in a routine. For movements: planned sets, and whether it is linked to the next one (a superset). */
-export interface RItem { k: string; sets?: number; link?: boolean }
+type Any = any;   // eslint-disable-line @typescript-eslint/no-explicit-any
+/**
+ * One entry in a routine. Movements: planned sets, and whether it is linked to the next one (a superset).
+ * Stretches: hold seconds or reps per set, and sets. Cardio: minutes per set, and sets. A field left out means
+ * the stretch's or cardio's own setting.
+ */
+export interface RItem { k: string; sets?: number; link?: boolean; secs?: number; reps?: number; mins?: number }
+/** Allowed range of each per-item field, by kind. */
+export const ITEM_FIELDS: Record<Kind, Record<string, [number, number]>> = {
+  lift: { sets: [1, 20] },
+  sx: { secs: [1, 3600], reps: [1, 999], sets: [1, 50] },
+  cd: { mins: [1, 600], sets: [1, 50] },
+};
+/** Keeps the fields this kind uses, each a whole number in range. */
+export function cleanItem(kind: Kind, it: Any): RItem {
+  const o: RItem = { k: it.k };
+  for (const [f, [lo, hi]] of Object.entries(ITEM_FIELDS[kind])) { const n = parseInt(it[f], 10); if (n >= lo && n <= hi) (o as Any)[f] = n; }
+  if (kind === 'lift' && it.link === true) o.link = true;
+  return o;
+}
 export interface Routine { id: string; name: string; items: RItem[] }
 export type Week = Record<string, string[]>;
 export interface Routines { lift: Routine[]; sx: Routine[]; cd: Routine[]; week: Record<Kind, Week>; plan?: string }
@@ -16,7 +34,6 @@ export const ROUTINE_ID = /^r_[a-z0-9]{1,24}$/;
 export const MAX_ROUTINES = 60, MAX_ITEMS = 40, NAME_MAX = 40;
 export const emptyRoutines = (): Routines => ({ lift: [], sx: [], cd: [], week: { lift: {}, sx: {}, cd: {} } });
 
-type Any = any;   // eslint-disable-line @typescript-eslint/no-explicit-any
 /** Cleans whatever was saved: unknown entries dropped, each routine id and each entry once, weekdays pointing only at routines of their own kind. */
 export function normRoutines(x: Any, exists: Record<Kind, (k: string) => unknown>): Routines {
   const out = emptyRoutines();
@@ -31,12 +48,7 @@ export function normRoutines(x: Any, exists: Record<Kind, (k: string) => unknown
       (Array.isArray(r.items) ? r.items : []).forEach((it: Any) => {
         if (!it || typeof it.k !== 'string' || seen.has(it.k) || !exists[kind](it.k) || items.length >= MAX_ITEMS) return;
         seen.add(it.k);
-        const o: RItem = { k: it.k };
-        if (kind === 'lift') {
-          const n = parseInt(it.sets, 10); if (n >= 1 && n <= 20) o.sets = n;
-          if (it.link === true) o.link = true;
-        }
-        items.push(o);
+        items.push(cleanItem(kind, it));
       });
       if (items.length) delete items[items.length - 1].link;   // the last one has nothing to link to
       ids.add(r.id);

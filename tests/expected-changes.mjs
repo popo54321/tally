@@ -6,6 +6,9 @@
 // Say why next to each one. When the baseline moves forward (after a review, and at every publish), empty this list.
 export const EXPECTED = [
   // { what: /\/workout\/\d+-cardLog$/, why: 'example: the workout card gets a new button' },
+  // 9.5: stretch and cardio routines set their own hold or reps, minutes and sets
+  { what: /\/acts\/routine-editor$/, why: '9.5: each routine item\'s fields sit under its name (movements: sets; stretches: hold or reps × sets; cardio: minutes × sets)' },
+  { what: 'text:rt.cfg.*', why: '9.5: wording for the new stretch and cardio fields in a routine' },
 ];
 
 /** The entry that allows this difference, if any. */

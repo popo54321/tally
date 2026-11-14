@@ -64,7 +64,7 @@ try {
   await edit(p, 'lift', 'Monday');
   await p.fill('#rtName', 'Push A');
   await p.click('#rtItems .rtlink[data-link="0"]');                         // bench + overhead press
-  await p.fill('#rtItems .rtitem[data-i="2"] .rtset', '2');                 // lateral raise: 2 sets
+  await p.fill('#rtItems .rtitem[data-i="2"] input[data-f="sets"]', '2');                 // lateral raise: 2 sets
   await p.click('#rtAddBtn'); await p.fill('#rtSearch', 'curl'); await p.click('#rtPool button');
   await p.click('#rtDays button[data-d="thu"]');
   await p.click('#rtSave'); await p.waitForTimeout(300);
@@ -137,7 +137,7 @@ try {
   // a stretch routine of its own
   await p.click('#rtKind button[data-k="sx"]'); await p.click('#rtNew'); await p.fill('#rtName', 'Hips');
   await p.click('#rtPool button[data-k="sx_pigeonpose"]'); await p.click('#rtPool button[data-k="sx_couchstretch"]'); await p.click('#rtDays button[data-d="sat"]');
-  ok(await p.$$eval('#rtItems .rtset', x => x.length) === 0 && await p.$$eval('#rtItems .rtlink', x => x.length) === 0, 'stretch routines have no sets or supersets');
+  ok(await p.$$eval('#rtItems input[data-f="secs"]', x => x.length) === 2 && await p.$$eval('#rtItems input[data-f="sets"]', x => x.length) === 2 && await p.$$eval('#rtItems .rtlink', x => x.length) === 0, 'stretch routines have a hold and sets for each stretch, and no supersets');
   await p.click('#rtSave'); await p.waitForTimeout(300);
   ok((await plan(p)).sx.sat.join(',') === 'sx_pigeonpose,sx_couchstretch', 'a new stretch routine on Saturday');
 
@@ -186,6 +186,60 @@ try {
     ok(samePlan(await plan(q), pl2), 'and the plan stays as the older version left it');
     ok(o3.errors.length === 0, 'no page errors (' + o3.errors.join(' | ') + ')');
     await o3.ctx.close();
+  }
+
+  // ---- 10. stretch and cardio routines set their own hold, reps, minutes and sets ----
+  {
+    const o4 = await open(base()), q = o4.page;
+    const stored = () => q.evaluate(() => ({ sx: JSON.parse(localStorage.getItem('tally:stretches:v2')), cd: JSON.parse(localStorage.getItem('tally:cardio:v2')) }));
+    const own = await stored();
+    await edit(q, 'sx', 'Monday');
+    ok(await q.getAttribute('#rtItems .rtitem[data-i="0"] input[data-f="secs"]', 'placeholder') === '45' && await q.getAttribute('#rtItems .rtitem[data-i="0"] input[data-f="sets"]', 'placeholder') === '2', 'a stretch in a routine shows its own hold and sets in grey (45 s × 2)');
+    await q.fill('#rtItems .rtitem[data-i="0"] input[data-f="secs"]', '60'); await q.fill('#rtItems .rtitem[data-i="0"] input[data-f="sets"]', '3');
+    await q.click('#rtSave'); await q.waitForTimeout(300);
+    let item = byName(await routines(q), 'sx', 'Monday').items;
+    ok(item[0].secs === 60 && item[0].sets === 3 && item[1].secs === undefined, 'saved: couch stretch 60 s × 3 in this routine; pigeon pose left to its own');
+    await edit(q, 'sx', 'Wednesday');
+    ok(await q.$$eval('#rtItems input[data-f="reps"]', x => x.length) === 1 && await q.$$eval('#rtItems input[data-f="secs"]', x => x.length) === 0, 'a stretch counted in reps asks for reps instead of seconds');
+    await q.fill('#rtItems input[data-f="reps"]', '15'); await q.click('#rtSave'); await q.waitForTimeout(300);
+    await session(q, 'mon');
+    const row = k => q.evaluate(k => { const r = document.querySelector(`#mobWrap .mobrow[data-k="${k}"]`); return r && { amt: r.querySelector('.mobsec').placeholder, sets: r.querySelector('.mobn').placeholder, sub: r.querySelector('.mobname span:last-child').textContent }; }, k);
+    let r = await row('sx_couchstretch');
+    ok(r.amt === '60' && r.sets === '3' && /60s × 3 sets/.test(r.sub), 'Monday\'s log aims for the routine\'s 60 s × 3 (' + r.sub + ')');
+    r = await row('sx_pigeonpose');
+    ok(r.amt === '45' && r.sets === '1', 'pigeon pose keeps its own 45 s × 1');
+    await q.click('#mobWrap .mobrow[data-k="sx_couchstretch"] .mobtick'); await q.waitForTimeout(250);
+    const logged = await q.evaluate(() => { const e = JSON.parse(localStorage.getItem('tally:entries:v1')).find(x => x.date === '2026-11-10'); return e && e.mob && e.mob.sx_couchstretch; });
+    ok(logged === 60, 'ticking a set logs the routine\'s 60 s (' + logged + ')');
+    await q.click('#segLead button[data-l="0"]').catch(() => {});
+    await q.click('#mobWrap .mobrow[data-k="sx_couchstretch"] .mobgo'); await q.waitForTimeout(200);
+    ok(/1:00|^60/.test((await q.textContent('#restNum')).trim()), 'Start runs a 60 s hold (' + (await q.textContent('#restNum')).trim() + ')');
+    await q.click('#restStop');
+    await session(q, 'wed');
+    r = await row('sx_catcow');
+    ok(r.amt === '15', 'Wednesday\'s cat-cow aims for the routine\'s 15 reps');
+    const after = await stored();
+    ok(JSON.stringify(after.sx) === JSON.stringify(own.sx), 'the stretches\' own settings are untouched');
+    // cardio
+    await edit(q, 'cd', 'Tuesday');
+    ok(await q.getAttribute('#rtItems input[data-f="mins"]', 'placeholder') === '30', 'cardio in a routine shows its own minutes in grey');
+    await q.fill('#rtItems input[data-f="mins"]', '25'); await q.fill('#rtItems input[data-f="sets"]', '2'); await q.click('#rtSave'); await q.waitForTimeout(300);
+    await session(q, 'tue');
+    const cd = await q.evaluate(() => { const r = document.querySelector('#cdWrap .mobrow[data-k="cd_walking"]'); return r && { amt: r.querySelector('.mobsec').placeholder, sets: r.querySelector('.mobn').placeholder }; });
+    ok(cd && cd.amt === '25' && cd.sets === '2', 'Tuesday\'s walking aims for the routine\'s 25 min × 2');
+    await q.click('#cdWrap .mobrow[data-k="cd_walking"] .mobgo'); await q.waitForTimeout(200);
+    ok(/25:00|^25/.test((await q.textContent('#restNum')).trim()), 'Start runs 25 minutes (' + (await q.textContent('#restNum')).trim() + ')');
+    await q.click('#restStop');
+    ok(JSON.stringify((await stored()).cd) === JSON.stringify(own.cd), 'the cardio\'s own settings are untouched');
+    // an older version adds a stretch to Monday: the routine follows and keeps its targets
+    const raw = await q.evaluate(() => ({ r: localStorage.getItem('tally:routines:v1'), p: JSON.parse(localStorage.getItem('tally:plan:v1')) }));
+    await o4.ctx.close();
+    const st = base(); st['tally:routines:v1'] = raw.r; raw.p.sx.mon.push('sx_catcow'); st['tally:plan:v1'] = JSON.stringify(raw.p);
+    const o5 = await open(st);
+    item = byName(await routines(o5.page), 'sx', 'Monday').items;
+    ok(item.map(i => i.k).join(',') === 'sx_couchstretch,sx_pigeonpose,sx_catcow' && item[0].secs === 60 && item[0].sets === 3, 'after an older version adds a stretch, the routine keeps couch stretch at 60 s × 3');
+    ok(o4.errors.length === 0 && o5.errors.length === 0, 'no page errors (' + o4.errors.concat(o5.errors).join(' | ') + ')');
+    await o5.ctx.close();
   }
 } finally { await browser.close(); server.close(); }
 console.log(fails ? `${fails} routine check(s) FAILED` : 'all routine checks passed');

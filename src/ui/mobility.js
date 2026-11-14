@@ -8,7 +8,7 @@ import { normStretch } from '../store/schema';
 import { num } from '../core/numbers';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { cdToday, dayEntry, dayName, dayShort, mobSetsOf, persist, persistPlan, persistStretches, sxIsReps, sxKeyFor, sxTarget, sxToday } from './shared';
+import { cdToday, dayEntry, dayName, dayShort, mobSetsOf, persist, persistPlan, persistStretches, sxEff, sxIsReps, sxKeyFor, sxTarget, sxToday } from './shared';
 import { dlgClose, dlgOpen } from './dialog';
 import { drawCardio } from './cardio';
 import { fmtClock } from './rest-timer';
@@ -27,7 +27,7 @@ export async function setMobLog(key, total, sets){
 export function toggleMob(key){
   const cur=S.entries.find(e=>e.date===$("fDate").value);
   const on=!!(cur && cur.mob && (key in cur.mob));
-  const s=stretchByKey(key), n=(s && s.sets) || 1, per=s ? sxTarget(s) : 0, done=on ? mobSetsOf(cur,key) : 0;
+  const s=sxEff(stretchByKey(key)), n=(s && s.sets) || 1, per=s ? sxTarget(s) : 0, done=on ? mobSetsOf(cur,key) : 0;
   if(on && done>=n) return setMobLog(key, null);
   return setMobLog(key, (on ? cur.mob[key] : 0)+per, done+1);
 }
@@ -39,10 +39,11 @@ export function mobSetAdd(key, amount){
 export function mobRowEdit(row){
   const per=num(row.querySelector('.mobsec').value), n=num(row.querySelector('.mobn').value);
   if(per==null && n==null) return setMobLog(row.dataset.k, null);
-  const s=stretchByKey(row.dataset.k), sets=Math.max(1, Math.round(n || (s && s.sets) || 1));
+  const s=sxEff(stretchByKey(row.dataset.k)), sets=Math.max(1, Math.round(n || (s && s.sets) || 1));
   return setMobLog(row.dataset.k, Math.max(0, per || 0)*sets, sets);
 }
-export function mobRowHtml(s, mob, gone, ms){
+export function mobRowHtml(s0, mob, gone, ms){
+  const s=sxEff(s0);
   const on=(s.key in mob);
   const reps=sxIsReps(s), tgt=sxTarget(s), sets=s.sets||1, done=on ? ((ms && ms[s.key]) || 1) : 0;
   const base = tgt ? (reps ? tn('mob.repsn',tgt) : tf('mob.holdn',{n:tgt})) : t(reps?'mob.noreps':'mob.nohold');

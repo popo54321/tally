@@ -9,7 +9,7 @@ import { $, flash } from './dom';
 import { alarmCancel, scheduleAlarm, exactAlarmsOff } from '../platform/alarm';
 import { cdSetAdd } from './cardio';
 import { mobSetAdd } from './mobility';
-import { persistSettings, sxIsReps } from './shared';
+import { persistSettings, sxEff, sxIsReps } from './shared';
 
 // Only when the Beep setting is on; the label defaults to the rest wording.
 function alarmSet(secs, label){ if(S.settings.restSound) scheduleAlarm(secs, label||t('rest.alarm.rest')); }
@@ -128,7 +128,7 @@ export function startRest(secs, who){
   timerStart({kind:'rest', label: who?(t('rest.rest')+' · '+who):t('rest.rest'), hold:s, lead:0});
 }
 export function startStretch(key){
-  const s=stretchByKey(key);
+  const s=sxEff(stretchByKey(key));
   if(!s || sxIsReps(s) || !s.secs){ flash(t('msg.needhold')); return; }
   timerStart({kind:'stretch', key:key, label:s.name, hold:s.secs, lead:S.settings.mobLead||0});
 }

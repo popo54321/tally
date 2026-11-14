@@ -4,12 +4,12 @@
 import { DAY_KEYS } from '../core/dates';
 import { S } from '../state/app';
 import { exByKey, stretchByKey, cardioByKey, activeStretches, activeCardio } from '../state/persist';
-import { KINDS, NAME_MAX, MAX_ITEMS, type Kind, type Routine, type RItem } from '../store/routines';
+import { ITEM_FIELDS, KINDS, NAME_MAX, MAX_ITEMS, type Kind, type Routine, type RItem } from '../store/routines';
 import { PLAN_SETS_DEF } from '../store/schema';
 import { addToDay, dayRoutines, deleteRoutine, newRoutineId, putRoutine, removeFromDay, routineById, routineDays, saveRoutines } from '../state/routines';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
-import { byName, dayName, dayShort } from './shared';
+import { byName, dayName, dayShort, sxIsReps } from './shared';
 import { render } from './nav';
 import { buildExForm } from './workout-log';
 import { drawMob } from './mobility';
@@ -66,6 +66,23 @@ function openForm(k: Kind, id: string | null): void {
 function closeForm(): void { draft = null; resetDel(); msg(''); drawRoutines(); }
 function resetDel(): void { delArmed = false; if (delTimer) clearTimeout(delTimer); const b = $('rtDelete'); if (b) b.textContent = t('btn.remove'); }
 
+/** The per-item fields: movements their planned sets; stretches hold time (or reps) and sets; cardio minutes and sets.
+ *  Blank means the item's own setting, shown in grey. */
+function itemFields(k: Kind, it: RItem): string {
+  const box = (f: 'sets' | 'secs' | 'reps' | 'mins', ph: number | string, unit: string, aria: string) => {
+    const [lo, hi] = ITEM_FIELDS[k][f];
+    return `<label class="rtf"><input type="number" min="${lo}" max="${hi}" inputmode="numeric" data-f="${f}" value="${it[f] ?? ''}" placeholder="${ph}" aria-label="${esc(aria)}"><span>${esc(unit)}</span></label>`;
+  };
+  const x = (inner: string) => `<span class="rtfx"><span class="rtx">×</span>${inner}</span>`;   // '× sets' wraps as one
+  if (k === 'lift') return box('sets', PLAN_SETS_DEF, t('rt.setsu'), t('rt.sets'));
+  if (k === 'sx') {
+    const s = stretchByKey(it.k), reps = sxIsReps(s);
+    return (reps ? box('reps', (s && s.reps) || '', t('unit.reps'), t('rt.cfg.reps')) : box('secs', (s && s.secs) || '', 's', t('rt.cfg.secs')))
+      + x(box('sets', (s && s.sets) || 1, t('rt.setsu'), t('rt.sets')));
+  }
+  const c = cardioByKey(it.k);
+  return box('mins', (c && c.mins) || '', t('unit.min'), t('rt.cfg.mins')) + x(box('sets', (c && c.sets) || 1, t('rt.setsu'), t('rt.sets')));
+}
 function drawForm(): void {
   const d = draft!; const lift = d.kind === 'lift';
   el('rtFormTitle').textContent = t(d.isNew ? (lift ? 'rt.new.lift' : d.kind === 'sx' ? 'rt.new.sx' : 'rt.new.cd') : 'rt.edit');
@@ -73,20 +90,23 @@ function drawForm(): void {
   el('rtItems').innerHTML = d.items.length ? d.items.map((it, i) => {
     const last = i === d.items.length - 1, inSS = it.link || (i > 0 && d.items[i - 1].link);
     const row = `<div class="rtitem${inSS ? ' ss' : ''}${it.link ? ' ssnext' : ''}" data-i="${i}">`
-      + `<span class="rtn">${i + 1}</span><span class="rtinm">${esc(nameOf(d.kind, it.k))}${hiddenOf(d.kind, it.k) ? ' <span class="xtag">' + esc(t('coll.hidden')) + '</span>' : ''}</span>`
-      + (lift ? `<label class="rtsets"><input type="number" min="1" max="20" inputmode="numeric" class="rtset" value="${it.sets || ''}" placeholder="${PLAN_SETS_DEF}" aria-label="${esc(t('rt.sets'))}"><span>${esc(t('rt.setsu'))}</span></label>` : '')
+      + `<span class="rtn">${i + 1}</span><div class="rtmain"><span class="rtinm">${esc(nameOf(d.kind, it.k))}${hiddenOf(d.kind, it.k) ? ' <span class="xtag">' + esc(t('coll.hidden')) + '</span>' : ''}</span>`
+      + `<div class="rtcfg">${itemFields(d.kind, it)}</div></div>`
       + `<button type="button" class="rtmv" data-mv="-1"${i === 0 ? ' disabled' : ''} aria-label="${esc(t('rt.up'))}">↑</button>`
       + `<button type="button" class="rtmv" data-mv="1"${last ? ' disabled' : ''} aria-label="${esc(t('rt.down'))}">↓</button>`
       + `<button type="button" class="rtrm" aria-label="${esc(t('btn.remove'))}">✕</button></div>`;
     const link = (lift && !last) ? `<button type="button" class="rtlink${it.link ? ' on' : ''}" data-link="${i}" aria-pressed="${!!it.link}">${esc(t(it.link ? 'rt.linked' : 'rt.link'))}</button>` : '';
     return row + link;
-  }).join('') : `<div class="sxnote">${esc(t('rt.noitems'))}</div>`;
+  }).join('') + (lift ? '' : `<div class="sxnote rtcfgnote">${esc(t(d.kind === 'sx' ? 'rt.cfg.hint.sx' : 'rt.cfg.hint.cd'))}</div>`)
+    : `<div class="sxnote">${esc(t('rt.noitems'))}</div>`;
   el('rtItems').querySelectorAll<HTMLElement>('.rtitem').forEach(row => {
     const i = +row.dataset.i!;
     row.querySelectorAll<HTMLButtonElement>('.rtmv').forEach(b => b.onclick = () => move(i, +b.dataset.mv!));
     (row.querySelector('.rtrm') as HTMLElement).onclick = () => { d.items.splice(i, 1); if (d.items.length) delete d.items[d.items.length - 1].link; drawForm(); };
-    const s = row.querySelector<HTMLInputElement>('.rtset');
-    if (s) s.oninput = () => { const n = parseInt(s.value, 10); if (n >= 1 && n <= 20) d.items[i].sets = n; else delete d.items[i].sets; };
+    row.querySelectorAll<HTMLInputElement>('input[data-f]').forEach(inp => inp.oninput = () => {
+      const f = inp.dataset.f as 'sets' | 'secs' | 'reps' | 'mins', [lo, hi] = ITEM_FIELDS[d.kind][f], n = parseInt(inp.value, 10);
+      if (n >= lo && n <= hi) d.items[i][f] = n; else delete d.items[i][f];
+    });
   });
   el('rtItems').querySelectorAll<HTMLButtonElement>('.rtlink').forEach(b => b.onclick = () => {
     const i = +b.dataset.link!; if (d.items[i].link) delete d.items[i].link; else d.items[i].link = true; drawForm();
