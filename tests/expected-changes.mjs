@@ -7,11 +7,6 @@
 // Say why next to each one. When the baseline moves forward (after a review, and at every publish), empty this list.
 export const EXPECTED = [
   // { what: /\/workout\/\d+-cardLog$/, why: 'example: the workout card gets a new button' },
-  // 9.7: Android updates itself; 'Your data is 100% offline' wherever the app talked about offline
-  { what: 'text:upd.*', why: '9.7: self-update wording; web and Android update text say your data is 100% offline' },
-  { what: 'text:tour.backup.b', why: '9.7: Your data is 100% offline: it stays on this phone and nowhere else' },
-  { what: /\/settings\/\d+-cardUpdate$/, why: '9.7: the web update text now says your data is 100% offline' },
-  { what: /\/settings\/\d+-card(About|Methods|Theme)?$|\/import-message$/, moved: true, why: '9.7: below the Version card, which is a line taller' },
 ];
 
 /** The entry that allows this difference, if any. */

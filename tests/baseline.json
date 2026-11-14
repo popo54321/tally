@@ -1,5 +1,5 @@
 {
   "about": "The last reviewed version of Tally. tests/record.mjs + tests/compare.mjs (pictures and text of every screen) and tests/calc.mjs (calculations) compare the current code with this commit. Move it forward after reviewing a change, and always at a publish; then empty tests/expected-changes.mjs.",
-  "ref": "d3e44f83a99a335b46085ff85b93502e62beff55",
-  "version": "9.6"
+  "ref": "846c0b6187b017c4453bf4fbdcdbcc27b24f7002",
+  "version": "9.7"
 }
