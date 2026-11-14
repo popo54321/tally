@@ -28,7 +28,16 @@ const ALLOW = [/\/body\/06-card$/, /\/settings\/\d+-cardMethods$/, /\/history\/\
 const SHIFTED = [/\/body\/07-cardProfile$/, /\/settings\/\d+-cardAbout$/];
 // The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
 // Every other word on the card must still match, and the picture is then not compared.
-const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.3';
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.4';
+// 9.4 routines: where 8.1 tagged a planned movement, stretch or cardio 'PINNED', the tag now names the routine it
+// comes from (made from the old pins, so named after its weekdays, or 'Every day'). On these cards every other
+// word must still match; the picture is not compared, as the tag is wider. The 'Pin to …' buttons are gone from
+// the movement picker (a picture with no text: covered by tests/routines.mjs instead).
+const ROUTINE_TAG = [/\/workout\/\d+-card(Log|Mob|Cardio)$/, /\/acts\/session-mon$/];
+const TAG = /PINNED|(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|EVERY DAY|(SUN|MON|TUE|WED|THU|FRI|SAT)( \+ (SUN|MON|TUE|WED|THU|FRI|SAT))+)\b/g;
+ALLOW.push(/\/acts\/add-movement$/);
+// A wider tag can wrap the stretch list onto one more line, nudging the cards below by a pixel.
+SHIFTED.push(/^old-shapes-phone\/workout\//);
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));
@@ -65,6 +74,10 @@ for (const k of keys) {
   const notes = [];
   if (VERSION_CARD.test(k)) {
     const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split(OLD_V).join(NEW_V), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8');
+    if (ta === tb) { same++; continue; }
+  }
+  if (ROUTINE_TAG.some(r => r.test(k)) && x.png !== 'missing' && y.png !== 'missing') {
+    const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').replace(TAG, '<tag>'), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8').replace(TAG, '<tag>');
     if (ta === tb) { same++; continue; }
   }
   if (x.png === 'missing' || y.png === 'missing') { bad.push(`${k}: could not photograph in ${x.png === 'missing' ? a : b}: ${(x.error || y.error || '').slice(0, 100)}`); continue; }

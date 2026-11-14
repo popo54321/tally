@@ -15,6 +15,7 @@ import { fillForm } from './body';
 import { libToCollection } from './guide';
 import { render } from './nav';
 import { coachApplyDraw, coachApplyReset, coachApplySave, coachApplyMsg } from './coachapply';
+import { dropFromRoutines } from '../state/routines';
 
 export function loadDesc(ex){
   if(ex.unit==='sec') return t('load.seconds');
@@ -42,7 +43,6 @@ export function shRenderList(){
   const onForm=k=>!!$("sets-"+k);
   const hit=ex=>!q || qMatch(q, ex.name+' '+ex.short+' '+ex.note);
   const row=ex=>{
-    const pinned=(S.planExtras[dayKey]||[]).indexOf(ex.key)>=0;
     if(V.shManaging){
       const days=S.entries.filter(e=>liftsOf(e,ex.key).length).length;
       return `<div class="sh-row">
@@ -53,7 +53,6 @@ export function shRenderList(){
     }
     return `<div class="sh-row">
         <div class="nm">${esc(ex.name)}${lvTag(exLv(ex))}<span>${esc(loadDesc(ex))} · ${esc(exNote(ex))}</span></div>
-        <button class="sh-pin${pinned?' on':''}" data-pin="${esc(ex.key)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t('btn.add'))}</button>
       </div>`;
   };
@@ -62,7 +61,6 @@ export function shRenderList(){
     const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.bodyweight');
     return `<div class="sh-row${ok?'':' off'}">
         <div class="nm">${esc(t('lib.'+l.key))}${lvTag(l.lv)}<span>${esc(l.p.map(k=>t('mus.'+k)).join(', '))} · ${esc(ok ? eq : tf('guide.needs',{list:eq}))}</span></div>
-        <button class="sh-pin" data-libpin="${l.key}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>
         <button class="sh-add" data-libadd="${l.key}">${esc(t('btn.add'))}</button>
       </div>`;
   };
@@ -76,41 +74,23 @@ export function shRenderList(){
     : `<div class="sh-empty">${esc(tf('nomatch',{q:q}))}${V.shManaging?'':'<br>'+esc(t('sh.tapnew'))}</div>`+libPart;
 
 }
-export async function shLibPick(k, pin){
+export async function shLibPick(k){
   const key=await libToCollection(k);
-  if(key) shPick(key, pin);
+  if(key) shPick(key);
 }
-export async function shPick(key, pin){
-  const dayKey=$("fDay").value;
-  if(pin){
-    const list=S.planExtras[dayKey]||(S.planExtras[dayKey]=[]);
-    if(list.indexOf(key)<0) list.push(key);
-    await persistPlan();
-  }
+export async function shPick(key){
   addMovementToForm(key);
   shClose();
-  if(pin) render();
   const ex=exByKey(key);
-  flash(pin ? tf('msg.pinned',{name:(ex?ex.name:t('ex.movement')), day:dayShort(dayKey)})
-            : tf('msg.exadded',{name:(ex?ex.name:t('ex.movement'))}));
+  flash(tf('msg.exadded',{name:(ex?ex.name:t('ex.movement'))}));
 }
 export function unhide(key){ const ed=S.exEdits[key]; if(ed){ delete ed.retired; if(!Object.keys(ed).length) delete S.exEdits[key]; } }
-export function unpinEverywhere(key){
-  let touched=false;
-  Object.keys(S.planExtras).forEach(dk=>{
-    const i=S.planExtras[dk].indexOf(key);
-    if(i>=0){ S.planExtras[dk].splice(i,1); if(!S.planExtras[dk].length) delete S.planExtras[dk]; touched=true; }
-  });
-  return touched;
-}
 export async function shRetire(key){
   const ex=exByKey(key); if(!ex) return;
   const hide=!ex.retired;
   if(hide) (S.exEdits[key]||(S.exEdits[key]={})).retired=true; else unhide(key);
-  const unpinned = hide ? unpinEverywhere(key) : false;
-  await persistExEdits(); if(unpinned) await persistPlan();
-  const box=$("sets-"+key), tag=(box&&box.parentNode)?box.parentNode.querySelector('.xtag'):null;
-  if(tag && hide){ tag.className='xtag'; tag.textContent=t('ex.added'); }
+  // a hidden movement stays in its routines (and comes back when shown again) but is left out of the log
+  await persistExEdits();
   shRenderList(); render();
   shMsg(tf(hide?'msg.hidden':'msg.shown',{name:ex.name}));
   flash(tf(hide?'msg.hidden.short':'msg.shown.short',{name:ex.name}));
@@ -130,7 +110,7 @@ export async function shDelete(){
   }
   shResetDel();
   S.entries.forEach(e=>{ if(e.lifts && e.lifts[key]) delete e.lifts[key]; });
-  unpinEverywhere(key);
+  dropFromRoutines('lift', key);
   if(Array.isArray(S.settings.chartEx)) S.settings.chartEx=S.settings.chartEx.filter(k=>k!==key);
   S.customEx=S.customEx.filter(x=>x.key!==key); delete S.exEdits[key];
   await persistCatalogue(); await persistExEdits(); await persistPlan(); await persistSettings(); await persist();

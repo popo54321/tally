@@ -12,8 +12,9 @@ import { localDate } from '../core/dates';
 import { muscleVolume, weekStart } from '../core/volume';
 import { t, tf } from '../i18n/index';
 import { $, esc, flash } from './dom';
+import { dayRoutines, saveRoutines } from '../state/routines';
 
-export const APP_VERSION = '9.3';
+export const APP_VERSION = '9.4';
 export const kcalFloor = () => core.kcalFloor(S.settings.sex);
 export const kcalBand = target => core.kcalBand(target, S.settings.sex);
 export const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
@@ -59,6 +60,9 @@ export const DAYS = ['sun','mon','tue','wed','thu','fri','sat'].map(key=>({key})
 export const dayName = k => t('day.'+k);
 export const dayShort = k => t('day.short.'+k);
 export function dayLabel(k){
+  // workout routines by name; one still called after its weekday (as made from the old pins) by its movements
+  const rs=dayRoutines(k,'lift');
+  if(rs.length && !rs.some(r=>r.name===dayName(k))) return dayName(k)+' · '+rs.map(r=>r.name).join(' + ');
   const ks=sessionEx(k);
   if(!ks.length) return dayName(k)+' · '+t('day.rest');
   return dayName(k)+' · '+ks.map(x=>{ const e=exByKey(x); return e?e.short:x; }).join(' + ');
@@ -86,7 +90,7 @@ export const loadStretches = P.loadStretches, persistStretches = P.saveStretches
 export const loadCardio = P.loadCardio, persistCardio = P.saveCardio, loadGym = P.loadGym, persistGym = P.saveGym;
 export const recoverCardio = () => P.recoverCardio(t('ex.movement'));
 export const sxToday = {}, cdToday = {};
-export const planLogsInit = P.planLogsInit, planObject = P.planObject, persistPlan = P.savePlan;
+export const planLogsInit = P.planLogsInit, planObject = P.planObject, persistPlan = saveRoutines;
 export const liftsOf = (e,k)=> (e.lifts && e.lifts[k]) ? e.lifts[k] : [];
 export const groupName = k => t('grp.'+(GROUP_KEYS.indexOf(k)>=0?k:'other'));
 export const groupOf = ex => (ex && GROUP_KEYS.indexOf(ex.group)>=0) ? ex.group : 'other';

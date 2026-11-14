@@ -27,27 +27,25 @@ export function kpRender(){
   const c=kpCfg(V.kpKind), q=$("kpSearch").value.trim(), dayKey=$("fDay").value;
   const cur=S.entries.find(e=>e.date===$("fDate").value), log=(cur && cur[c.log]) || {};
   const shown=new Set(dayLogKeys(c.plan, c.today, log));
-  const pinBtn=(attr,k)=>`<button class="sh-pin" ${attr}="${esc(k)}" title="${esc(tf('sh.pintip',{day:dayShort(dayKey)}))}">${esc(tf('sh.pin',{day:dayShort(dayKey)}))}</button>`;
   const mine=c.mine().filter(x=>!shown.has(x.key) && (!q || qMatch(q, x.name))).sort((a,b)=>byName(a.name,b.name));
-  const mineRow=x=>`<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(V.kpKind==='sx' ? (sxTarget(x) ? (sxIsReps(x)?tn('mob.repsn',sxTarget(x)):tf('mob.holdn',{n:sxTarget(x)})) : t('mob.nohold')) : (x.mins?tf('cd.target',{n:x.mins}):t('cd.notarget')))}</span></div>${pinBtn('data-kpin',x.key)}<button class="sh-add" data-kadd="${esc(x.key)}">${esc(t('btn.add'))}</button></div>`;
+  const mineRow=x=>`<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(V.kpKind==='sx' ? (sxTarget(x) ? (sxIsReps(x)?tn('mob.repsn',sxTarget(x)):tf('mob.holdn',{n:sxTarget(x)})) : t('mob.nohold')) : (x.mins?tf('cd.target',{n:x.mins}):t('cd.notarget')))}</span></div><button class="sh-add" data-kadd="${esc(x.key)}">${esc(t('btn.add'))}</button></div>`;
   const lib=c.lib.filter(l=>!c.owned(l) && (!q || qMatch(q, c.libName(l)+' '+(l.mus||[]).map(m=>t('mus.'+m)).join(' ')+(l.lv?' '+t('lv.'+l.lv):''))))
     .sort((a,b)=>(libUsable(b)?1:0)-(libUsable(a)?1:0) || (a.lv||0)-(b.lv||0) || byName(c.libName(a),c.libName(b)));
   const libRowK=l=>{ const ok=libUsable(l), eq=l.eq.length ? l.eq.map(x=>t('eq.'+x)).join(', ') : t('guide.noeq');
     const sub=V.kpKind==='sx' ? l.mus.map(m=>t('mus.'+m)).join(', ')+' · '+sxSub(l) : tf('cd.target',{n:l.mins});
-    return `<div class="sh-row${ok?'':' off'}"><div class="nm">${esc(c.libName(l))}${V.kpKind==='sx'?lvTag(l.lv):''}<span>${esc(sub)} · ${esc(ok?eq:tf('guide.needs',{list:eq}))}</span></div>${pinBtn('data-lpin',l.key)}<button class="sh-add" data-ladd="${esc(l.key)}">${esc(t('btn.add'))}</button></div>`; };
+    return `<div class="sh-row${ok?'':' off'}"><div class="nm">${esc(c.libName(l))}${V.kpKind==='sx'?lvTag(l.lv):''}<span>${esc(sub)} · ${esc(ok?eq:tf('guide.needs',{list:eq}))}</span></div><button class="sh-add" data-ladd="${esc(l.key)}">${esc(t('btn.add'))}</button></div>`; };
   $("kpList").innerHTML = (mine.length ? `<div class="sh-grp">${esc(t(V.kpKind==='sx'?'kp.mine.sx':'kp.mine.cd'))}</div>`+mine.map(mineRow).join('') : '')
     + (lib.length ? `<div class="sh-grp">${esc(t('sh.lib'))}</div>`+lib.map(libRowK).join('') : '')
     || `<div class="sh-empty">${esc(q?tf('nomatch',{q:q}):t('kp.empty'))}</div>`;
 }
-export async function kpPick(key, pin){
-  const c=kpCfg(V.kpKind), dayKey=$("fDay").value, date=$("fDate").value;
-  if(pin){ const l=c.plan[dayKey]||(c.plan[dayKey]=[]); if(l.indexOf(key)<0) l.push(key); await persistPlan(); }
-  else (c.today[date]||(c.today[date]=[])).push(key);
+export async function kpPick(key){
+  const c=kpCfg(V.kpKind), date=$("fDate").value;
+  (c.today[date]||(c.today[date]=[])).push(key);
   kpClose(); c.draw();
   const x=V.kpKind==='sx'?stretchByKey(key):cardioByKey(key);
-  flash(pin ? tf('msg.pinned',{name:x?x.name:'', day:dayShort(dayKey)}) : tf('msg.exadded',{name:x?x.name:''}));
+  flash(tf('msg.exadded',{name:x?x.name:''}));
 }
-export async function kpLibPick(libKey, pin){ const key=await kpCfg(V.kpKind).fromLib(libKey); if(key) kpPick(key, pin); }
+export async function kpLibPick(libKey){ const key=await kpCfg(V.kpKind).fromLib(libKey); if(key) kpPick(key); }
 export function kpNew(){ kpClose(); if(V.kpKind==='sx'){ V.sxPinDay=$("fDay").value; sxOpen(null); } else { V.cdPinDay=$("fDay").value; cdOpen(null); } }
 export const sxOwned = l => S.stretches.find(x=>x.lib===l.key || x.name.toLowerCase()===t('sxlib.'+l.key).toLowerCase()) || null;
 export const cdOwned = l => S.cardios.find(x=>x.lib===l.key || x.name.toLowerCase()===t('cdlib.'+l.key).toLowerCase()) || null;

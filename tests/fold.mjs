@@ -8,7 +8,7 @@ const { server, url } = await start();
 const browser = await chromium.launch();
 let fails = 0;
 const ok = (c, w) => { console.log((c ? 'ok   ' : 'FAIL ') + w); if (!c) fails++; };
-const PAGES = { body: 8, workout: 9, guide: 5, gym: 1 };
+const PAGES = { body: 8, workout: 10, guide: 5, gym: 1 };   // 9.4 adds Routines on Workout
 const cardsOf = (p, pg) => p.evaluate(pg => [...document.querySelectorAll(`#pg-${pg} > .card`)].map(c => ({ id: c.id || c.querySelector('.lbl').textContent.trim().slice(0, 24), fold: !!c.querySelector('.foldbtn'), folded: c.classList.contains('folded'), h: Math.round(c.getBoundingClientRect().height) })), pg);
 
 try {

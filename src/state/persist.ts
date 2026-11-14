@@ -191,7 +191,7 @@ export async function savePlan(): Promise<boolean> {
 /** Everything, in the backup file layout 8.1 uses (version 4), so any version can read it. */
 export function exportObject(extra?: Record<string, unknown>) {
   return Object.assign({ app: 'tally', version: 4, exportedAt: new Date().toISOString(),
-    entries: S.entries, settings: S.settings, exercises: S.customEx, plan: planObject(), stretches: S.stretches, exEdits: S.exEdits, cardio: S.cardios,
+    entries: S.entries, settings: S.settings, exercises: S.customEx, plan: planObject(), routines: S.routines, stretches: S.stretches, exEdits: S.exEdits, cardio: S.cardios,
     theme: S.theme, gym: S.gym }, extra || {});
 }
 export async function loadBackupDate(): Promise<void> {

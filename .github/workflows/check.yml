@@ -59,6 +59,9 @@ jobs:
       - name: Coaching headroom and lifted today
         run: node tests/headroom.mjs
 
+      - name: Routines (workout, stretch, cardio), supersets, older versions, backups
+        run: node tests/routines.mjs
+
       - name: Photograph 8.1 and the rebuild, then compare
         run: |
           node tests/record.mjs old

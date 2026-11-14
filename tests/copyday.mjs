@@ -24,7 +24,7 @@ try {
   await page.click('#copyDayBtn');
   ok(await page.isVisible('#cpWrap .sh'), 'the button opens the copy dialog');
   ok((await page.textContent('#cpTitle')) === 'Copy Monday', 'dialog is titled after the selected session (' + await page.textContent('#cpTitle') + ')');
-  ok(/Monday: 3 movements and 2 stretches\. /.test(await page.textContent('#cpWhat')), 'it says what will be copied (' + await page.textContent('#cpWhat') + ')');
+  ok(/Monday: 3 movements and 2 stretches, in its routines\. /.test(await page.textContent('#cpWhat')), 'it says what will be copied (' + await page.textContent('#cpWhat') + ')');
   ok(!(await page.$('#cpDays button[data-d="mon"]')), 'Monday itself is not offered as a target');
   await page.click('#cpGo');
   ok(/Tick at least one day/.test(await page.textContent('#cpMsg')), 'copying with no day ticked asks for one');
@@ -51,7 +51,7 @@ try {
   await page.selectOption('#fDay', 'wed');
   await page.click('#copyDayBtn');
   await page.click('#cpMode button[data-m="replace"]');
-  ok(/exactly the same as Wednesday/.test(await page.textContent('#cpHowNote')), 'Replace explains what it does');
+  ok(/exactly Wednesday.s routines/.test(await page.textContent('#cpHowNote')), 'Replace explains what it does');
   await page.click('#cpDays button[data-d="sat"]'); await page.click('#cpGo'); await page.waitForTimeout(300);
   pl = await plan(page);
   ok(JSON.stringify(pl.sat) === JSON.stringify(p0.wed) && JSON.stringify(pl.sx.sat) === JSON.stringify(p0.sx.wed) && !pl.cd.sat, 'Replace: Saturday becomes exactly Wednesday (its run is gone)');

@@ -5,7 +5,7 @@ export const FOLD_KEYS = [
   // Body
   'cardBody', 'stat_bw', 'bfCard', 'stat_nutr', 'chart_weight', 'chart_size', 'calib_title', 'cardProfile',
   // Workout
-  'cardLog', 'cardPlates', 'cardMob', 'cardCardio', 'cardColl', 'cardProg', 'str', 'sx', 'cd',
+  'cardLog', 'cardPlates', 'cardMob', 'cardCardio', 'cardRoutines', 'cardColl', 'cardProg', 'str', 'sx', 'cd',
   // Guide
   'cardVol', 'cardSxWeek', 'cardRec', 'cardBrowse', 'cardCdLib',
   // My Gym

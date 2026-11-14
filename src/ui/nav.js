@@ -20,6 +20,7 @@ import { drawReview } from './review';
 import { drawTheme } from './theme';
 import { drawUndo, drawVersion } from './sync';
 import { foldApplyAll } from './fold';
+import { drawDayRoutines, drawRoutines } from './routines';
 
 export const PAGES=['body','workout','guide','gym','settings','history'];
 export function showPage(k){
@@ -39,7 +40,7 @@ export function shiftDay(n){
 }
 export const PAGE_DRAW = {
   body:     () => { drawBodyStats(); drawWeight(S.entries.filter(e=>e.weight!=null)); drawBody(); drawCalibration(); refreshManualTarget(); drawProtein(); drawBMR(); },
-  workout:  () => { drawPlates(); drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
+  workout:  () => { drawRoutines(); drawPlates(); drawStrength(); drawSxTrend(); drawCdTrend(); drawProg(); drawColl(); },
   guide:    () => drawGuide(),
   gym:      () => drawGym(),
   settings: () => { drawTheme(); drawUndo(); drawVersion(); },
@@ -60,6 +61,7 @@ export function drawSched(){
     sel.innerHTML=DAYS.map(d=>`<option value="${d.key}">${esc(dayLabel(d.key))}</option>`).join('');
     if(keep && DAYS.some(d=>d.key===keep)) sel.value=keep;
   }
+  drawDayRoutines();
   const wrap=$("sched"); if(!wrap) return;
   const today=weekdayKey($("fDate") && $("fDate").value ? $("fDate").value : localDate());
   wrap.innerHTML=DAYS.map(d=>{

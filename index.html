@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-M2Rx5jvAF5Rn4/vn/thu41WssQYTMMBOXQIhcfUJCg0='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-FQdKzhE6Eo2cgPHG5HKEn/G1zUjumvNj+aWUQDjc2hw='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -345,6 +345,8 @@
   .xtag{display:inline-block;background:var(--panel-2);color:var(--txt-faint);border:1px solid var(--line-soft);border-radius:5px;padding:2px 5px;margin:0 2px;
     font-family:var(--font-mono);font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;vertical-align:1px;line-height:1.2;cursor:pointer}
   .xtag:hover{border-color:var(--brass);color:var(--brass-bright)}
+  .xtag.still{font-style:normal;cursor:default}
+  .xtag.still:not(.pin):hover{border-color:var(--line-soft);color:var(--txt-faint)}
   .xtag.pin{background:rgba(13,89,209,.12);background:color-mix(in srgb,var(--brass) 15%,transparent);color:var(--brass-bright);border-color:var(--brass)}
   .exdrop{background:none;border:none;color:var(--txt-faint);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:5px;flex:none}
   .exdrop:hover{color:var(--rust)}
@@ -441,6 +443,38 @@
   .foldlbl{padding-right:50px;cursor:pointer}
   .plsides{margin:-2px 0 14px}
   .coachapply{margin-top:10px}
+  .dayrt{margin:2px 0 12px}
+  .dayrthead{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+  .dayrthead .ctl-lbl{margin:0 4px 0 0}
+  #dayRtList{display:flex;flex-wrap:wrap;gap:6px}
+  .rtchip{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--brass);border-radius:7px;padding:2px 2px 2px 9px;font-size:12.5px;color:var(--ink);background:color-mix(in srgb,var(--brass) 12%,transparent)}
+  .rtchip button{border:none;background:none;color:var(--txt-faint);cursor:pointer;font-size:12px;padding:4px 7px;min-height:30px}
+  .rtkind{font-size:10px;color:var(--txt-faint);text-transform:uppercase;letter-spacing:.4px;margin-left:4px}
+  .rtnone{font-size:12.5px;color:var(--txt-faint)}
+  .dayrtbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  #dayRtPick{margin-top:8px}
+  #rtKind{margin-bottom:8px}
+  .rtrow{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+  .rtrow:last-child{border-bottom:none}
+  .rtnm{flex:1;min-width:0;font-size:13.5px;color:var(--ink)}
+  .rtnm span{display:block;font-size:11.5px;color:var(--txt-faint);margin-top:2px}
+  .rtitem{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line-soft);border-radius:8px;margin-top:6px;background:var(--panel)}
+  .rtitem.ss{border-left:4px solid var(--brass)}
+  .rtn{font-family:var(--font-mono);font-size:11px;color:var(--txt-faint);min-width:16px}
+  .rtinm{flex:1;min-width:0;font-size:13px;color:var(--ink)}
+  .rtsets{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-faint)}
+  .rtsets input{width:46px;padding:6px 4px;text-align:center;min-height:34px}
+  .rtmv,.rtrm{border:1px solid var(--line);background:var(--panel-2);border-radius:6px;min-width:34px;min-height:34px;cursor:pointer;color:var(--ink-dim)}
+  .rtmv:disabled{opacity:.35;cursor:default}
+  .rtlink{display:block;margin:5px auto 0;border:1px dashed var(--line);background:none;border-radius:6px;font-size:10.5px;padding:5px 12px;color:var(--txt-faint);cursor:pointer;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.4px;min-height:30px}
+  .rtlink.on{border-style:solid;border-color:var(--brass);color:var(--brass-bright)}
+  #rtAddBtn{margin-top:10px}
+  #rtAddBox{margin-top:8px}
+  #rtAddBox .sh-search{margin-bottom:8px}
+  .rtdayslbl{margin-top:12px}
+  #rtMsg.err{color:var(--orange)}
+  .ssgroup{border-left:4px solid var(--brass);padding-left:10px;margin:4px 0 10px}
+  .sslbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--brass-bright);margin:6px 0 2px}
   .liftday{font-size:.82em;opacity:.8;margin:-4px 0 10px}
   .liftday:empty{display:none}
   .coachapply #shApplyBox{margin-top:10px}
@@ -535,8 +569,9 @@
   .reststart:active{transform:translate(3px,3px);box-shadow:0 0 0 var(--line)}
   .restsnd{background:none;border:1px solid var(--line-soft);border-radius:7px;color:var(--txt-faint);font-family:var(--font-mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;padding:9px;cursor:pointer;min-height:38px}
   .restsnd.on{border-color:var(--brass);color:var(--brass-bright)}
-  .rmrest{background:none;border:none;color:var(--txt-faint);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:5px}
-  .rmrest:hover{color:var(--brass-bright)}
+  .rmrest,.rmnext{background:none;border:none;color:var(--txt-faint);cursor:pointer;font-size:13px;padding:4px 7px;border-radius:5px}
+  .rmrest:hover,.rmnext:hover{color:var(--brass-bright)}
+  .rmnext{font-weight:700}
   .restbar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:70;background:var(--panel);border-top:3px solid var(--line);
     box-shadow:0 -4px 0 rgba(20,20,48,.16);padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
   .restbar.show{display:block}
@@ -586,7 +621,7 @@
     .day{min-width:0;flex:1 1 28%}
     .qnav button{font-size:9px;letter-spacing:.5px}
     .setrow input{width:62px;padding:11px 6px}
-    .setrow .rmset,.setrow .rmrest{padding:9px 8px;font-size:15px}
+    .setrow .rmset,.setrow .rmrest,.setrow .rmnext{padding:9px 8px;font-size:15px}
     .restnum{font-size:25px;min-width:76px}
   }
   .tourrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 2px}
@@ -781,6 +816,9 @@
     <div class="card col-12" id="cardLog">
       <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
       <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
+      <div class="dayrt" id="dayRt"><div class="dayrthead"><span class="ctl-lbl" data-i18n="rt.dayhead">Routines</span><span id="dayRtList"></span></div>
+        <div class="dayrtbtns"><button type="button" class="ghostbtn" id="dayRtAdd" aria-expanded="false">Add a routine…</button><button type="button" class="ghostbtn" id="dayRtManage" data-i18n="rt.manage">Make or edit routines</button></div>
+        <div id="dayRtPick" style="display:none"></div></div>
       <div class="copyrow"><button type="button" class="ghostbtn" id="copyDayBtn" data-i18n="copy.btn">Copy this day to…</button></div>
       <div class="restctl">
         <div class="seg" id="segRest">
@@ -839,6 +877,24 @@
       </div>
       <div id="cdWrap"></div>
       <button type="button" class="addmove" id="addCardioBtn" data-i18n="cd.add">+ Add cardio</button>
+    </div>
+
+    <div class="card col-12" id="cardRoutines">
+      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span></div>
+      <div id="rtWrap">
+        <div class="seg" id="rtKind"><button type="button" data-k="lift" data-i18n="rt.tab.lift">Workout</button><button type="button" data-k="sx" data-i18n="rt.tab.sx">Stretch</button><button type="button" data-k="cd" data-i18n="rt.tab.cd">Cardio</button></div>
+        <div id="rtList"><div id="rtRows"></div><button type="button" class="addmove" id="rtNew">+ New workout routine</button></div>
+        <div id="rtForm" style="display:none">
+          <div class="ctl-lbl" id="rtFormTitle"></div>
+          <div class="field"><label for="rtName" data-i18n="rt.name">Name</label><input type="text" id="rtName" maxlength="40" autocomplete="off" data-i18n-ph="rt.name.ph" placeholder="e.g. Push A"></div>
+          <div id="rtItems"></div>
+          <button type="button" class="ghostbtn" id="rtAddBtn"></button>
+          <div id="rtAddBox" style="display:none"><input type="text" class="sh-search" id="rtSearch" autocomplete="off" data-i18n-ph="rt.search" placeholder="Search"><div class="muschips" id="rtPool"></div></div>
+          <div class="ctl-lbl rtdayslbl" data-i18n="rt.days">On these weekdays</div><div class="muschips" id="rtDays"></div>
+          <div class="sxnote" id="rtMsg"></div>
+          <div class="sh-foot"><button type="button" id="rtCancel" data-i18n="btn.cancel">Cancel</button><button type="button" id="rtDelete" data-i18n="btn.remove">Remove</button><button type="button" class="prim" id="rtSave" data-i18n="btn.saveshort">Save</button></div>
+        </div>
+      </div>
     </div>
 
     <div class="card col-12" id="cardColl">
@@ -2470,6 +2526,7 @@
     "cardPlates",
     "cardMob",
     "cardCardio",
+    "cardRoutines",
     "cardColl",
     "cardProg",
     "str",
@@ -2978,6 +3035,49 @@
     return { set: !!g.set, have, own };
   }
 
+  // src/store/routines.ts
+  var RKEY = "tally:routines:v1";
+  var KINDS = ["lift", "sx", "cd"];
+  var ROUTINE_ID = /^r_[a-z0-9]{1,24}$/;
+  var MAX_ROUTINES = 60;
+  var MAX_ITEMS = 40;
+  var NAME_MAX = 40;
+  var emptyRoutines = () => ({ lift: [], sx: [], cd: [], week: { lift: {}, sx: {}, cd: {} } });
+  function normRoutines(x, exists) {
+    const out = emptyRoutines();
+    if (!x || typeof x !== "object") return out;
+    const ids = /* @__PURE__ */ new Set();
+    for (const kind2 of KINDS) {
+      const list = Array.isArray(x[kind2]) ? x[kind2] : [];
+      for (const r of list) {
+        if (out[kind2].length >= MAX_ROUTINES) break;
+        if (!r || typeof r !== "object" || typeof r.id !== "string" || !ROUTINE_ID.test(r.id) || ids.has(r.id)) continue;
+        const seen = /* @__PURE__ */ new Set(), items = [];
+        (Array.isArray(r.items) ? r.items : []).forEach((it) => {
+          if (!it || typeof it.k !== "string" || seen.has(it.k) || !exists[kind2](it.k) || items.length >= MAX_ITEMS) return;
+          seen.add(it.k);
+          const o = { k: it.k };
+          if (kind2 === "lift") {
+            const n = parseInt(it.sets, 10);
+            if (n >= 1 && n <= 20) o.sets = n;
+            if (it.link === true) o.link = true;
+          }
+          items.push(o);
+        });
+        if (items.length) delete items[items.length - 1].link;
+        ids.add(r.id);
+        out[kind2].push({ id: r.id, name: String(r.name == null ? "" : r.name).trim().slice(0, NAME_MAX) || "Routine", items });
+      }
+      const mine = new Set(out[kind2].map((r) => r.id)), wk = x.week && x.week[kind2];
+      if (wk && typeof wk === "object") DAY_KEYS.forEach((d) => {
+        const a = Array.isArray(wk[d]) ? wk[d].filter((id, i, arr) => typeof id === "string" && mine.has(id) && arr.indexOf(id) === i) : [];
+        if (a.length) out.week[kind2][d] = a;
+      });
+    }
+    if (typeof x.plan === "string") out.plan = x.plan;
+    return out;
+  }
+
   // src/state/app.ts
   var S = {
     /** Every logged day, oldest first. */
@@ -2991,7 +3091,9 @@
     catByKey: /* @__PURE__ */ new Map(),
     stretches: [],
     cardios: [],
-    /** Weekly plan: pinned movements, planned set counts, pinned stretches and cardio, per weekday. */
+    /** Routines of movements, stretches and cardio, and which weekdays each is on. The weekly plan below is worked out from them. */
+    routines: emptyRoutines(),
+    /** Weekly plan: movements, planned set counts, stretches and cardio, per weekday (from the routines). */
     planExtras: {},
     planSets: {},
     planSx: {},
@@ -3554,6 +3656,7 @@
       settings: S.settings,
       exercises: S.customEx,
       plan: planObject(),
+      routines: S.routines,
       stretches: S.stretches,
       exEdits: S.exEdits,
       cardio: S.cardios,
@@ -5222,13 +5325,17 @@
     "tour.calib.h": "Your calorie target",
     "tour.calib.b": "After a couple of weeks of weigh-ins and food, Tally works out your own maintenance and a target for your goal, with a ± range that narrows as you log. Tap Apply to use it.",
     "tour.session.h": "Pick the session",
-    "tour.session.b": "Each weekday has its own movements. Choose the day you are training to fill in its sets, with a suggestion for each lift.",
+    "tour.session.b": "Each weekday has its own routines. Choose the day you are training to fill in its sets, with a suggestion for each lift.",
+    "tour.dayrt.h": "Routines on this day",
+    "tour.dayrt.b": "Add a workout, stretch or cardio routine to this weekday, as many as you like: they all show up together. ✕ takes one off.",
+    "tour.routines.h": "Your routines",
+    "tour.routines.b": "Make named routines here, workout, stretch and cardio each on their own tab. Link movements into a superset and pick the weekdays.",
     "tour.addmove.h": "Add a movement",
     "tour.addmove.b": "Pick from 592 lifts. Pin it to the day and it comes back every week with your last weights.",
     "tour.rest.h": "Rest timer",
     "tour.rest.b": "Start a rest between sets. It beeps when time is up, even with the screen off in the Android app.",
     "tour.copy.h": "Copy a day",
-    "tour.copy.b": "Copy this day’s movements, stretches and cardio to other days in two taps, with Undo.",
+    "tour.copy.b": "Put this day’s routines on other days too in two taps, with Undo.",
     "tour.plates.h": "Plate calculator",
     "tour.plates.b": "Type the total you want and it shows what to load on each side of the bar.",
     "tour.mob.h": "Mobility and cardio",
@@ -5252,6 +5359,67 @@
     "pl.onenone": "One side",
     "pl.tot1": "Total {tot} ({other}) = bar {bar} + {side} on one side",
     "pl.totnobar1": "Total {tot} ({other}), all on one side",
+    "rt.title": `Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span>`,
+    "rt.tab.lift": "Workout",
+    "rt.tab.sx": "Stretch",
+    "rt.tab.cd": "Cardio",
+    "rt.kind.sx": "stretch",
+    "rt.kind.cd": "cardio",
+    "rt.new.lift": "+ New workout routine",
+    "rt.new.sx": "+ New stretch routine",
+    "rt.new.cd": "+ New cardio routine",
+    "rt.edit": "Edit routine",
+    "rt.name": "Name",
+    "rt.name.ph": "e.g. Push A",
+    "rt.search": "Search",
+    "rt.days": "On these weekdays",
+    "rt.nlift": "{n} movements",
+    "rt.nlift.1": "1 movement",
+    "rt.nsx": "{n} stretches",
+    "rt.nsx.1": "1 stretch",
+    "rt.ncd": "{n} cardio",
+    "rt.ncd.1": "1 cardio",
+    "rt.nss": "{n} supersets",
+    "rt.nss.1": "1 superset",
+    "rt.nodays": "not on any weekday yet",
+    "rt.everyday": "Every day",
+    "rt.empty.lift": "No workout routines yet. Make one, give it a name, put it on the weekdays you train it.",
+    "rt.empty.sx": "No stretch routines yet.",
+    "rt.empty.cd": "No cardio routines yet.",
+    "rt.noitems": "Nothing in this routine yet.",
+    "rt.add.lift": "+ Add movements",
+    "rt.add.sx": "+ Add stretches",
+    "rt.add.cd": "+ Add cardio",
+    "rt.adddone": "Done adding",
+    "rt.pool.none.lift": "Every movement in your collection is already in this routine.",
+    "rt.pool.none": "Everything on your list is already in this routine.",
+    "rt.toomany": "A routine holds up to {n}.",
+    "rt.sets": "Planned sets",
+    "rt.setsu": "sets",
+    "rt.up": "Move up",
+    "rt.down": "Move down",
+    "rt.link": "Link as superset",
+    "rt.linked": "Superset ✓ · tap to unlink",
+    "rt.needname": "Give the routine a name.",
+    "rt.needitems": "Add at least one first.",
+    "rt.clash": 'You already have a routine called "{name}".',
+    "rt.saved.new": 'Routine "{name}" saved',
+    "rt.saved": '"{name}" saved',
+    "rt.del.warn": 'Removes the routine "{name}" from every weekday. What you logged stays.',
+    "rt.deleted": 'Routine "{name}" removed',
+    "rt.dayhead": "Routines",
+    "rt.dayempty": "None on {day} yet",
+    "rt.addtoday": "Add a routine…",
+    "rt.manage": "Make or edit routines",
+    "rt.allon": "Every routine is already on this day.",
+    "rt.none": "No routines yet: make one in the Routines card further down.",
+    "rt.takeoff": "Take {name} off {day}",
+    "rt.puton": "{name} is now on every {day}",
+    "rt.tookoff": "{name} taken off {day}",
+    "rt.fromtip": "From your routine {name}",
+    "ss.label": "Superset · → goes to the next one, rest after the round",
+    "ss.nexttip": "Superset: go straight to the next movement",
+    "ss.resttip": "Start rest: the superset round is done",
     "ca.btn": "Apply this coaching to other movements…",
     "ca.btnn": "Apply to {n} more movements · change",
     "ca.btnn.1": "Apply to 1 more movement · change",
@@ -5263,7 +5431,7 @@
     "ca.done.1": " · coaching also set on 1 more movement",
     "copy.btn": "Copy this day to…",
     "copy.title": "Copy {day}",
-    "copy.what": "{day}: {list}. Planned set counts come too.",
+    "copy.what": "{day}: {list}, in its routines. The days share the routines, so a later change to one shows on every day it is on.",
     "copy.lifts": "{n} movements",
     "copy.lifts.1": "1 movement",
     "copy.sx": "{n} stretches",
@@ -5275,8 +5443,8 @@
     "copy.how": "If a day already has a plan",
     "copy.add": "Add to it",
     "copy.replace": "Replace it",
-    "copy.add.note": "Keeps what each day already has and adds what is missing. A movement already there keeps its own set count.",
-    "copy.replace.note": "Each ticked day becomes exactly the same as {day}. What it had before is removed from its plan; logged workouts are not touched.",
+    "copy.add.note": "Keeps the routines each day already has and adds the ones it lacks.",
+    "copy.replace.note": "Each ticked day gets exactly {day}'s routines. Routines it had before come off that day (they are not deleted); logged workouts are not touched.",
     "copy.go": "Copy",
     "copy.pick": "Tick at least one day.",
     "copy.done": "Copied {day} to {days}.",
@@ -5302,18 +5470,18 @@
   var cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
   var esc = (s) => String(s == null ? "" : s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   function applyLang() {
-    document.querySelectorAll("[data-i18n]").forEach((el2) => {
-      el2.textContent = t(el2.getAttribute("data-i18n"));
+    document.querySelectorAll("[data-i18n]").forEach((el3) => {
+      el3.textContent = t(el3.getAttribute("data-i18n"));
     });
-    document.querySelectorAll("[data-i18n-html]").forEach((el2) => {
-      el2.innerHTML = t(el2.getAttribute("data-i18n-html"));
+    document.querySelectorAll("[data-i18n-html]").forEach((el3) => {
+      el3.innerHTML = t(el3.getAttribute("data-i18n-html"));
     });
-    document.querySelectorAll("[data-i18n-ph]").forEach((el2) => {
-      el2.placeholder = t(el2.getAttribute("data-i18n-ph"));
+    document.querySelectorAll("[data-i18n-ph]").forEach((el3) => {
+      el3.placeholder = t(el3.getAttribute("data-i18n-ph"));
     });
-    document.querySelectorAll("[data-i18n-title]").forEach((el2) => {
-      el2.title = t(el2.getAttribute("data-i18n-title"));
-      if (!/[A-Za-z0-9]/.test(el2.textContent)) el2.setAttribute("aria-label", el2.title);
+    document.querySelectorAll("[data-i18n-title]").forEach((el3) => {
+      el3.title = t(el3.getAttribute("data-i18n-title"));
+      if (!/[A-Za-z0-9]/.test(el3.textContent)) el3.setAttribute("aria-label", el3.title);
     });
   }
   function fmtDelta(lbl, d, unit) {
@@ -5326,10 +5494,10 @@
     if (e) e.className = "dot " + (v >= good ? "ok" : v >= mid ? "mid" : "no");
   }
   var isObj2 = (x) => !!x && typeof x === "object" && !Array.isArray(x);
-  function flash(msg2, err) {
+  function flash(msg3, err) {
     const els = ["savedMsg", "savedMsg2"].map($).filter(Boolean);
     els.forEach((m) => {
-      m.textContent = msg2;
+      m.textContent = msg3;
       m.style.color = err ? "var(--rust)" : "var(--orange)";
       m.classList.add("show");
     });
@@ -5514,8 +5682,224 @@
     return ink;
   }
 
+  // src/state/routines.ts
+  var clone = (x) => JSON.parse(JSON.stringify(x));
+  var EXISTS = { lift: (k) => exByKey(k), sx: (k) => stretchByKey(k), cd: (k) => cardioByKey(k) };
+  var planList = (kind2) => kind2 === "lift" ? S.planExtras : kind2 === "sx" ? S.planSx : S.planCd;
+  function planSig() {
+    return JSON.stringify(DAY_KEYS.map((d) => [S.planExtras[d] || [], Object.entries(S.planSets[d] || {}).sort(), S.planSx[d] || [], S.planCd[d] || []]));
+  }
+  function dayRoutines(day, kind2) {
+    const ids = S.routines.week[kind2][day] || [];
+    return ids.map((id) => S.routines[kind2].find((r) => r.id === id)).filter(Boolean);
+  }
+  var routineById = (kind2, id) => S.routines[kind2].find((r) => r.id === id) || null;
+  var routineDays = (kind2, id) => DAY_KEYS.filter((d) => (S.routines.week[kind2][d] || []).indexOf(id) >= 0);
+  function derivePlan() {
+    const lifts = {}, sets = {}, sx = {}, cd = {};
+    DAY_KEYS.forEach((d) => {
+      const L = [], N = {};
+      dayRoutines(d, "lift").forEach((r) => r.items.forEach((it) => {
+        if (L.indexOf(it.k) < 0) {
+          L.push(it.k);
+          if (it.sets) N[it.k] = it.sets;
+        }
+      }));
+      if (L.length) lifts[d] = L;
+      if (Object.keys(N).length) sets[d] = N;
+      for (const [kind2, map] of [["sx", sx], ["cd", cd]]) {
+        const a = [];
+        dayRoutines(d, kind2).forEach((r) => r.items.forEach((it) => {
+          if (a.indexOf(it.k) < 0) a.push(it.k);
+        }));
+        if (a.length) map[d] = a;
+      }
+    });
+    S.planExtras = lifts;
+    S.planSets = sets;
+    S.planSx = sx;
+    S.planCd = cd;
+  }
+  function routinesFromPlan(prev, nameFor) {
+    const R = prev ? clone(prev) : emptyRoutines();
+    delete R.plan;
+    let n = 0;
+    const fresh = /* @__PURE__ */ new Map();
+    const sameItems = (a, b) => a.length === b.length && a.every((x, i) => x.k === b[i].k && (x.sets || 0) === (b[i].sets || 0));
+    for (const kind2 of KINDS) {
+      DAY_KEYS.forEach((d) => {
+        const want = (planList(kind2)[d] || []).map((k) => kind2 === "lift" && S.planSets[d] && S.planSets[d][k] ? { k, sets: S.planSets[d][k] } : { k });
+        const have = [];
+        const seen = /* @__PURE__ */ new Set();
+        (R.week[kind2][d] || []).forEach((id) => {
+          const r2 = R[kind2].find((x) => x.id === id);
+          if (r2) r2.items.forEach((it) => {
+            if (!seen.has(it.k)) {
+              seen.add(it.k);
+              have.push({ k: it.k, sets: it.sets });
+            }
+          });
+        });
+        if (sameItems(have, want)) return;
+        if (!want.length) {
+          delete R.week[kind2][d];
+          return;
+        }
+        const own = (R.week[kind2][d] || []).length === 1 ? R[kind2].find((x) => x.id === R.week[kind2][d][0]) : null;
+        if (own && DAY_KEYS.every((o) => o === d || (R.week[kind2][o] || []).indexOf(own.id) < 0)) {
+          own.items = want.map((w) => {
+            const old = own.items.find((it) => it.k === w.k);
+            return Object.assign({}, w, old && old.link ? { link: true } : {});
+          });
+          delete own.items[own.items.length - 1].link;
+          return;
+        }
+        let r = R[kind2].find((x) => sameItems(x.items.map((it) => ({ k: it.k, sets: it.sets })), want));
+        if (!r && R[kind2].length < MAX_ROUTINES) {
+          r = { id: newRoutineId(R, n++), name: "", items: want };
+          R[kind2].push(r);
+          fresh.set(r.id, []);
+        }
+        if (!r) return;
+        R.week[kind2][d] = [r.id];
+        if (fresh.has(r.id)) fresh.get(r.id).push(d);
+      });
+      R[kind2].forEach((r) => {
+        if (fresh.has(r.id)) r.name = nameFor(fresh.get(r.id));
+      });
+    }
+    return R;
+  }
+  function newRoutineId(R = S.routines, salt = 0) {
+    const used = new Set(KINDS.flatMap((k) => R[k].map((r) => r.id)));
+    let id = "";
+    do {
+      id = "r_" + (Date.now() + salt).toString(36) + Math.floor(Math.random() * 1296).toString(36);
+      salt++;
+    } while (used.has(id));
+    return id;
+  }
+  async function loadRoutines(nameFor) {
+    let saved = null;
+    try {
+      const v = await STORE.get(RKEY);
+      if (v) saved = normRoutines(JSON.parse(v), EXISTS);
+    } catch (e) {
+      console.error("routines read failed", e);
+    }
+    const sig = planSig();
+    if (saved && saved.plan === sig) {
+      S.routines = saved;
+      derivePlan();
+      return;
+    }
+    S.routines = routinesFromPlan(saved, nameFor);
+    await saveRoutines();
+  }
+  async function saveRoutines() {
+    derivePlan();
+    const okPlan = await savePlan();
+    try {
+      await STORE.set(RKEY, JSON.stringify(Object.assign({}, S.routines, { plan: planSig() })));
+      return okPlan;
+    } catch (e) {
+      console.error("routines save failed", e);
+      return false;
+    }
+  }
+  function routinesFromBackup(data, nameFor) {
+    const r = data.routines ? normRoutines(data.routines, EXISTS) : null;
+    if (r && KINDS.some((k) => r[k].length)) {
+      delete r.plan;
+      return r;
+    }
+    return routinesFromPlan(null, nameFor);
+  }
+  function addToDay(kind2, id, day) {
+    const w = S.routines.week[kind2], a = w[day] || (w[day] = []);
+    if (a.indexOf(id) >= 0) return false;
+    a.push(id);
+    return true;
+  }
+  function removeFromDay(kind2, id, day) {
+    const w = S.routines.week[kind2], a = (w[day] || []).filter((x) => x !== id);
+    if (a.length) w[day] = a;
+    else delete w[day];
+  }
+  function putRoutine(kind2, r, days) {
+    const list = S.routines[kind2], i = list.findIndex((x) => x.id === r.id);
+    const items = r.items.map((it) => kind2 === "lift" ? Object.assign({ k: it.k }, it.sets ? { sets: it.sets } : {}, it.link ? { link: true } : {}) : { k: it.k });
+    if (items.length) delete items[items.length - 1].link;
+    const clean = { id: r.id, name: r.name, items };
+    if (i >= 0) list[i] = clean;
+    else list.push(clean);
+    DAY_KEYS.forEach((d) => {
+      if (days.indexOf(d) >= 0) addToDay(kind2, r.id, d);
+      else removeFromDay(kind2, r.id, d);
+    });
+  }
+  function deleteRoutine(kind2, id) {
+    S.routines[kind2] = S.routines[kind2].filter((r) => r.id !== id);
+    DAY_KEYS.forEach((d) => removeFromDay(kind2, id, d));
+  }
+  function dropFromRoutines(kind2, key) {
+    let hit = false;
+    S.routines[kind2].forEach((r) => {
+      const n = r.items.length;
+      r.items = r.items.filter((it) => it.k !== key);
+      if (r.items.length !== n) {
+        hit = true;
+        if (r.items.length) delete r.items[r.items.length - 1].link;
+      }
+    });
+    return hit;
+  }
+  function daySupersets(day) {
+    const groups = [], placed = /* @__PURE__ */ new Set();
+    dayRoutines(day, "lift").forEach((r) => {
+      let cur = [];
+      r.items.forEach((it, i) => {
+        if (placed.has(it.k)) {
+          if (cur.length > 1) groups.push(cur);
+          cur = [];
+          return;
+        }
+        placed.add(it.k);
+        cur.push(it.k);
+        if (!it.link || i === r.items.length - 1) {
+          if (cur.length > 1) groups.push(cur);
+          cur = [];
+        }
+      });
+    });
+    return groups;
+  }
+  function routineFor(day, kind2, key) {
+    return dayRoutines(day, kind2).find((r) => r.items.some((it) => it.k === key)) || null;
+  }
+  var weekSnapshot = () => clone(S.routines.week);
+  async function restoreWeek(w) {
+    S.routines.week = clone(w);
+    await saveRoutines();
+  }
+  async function copyDayRoutines(from2, to, mode2) {
+    const before = weekSnapshot();
+    for (const kind2 of KINDS) {
+      const src = (S.routines.week[kind2][from2] || []).slice();
+      for (const d of to) {
+        if (d === from2) continue;
+        if (mode2 === "replace") {
+          if (src.length) S.routines.week[kind2][d] = src.slice();
+          else delete S.routines.week[kind2][d];
+        } else src.forEach((id) => addToDay(kind2, id, d));
+      }
+    }
+    await saveRoutines();
+    return before;
+  }
+
   // src/ui/shared.js
-  var APP_VERSION = "9.3";
+  var APP_VERSION = "9.4";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -5570,6 +5954,8 @@
   var dayName = (k) => t("day." + k);
   var dayShort = (k) => t("day.short." + k);
   function dayLabel(k) {
+    const rs = dayRoutines(k, "lift");
+    if (rs.length && !rs.some((r) => r.name === dayName(k))) return dayName(k) + " · " + rs.map((r) => r.name).join(" + ");
     const ks = sessionEx(k);
     if (!ks.length) return dayName(k) + " · " + t("day.rest");
     return dayName(k) + " · " + ks.map((x) => {
@@ -5622,7 +6008,7 @@
   var sxToday = {};
   var cdToday = {};
   var planLogsInit2 = planLogsInit;
-  var persistPlan = savePlan;
+  var persistPlan = saveRoutines;
   var liftsOf = (e, k) => e.lifts && e.lifts[k] ? e.lifts[k] : [];
   var groupName = (k) => t("grp." + (GROUP_KEYS.indexOf(k) >= 0 ? k : "other"));
   var groupOf = (ex) => ex && GROUP_KEYS.indexOf(ex.group) >= 0 ? ex.group : "other";
@@ -5680,9 +6066,9 @@
       top: plan.top,
       fail: plan.fail != null ? fmtLoad(ex, plan.fail) : ""
     };
-    const msg2 = plan.kind === "reps" && sec ? tf("coach.secs", v) : tf("coach." + plan.kind, v);
+    const msg3 = plan.kind === "reps" && sec ? tf("coach.secs", v) : tf("coach." + plan.kind, v);
     const L = plan.kind === "first" ? "" : fmtLoad(ex, plan.load);
-    return `<b>${esc(t("coach.next"))}</b> · ${L ? `<b>${esc(L)}</b> · ` : ""}${esc(msg2)}`;
+    return `<b>${esc(t("coach.next"))}</b> · ${L ? `<b>${esc(L)}</b> · ` : ""}${esc(msg3)}`;
   }
   function recordsLine(ex, r) {
     const b = [];
@@ -5841,8 +6227,8 @@
     return Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
   }
   function drawExactNotice() {
-    const el2 = $("restExact");
-    if (el2) el2.style.display = S.settings.restSound && exactAlarmsOff() ? "" : "none";
+    const el3 = $("restExact");
+    if (el3) el3.style.display = S.settings.restSound && exactAlarmsOff() ? "" : "none";
   }
   function audioWake() {
     try {
@@ -6079,36 +6465,20 @@
     const tip = t(sets > 1 && done < sets ? "mob.ticktip.set" : "mob.ticktip");
     return `<div class="mobrow${on ? " done" : ""}${on && done < sets ? " part" : ""}" data-k="${esc(s.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? done < sets ? "mixed" : "true" : "false"}">✓</button>
-    <div class="mobname">${esc(s.name)}${gone ? ' <span class="xtag">' + esc(t("removed")) + "</span>" : pinTag(logPinned(S.planSx, s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(s.name)}${gone ? ' <span class="xtag">' + esc(t("removed")) + "</span>" : pinTag("sx", s.key)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="${reps ? 999 : 3600}" inputmode="numeric" placeholder="${tgt || 0}" value="${on ? Math.round(mob[s.key] / done) : ""}" aria-label="${esc(t(reps ? "sx.reps" : "sx.hold"))}"><span class="mobu">${esc(reps ? t("unit.reps") : "s")}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on ? done : ""}" aria-label="${esc(t("sx.sets"))}">
     ${go3}
     ${gone ? "" : '<button type="button" class="mobedit" title="' + esc(t("mob.edittip")) + '" aria-label="' + esc(t("mob.edittip")) + '">⋯</button>'}
   </div>`;
   }
-  function unpinLog(plan, key) {
-    Object.keys(plan).forEach((d) => {
-      plan[d] = plan[d].filter((k) => k !== key);
-      if (!plan[d].length) delete plan[d];
-    });
-  }
   function dayLogKeys(plan, today, log) {
     const dayKey = $("fDay").value, date = $("fDate").value;
     return [.../* @__PURE__ */ new Set([...plan[dayKey] || [], ...today[date] || [], ...Object.keys(log)])];
   }
-  var logPinned = (plan, key) => (plan[$("fDay").value] || []).indexOf(key) >= 0;
-  async function toggleLogPin(kind, key) {
-    const plan = kind === "sx" ? S.planSx : S.planCd, dayKey = $("fDay").value, list = plan[dayKey] || (plan[dayKey] = []), i = list.indexOf(key);
-    if (i >= 0) {
-      list.splice(i, 1);
-      if (!list.length) delete plan[dayKey];
-      const today = kind === "sx" ? sxToday : cdToday, date = $("fDate").value;
-      (today[date] || (today[date] = [])).push(key);
-    } else list.push(key);
-    await persistPlan();
-    if (kind === "sx") drawMob();
-    else drawCardio();
-  }
-  var pinTag = (pinned, dayKey) => `<button type="button" class="xtag mobpin${pinned ? " pin" : ""}" title="${esc(pinned ? t("ex.unpintip") : tf("ex.pintip", { day: dayShort(dayKey) }))}">${esc(t(pinned ? "ex.pinned" : "ex.added"))}</button>`;
+  var pinTag = (kind2, key) => {
+    const r = routineFor($("fDay").value, kind2, key);
+    return r ? `<em class="xtag pin still">${esc(r.name)}</em>` : `<em class="xtag still">${esc(t("ex.added"))}</em>`;
+  };
   function drawMob() {
     const wrap = $("mobWrap");
     if (!wrap) return;
@@ -6142,10 +6512,10 @@
     const hint = $("mobHint");
     if (hint) hint.innerHTML = n ? tf("mob.hint.done", { summary: "<b>" + esc(summary) + "</b>" }) : t("mob.hint.none");
   }
-  function sxMsg(msg2, err) {
+  function sxMsg(msg3, err) {
     const m = $("sxMsg");
     if (!m) return;
-    m.textContent = msg2 || "";
+    m.textContent = msg3 || "";
     m.className = "sh-msg" + (err ? " err" : "");
   }
   function sxResetDel() {
@@ -6252,8 +6622,8 @@
       }
       S.stretches.push(s);
       if (V.sxPinDay) {
-        (S.planSx[V.sxPinDay] || (S.planSx[V.sxPinDay] = [])).push(s.key);
-        await persistPlan();
+        const d = $("fDate").value;
+        (sxToday[d] || (sxToday[d] = [])).push(s.key);
       }
     }
     const ok = await persistStretches();
@@ -6278,8 +6648,7 @@
     }
     sxResetDel();
     S.stretches = S.stretches.filter((x) => x.key !== s.key);
-    unpinLog(S.planSx, s.key);
-    await persistPlan();
+    if (dropFromRoutines("sx", s.key)) await persistPlan();
     S.entries.forEach((e) => {
       if (e.mob && s.key in e.mob) {
         delete e.mob[s.key];
@@ -6344,7 +6713,7 @@
     const tip = t(sets > 1 && done < sets ? "mob.ticktip.set" : "mob.ticktip");
     return `<div class="mobrow${on ? " done" : ""}${on && done < sets ? " part" : ""}" data-k="${esc(c.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? done < sets ? "mixed" : "true" : "false"}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone ? ' <span class="xtag">' + esc(t("removed")) + "</span>" : pinTag(logPinned(S.planCd, c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(c.name)}${gone ? ' <span class="xtag">' + esc(t("removed")) + "</span>" : pinTag("cd", c.key)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="${c.mins || 0}" value="${on ? Math.round(log[c.key] / done) : ""}" aria-label="${esc(t("cdx.mins"))}"><span class="mobu">${esc(t("unit.min"))}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on ? done : ""}" aria-label="${esc(t("sx.sets"))}">
     ${c.mins ? '<button type="button" class="mobgo">' + esc(t("btn.start")) + "</button>" : ""}
     ${gone ? "" : '<button type="button" class="mobedit" title="' + esc(t("mob.edittip")) + '" aria-label="' + esc(t("mob.edittip")) + '">⋯</button>'}
@@ -6372,10 +6741,10 @@
     const tot = $("cdTot");
     if (tot) tot.textContent = n ? tf("done.n", { n }) + (mins ? " · " + mins + " " + t("unit.min") : "") : t("nothingyet");
   }
-  function cdMsg(msg2, err) {
+  function cdMsg(msg3, err) {
     const m = $("cdMsg");
     if (!m) return;
-    m.textContent = msg2 || "";
+    m.textContent = msg3 || "";
     m.className = "sh-msg" + (err ? " err" : "");
   }
   function cdResetDel() {
@@ -6435,8 +6804,8 @@
       }
       S.cardios.push(c);
       if (V.cdPinDay) {
-        (S.planCd[V.cdPinDay] || (S.planCd[V.cdPinDay] = [])).push(c.key);
-        await persistPlan();
+        const d = $("fDate").value;
+        (cdToday[d] || (cdToday[d] = [])).push(c.key);
       }
     }
     const ok = await persistCardio();
@@ -6461,8 +6830,7 @@
     }
     cdResetDel();
     S.cardios = S.cardios.filter((x) => x.key !== c.key);
-    unpinLog(S.planCd, c.key);
-    await persistPlan();
+    if (dropFromRoutines("cd", c.key)) await persistPlan();
     S.entries.forEach((e) => {
       if (e.cardio && c.key in e.cardio) {
         delete e.cardio[c.key];
@@ -6478,12 +6846,12 @@
 
   // src/ui/picker.js
   var kpCfg = (k) => k === "sx" ? { lib: SX_LIB, mine: activeStretches, plan: S.planSx, today: sxToday, libName: (l) => t("sxlib." + l.key), owned: sxOwned, fromLib: sxFromLib, draw: () => drawMob(), log: "mob" } : { lib: CD_LIB, mine: activeCardio, plan: S.planCd, today: cdToday, libName: (l) => t("cdlib." + l.key), owned: cdOwned, fromLib: cdFromLib, draw: () => drawCardio(), log: "cardio" };
-  function kpOpen(kind) {
-    V.kpKind = kind;
-    $("kpTitle").textContent = t(kind === "sx" ? "kp.title.sx" : "kp.title.cd");
-    $("kpNew").textContent = t(kind === "sx" ? "sx.new" : "cdx.new");
+  function kpOpen(kind2) {
+    V.kpKind = kind2;
+    $("kpTitle").textContent = t(kind2 === "sx" ? "kp.title.sx" : "kp.title.cd");
+    $("kpNew").textContent = t(kind2 === "sx" ? "sx.new" : "cdx.new");
     $("kpSearch").value = "";
-    $("kpSearch").placeholder = t(kind === "sx" ? "kp.search.sx" : "kp.search.cd");
+    $("kpSearch").placeholder = t(kind2 === "sx" ? "kp.search.sx" : "kp.search.cd");
     kpRender();
     dlgOpen("kpWrap");
   }
@@ -6495,32 +6863,27 @@
     const c = kpCfg(V.kpKind), q = $("kpSearch").value.trim(), dayKey = $("fDay").value;
     const cur = S.entries.find((e) => e.date === $("fDate").value), log = cur && cur[c.log] || {};
     const shown = new Set(dayLogKeys(c.plan, c.today, log));
-    const pinBtn = (attr, k) => `<button class="sh-pin" ${attr}="${esc(k)}" title="${esc(tf("sh.pintip", { day: dayShort(dayKey) }))}">${esc(tf("sh.pin", { day: dayShort(dayKey) }))}</button>`;
     const mine = c.mine().filter((x) => !shown.has(x.key) && (!q || qMatch(q, x.name))).sort((a, b) => byName(a.name, b.name));
-    const mineRow = (x) => `<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(V.kpKind === "sx" ? sxTarget(x) ? sxIsReps(x) ? tn("mob.repsn", sxTarget(x)) : tf("mob.holdn", { n: sxTarget(x) }) : t("mob.nohold") : x.mins ? tf("cd.target", { n: x.mins }) : t("cd.notarget"))}</span></div>${pinBtn("data-kpin", x.key)}<button class="sh-add" data-kadd="${esc(x.key)}">${esc(t("btn.add"))}</button></div>`;
+    const mineRow = (x) => `<div class="sh-row"><div class="nm">${esc(x.name)}<span>${esc(V.kpKind === "sx" ? sxTarget(x) ? sxIsReps(x) ? tn("mob.repsn", sxTarget(x)) : tf("mob.holdn", { n: sxTarget(x) }) : t("mob.nohold") : x.mins ? tf("cd.target", { n: x.mins }) : t("cd.notarget"))}</span></div><button class="sh-add" data-kadd="${esc(x.key)}">${esc(t("btn.add"))}</button></div>`;
     const lib = c.lib.filter((l) => !c.owned(l) && (!q || qMatch(q, c.libName(l) + " " + (l.mus || []).map((m) => t("mus." + m)).join(" ") + (l.lv ? " " + t("lv." + l.lv) : "")))).sort((a, b) => (libUsable(b) ? 1 : 0) - (libUsable(a) ? 1 : 0) || (a.lv || 0) - (b.lv || 0) || byName(c.libName(a), c.libName(b)));
     const libRowK = (l) => {
       const ok = libUsable(l), eq = l.eq.length ? l.eq.map((x) => t("eq." + x)).join(", ") : t("guide.noeq");
       const sub = V.kpKind === "sx" ? l.mus.map((m) => t("mus." + m)).join(", ") + " · " + sxSub(l) : tf("cd.target", { n: l.mins });
-      return `<div class="sh-row${ok ? "" : " off"}"><div class="nm">${esc(c.libName(l))}${V.kpKind === "sx" ? lvTag(l.lv) : ""}<span>${esc(sub)} · ${esc(ok ? eq : tf("guide.needs", { list: eq }))}</span></div>${pinBtn("data-lpin", l.key)}<button class="sh-add" data-ladd="${esc(l.key)}">${esc(t("btn.add"))}</button></div>`;
+      return `<div class="sh-row${ok ? "" : " off"}"><div class="nm">${esc(c.libName(l))}${V.kpKind === "sx" ? lvTag(l.lv) : ""}<span>${esc(sub)} · ${esc(ok ? eq : tf("guide.needs", { list: eq }))}</span></div><button class="sh-add" data-ladd="${esc(l.key)}">${esc(t("btn.add"))}</button></div>`;
     };
     $("kpList").innerHTML = (mine.length ? `<div class="sh-grp">${esc(t(V.kpKind === "sx" ? "kp.mine.sx" : "kp.mine.cd"))}</div>` + mine.map(mineRow).join("") : "") + (lib.length ? `<div class="sh-grp">${esc(t("sh.lib"))}</div>` + lib.map(libRowK).join("") : "") || `<div class="sh-empty">${esc(q ? tf("nomatch", { q }) : t("kp.empty"))}</div>`;
   }
-  async function kpPick(key, pin) {
-    const c = kpCfg(V.kpKind), dayKey = $("fDay").value, date = $("fDate").value;
-    if (pin) {
-      const l = c.plan[dayKey] || (c.plan[dayKey] = []);
-      if (l.indexOf(key) < 0) l.push(key);
-      await persistPlan();
-    } else (c.today[date] || (c.today[date] = [])).push(key);
+  async function kpPick(key) {
+    const c = kpCfg(V.kpKind), date = $("fDate").value;
+    (c.today[date] || (c.today[date] = [])).push(key);
     kpClose();
     c.draw();
     const x = V.kpKind === "sx" ? stretchByKey(key) : cardioByKey(key);
-    flash(pin ? tf("msg.pinned", { name: x ? x.name : "", day: dayShort(dayKey) }) : tf("msg.exadded", { name: x ? x.name : "" }));
+    flash(tf("msg.exadded", { name: x ? x.name : "" }));
   }
-  async function kpLibPick(libKey, pin) {
+  async function kpLibPick(libKey) {
     const key = await kpCfg(V.kpKind).fromLib(libKey);
-    if (key) kpPick(key, pin);
+    if (key) kpPick(key);
   }
   function kpNew() {
     kpClose();
@@ -6645,10 +7008,10 @@
     if (ex.added) return t("load.bwkg");
     return "kg";
   }
-  function shMsg(msg2, err) {
+  function shMsg(msg3, err) {
     const m = $("shMsg");
     if (!m) return;
-    m.textContent = msg2 || "";
+    m.textContent = msg3 || "";
     m.className = "sh-msg" + (err ? " err" : "");
   }
   function shShow(mode2) {
@@ -6675,7 +7038,6 @@
     const onForm = (k) => !!$("sets-" + k);
     const hit = (ex) => !q || qMatch(q, ex.name + " " + ex.short + " " + ex.note);
     const row = (ex) => {
-      const pinned = (S.planExtras[dayKey] || []).indexOf(ex.key) >= 0;
       if (V.shManaging) {
         const days = S.entries.filter((e) => liftsOf(e, ex.key).length).length;
         return `<div class="sh-row">
@@ -6686,39 +7048,30 @@
       }
       return `<div class="sh-row">
         <div class="nm">${esc(ex.name)}${lvTag(exLv(ex))}<span>${esc(loadDesc(ex))} · ${esc(exNote(ex))}</span></div>
-        <button class="sh-pin${pinned ? " on" : ""}" data-pin="${esc(ex.key)}" title="${esc(tf("sh.pintip", { day: dayShort(dayKey) }))}">${esc(tf("sh.pin", { day: dayShort(dayKey) }))}</button>
         <button class="sh-add" data-add="${esc(ex.key)}">${esc(t("btn.add"))}</button>
       </div>`;
     };
-    const pool = S.catalogue.filter(hit).filter((ex) => V.shManaging || !ex.retired && !onForm(ex.key)).sort(exOrder);
+    const pool2 = S.catalogue.filter(hit).filter((ex) => V.shManaging || !ex.retired && !onForm(ex.key)).sort(exOrder);
     const lrow = (l) => {
       const ok = libUsable(l), eq = l.eq.length ? l.eq.map((x) => t("eq." + x)).join(", ") : t("guide.bodyweight");
       return `<div class="sh-row${ok ? "" : " off"}">
         <div class="nm">${esc(t("lib." + l.key))}${lvTag(l.lv)}<span>${esc(l.p.map((k) => t("mus." + k)).join(", "))} · ${esc(ok ? eq : tf("guide.needs", { list: eq }))}</span></div>
-        <button class="sh-pin" data-libpin="${l.key}" title="${esc(tf("sh.pintip", { day: dayShort(dayKey) }))}">${esc(tf("sh.pin", { day: dayShort(dayKey) }))}</button>
         <button class="sh-add" data-libadd="${l.key}">${esc(t("btn.add"))}</button>
       </div>`;
     };
     const found = q && !V.shManaging ? LIB.filter((l) => !libLive(l) && qMatch(q, t("lib." + l.key) + " " + l.p.concat(l.s).map((k) => t("mus." + k)).join(" ") + (l.lv ? " " + t("lv." + l.lv) : ""))).sort((a, b) => (libUsable(b) ? 1 : 0) - (libUsable(a) ? 1 : 0) || libOrder(a, b)).slice(0, 60) : [];
     const libPart = found.length ? `<div class="sh-grp">${esc(t("sh.lib"))}</div>` + bwSplit(found, (l) => l.lv, lrow, "sh-grp") : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}</div>` : "";
-    box.innerHTML = pool.length || found.length ? (pool.length ? `<div class="sh-grp">${esc(t("sh.yours"))}</div>` + bwSplit(pool, exLv, row, "sh-grp") : "") + libPart : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}<br>${esc(t("sh.tapnew"))}</div>` : `<div class="sh-empty">${esc(tf("nomatch", { q }))}${V.shManaging ? "" : "<br>" + esc(t("sh.tapnew"))}</div>` + libPart;
+    box.innerHTML = pool2.length || found.length ? (pool2.length ? `<div class="sh-grp">${esc(t("sh.yours"))}</div>` + bwSplit(pool2, exLv, row, "sh-grp") : "") + libPart : !q && !V.shManaging ? `<div class="sh-empty">${esc(tf("sh.libhint", { n: LIB.length }))}<br>${esc(t("sh.tapnew"))}</div>` : `<div class="sh-empty">${esc(tf("nomatch", { q }))}${V.shManaging ? "" : "<br>" + esc(t("sh.tapnew"))}</div>` + libPart;
   }
-  async function shLibPick(k, pin) {
+  async function shLibPick(k) {
     const key = await libToCollection(k);
-    if (key) shPick(key, pin);
+    if (key) shPick(key);
   }
-  async function shPick(key, pin) {
-    const dayKey = $("fDay").value;
-    if (pin) {
-      const list = S.planExtras[dayKey] || (S.planExtras[dayKey] = []);
-      if (list.indexOf(key) < 0) list.push(key);
-      await persistPlan();
-    }
+  async function shPick(key) {
     addMovementToForm(key);
     shClose();
-    if (pin) render();
     const ex = exByKey(key);
-    flash(pin ? tf("msg.pinned", { name: ex ? ex.name : t("ex.movement"), day: dayShort(dayKey) }) : tf("msg.exadded", { name: ex ? ex.name : t("ex.movement") }));
+    flash(tf("msg.exadded", { name: ex ? ex.name : t("ex.movement") }));
   }
   function unhide(key) {
     const ed = S.exEdits[key];
@@ -6727,32 +7080,13 @@
       if (!Object.keys(ed).length) delete S.exEdits[key];
     }
   }
-  function unpinEverywhere(key) {
-    let touched = false;
-    Object.keys(S.planExtras).forEach((dk) => {
-      const i = S.planExtras[dk].indexOf(key);
-      if (i >= 0) {
-        S.planExtras[dk].splice(i, 1);
-        if (!S.planExtras[dk].length) delete S.planExtras[dk];
-        touched = true;
-      }
-    });
-    return touched;
-  }
   async function shRetire(key) {
     const ex = exByKey(key);
     if (!ex) return;
     const hide = !ex.retired;
     if (hide) (S.exEdits[key] || (S.exEdits[key] = {})).retired = true;
     else unhide(key);
-    const unpinned = hide ? unpinEverywhere(key) : false;
     await persistExEdits();
-    if (unpinned) await persistPlan();
-    const box = $("sets-" + key), tag = box && box.parentNode ? box.parentNode.querySelector(".xtag") : null;
-    if (tag && hide) {
-      tag.className = "xtag";
-      tag.textContent = t("ex.added");
-    }
     shRenderList();
     render();
     shMsg(tf(hide ? "msg.hidden" : "msg.shown", { name: ex.name }));
@@ -6782,7 +7116,7 @@
     S.entries.forEach((e) => {
       if (e.lifts && e.lifts[key]) delete e.lifts[key];
     });
-    unpinEverywhere(key);
+    dropFromRoutines("lift", key);
     if (Array.isArray(S.settings.chartEx)) S.settings.chartEx = S.settings.chartEx.filter((k) => k !== key);
     S.customEx = S.customEx.filter((x) => x.key !== key);
     delete S.exEdits[key];
@@ -7083,8 +7417,8 @@
     const w = weekVolume(), vol = w.vol;
     const stOf = (k) => weekState(k, w, lo, hi, mute);
     [["volLo", lo], ["volHi", hi]].forEach(([id, v]) => {
-      const el2 = $(id);
-      if (el2 && document.activeElement !== el2) el2.value = v;
+      const el3 = $(id);
+      if (el3 && document.activeElement !== el3) el3.value = v;
     });
     const pct = (v) => Math.min(100, v / hi * 100);
     const pre = VOL_PRESETS.find((x) => x.lo === lo && x.hi === hi);
@@ -7105,8 +7439,8 @@
     const low = MUSCLES.filter((m) => w.proj[m.key] < lo && mute.indexOf(m.key) < 0).sort((a, b) => w.proj[a.key] - w.proj[b.key]);
     const focus = low.slice(0, 4);
     $("recWrap").innerHTML = !low.length ? `<div class="restnote">${esc(t("guide.rec.none"))}</div>` : focus.map((m) => {
-      const pool2 = LIB.filter((l) => l.p.indexOf(m.key) >= 0 && libUsable(l)), easy = pool2.filter((l) => (l.lv || 0) <= 3);
-      const picks = (easy.length ? easy : pool2).sort((a, b) => (libLive(a) ? 1 : 0) - (libLive(b) ? 1 : 0)).slice(0, 2);
+      const pool3 = LIB.filter((l) => l.p.indexOf(m.key) >= 0 && libUsable(l)), easy = pool3.filter((l) => (l.lv || 0) <= 3);
+      const picks = (easy.length ? easy : pool3).sort((a, b) => (libLive(a) ? 1 : 0) - (libLive(b) ? 1 : 0)).slice(0, 2);
       const n = vol[m.key], p = w.proj[m.key];
       return `<div class="reclbl">${esc(tf("guide.rec.of", { name: t("mus." + m.key), n: fmtSetsN(n), lo }) + (p > n ? " · " + tf("guide.rec.plan", { p: fmtSetsN(p) }) : ""))}</div>` + (picks.length ? picks.map(libRow).join("") : `<div class="restnote">${esc(t("guide.rec.nothing"))}</div>`);
     }).join("") + (low.length > focus.length ? `<div class="sxnote">${esc(tf("guide.rec.more", { n: low.length - focus.length }))}</div>` : "");
@@ -7116,12 +7450,12 @@
     const eqHit = (l) => !V.guideEq || (V.guideEq === "none" ? !l.eq.length : l.eq.indexOf(V.guideEq) >= 0);
     const prim = LIB.filter((l) => l.p.indexOf(V.guideMus) >= 0 && show2(l)), sec = LIB.filter((l) => l.s.indexOf(V.guideMus) >= 0 && show2(l));
     const sxs = SX_LIB.filter((l) => l.mus.indexOf(V.guideMus) >= 0 && show2(l));
-    const pools = { p: prim, s: sec, x: sxs }, pool = pools[V.guideMode] || prim;
-    const list = pool.filter(eqHit).sort(V.guideMode === "x" ? (a, b) => a.lv - b.lv || byName(t("sxlib." + a.key), t("sxlib." + b.key)) : libOrder);
+    const pools = { p: prim, s: sec, x: sxs }, pool2 = pools[V.guideMode] || prim;
+    const list = pool2.filter(eqHit).sort(V.guideMode === "x" ? (a, b) => a.lv - b.lv || byName(t("sxlib." + a.key), t("sxlib." + b.key)) : libOrder);
     $("browseMode").innerHTML = ["p", "s", "x"].map((m) => `<button type="button" class="${m === V.guideMode ? "on" : ""}" data-mode="${m}">${esc(tf("guide.mode." + m, { n: pools[m].filter(eqHit).length }))}</button>`).join("");
-    const eqN = (q) => pool.filter((l) => q === "none" ? !l.eq.length : l.eq.indexOf(q) >= 0).length;
+    const eqN = (q) => pool2.filter((l) => q === "none" ? !l.eq.length : l.eq.indexOf(q) >= 0).length;
     const eqOpts = ["none"].concat(EQUIP).filter((q) => q === V.guideEq || eqN(q) > 0);
-    $("browseEq").innerHTML = `<option value="">${esc(tf("guide.eq.any", { n: pool.length }))}</option>` + eqOpts.map((q) => `<option value="${q}"${q === V.guideEq ? " selected" : ""}>${esc(tf("guide.eq.item", { name: t(q === "none" ? "guide.eq.none" : "eq." + q), n: eqN(q) }))}</option>`).join("");
+    $("browseEq").innerHTML = `<option value="">${esc(tf("guide.eq.any", { n: pool2.length }))}</option>` + eqOpts.map((q) => `<option value="${q}"${q === V.guideEq ? " selected" : ""}>${esc(tf("guide.eq.item", { name: t(q === "none" ? "guide.eq.none" : "eq." + q), n: eqN(q) }))}</option>`).join("");
     $("browseEq").value = V.guideEq;
     const ab = $("browseAll");
     ab.style.display = S.gym.set ? "" : "none";
@@ -7193,11 +7527,11 @@
 
   // src/ui/workout-log.js
   function appendExBlock(wrap, ex, dayKey) {
-    const pinned = (S.planExtras[dayKey] || []).indexOf(ex.key) >= 0;
+    const rt = routineFor(dayKey, "lift", ex.key);
     const onDate = $("fDate").value, curE = S.entries.find((e) => e.date === onDate);
     const plan = curE && liftsOf(curE, ex.key).length ? null : coachNext(ex, sessionsBefore(ex.key, onDate));
     const rchip = ex.repMin != null && ex.repMax != null ? `<span class="rtag">${ex.repMin}–${ex.repMax}${ex.unit === "sec" ? "s" : ""}</span>` : "";
-    const mark = `<button type="button" class="xtag${pinned ? " pin" : ""}" title="${esc(pinned ? t("ex.unpintip") : tf("ex.pintip", { day: dayShort(dayKey) }))}">${esc(t(pinned ? "ex.pinned" : "ex.added"))}</button>`;
+    const mark = rt ? `<em class="xtag pin still" title="${esc(tf("rt.fromtip", { name: rt.name }))}">${esc(rt.name)}</em>` : `<em class="xtag still">${esc(t("ex.added"))}</em>`;
     const block = document.createElement("div");
     block.className = "ex";
     block.innerHTML = `<div class="ex-head">
@@ -7210,29 +7544,10 @@
     block.querySelector(".addset").onclick = () => {
       const rows = $("sets-" + ex.key).querySelectorAll(".setrow");
       addSetRow(ex, rows.length ? rows[rows.length - 1].querySelector(".kg").value : ex.def, "");
-      rememberSets(ex);
     };
     block.querySelector(".exdrop").onclick = () => dropMovement(ex.key, dayKey);
-    block.querySelector(".xtag").onclick = () => togglePin(ex.key, dayKey);
     wrap.appendChild(block);
     return block;
-  }
-  async function togglePin(key, dayKey) {
-    const list = S.planExtras[dayKey] || (S.planExtras[dayKey] = []);
-    const i = list.indexOf(key);
-    if (i >= 0) {
-      list.splice(i, 1);
-      if (!list.length) delete S.planExtras[dayKey];
-    } else list.push(key);
-    await persistPlan();
-    const box = $("sets-" + key), tag = box && box.parentNode ? box.parentNode.querySelector(".xtag") : null;
-    if (tag) {
-      const on = (S.planExtras[dayKey] || []).indexOf(key) >= 0;
-      tag.className = "xtag" + (on ? " pin" : "");
-      tag.textContent = t(on ? "ex.pinned" : "ex.added");
-      tag.title = on ? t("ex.unpintip") : tf("ex.pintip", { day: dayShort(dayKey) });
-    }
-    render();
   }
   function prefillEx(ex, dayKey, cur) {
     const sameDay = cur && cur.lifts && cur.lifts[ex.key];
@@ -7259,9 +7574,22 @@
   function buildExForm(cur, dayKey) {
     const wrap = $("exWrap");
     wrap.innerHTML = "";
-    const keys = sessionEx(dayKey);
+    const skip = SKIP[$("fDate").value] || /* @__PURE__ */ new Set();
+    const keys = sessionEx(dayKey).filter((k) => !skip.has(k) || cur && cur.lifts && cur.lifts[k]);
     if (cur && cur.lifts) Object.keys(cur.lifts).forEach((k) => {
       if (exByKey(k) && keys.indexOf(k) < 0) keys.push(k);
+    });
+    SS_NEXT = /* @__PURE__ */ new Map();
+    SS_LAST = /* @__PURE__ */ new Map();
+    const groups = daySupersets(dayKey).map((g) => g.filter((k) => keys.indexOf(k) >= 0)).filter((g) => g.length > 1);
+    groups.forEach((g) => {
+      g.forEach((k, i) => {
+        if (i < g.length - 1) SS_NEXT.set(k, g[i + 1]);
+      });
+      SS_LAST.set(g[g.length - 1], g.map((k) => {
+        const e = exByKey(k);
+        return e ? e.short || e.name : k;
+      }).join(" + "));
     });
     if (!keys.length) {
       const known = DAYS2.some((d) => d.key === dayKey);
@@ -7275,6 +7603,15 @@
     keys.forEach((k) => {
       const ex = exByKey(k);
       if (ex) prefillEx(ex, dayKey, cur);
+    });
+    groups.forEach((g) => {
+      const blocks = g.map((k) => $("sets-" + k)).filter(Boolean).map((b) => b.parentNode);
+      if (blocks.length < 2) return;
+      const grp = document.createElement("div");
+      grp.className = "ssgroup";
+      grp.innerHTML = `<div class="sslbl">${esc(t("ss.label"))}</div>`;
+      wrap.insertBefore(grp, blocks[0]);
+      blocks.forEach((b) => grp.appendChild(b));
     });
   }
   function addMovementToForm(key) {
@@ -7292,15 +7629,25 @@
   async function dropMovement(key, dayKey) {
     const box = $("sets-" + key);
     if (box && box.parentNode) box.parentNode.remove();
-    const list = S.planExtras[dayKey] || [];
-    const i = list.indexOf(key);
-    if (i >= 0) {
-      list.splice(i, 1);
-      if (!list.length) delete S.planExtras[dayKey];
-      await persistPlan();
-      render();
-    }
+    const date = $("fDate").value;
+    (SKIP[date] || (SKIP[date] = /* @__PURE__ */ new Set())).add(key);
     if (!$("exWrap").children.length) buildExForm(S.entries.find((e) => e.date === $("fDate").value), dayKey);
+  }
+  var SKIP = {};
+  var SS_NEXT = /* @__PURE__ */ new Map();
+  var SS_LAST = /* @__PURE__ */ new Map();
+  function ssNext(key, row) {
+    const box = $("sets-" + key), nb = $("sets-" + SS_NEXT.get(key));
+    if (!box || !nb) return;
+    const i = [...box.querySelectorAll(".setrow")].indexOf(row), rows = nb.querySelectorAll(".setrow");
+    const target2 = rows[Math.min(Math.max(i, 0), rows.length - 1)];
+    if (!target2) {
+      nb.parentNode.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+    target2.scrollIntoView({ behavior: "smooth", block: "center" });
+    const rp = target2.querySelector(".rp");
+    if (rp) rp.focus({ preventScroll: true });
   }
   function addSetRow(ex, loadVal, reps, aim) {
     const box = $("sets-" + ex.key);
@@ -7312,25 +7659,16 @@
     <input class="kg" type="number" min="0" step="0.5" inputmode="decimal" value="${loadVal == null ? "" : loadVal}"><span class="u">${ex.added ? "+kg" : "kg"}</span>
     <span class="x">×</span>
     <input class="rp${aim != null ? " aim" : ""}" type="number" min="0" inputmode="numeric" placeholder="${repPh}" value="${reps}">
-    <button class="rmrest" title="${esc(t("ex.resttip"))}" aria-label="${esc(t("ex.resttip"))}">⏱</button>
+    ${SS_NEXT.has(ex.key) ? `<button class="rmnext" title="${esc(t("ss.nexttip"))}" aria-label="${esc(t("ss.nexttip"))}">→</button>` : `<button class="rmrest" title="${esc(t(SS_LAST.has(ex.key) ? "ss.resttip" : "ex.resttip"))}" aria-label="${esc(t(SS_LAST.has(ex.key) ? "ss.resttip" : "ex.resttip"))}">⏱</button>`}
     <button class="rmset" title="${esc(t("btn.remove"))}" aria-label="${esc(t("btn.remove"))}">✕</button>`;
-    row.querySelector(".rmrest").onclick = () => startRest(null, ex.short || ex.name);
+    if (SS_NEXT.has(ex.key)) row.querySelector(".rmnext").onclick = () => ssNext(ex.key, row);
+    else row.querySelector(".rmrest").onclick = () => startRest(null, SS_LAST.get(ex.key) || ex.short || ex.name);
     row.querySelector(".rmset").onclick = () => {
       row.remove();
       renumber(ex);
-      rememberSets(ex);
     };
     box.appendChild(row);
     renumber(ex);
-  }
-  async function rememberSets(ex) {
-    const dayKey = $("fDay").value, box = $("sets-" + ex.key);
-    if (!box || (S.planExtras[dayKey] || []).indexOf(ex.key) < 0) return;
-    const n = box.querySelectorAll(".setrow").length;
-    if (n < 1 || plannedSets(dayKey, ex.key) === n) return;
-    (S.planSets[dayKey] || (S.planSets[dayKey] = {}))[ex.key] = n;
-    await persistPlan();
-    drawGuide();
   }
   function renumber(ex) {
     const box = $("sets-" + ex.key);
@@ -7772,7 +8110,7 @@
       return cdRow(o.ex.name, fmtSets(o.k, e.lifts[o.k]), t(m.lbl) + " " + Math.round(m.val).toLocaleString() + u, i >= 0 ? LINE_COLORS[i % LINE_COLORS.length] : "");
     }).join("");
   };
-  var logRows = (log, nameOf, fmtVal, sel) => Object.keys(log || {}).map((k) => ({ k, n: nameOf(k) })).sort((a, b) => {
+  var logRows = (log, nameOf2, fmtVal, sel) => Object.keys(log || {}).map((k) => ({ k, n: nameOf2(k) })).sort((a, b) => {
     const ia = sel.indexOf(a.k), ib = sel.indexOf(b.k);
     return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib) || byName(a.n, b.n);
   }).map((o) => {
@@ -8096,20 +8434,291 @@
     }
   }
 
+  // src/ui/routines.ts
+  var kind = "lift";
+  var draft = null;
+  var delArmed = false;
+  var delTimer = null;
+  var addOpen = false;
+  var el = (id) => $(id);
+  var nameOf = (k, key) => {
+    const x = k === "lift" ? exByKey(key) : k === "sx" ? stretchByKey(key) : cardioByKey(key);
+    return x ? x.name : key;
+  };
+  var hiddenOf = (k, key) => {
+    const x = k === "lift" ? exByKey(key) : k === "sx" ? stretchByKey(key) : cardioByKey(key);
+    return !x || !!x.retired;
+  };
+  var pool = (k) => k === "lift" ? S.catalogue.filter((x) => !x.retired) : k === "sx" ? activeStretches() : activeCardio();
+  var dayList = (days) => days.length === 7 ? t("rt.everyday") : days.map((d) => dayShort(d)).join(", ");
+  var supersetCount = (r) => {
+    let n = 0;
+    r.items.forEach((it, i) => {
+      if (it.link && !(i > 0 && r.items[i - 1].link)) n++;
+    });
+    return n;
+  };
+  var msg = (m, err) => {
+    const b = el("rtMsg");
+    b.textContent = m;
+    b.classList.toggle("err", !!err);
+  };
+  var routineNameFor = (days) => days.length === 7 ? t("rt.everyday") : days.length === 1 ? dayName(days[0]) : days.map((d) => dayShort(d)).join(" + ");
+  function drawRoutines() {
+    const wrap = el("rtWrap");
+    if (!wrap) return;
+    el("rtKind").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.k === kind));
+    el("rtList").style.display = draft ? "none" : "";
+    el("rtForm").style.display = draft ? "" : "none";
+    if (draft) {
+      drawForm();
+      return;
+    }
+    const list = S.routines[kind];
+    el("rtRows").innerHTML = list.length ? list.map((r) => {
+      const days = routineDays(kind, r.id), ss = kind === "lift" ? supersetCount(r) : 0;
+      const bits = [tn(kind === "lift" ? "rt.nlift" : kind === "sx" ? "rt.nsx" : "rt.ncd", r.items.length)];
+      if (ss) bits.push(tn("rt.nss", ss));
+      bits.push(days.length ? dayList(days) : t("rt.nodays"));
+      const peek = r.items.slice(0, 4).map((it) => nameOf(kind, it.k)).join(", ") + (r.items.length > 4 ? " …" : "");
+      return `<div class="rtrow"><div class="rtnm">${esc(r.name)}<span>${esc(bits.join(" · "))}</span><span class="rtpeek">${esc(peek)}</span></div><button type="button" class="collbtn" data-rtedit="${esc(r.id)}">${esc(t("btn.edit"))}</button></div>`;
+    }).join("") : `<div class="sxnote">${esc(t(kind === "lift" ? "rt.empty.lift" : kind === "sx" ? "rt.empty.sx" : "rt.empty.cd"))}</div>`;
+    el("rtNew").textContent = t(kind === "lift" ? "rt.new.lift" : kind === "sx" ? "rt.new.sx" : "rt.new.cd");
+  }
+  function openForm(k, id) {
+    const r = id ? routineById(k, id) : null;
+    kind = k;
+    draft = r ? { kind: k, id: r.id, name: r.name, items: JSON.parse(JSON.stringify(r.items)), days: new Set(routineDays(k, r.id)), isNew: false } : { kind: k, id: newRoutineId(), name: "", items: [], days: /* @__PURE__ */ new Set(), isNew: true };
+    resetDel();
+    msg("");
+    addOpen = !r;
+    el("rtName").value = draft.name;
+    el("rtSearch").value = "";
+    drawRoutines();
+    if (!r) el("rtName").focus();
+  }
+  function closeForm() {
+    draft = null;
+    resetDel();
+    msg("");
+    drawRoutines();
+  }
+  function resetDel() {
+    delArmed = false;
+    if (delTimer) clearTimeout(delTimer);
+    const b = $("rtDelete");
+    if (b) b.textContent = t("btn.remove");
+  }
+  function drawForm() {
+    const d = draft;
+    const lift = d.kind === "lift";
+    el("rtFormTitle").textContent = t(d.isNew ? lift ? "rt.new.lift" : d.kind === "sx" ? "rt.new.sx" : "rt.new.cd" : "rt.edit");
+    el("rtDelete").style.display = d.isNew ? "none" : "";
+    el("rtItems").innerHTML = d.items.length ? d.items.map((it, i) => {
+      const last = i === d.items.length - 1, inSS = it.link || i > 0 && d.items[i - 1].link;
+      const row = `<div class="rtitem${inSS ? " ss" : ""}${it.link ? " ssnext" : ""}" data-i="${i}"><span class="rtn">${i + 1}</span><span class="rtinm">${esc(nameOf(d.kind, it.k))}${hiddenOf(d.kind, it.k) ? ' <span class="xtag">' + esc(t("coll.hidden")) + "</span>" : ""}</span>` + (lift ? `<label class="rtsets"><input type="number" min="1" max="20" inputmode="numeric" class="rtset" value="${it.sets || ""}" placeholder="${PLAN_SETS_DEF}" aria-label="${esc(t("rt.sets"))}"><span>${esc(t("rt.setsu"))}</span></label>` : "") + `<button type="button" class="rtmv" data-mv="-1"${i === 0 ? " disabled" : ""} aria-label="${esc(t("rt.up"))}">↑</button><button type="button" class="rtmv" data-mv="1"${last ? " disabled" : ""} aria-label="${esc(t("rt.down"))}">↓</button><button type="button" class="rtrm" aria-label="${esc(t("btn.remove"))}">✕</button></div>`;
+      const link = lift && !last ? `<button type="button" class="rtlink${it.link ? " on" : ""}" data-link="${i}" aria-pressed="${!!it.link}">${esc(t(it.link ? "rt.linked" : "rt.link"))}</button>` : "";
+      return row + link;
+    }).join("") : `<div class="sxnote">${esc(t("rt.noitems"))}</div>`;
+    el("rtItems").querySelectorAll(".rtitem").forEach((row) => {
+      const i = +row.dataset.i;
+      row.querySelectorAll(".rtmv").forEach((b) => b.onclick = () => move(i, +b.dataset.mv));
+      row.querySelector(".rtrm").onclick = () => {
+        d.items.splice(i, 1);
+        if (d.items.length) delete d.items[d.items.length - 1].link;
+        drawForm();
+      };
+      const s = row.querySelector(".rtset");
+      if (s) s.oninput = () => {
+        const n = parseInt(s.value, 10);
+        if (n >= 1 && n <= 20) d.items[i].sets = n;
+        else delete d.items[i].sets;
+      };
+    });
+    el("rtItems").querySelectorAll(".rtlink").forEach((b) => b.onclick = () => {
+      const i = +b.dataset.link;
+      if (d.items[i].link) delete d.items[i].link;
+      else d.items[i].link = true;
+      drawForm();
+    });
+    el("rtAddBtn").textContent = t(addOpen ? "rt.adddone" : lift ? "rt.add.lift" : d.kind === "sx" ? "rt.add.sx" : "rt.add.cd");
+    el("rtAddBox").style.display = addOpen ? "" : "none";
+    if (addOpen) drawAdd();
+    el("rtDays").innerHTML = DAY_KEYS.map((k) => `<button type="button" class="mchip${d.days.has(k) ? " on" : ""}" data-d="${k}" aria-pressed="${d.days.has(k)}">${esc(dayShort(k))}</button>`).join("");
+    el("rtDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
+      const k = b.dataset.d;
+      if (d.days.has(k)) d.days.delete(k);
+      else d.days.add(k);
+      drawForm();
+    });
+  }
+  function drawAdd() {
+    const d = draft, q = el("rtSearch").value.trim().toLowerCase(), have = new Set(d.items.map((it) => it.k));
+    const cands = pool(d.kind).filter((x) => !have.has(x.key) && (!q || x.name.toLowerCase().indexOf(q) >= 0)).sort((a, b) => byName(a.name, b.name)).slice(0, 80);
+    el("rtPool").innerHTML = cands.length ? cands.map((x) => `<button type="button" class="mchip" data-k="${esc(x.key)}">+ ${esc(x.name)}</button>`).join("") : `<div class="sxnote">${esc(q ? tf("nomatch", { q }) : t(d.kind === "lift" ? "rt.pool.none.lift" : "rt.pool.none"))}</div>`;
+    el("rtPool").querySelectorAll("button").forEach((b) => b.onclick = () => {
+      if (d.items.length >= MAX_ITEMS) {
+        msg(tf("rt.toomany", { n: MAX_ITEMS }), true);
+        return;
+      }
+      d.items.push({ k: b.dataset.k });
+      drawForm();
+    });
+  }
+  function move(i, by) {
+    const d = draft, j = i + by;
+    if (j < 0 || j >= d.items.length) return;
+    const [x] = d.items.splice(i, 1);
+    d.items.splice(j, 0, x);
+    if (d.items.length) delete d.items[d.items.length - 1].link;
+    drawForm();
+  }
+  async function save() {
+    const d = draft;
+    const name = el("rtName").value.trim().slice(0, NAME_MAX);
+    if (!name) {
+      msg(t("rt.needname"), true);
+      el("rtName").focus();
+      return;
+    }
+    if (!d.items.length) {
+      msg(t("rt.needitems"), true);
+      return;
+    }
+    const clash = S.routines[d.kind].find((r) => r.id !== d.id && r.name.toLowerCase() === name.toLowerCase());
+    if (clash) {
+      msg(tf("rt.clash", { name }), true);
+      return;
+    }
+    putRoutine(d.kind, { id: d.id, name, items: d.items }, [...d.days]);
+    const ok = await saveRoutines();
+    if (!ok) {
+      msg(t("msg.savefail"), true);
+      return;
+    }
+    draft = null;
+    resetDel();
+    msg("");
+    refreshLog();
+    render();
+    flash(tf(d.isNew ? "rt.saved.new" : "rt.saved", { name }));
+  }
+  async function remove() {
+    const d = draft;
+    if (d.isNew) return;
+    if (!delArmed) {
+      delArmed = true;
+      el("rtDelete").textContent = t("btn.tapagain");
+      msg(tf("rt.del.warn", { name: d.name || el("rtName").value }), true);
+      delTimer = setTimeout(resetDel, 4e3);
+      return;
+    }
+    const r = routineById(d.kind, d.id);
+    deleteRoutine(d.kind, d.id);
+    await saveRoutines();
+    draft = null;
+    resetDel();
+    msg("");
+    refreshLog();
+    render();
+    flash(tf("rt.deleted", { name: r ? r.name : "" }));
+  }
+  function refreshLog() {
+    buildExForm(S.entries.find((e) => e.date === el("fDate").value), el("fDay").value);
+    drawMob();
+    drawCardio();
+    drawDayRoutines();
+  }
+  var dayAddOpen = false;
+  function drawDayRoutines() {
+    const box = $("dayRt");
+    if (!box) return;
+    const day = el("fDay").value || "mon";
+    const on = KINDS.flatMap((k) => dayRoutines(day, k).map((r) => ({ k, r })));
+    const tag = (k) => k === "lift" ? "" : ` <span class="rtkind">${esc(t(k === "sx" ? "rt.kind.sx" : "rt.kind.cd"))}</span>`;
+    el("dayRtList").innerHTML = on.length ? on.map(({ k, r }) => `<span class="rtchip">${esc(r.name)}${tag(k)}<button type="button" data-rk="${k}" data-rid="${esc(r.id)}" aria-label="${esc(tf("rt.takeoff", { name: r.name, day: dayName(day) }))}">✕</button></span>`).join("") : `<span class="rtnone">${esc(tf("rt.dayempty", { day: dayName(day) }))}</span>`;
+    el("dayRtList").querySelectorAll("button").forEach((b) => b.onclick = () => {
+      void takeOff(b.dataset.rk, b.dataset.rid, day);
+    });
+    el("dayRtAdd").textContent = t(dayAddOpen ? "rt.adddone" : "rt.addtoday");
+    el("dayRtAdd").setAttribute("aria-expanded", String(dayAddOpen));
+    const pick = el("dayRtPick");
+    pick.style.display = dayAddOpen ? "" : "none";
+    if (!dayAddOpen) return;
+    const groups = KINDS.map((k) => ({ k, list: S.routines[k].filter((r) => (S.routines.week[k][day] || []).indexOf(r.id) < 0) })).filter((g) => g.list.length);
+    pick.innerHTML = groups.length ? groups.map((g) => `<div class="ctl-lbl">${esc(t(g.k === "lift" ? "rt.tab.lift" : g.k === "sx" ? "rt.tab.sx" : "rt.tab.cd"))}</div><div class="muschips">` + g.list.map((r) => `<button type="button" class="mchip" data-rk="${g.k}" data-rid="${esc(r.id)}">+ ${esc(r.name)}</button>`).join("") + "</div>").join("") : `<div class="sxnote">${esc(t(KINDS.some((k) => S.routines[k].length) ? "rt.allon" : "rt.none"))}</div>`;
+    pick.querySelectorAll("button").forEach((b) => b.onclick = () => {
+      void putOn(b.dataset.rk, b.dataset.rid, day);
+    });
+  }
+  async function putOn(k, id, day) {
+    const r = routineById(k, id);
+    if (!r) return;
+    if (!addToDay(k, id, day)) return;
+    await saveRoutines();
+    refreshLog();
+    render();
+    flash(tf("rt.puton", { name: r.name, day: dayName(day) }));
+  }
+  async function takeOff(k, id, day) {
+    const r = routineById(k, id);
+    removeFromDay(k, id, day);
+    await saveRoutines();
+    refreshLog();
+    render();
+    if (r) flash(tf("rt.tookoff", { name: r.name, day: dayName(day) }));
+  }
+  function initRoutines() {
+    el("rtKind").querySelectorAll("button").forEach((b) => b.onclick = () => {
+      if (draft) return;
+      kind = b.dataset.k;
+      drawRoutines();
+    });
+    el("rtNew").onclick = () => openForm(kind, null);
+    el("rtRows").onclick = (ev) => {
+      const b = ev.target.closest("[data-rtedit]");
+      if (b) openForm(kind, b.dataset.rtedit);
+    };
+    el("rtCancel").onclick = closeForm;
+    el("rtSave").onclick = () => {
+      void save();
+    };
+    el("rtDelete").onclick = () => {
+      void remove();
+    };
+    el("rtName").oninput = () => {
+      if (draft) draft.name = el("rtName").value;
+    };
+    el("rtAddBtn").onclick = () => {
+      addOpen = !addOpen;
+      drawForm();
+      if (addOpen) el("rtSearch").focus();
+    };
+    el("rtSearch").oninput = drawAdd;
+    el("dayRtAdd").onclick = () => {
+      dayAddOpen = !dayAddOpen;
+      drawDayRoutines();
+    };
+    el("dayRtManage").onclick = () => {
+      const c = $("cardRoutines");
+      if (c) c.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+  }
+
   // src/ui/sync.js
   function drawVersion() {
-    const el2 = $("appVer");
-    if (!el2) return;
+    const el3 = $("appVer");
+    if (!el3) return;
     const android = !!window.AndroidFile;
     const line = tf("ver.line", {
       name: t("ver.app"),
       v: APP_VERSION,
       where: t(android ? "ver.android" : location.protocol === "file:" ? "ver.file" : "ver.web")
     });
-    el2.textContent = line;
+    el3.textContent = line;
     if (!android && window.caches && caches.keys) caches.keys().then((ks) => {
       const k = ks.find((x) => /^tally-[0-9a-f]{12}$/.test(x));
-      if (k) el2.textContent = line + " · " + tf("ver.build", { id: k.slice(6, 13) });
+      if (k) el3.textContent = line + " · " + tf("ver.build", { id: k.slice(6, 13) });
     }).catch(() => {
     });
   }
@@ -8127,10 +8736,10 @@
     box.focus();
     box.select();
   }
-  function smsg(msg2, err) {
+  function smsg(msg3, err) {
     const m = $("syncMsg");
     if (!m) return;
-    m.textContent = msg2 || "";
+    m.textContent = msg3 || "";
     m.className = "syncmsg" + (err ? " err" : "");
   }
   function pickFile() {
@@ -8464,10 +9073,12 @@
       S.gym = normGym(data.gym);
       await persistGym();
     }
-    if (isObj2(data.plan)) {
-      S.planExtras = normPlan2(data.plan);
-      S.planSets = normPlanSets2(data.plan.sets);
-      planLogsInit2(data.plan);
+    if (isObj2(data.plan) || isObj2(data.routines)) {
+      const p = isObj2(data.plan) ? data.plan : {};
+      S.planExtras = normPlan2(p);
+      S.planSets = normPlanSets2(p.sets);
+      planLogsInit2(p);
+      S.routines = routinesFromBackup(data, routineNameFor);
       await persistPlan();
     }
     if (isObj2(data.settings)) {
@@ -8557,9 +9168,9 @@
 
   // src/ui/body.js
   function calcHint(id) {
-    const el2 = $(id), out = $(id + "Sum");
-    if (!el2 || !out) return;
-    const raw = el2.value.trim(), v = calcVal(raw);
+    const el3 = $(id), out = $(id + "Sum");
+    if (!el3 || !out) return;
+    const raw = el3.value.trim(), v = calcVal(raw);
     out.textContent = v != null && /[+*/-]/.test(raw.slice(1)) ? "= " + v : "";
     calcLeft(id, raw ? calcVal(raw.replace(/[+*/-]+$/, "")) : 0);
   }
@@ -8577,19 +9188,19 @@
     out.innerHTML = esc(head) + " · <b>" + esc(tail) + "</b>";
   }
   function calcSettle(id) {
-    const el2 = $(id);
-    if (!el2) return;
-    const v = calcVal(el2.value);
-    if (v != null && /[+*/-]/.test(el2.value.trim().slice(1))) el2.value = v;
+    const el3 = $(id);
+    if (!el3) return;
+    const v = calcVal(el3.value);
+    if (v != null && /[+*/-]/.test(el3.value.trim().slice(1))) el3.value = v;
     calcHint(id);
   }
   function calcAdd(id) {
-    const el2 = $(id);
-    if (!el2) return;
-    el2.value = el2.value.trim().replace(/[+*/-]$/, "") + "+";
-    el2.focus();
+    const el3 = $(id);
+    if (!el3) return;
+    el3.value = el3.value.trim().replace(/[+*/-]$/, "") + "+";
+    el3.focus();
     try {
-      el2.setSelectionRange(el2.value.length, el2.value.length);
+      el3.setSelectionRange(el3.value.length, el3.value.length);
     } catch (e) {
     }
     calcHint(id);
@@ -8951,7 +9562,7 @@
     if (!wrap) return;
     const q = ($("collSearch") ? $("collSearch").value : "").trim().toLowerCase();
     const hit = (ex) => !q || qMatch(q, ex.name + " " + ex.short + " " + ex.note);
-    const pool = S.catalogue.filter(hit).sort(exOrder);
+    const pool2 = S.catalogue.filter(hit).sort(exOrder);
     const row = (ex) => {
       const days = S.entries.filter((e) => liftsOf(e, ex.key).length).length;
       const inDays = DAYS2.filter((d) => sessionEx(d.key).indexOf(ex.key) >= 0).map((d) => dayShort(d.key));
@@ -8965,7 +9576,7 @@
       <button type="button" class="collbtn${ex.retired ? " on" : ""}" data-cret="${esc(ex.key)}">${esc(t(ex.retired ? "btn.show" : "btn.hide"))}</button>
     </div>`;
     };
-    wrap.innerHTML = pool.length ? `<div class="collgrp">${esc(t("coll.yours"))}</div>` + bwSplit(pool, exLv, row, "collgrp") : `<div class="collempty">${esc(q ? tf("nomatch", { q }) : t("coll.empty"))}<br>${esc(t("coll.addbelow"))}</div>`;
+    wrap.innerHTML = pool2.length ? `<div class="collgrp">${esc(t("coll.yours"))}</div>` + bwSplit(pool2, exLv, row, "collgrp") : `<div class="collempty">${esc(q ? tf("nomatch", { q }) : t("coll.empty"))}<br>${esc(t("coll.addbelow"))}</div>`;
   }
 
   // src/ui/gym.js
@@ -8992,10 +9603,10 @@
     render();
   }
   async function gymAddOwn() {
-    const el2 = $("gymName"), name = el2.value.trim();
+    const el3 = $("gymName"), name = el3.value.trim();
     if (!name) return;
     S.gym = normGym({ set: S.gym.set, have: S.gym.have, own: S.gym.own.concat([{ name }]) });
-    el2.value = "";
+    el3.value = "";
     await persistGym();
     drawGym();
   }
@@ -9341,8 +9952,8 @@
     if (PAGES2.indexOf(k) < 0) k = "body";
     V.curPage = k;
     PAGES2.forEach((p) => {
-      const el2 = $("pg-" + p);
-      if (el2) el2.classList.toggle("on", p === k);
+      const el3 = $("pg-" + p);
+      if (el3) el3.classList.toggle("on", p === k);
     });
     document.querySelectorAll("#tabs button").forEach((b) => b.classList.toggle("on", b.dataset.pg === k));
     const bar = $("dayBar");
@@ -9370,6 +9981,7 @@
       drawBMR();
     },
     workout: () => {
+      drawRoutines();
       drawPlates();
       drawStrength();
       drawSxTrend();
@@ -9414,6 +10026,7 @@
       sel.innerHTML = DAYS2.map((d) => `<option value="${d.key}">${esc(dayLabel(d.key))}</option>`).join("");
       if (keep && DAYS2.some((d) => d.key === keep)) sel.value = keep;
     }
+    drawDayRoutines();
     const wrap = $("sched");
     if (!wrap) return;
     const today = weekdayKey($("fDate") && $("fDate").value ? $("fDate").value : localDate());
@@ -9439,11 +10052,13 @@
     { page: "body", sel: "#wChart", card: true, key: "chart" },
     { page: "body", sel: "#calibOut", card: true, key: "calib" },
     { page: "workout", sel: "#fDay", key: "session" },
+    { page: "workout", sel: "#dayRt", key: "dayrt" },
     { page: "workout", sel: "#addMoveBtn", key: "addmove" },
     { page: "workout", sel: ".restctl", key: "rest" },
     { page: "workout", sel: "#copyDayBtn", key: "copy" },
     { page: "workout", sel: "#cardPlates", key: "plates" },
     { page: "workout", sel: "#cardMob", key: "mob" },
+    { page: "workout", sel: "#rtNew", card: true, key: "routines" },
     { page: "guide", sel: "#cardVol", key: "vol" },
     { page: "gym", sel: "#cardGym", key: "gym" },
     { page: "settings", sel: "#cardInstall", key: "install" },
@@ -9454,17 +10069,17 @@
   var at = 0;
   var root = null;
   var opened = [];
-  var visible = (el2) => !!el2 && el2.offsetParent !== null && el2.getBoundingClientRect().height > 0;
+  var visible = (el3) => !!el3 && el3.offsetParent !== null && el3.getBoundingClientRect().height > 0;
   function target(s) {
     showPage(s.page);
-    let el2 = document.querySelector(s.sel);
-    const shut = el2 && el2.closest(".card.folded");
+    let el3 = document.querySelector(s.sel);
+    const shut = el3 && el3.closest(".card.folded");
     if (shut) {
       shut.classList.remove("folded");
       opened.push(shut);
     }
-    if (el2 && s.card) el2 = el2.closest(".card");
-    return visible(el2) ? el2 : null;
+    if (el3 && s.card) el3 = el3.closest(".card");
+    return visible(el3) ? el3 : null;
   }
   function build() {
     const r = document.createElement("div");
@@ -9483,10 +10098,10 @@
     r.querySelector("#tourNext").onclick = () => go(1);
     return r;
   }
-  function place(el2) {
+  function place(el3) {
     if (!root) return;
     const ring = root.querySelector(".tour-ring"), card = root.querySelector(".tour-card");
-    const b = el2.getBoundingClientRect(), pad = 6, vh = window.innerHeight, vw = window.innerWidth;
+    const b = el3.getBoundingClientRect(), pad = 6, vh = window.innerHeight, vw = window.innerWidth;
     const top = Math.max(4, b.top - pad), bottom = Math.min(vh - 4, b.bottom + pad);
     Object.assign(ring.style, { top: top + "px", left: Math.max(4, b.left - pad) + "px", width: Math.min(vw - 8, b.width + pad * 2) + "px", height: Math.max(24, bottom - top) + "px" });
     const roomBelow = vh - bottom, roomAbove = top;
@@ -9496,8 +10111,8 @@
   }
   function show() {
     if (!root) return;
-    const s = steps[at], el2 = target(s);
-    if (!el2) {
+    const s = steps[at], el3 = target(s);
+    if (!el3) {
       steps.splice(at, 1);
       if (at >= steps.length) {
         void endTour();
@@ -9506,9 +10121,9 @@
       show();
       return;
     }
-    const tall = el2.getBoundingClientRect().height > window.innerHeight * 0.5;
-    if (tall) window.scrollTo(0, el2.getBoundingClientRect().top + window.scrollY - 12);
-    else el2.scrollIntoView({ block: "center" });
+    const tall = el3.getBoundingClientRect().height > window.innerHeight * 0.5;
+    if (tall) window.scrollTo(0, el3.getBoundingClientRect().top + window.scrollY - 12);
+    else el3.scrollIntoView({ block: "center" });
     $("tourCount").textContent = tf("tour.count", { n: at + 1, of: steps.length });
     $("tourTitle").textContent = t("tour." + s.key + ".h");
     $("tourText").textContent = t("tour." + s.key + ".b");
@@ -9517,7 +10132,7 @@
     $("tourBack").disabled = at === 0;
     $("tourNext").textContent = t(at === steps.length - 1 ? "tour.done" : "tour.next");
     requestAnimationFrame(() => {
-      place(el2);
+      place(el3);
       root.querySelector(".tour-card").focus({ preventScroll: true });
     });
   }
@@ -9533,8 +10148,8 @@
   }
   var reflow = () => {
     if (root && steps[at]) {
-      const el2 = target(steps[at]);
-      if (el2) place(el2);
+      const el3 = target(steps[at]);
+      if (el3) place(el3);
     }
   };
   function tourOpen() {
@@ -9618,15 +10233,6 @@
   }
 
   // src/state/plan.ts
-  var clone = (x) => JSON.parse(JSON.stringify(x));
-  var planSnapshot = () => clone({ extras: S.planExtras, sets: S.planSets, sx: S.planSx, cd: S.planCd });
-  async function restorePlan(p) {
-    S.planExtras = clone(p.extras);
-    S.planSets = clone(p.sets);
-    S.planSx = clone(p.sx);
-    S.planCd = clone(p.cd);
-    await savePlan();
-  }
   function dayPlan(day) {
     const lifts = (S.planExtras[day] || []).filter((k, i, a) => {
       const ex = exByKey(k);
@@ -9651,70 +10257,39 @@
     const p = dayPlan(day);
     return !p.lifts.length && !p.sx.length && !p.cd.length;
   };
-  var setList = (map, day, list) => {
-    if (list.length) map[day] = list.slice();
-    else delete map[day];
-  };
-  async function copyDay(from2, to, mode2) {
-    const before = planSnapshot(), src = dayPlan(from2);
-    for (const d of to) {
-      if (d === from2) continue;
-      if (mode2 === "replace") {
-        setList(S.planExtras, d, src.lifts);
-        if (Object.keys(src.sets).length) S.planSets[d] = { ...src.sets };
-        else delete S.planSets[d];
-        setList(S.planSx, d, src.sx);
-        setList(S.planCd, d, src.cd);
-      } else {
-        const merge = (map, list) => {
-          const cur = map[d] || [];
-          setList(map, d, cur.concat(list.filter((k) => cur.indexOf(k) < 0)));
-        };
-        const had = new Set(S.planExtras[d] || []);
-        merge(S.planExtras, src.lifts);
-        src.lifts.forEach((k) => {
-          if (!had.has(k) && src.sets[k]) (S.planSets[d] || (S.planSets[d] = {}))[k] = src.sets[k];
-        });
-        merge(S.planSx, src.sx);
-        merge(S.planCd, src.cd);
-      }
-    }
-    await savePlan();
-    return before;
-  }
 
   // src/ui/copyday.ts
   var from = "mon";
   var picked2 = /* @__PURE__ */ new Set();
   var mode = "add";
   var undo = null;
-  var el = (id) => $(id);
-  var msg = (m) => {
-    el("cpMsg").textContent = m;
+  var el2 = (id) => $(id);
+  var msg2 = (m) => {
+    el2("cpMsg").textContent = m;
   };
   var andList = (xs) => xs.length < 2 ? xs.join("") : xs.slice(0, -1).join(", ") + " and " + xs[xs.length - 1];
   function draw() {
     const empty = dayPlanEmpty(from), p = dayPlan(from);
-    el("cpTitle").textContent = tf("copy.title", { day: dayName(from) });
-    el("cpWhat").textContent = empty ? tf("copy.empty", { day: dayName(from) }) : tf("copy.what", { day: dayName(from), list: andList([[p.lifts.length, "copy.lifts"], [p.sx.length, "copy.sx"], [p.cd.length, "copy.cd"]].filter(([n]) => n > 0).map(([n, k]) => tn(k, n))) });
-    el("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked2.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked2.has(d)}">${esc(dayShort(d))}</button>`).join("");
-    el("cpDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
+    el2("cpTitle").textContent = tf("copy.title", { day: dayName(from) });
+    el2("cpWhat").textContent = empty ? tf("copy.empty", { day: dayName(from) }) : tf("copy.what", { day: dayName(from), list: andList([[p.lifts.length, "copy.lifts"], [p.sx.length, "copy.sx"], [p.cd.length, "copy.cd"]].filter(([n]) => n > 0).map(([n, k]) => tn(k, n))) });
+    el2("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked2.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked2.has(d)}">${esc(dayShort(d))}</button>`).join("");
+    el2("cpDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
       const d = b.dataset.d;
       if (picked2.has(d)) picked2.delete(d);
       else picked2.add(d);
       draw();
     });
-    el("cpMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode));
-    el("cpHowNote").textContent = mode === "add" ? t("copy.add.note") : tf("copy.replace.note", { day: dayName(from) });
-    el("cpGo").disabled = empty;
-    el("cpUndo").style.display = undo ? "" : "none";
+    el2("cpMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode));
+    el2("cpHowNote").textContent = mode === "add" ? t("copy.add.note") : tf("copy.replace.note", { day: dayName(from) });
+    el2("cpGo").disabled = empty;
+    el2("cpUndo").style.display = undo ? "" : "none";
   }
   function cpOpen() {
-    from = el("fDay").value || "mon";
+    from = el2("fDay").value || "mon";
     picked2 = /* @__PURE__ */ new Set();
     mode = "add";
     undo = null;
-    msg("");
+    msg2("");
     draw();
     dlgOpen("cpWrap");
   }
@@ -9725,37 +10300,37 @@
   async function go2() {
     if (dayPlanEmpty(from)) return;
     if (!picked2.size) {
-      msg(t("copy.pick"));
+      msg2(t("copy.pick"));
       return;
     }
     const to = DAY_KEYS.filter((d) => picked2.has(d));
-    undo = await copyDay(from, to, mode);
-    msg(tf("copy.done", { day: dayName(from), days: to.map((d) => dayShort(d)).join(", ") }));
+    undo = await copyDayRoutines(from, to, mode);
+    msg2(tf("copy.done", { day: dayName(from), days: to.map((d) => dayShort(d)).join(", ") }));
     picked2 = /* @__PURE__ */ new Set();
     draw();
     render();
   }
   async function undoCopy() {
     if (!undo) return;
-    await restorePlan(undo);
+    await restoreWeek(undo);
     undo = null;
-    msg(t("copy.undone"));
+    msg2(t("copy.undone"));
     draw();
     render();
   }
   function initCopyDay() {
-    el("copyDayBtn").onclick = cpOpen;
-    el("cpX").onclick = cpClose;
-    el("cpWrap").onclick = (ev) => {
-      if (ev.target === el("cpWrap")) cpClose();
+    el2("copyDayBtn").onclick = cpOpen;
+    el2("cpX").onclick = cpClose;
+    el2("cpWrap").onclick = (ev) => {
+      if (ev.target === el2("cpWrap")) cpClose();
     };
-    el("cpGo").onclick = () => {
+    el2("cpGo").onclick = () => {
       void go2();
     };
-    el("cpUndo").onclick = () => {
+    el2("cpUndo").onclick = () => {
       void undoCopy();
     };
-    el("cpMode").querySelectorAll("button").forEach((b) => b.onclick = () => {
+    el2("cpMode").querySelectorAll("button").forEach((b) => b.onclick = () => {
       mode = b.dataset.m === "replace" ? "replace" : "add";
       draw();
     });
@@ -9802,7 +10377,12 @@
       $("dpWrap").onclick = (ev) => {
         if (ev.target === $("dpWrap")) dpClose();
       };
-      $("fDay").onchange = () => buildExForm(S.entries.find((e) => e.date === $("fDate").value), $("fDay").value);
+      $("fDay").onchange = () => {
+        buildExForm(S.entries.find((e) => e.date === $("fDate").value), $("fDay").value);
+        drawDayRoutines();
+        drawMob();
+        drawCardio();
+      };
       document.querySelectorAll("#segPeriod button").forEach((b) => b.onclick = () => {
         S.settings.calPeriod = +b.dataset.p;
         persistSettings();
@@ -9932,8 +10512,7 @@
         const row = ev.target.closest(".mobrow");
         if (!row) return;
         const k = row.dataset.k;
-        if (ev.target.closest(".mobpin")) toggleLogPin("sx", k);
-        else if (ev.target.closest(".mobtick")) toggleMob(k);
+        if (ev.target.closest(".mobtick")) toggleMob(k);
         else if (ev.target.closest(".mobgo")) startStretch(k);
         else if (ev.target.closest(".mobedit")) sxOpen(k);
       };
@@ -9945,8 +10524,7 @@
         const row = ev.target.closest(".mobrow");
         if (!row) return;
         const k = row.dataset.k;
-        if (ev.target.closest(".mobpin")) toggleLogPin("cd", k);
-        else if (ev.target.closest(".mobtick")) toggleCardio(k);
+        if (ev.target.closest(".mobtick")) toggleCardio(k);
         else if (ev.target.closest(".mobgo")) startCardioTimer(k);
         else if (ev.target.closest(".mobedit")) cdOpen(k);
       };
@@ -9967,10 +10545,8 @@
         const b = ev.target.closest("button");
         if (!b) return;
         const d = b.dataset;
-        if (d.add) shPick(d.add, false);
-        else if (d.pin) shPick(d.pin, true);
-        else if (d.libadd) shLibPick(d.libadd, false);
-        else if (d.libpin) shLibPick(d.libpin, true);
+        if (d.add) shPick(d.add);
+        else if (d.libadd) shLibPick(d.libadd);
         else if (d.ret) shRetire(d.ret);
         else if (d.edit) shEdit(d.edit);
       };
@@ -10041,10 +10617,10 @@
       initFold();
       document.querySelectorAll(".foldhead").forEach((h) => h.onclick = () => chartFoldToggle(h.querySelector(".foldbtn").dataset.fold));
       $("sched").onclick = (ev) => {
-        const el2 = ev.target.closest(".day");
-        if (!el2) return;
-        $("fDay").value = el2.dataset.day;
-        buildExForm(S.entries.find((e) => e.date === $("fDate").value), el2.dataset.day);
+        const el3 = ev.target.closest(".day");
+        if (!el3) return;
+        $("fDay").value = el3.dataset.day;
+        buildExForm(S.entries.find((e) => e.date === $("fDate").value), el3.dataset.day);
       };
       $("dpGrid").onclick = (ev) => {
         const b = ev.target.closest("[data-d]");
@@ -10079,6 +10655,7 @@
       initCopyDay();
       initTour();
       initCoachApply();
+      initRoutines();
       $("kpWrap").onclick = (ev) => {
         if (ev.target === $("kpWrap")) kpClose();
       };
@@ -10087,10 +10664,8 @@
         const b = ev.target.closest("button");
         if (!b) return;
         const d = b.dataset;
-        if (d.kadd) kpPick(d.kadd, false);
-        else if (d.kpin) kpPick(d.kpin, true);
-        else if (d.ladd) kpLibPick(d.ladd, false);
-        else if (d.lpin) kpLibPick(d.lpin, true);
+        if (d.kadd) kpPick(d.kadd);
+        else if (d.ladd) kpLibPick(d.ladd);
       };
       $("cdClose").onclick = cdClose;
       $("cdSave").onclick = cdSave;
@@ -10147,7 +10722,7 @@
       await recoverStretches2();
       await recoverCardio2();
       planLogsInit2(S.planRaw);
-      await persistPlan();
+      await loadRoutines(routineNameFor);
       if (rec) flash(tn("msg.rebuilt", rec));
       syncRestSegs();
       drawExactNotice();
@@ -10173,8 +10748,8 @@
       return true;
     }
     const open2 = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose]].find(([id]) => {
-      const el2 = $(id);
-      return el2 && el2.classList.contains("show");
+      const el3 = $(id);
+      return el3 && el3.classList.contains("show");
     });
     if (!open2) return false;
     open2[1]();

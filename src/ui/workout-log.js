@@ -10,13 +10,14 @@ import { DAYS, coachLine, dayName, dayShort, exNote, lastSessionOf, liftsOf, per
 import { drawGuide } from './guide';
 import { render } from './nav';
 import { startRest } from './rest-timer';
+import { daySupersets, routineFor } from '../state/routines';
 
 export function appendExBlock(wrap, ex, dayKey){
-  const pinned=(S.planExtras[dayKey]||[]).indexOf(ex.key)>=0;
+  const rt=routineFor(dayKey,'lift',ex.key);
   const onDate=$("fDate").value, curE=S.entries.find(e=>e.date===onDate);
   const plan=(curE && liftsOf(curE,ex.key).length) ? null : coachNext(ex, sessionsBefore(ex.key, onDate));
   const rchip=(ex.repMin!=null && ex.repMax!=null) ? `<span class="rtag">${ex.repMin}–${ex.repMax}${ex.unit==='sec'?'s':''}</span>` : '';
-  const mark=`<button type="button" class="xtag${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`;
+  const mark=rt ? `<em class="xtag pin still" title="${esc(tf('rt.fromtip',{name:rt.name}))}">${esc(rt.name)}</em>` : `<em class="xtag still">${esc(t('ex.added'))}</em>`;
   const block=document.createElement('div'); block.className='ex';
   block.innerHTML=`<div class="ex-head">
       <div class="ex-name">${esc(ex.name)} ${rchip}${mark}<span> · ${esc(exNote(ex))}</span></div>
@@ -28,26 +29,10 @@ export function appendExBlock(wrap, ex, dayKey){
   block.querySelector('.addset').onclick=()=>{
     const rows=$("sets-"+ex.key).querySelectorAll('.setrow');
     addSetRow(ex, rows.length ? rows[rows.length-1].querySelector('.kg').value : ex.def, '');
-    rememberSets(ex);
   };
   block.querySelector('.exdrop').onclick=()=>dropMovement(ex.key, dayKey);
-  block.querySelector('.xtag').onclick=()=>togglePin(ex.key, dayKey);
   wrap.appendChild(block);
   return block;
-}
-export async function togglePin(key, dayKey){
-  const list=S.planExtras[dayKey]||(S.planExtras[dayKey]=[]);
-  const i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete S.planExtras[dayKey]; } else list.push(key);
-  await persistPlan();
-  const box=$("sets-"+key), tag=(box&&box.parentNode)?box.parentNode.querySelector('.xtag'):null;
-  if(tag){
-    const on=(S.planExtras[dayKey]||[]).indexOf(key)>=0;
-    tag.className='xtag'+(on?' pin':'');
-    tag.textContent=t(on?'ex.pinned':'ex.added');
-    tag.title=on?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)});
-  }
-  render();
 }
 export function prefillEx(ex, dayKey, cur){
   const sameDay = cur && cur.lifts && cur.lifts[ex.key];
@@ -62,8 +47,13 @@ export function prefillEx(ex, dayKey, cur){
 }
 export function buildExForm(cur, dayKey){
   const wrap=$("exWrap"); wrap.innerHTML='';
-  const keys=sessionEx(dayKey);
+  const skip=SKIP[$("fDate").value]||new Set();
+  const keys=sessionEx(dayKey).filter(k=>!skip.has(k) || (cur && cur.lifts && cur.lifts[k]));
   if(cur && cur.lifts) Object.keys(cur.lifts).forEach(k=>{ if(exByKey(k) && keys.indexOf(k)<0) keys.push(k); });
+  // supersets: each movement but the last points to the next; rest comes after the last one
+  SS_NEXT=new Map(); SS_LAST=new Map();
+  const groups=daySupersets(dayKey).map(g=>g.filter(k=>keys.indexOf(k)>=0)).filter(g=>g.length>1);
+  groups.forEach(g=>{ g.forEach((k,i)=>{ if(i<g.length-1) SS_NEXT.set(k,g[i+1]); }); SS_LAST.set(g[g.length-1], g.map(k=>{ const e=exByKey(k); return e?(e.short||e.name):k; }).join(' + ')); });
   if(!keys.length){
     const known=DAYS.some(d=>d.key===dayKey);
     wrap.innerHTML=`<div class="restnote">${esc(tf('log.restnote',{day:known?dayName(dayKey):t('day.rest')}))}<br>${t('log.restnote2')}<br>${t('log.restnote3')}</div>`;
@@ -71,6 +61,14 @@ export function buildExForm(cur, dayKey){
   }
   keys.forEach(k=>{ const ex=exByKey(k); if(ex) appendExBlock(wrap, ex, dayKey); });
   keys.forEach(k=>{ const ex=exByKey(k); if(ex) prefillEx(ex, dayKey, cur); });
+  groups.forEach(g=>{
+    const blocks=g.map(k=>$("sets-"+k)).filter(Boolean).map(b=>b.parentNode);
+    if(blocks.length<2) return;
+    const grp=document.createElement('div'); grp.className='ssgroup';
+    grp.innerHTML=`<div class="sslbl">${esc(t('ss.label'))}</div>`;
+    wrap.insertBefore(grp, blocks[0]);
+    blocks.forEach(b=>grp.appendChild(b));
+  });
 }
 export function addMovementToForm(key){
   const ex=exByKey(key); if(!ex) return false;
@@ -85,10 +83,22 @@ export function addMovementToForm(key){
 export async function dropMovement(key, dayKey){
   const box=$("sets-"+key);
   if(box && box.parentNode) box.parentNode.remove();
-  const list=S.planExtras[dayKey]||[];
-  const i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete S.planExtras[dayKey]; await persistPlan(); render(); }
+  // only for this day: the routine itself is changed in the Routines card
+  const date=$("fDate").value; (SKIP[date]||(SKIP[date]=new Set())).add(key);
   if(!$("exWrap").children.length) buildExForm(S.entries.find(e=>e.date===$("fDate").value), dayKey);
+}
+/** Movements dropped from a day's log (until the app restarts), by date. */
+const SKIP={};
+/** Supersets in the current log: key → next movement in the round; last movement → names for the rest timer. */
+let SS_NEXT=new Map(), SS_LAST=new Map();
+/** In a superset, '→' jumps to the same set of the next movement, so the rest only comes after the round. */
+export function ssNext(key, row){
+  const box=$("sets-"+key), nb=$("sets-"+SS_NEXT.get(key)); if(!box || !nb) return;
+  const i=[...box.querySelectorAll('.setrow')].indexOf(row), rows=nb.querySelectorAll('.setrow');
+  const target=rows[Math.min(Math.max(i,0), rows.length-1)];
+  if(!target){ nb.parentNode.scrollIntoView({behavior:'smooth', block:'center'}); return; }
+  target.scrollIntoView({behavior:'smooth', block:'center'});
+  const rp=target.querySelector('.rp'); if(rp) rp.focus({preventScroll:true});
 }
 export function addSetRow(ex, loadVal, reps, aim){
   const box=$("sets-"+ex.key); if(!box) return;
@@ -98,19 +108,12 @@ export function addSetRow(ex, loadVal, reps, aim){
     <input class="kg" type="number" min="0" step="0.5" inputmode="decimal" value="${loadVal==null?'':loadVal}"><span class="u">${ex.added?'+kg':'kg'}</span>
     <span class="x">×</span>
     <input class="rp${aim!=null?' aim':''}" type="number" min="0" inputmode="numeric" placeholder="${repPh}" value="${reps}">
-    <button class="rmrest" title="${esc(t('ex.resttip'))}" aria-label="${esc(t('ex.resttip'))}">⏱</button>
+    ${SS_NEXT.has(ex.key) ? `<button class="rmnext" title="${esc(t('ss.nexttip'))}" aria-label="${esc(t('ss.nexttip'))}">→</button>` : `<button class="rmrest" title="${esc(t(SS_LAST.has(ex.key)?'ss.resttip':'ex.resttip'))}" aria-label="${esc(t(SS_LAST.has(ex.key)?'ss.resttip':'ex.resttip'))}">⏱</button>`}
     <button class="rmset" title="${esc(t('btn.remove'))}" aria-label="${esc(t('btn.remove'))}">✕</button>`;
-  row.querySelector('.rmrest').onclick=()=>startRest(null, ex.short||ex.name);
-  row.querySelector('.rmset').onclick=()=>{ row.remove(); renumber(ex); rememberSets(ex); };
+  if(SS_NEXT.has(ex.key)) row.querySelector('.rmnext').onclick=()=>ssNext(ex.key, row);
+  else row.querySelector('.rmrest').onclick=()=>startRest(null, SS_LAST.get(ex.key)||ex.short||ex.name);
+  row.querySelector('.rmset').onclick=()=>{ row.remove(); renumber(ex); };
   box.appendChild(row); renumber(ex);
-}
-export async function rememberSets(ex){
-  const dayKey=$("fDay").value, box=$("sets-"+ex.key);
-  if(!box || (S.planExtras[dayKey]||[]).indexOf(ex.key)<0) return;
-  const n=box.querySelectorAll('.setrow').length;
-  if(n<1 || plannedSets(dayKey, ex.key)===n) return;
-  (S.planSets[dayKey]||(S.planSets[dayKey]={}))[ex.key]=n;
-  await persistPlan(); drawGuide();
 }
 export function renumber(ex){ const box=$("sets-"+ex.key); if(box) box.querySelectorAll('.setrow').forEach((r,i)=>r.querySelector('.setn').textContent=i+1); }
 export function readExForm(){

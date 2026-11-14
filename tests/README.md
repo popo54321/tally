@@ -22,3 +22,7 @@ theme; a brand-new user with the welcome dialog; an empty app; saved data with t
 versions left behind (`old-shapes`); importing an 8.1 backup and a bare list of days; and a set of
 interactions (date picker, typed meals, chart press and pick, add movement, session change,
 plate calculator, folded chart).
+
+Newer features have their own checks (copy-a-day, tour, folding, plates, coaching apply and headroom,
+chart picks, routines); `npm test` runs everything. Routines replaced the 8.1 weekday pins: the tag that
+said PINNED now names the routine, which tests/compare.mjs allows for on those cards only.

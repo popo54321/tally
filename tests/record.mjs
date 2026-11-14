@@ -57,7 +57,7 @@ async function settle(page) {
 }
 // The rebuild adds things on purpose: the "Copy this day to…" row, the How to use button and the fold button on every card. It is hidden while comparing
 // with 8.1, and photographed on its own in the new-only runs below.
-async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow,.plsides,.liftday,.foldbtn.corner{display:none!important}.foldlbl{padding-right:0!important}' }); }
+async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow,.plsides,.liftday,.dayrt,#cardRoutines,.foldbtn.corner{display:none!important}.foldlbl{padding-right:0!important}' }); }
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);
@@ -110,11 +110,12 @@ try {
         await showPage(page, pg);
         const cards = page.locator(`#pg-${pg} > .card`);
         const n = await cards.count();
-        for (let i = 0; i < n; i++) {
+        // numbered among the visible cards only, so a card the newer app adds (hidden while recording) shifts nothing
+        for (let i = 0, shown = 0; i < n; i++) {
           const c = cards.nth(i);
           if (!(await c.isVisible())) continue;
           const id = (await c.getAttribute('id')) || 'card';
-          await snap(page, c, path.join(dir, pg, String(i).padStart(2, '0') + '-' + id), manifest);
+          await snap(page, c, path.join(dir, pg, String(shown++).padStart(2, '0') + '-' + id), manifest);
         }
       }
     }

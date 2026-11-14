@@ -1,7 +1,8 @@
-// "Copy this day to…" on the Workout sets card: copies the selected session's plan (movements with
-// their planned set counts, stretches and cardio) to other weekdays, with Undo.
+// "Copy this day to…" on the Workout sets card: puts the selected session's routines (workout, stretch
+// and cardio) on other weekdays too, with Undo.
 import { DAY_KEYS, type DayKey } from '../core/dates';
-import { copyDay, dayPlan, dayPlanEmpty, restorePlan, type PlanSnapshot } from '../state/plan';
+import { dayPlan, dayPlanEmpty } from '../state/plan';
+import { copyDayRoutines, restoreWeek, type WeekSnapshot } from '../state/routines';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc } from './dom';
 import { dlgOpen, dlgClose } from './dialog';
@@ -11,7 +12,7 @@ import { render } from './nav';
 let from: DayKey = 'mon';
 let picked = new Set<DayKey>();
 let mode: 'add' | 'replace' = 'add';
-let undo: PlanSnapshot | null = null;
+let undo: WeekSnapshot | null = null;
 
 const el = <T extends HTMLElement = HTMLElement>(id: string) => $(id) as T;
 const msg = (m: string) => { el('cpMsg').textContent = m; };
@@ -46,13 +47,13 @@ async function go(): Promise<void> {
   if (dayPlanEmpty(from)) return;
   if (!picked.size) { msg(t('copy.pick')); return; }
   const to = DAY_KEYS.filter(d => picked.has(d));
-  undo = await copyDay(from, to, mode);
+  undo = await copyDayRoutines(from, to, mode);
   msg(tf('copy.done', { day: dayName(from), days: to.map(d => dayShort(d)).join(', ') }));
   picked = new Set(); draw(); render();
 }
 async function undoCopy(): Promise<void> {
   if (!undo) return;
-  await restorePlan(undo); undo = null;
+  await restoreWeek(undo); undo = null;
   msg(t('copy.undone')); draw(); render();
 }
 

@@ -16,6 +16,8 @@ import { fillForm, profileTDEE } from './body';
 import { markBackedUp } from './backup';
 import { persistTheme } from './theme';
 import { render } from './nav';
+import { routinesFromBackup } from '../state/routines';
+import { routineNameFor } from './routines';
 
 export function drawVersion(){
   const el=$("appVer"); if(!el) return;
@@ -258,7 +260,11 @@ export async function applyImport(data){
   if(Array.isArray(data.cardio)){ const bk=new Map(S.cardios.map(c=>[c.key,c])); data.cardio.forEach(x=>{ const c=normCardio(x); if(c) bk.set(c.key,c); }); S.cardios=[...bk.values()]; await persistCardio(); }
   if(isObj(data.theme)){ S.theme=normTheme(data.theme); await persistTheme(); }
   if(isObj(data.gym)){ S.gym=normGym(data.gym); await persistGym(); }
-  if(isObj(data.plan)){ S.planExtras=normPlan(data.plan); S.planSets=normPlanSets(data.plan.sets); planLogsInit(data.plan); await persistPlan(); }
+  if(isObj(data.plan) || isObj(data.routines)){
+    const p=isObj(data.plan) ? data.plan : {};
+    S.planExtras=normPlan(p); S.planSets=normPlanSets(p.sets); planLogsInit(p);
+    S.routines=routinesFromBackup(data, routineNameFor); await persistPlan();
+  }
   if(isObj(data.settings)){ S.settings=normSettings(data.settings); await persistSettings(); }
   await persist();
   fillForm($("fDate").value); render();

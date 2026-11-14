@@ -2,6 +2,7 @@
 // action saves just the part it changed (see actions as they move here from legacy/).
 import type { Day } from '../core/types';
 import { normSettings, normTheme, normGym, type Settings } from '../store/schema';
+import { emptyRoutines, type Routines } from '../store/routines';
 
 type Rec<T> = Record<string, T>;
 export interface Move { key: string; name: string; short: string; note: string; def: number; added: boolean; unit: string | null; group: string;
@@ -21,7 +22,9 @@ export const S = {
   catByKey: new Map<string, Move>(),
   stretches: [] as Stretch[],
   cardios: [] as Cardio[],
-  /** Weekly plan: pinned movements, planned set counts, pinned stretches and cardio, per weekday. */
+  /** Routines of movements, stretches and cardio, and which weekdays each is on. The weekly plan below is worked out from them. */
+  routines: emptyRoutines() as Routines,
+  /** Weekly plan: movements, planned set counts, stretches and cardio, per weekday (from the routines). */
   planExtras: {} as Rec<string[]>,
   planSets: {} as Rec<Rec<number>>,
   planSx: {} as Rec<string[]>,

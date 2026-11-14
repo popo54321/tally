@@ -13,6 +13,7 @@ import { dlgClose, dlgOpen } from './dialog';
 import { drawCardio } from './cardio';
 import { fmtClock } from './rest-timer';
 import { render, stale } from './nav';
+import { dropFromRoutines, routineFor } from '../state/routines';
 
 export async function setMobLog(key, total, sets){
   const e=dayEntry(); if(!e) return;
@@ -50,7 +51,7 @@ export function mobRowHtml(s, mob, gone, ms){
   const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
   return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(s.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
-    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(S.planSx,s.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(s.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag('sx', s.key)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="${reps?999:3600}" inputmode="numeric" placeholder="${tgt||0}" value="${on?Math.round(mob[s.key]/done):''}" aria-label="${esc(t(reps?'sx.reps':'sx.hold'))}"><span class="mobu">${esc(reps?t('unit.reps'):'s')}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${go}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
@@ -62,13 +63,8 @@ export function dayLogKeys(plan, today, log){
   return [...new Set([...(plan[dayKey]||[]), ...(today[date]||[]), ...Object.keys(log)])];
 }
 export const logPinned = (plan, key) => (plan[$("fDay").value]||[]).indexOf(key)>=0;
-export async function toggleLogPin(kind, key){
-  const plan=kind==='sx'?S.planSx:S.planCd, dayKey=$("fDay").value, list=plan[dayKey]||(plan[dayKey]=[]), i=list.indexOf(key);
-  if(i>=0){ list.splice(i,1); if(!list.length) delete plan[dayKey]; const today=kind==='sx'?sxToday:cdToday, date=$("fDate").value; (today[date]||(today[date]=[])).push(key); }
-  else list.push(key);
-  await persistPlan(); if(kind==='sx') drawMob(); else drawCardio();
-}
-export const pinTag = (pinned, dayKey) => `<button type="button" class="xtag mobpin${pinned?' pin':''}" title="${esc(pinned?t('ex.unpintip'):tf('ex.pintip',{day:dayShort(dayKey)}))}">${esc(t(pinned?'ex.pinned':'ex.added'))}</button>`;
+/** Which routine of the selected session a stretch or cardio comes from, or 'added' for just this day. */
+export const pinTag = (kind, key) => { const r=routineFor($("fDay").value, kind, key); return r ? `<em class="xtag pin still">${esc(r.name)}</em>` : `<em class="xtag still">${esc(t('ex.added'))}</em>`; };
 export function drawMob(){
   const wrap=$("mobWrap"); if(!wrap) return;
   const date=$("fDate").value;
@@ -147,7 +143,7 @@ export async function sxSave(){
       secs:reps?0:v, reps:reps?v:0, sets:$("sxSets").value, mus:sxMusGet()});
     if(!s){ sxMsg(t('msg.badname'),true); return; }
     S.stretches.push(s);
-    if(V.sxPinDay){ (S.planSx[V.sxPinDay]||(S.planSx[V.sxPinDay]=[])).push(s.key); await persistPlan(); }
+    if(V.sxPinDay){ const d=$("fDate").value; (sxToday[d]||(sxToday[d]=[])).push(s.key); }
   }
   const ok=await persistStretches();
   if(!ok){ sxMsg(t('msg.savefail'),true); return; }
@@ -166,7 +162,7 @@ export async function sxDelete(){
   }
   sxResetDel();
   S.stretches=S.stretches.filter(x=>x.key!==s.key);
-  unpinLog(S.planSx, s.key); await persistPlan();
+  if(dropFromRoutines('sx', s.key)) await persistPlan();
   S.entries.forEach(e=>{ if(e.mob && (s.key in e.mob)){ delete e.mob[s.key]; if(!Object.keys(e.mob).length) e.mob=null; } });
   await persistStretches(); await persist();
   sxClose(); render();

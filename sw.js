@@ -1,4 +1,4 @@
-const CACHE='tally-8921836fb20f';
+const CACHE='tally-3e2a572892d3';
 const ASSETS=[
   "./",
   "./index.html",

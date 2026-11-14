@@ -199,6 +199,9 @@
     <div class="card col-12" id="cardLog">
       <div class="lbl" data-i18n-html="log.title">Workout sets <span class="sub-note">· weight × reps</span></div>
       <div class="field"><label data-i18n="log.session">Session</label><select id="fDay" class="daysel"></select></div>
+      <div class="dayrt" id="dayRt"><div class="dayrthead"><span class="ctl-lbl" data-i18n="rt.dayhead">Routines</span><span id="dayRtList"></span></div>
+        <div class="dayrtbtns"><button type="button" class="ghostbtn" id="dayRtAdd" aria-expanded="false">Add a routine…</button><button type="button" class="ghostbtn" id="dayRtManage" data-i18n="rt.manage">Make or edit routines</button></div>
+        <div id="dayRtPick" style="display:none"></div></div>
       <div class="copyrow"><button type="button" class="ghostbtn" id="copyDayBtn" data-i18n="copy.btn">Copy this day to…</button></div>
       <div class="restctl">
         <div class="seg" id="segRest">
@@ -257,6 +260,24 @@
       </div>
       <div id="cdWrap"></div>
       <button type="button" class="addmove" id="addCardioBtn" data-i18n="cd.add">+ Add cardio</button>
+    </div>
+
+    <div class="card col-12" id="cardRoutines">
+      <div class="lbl" data-i18n-html="rt.title">Routines <span class="sub-note">· workout, stretch and cardio kept separate · put them on weekdays and they all show up in that day's log</span></div>
+      <div id="rtWrap">
+        <div class="seg" id="rtKind"><button type="button" data-k="lift" data-i18n="rt.tab.lift">Workout</button><button type="button" data-k="sx" data-i18n="rt.tab.sx">Stretch</button><button type="button" data-k="cd" data-i18n="rt.tab.cd">Cardio</button></div>
+        <div id="rtList"><div id="rtRows"></div><button type="button" class="addmove" id="rtNew">+ New workout routine</button></div>
+        <div id="rtForm" style="display:none">
+          <div class="ctl-lbl" id="rtFormTitle"></div>
+          <div class="field"><label for="rtName" data-i18n="rt.name">Name</label><input type="text" id="rtName" maxlength="40" autocomplete="off" data-i18n-ph="rt.name.ph" placeholder="e.g. Push A"></div>
+          <div id="rtItems"></div>
+          <button type="button" class="ghostbtn" id="rtAddBtn"></button>
+          <div id="rtAddBox" style="display:none"><input type="text" class="sh-search" id="rtSearch" autocomplete="off" data-i18n-ph="rt.search" placeholder="Search"><div class="muschips" id="rtPool"></div></div>
+          <div class="ctl-lbl rtdayslbl" data-i18n="rt.days">On these weekdays</div><div class="muschips" id="rtDays"></div>
+          <div class="sxnote" id="rtMsg"></div>
+          <div class="sh-foot"><button type="button" id="rtCancel" data-i18n="btn.cancel">Cancel</button><button type="button" id="rtDelete" data-i18n="btn.remove">Remove</button><button type="button" class="prim" id="rtSave" data-i18n="btn.saveshort">Save</button></div>
+        </div>
+      </div>
     </div>
 
     <div class="card col-12" id="cardColl">

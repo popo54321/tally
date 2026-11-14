@@ -8,10 +8,11 @@ import { num } from '../core/numbers';
 import { t, tf, tn } from '../i18n/index';
 import { $, esc, flash } from './dom';
 import { cdKeyFor, cdSetsOf, cdToday, dayEntry, dayName, persist, persistCardio, persistPlan, prettyKey } from './shared';
-import { dayLogKeys, logPinned, pinTag, unpinLog } from './mobility';
+import { dayLogKeys, pinTag } from './mobility';
 import { dlgClose, dlgOpen } from './dialog';
 import { render, stale } from './nav';
 import { timerStart } from './rest-timer';
+import { dropFromRoutines } from '../state/routines';
 
 export async function setCardioLog(key, total, sets){
   const e=dayEntry(); if(!e) return;
@@ -51,7 +52,7 @@ export function cdRowHtml(c, log, gone, ms){
   const tip=t(sets>1 && done<sets ? 'mob.ticktip.set' : 'mob.ticktip');
   return `<div class="mobrow${on?' done':''}${on && done<sets?' part':''}" data-k="${esc(c.key)}">
     <button type="button" class="mobtick" title="${esc(tip)}" aria-label="${esc(tip)}" aria-pressed="${on ? (done<sets ? 'mixed' : 'true') : 'false'}">✓</button>
-    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag(logPinned(S.planCd,c.key), $("fDay").value)}<span>${esc(sub)}</span></div>
+    <div class="mobname">${esc(c.name)}${gone?' <span class="xtag">'+esc(t('removed'))+'</span>':pinTag('cd', c.key)}<span>${esc(sub)}</span></div>
     <input class="mobsec" type="number" min="0" max="600" inputmode="numeric" placeholder="${c.mins||0}" value="${on?Math.round(log[c.key]/done):''}" aria-label="${esc(t('cdx.mins'))}"><span class="mobu">${esc(t('unit.min'))}</span><span class="mobx">×</span><input class="mobn" type="number" min="1" max="50" inputmode="numeric" placeholder="${sets}" value="${on?done:''}" aria-label="${esc(t('sx.sets'))}">
     ${c.mins?'<button type="button" class="mobgo">'+esc(t('btn.start'))+'</button>':''}
     ${gone?'':'<button type="button" class="mobedit" title="'+esc(t('mob.edittip'))+'" aria-label="'+esc(t('mob.edittip'))+'">⋯</button>'}
@@ -104,7 +105,7 @@ export async function cdSave(){
     const c=normCardio({key:cdKeyFor(name), name:name, mins:$("cdMins").value, sets:$("cdSets").value});
     if(!c){ cdMsg(t('msg.badname'),true); return; }
     S.cardios.push(c);
-    if(V.cdPinDay){ (S.planCd[V.cdPinDay]||(S.planCd[V.cdPinDay]=[])).push(c.key); await persistPlan(); }
+    if(V.cdPinDay){ const d=$("fDate").value; (cdToday[d]||(cdToday[d]=[])).push(c.key); }
   }
   const ok=await persistCardio();
   if(!ok){ cdMsg(t('msg.savefail'),true); return; }
@@ -123,7 +124,7 @@ export async function cdDelete(){
   }
   cdResetDel();
   S.cardios=S.cardios.filter(x=>x.key!==c.key);
-  unpinLog(S.planCd, c.key); await persistPlan();
+  if(dropFromRoutines('cd', c.key)) await persistPlan();
   S.entries.forEach(e=>{ if(e.cardio && (c.key in e.cardio)){ delete e.cardio[c.key]; if(!Object.keys(e.cardio).length) e.cardio=null; } });
   await persistCardio(); await persist();
   cdClose(); render();
