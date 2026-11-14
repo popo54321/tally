@@ -67,15 +67,15 @@ try {
   ok(o.errors.length === 0, 'no page errors (' + o.errors.join(' | ') + ')');
   await o.ctx.close();
 
-  // The copied plan survives a restart, and 8.1 reads it.
+  // The copied plan survives a restart, and the previous version (the baseline) reads it.
   const o2 = await openApp(browser, url, 'new', { store: fx });
   await o2.page.click('#tabs button[data-pg="workout"]');
   await o2.page.selectOption('#fDay', 'mon'); await o2.page.click('#copyDayBtn');
   await o2.page.click('#cpDays button[data-d="tue"]'); await o2.page.click('#cpGo'); await o2.page.waitForTimeout(300);
   const saved = await o2.page.evaluate(() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)])));
   await o2.ctx.close();
-  const o3 = await openApp(browser, url, 'old', { store: saved });
-  ok(/Tue[\s\S]*Barbell bench/i.test(await o3.page.textContent('#sched')), '8.1 opened on the same data shows the copied Tuesday');
+  const o3 = await openApp(browser, url, 'base', { store: saved });
+  ok(/Tue[\s\S]*Barbell bench/i.test(await o3.page.textContent('#sched')), 'the previous version opened on the same data shows the copied Tuesday');
   await o3.ctx.close();
 } finally { await browser.close(); server.close(); }
 console.log(fails ? `${fails} copy-a-day check(s) FAILED` : 'all copy-a-day checks passed');

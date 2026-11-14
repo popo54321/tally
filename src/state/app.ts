@@ -1,5 +1,5 @@
 // The one record of what the app currently knows. Screens read from it; only actions change it, and each
-// action saves just the part it changed (see actions as they move here from legacy/).
+// action saves just the part it changed.
 import type { Day } from '../core/types';
 import { normSettings, normTheme, normGym, type Settings } from '../store/schema';
 import { emptyRoutines, type Routines } from '../store/routines';

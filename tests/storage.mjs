@@ -59,19 +59,19 @@ try {
   ok(o.errors.length === 0, 'no page errors (' + o.errors.join(' | ') + ')');
   await o.ctx.close();
 
-  // 3. Going back to 8.1 shows everything, including the change just made
-  o = await openApp(browser, url, 'old', { store: afterSave });
+  // 3. Going back to the previous version (the baseline) shows everything, including the change just made
+  o = await openApp(browser, url, 'base', { store: afterSave });
   await o.page.click('#tabs button[data-pg="body"]');
   const oldWeight = await o.page.inputValue('#fWeight');
-  ok(oldWeight === '87.7', 'opening 8.1 on the same data shows the latest weight (' + oldWeight + ')');
-  // ... and a day logged in 8.1 meanwhile
+  ok(oldWeight === '87.7', 'opening the previous version on the same data shows the latest weight (' + oldWeight + ')');
+  // ... and a day logged there meanwhile
   await o.page.click('#dayPrev'); await o.page.fill('#fWeight', '88.8'); await o.page.click('#saveBtn'); await o.page.waitForTimeout(400);
   const after81 = (await dump(o.page)).raw;
   await o.ctx.close();
   o = await openApp(browser, url, 'new', { store: after81 });
   d = await dump(o.page);
-  ok(d.days.find(x => x.date === '2026-11-09').weight === 88.8, 'coming back from 8.1: the day logged in 8.1 is there');
-  ok(JSON.stringify(d.days) === d.raw['tally:entries:v1'], 'coming back from 8.1: new layout rebuilt from the 8.1 copy');
+  ok(d.days.find(x => x.date === '2026-11-09').weight === 88.8, 'coming back from the previous version: the day logged there is here');
+  ok(JSON.stringify(d.days) === d.raw['tally:entries:v1'], 'coming back: the 8.1-format copy still matches');
   await o.ctx.close();
 
   // 4. Eight months later, the months past the line pack themselves into bundles

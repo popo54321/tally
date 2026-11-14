@@ -1,7 +1,8 @@
-name: Check rebuild
+name: Check
 
-# On every push to the rebuild branch: type-check, layer rules, build, then photograph the
-# frozen 8.1 app and the rebuilt app and fail if any picture or text differs.
+# On every push to a tally-* branch: type-check, layer rules, build, feature tests, then compare every
+# calculation and every screen with the baseline version (tests/baseline.json). Differences fail unless
+# tests/expected-changes.mjs lists them.
 on:
   push:
     branches: [rebuild, 'tally-*']
@@ -15,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0   # the baseline version (tests/baseline.json) is an earlier commit
 
       - uses: actions/setup-node@v5
         with:
@@ -29,16 +32,16 @@ jobs:
       - name: Type-check, layer rules, build
         run: npm run check
 
-      - name: Same answers as 8.1 on random inputs
-        run: node tests/equiv.mjs
+      - name: Same answers as the baseline version on random inputs
+        run: node tests/calc.mjs
 
       - name: Maintenance estimate against simulated people with known maintenance
         run: node tests/estimate.mjs
 
-      - name: Storage (update from 8.1, saving, packing, going back to 8.1, crash, damage)
+      - name: Storage (update from 8.1 data, saving, packing, going back a version, crash, damage)
         run: node tests/storage.mjs
 
-      - name: Copy a day (Add, Replace, Undo, empty day, 8.1 reads the result)
+      - name: Copy a day (Add, Replace, Undo, empty day, the previous version reads the result)
         run: node tests/copyday.mjs
 
       - name: How to use tour
@@ -62,11 +65,11 @@ jobs:
       - name: Routines (workout, stretch, cardio), supersets, older versions, backups
         run: node tests/routines.mjs
 
-      - name: Photograph 8.1 and the rebuild, then compare
+      - name: Photograph the baseline version and the current build, then compare
         run: |
-          node tests/record.mjs old
+          node tests/record.mjs base
           node tests/record.mjs new
-          node tests/compare.mjs old new
+          node tests/compare.mjs
 
       - name: Keep the differences for a look
         if: failure()

@@ -1,14 +1,15 @@
 // Photographs an app: every visible card on every page, plus the top bar and a set of
 // interactions, for each sample data set, screen size and text size. Also saves each card's text.
-//   node tests/record.mjs old          -> tests/out/old/
-//   node tests/record.mjs new          -> tests/out/new/
-//   node tests/record.mjs old --quick  -> phone, 100% text only
+//   node tests/record.mjs base         -> tests/out/base/   (the baseline version, tests/baseline.json)
+//   node tests/record.mjs new          -> tests/out/new/    (the current build)
+//   node tests/record.mjs new --quick  -> phone, 100% text only
 import fs from 'node:fs';
 import path from 'node:path';
 import { chromium, openApp, fixture, ROOT, sha } from './harness.mjs';
 import { start } from './serve.mjs';
 
-const target = process.argv[2] || 'old';
+const target = process.argv[2] || 'new';
+if (!['base', 'new'].includes(target)) { console.error('record base or new'); process.exit(2); }
 const quick = process.argv.includes('--quick');
 const only = (process.argv.find(a => a.startsWith('--only=')) || '').slice(7);
 const OUT = path.join(ROOT, 'tests/out', target);
@@ -25,7 +26,7 @@ for (const scen of ['full-male', 'full-female', 'sparse'])
 RUNS.push({ name: 'old-shapes-phone', store: { ...fixture('old-shapes'), ...SEEN }, viewport: 'phone', pages: true });
 RUNS.push({ name: 'import-v4-phone', store: SEEN, viewport: 'phone', pages: true, importFile: 'backup-v4' });
 RUNS.push({ name: 'import-days-phone', store: SEEN, viewport: 'phone', pages: ['body', 'history'], importFile: 'backup-days-only' });
-if (target === 'new') RUNS.push({ name: 'new-only-copyday', store: { ...fixture('full-male'), ...SEEN }, viewport: 'phone', pages: ['workout'], newOnly: true, acts: true, actList: 'copy' });
+RUNS.push({ name: 'copyday-phone', store: { ...fixture('full-male'), ...SEEN }, viewport: 'phone', pages: false, acts: true, actList: 'copy' });
 RUNS.push({ name: 'new-user-phone', store: {}, viewport: 'phone', pages: false, welcome: true });
 RUNS.push({ name: 'empty-phone', store: SEEN, viewport: 'phone', pages: true });
 for (const preset of ['min', 'bold', 'zen', 'cyber', 'tact']) if (!quick)
@@ -47,6 +48,8 @@ const ACTS = [
   { name: 'session-mon', page: 'workout', run: async p => { await p.selectOption('#fDay', 'mon'); return '#cardLog'; } },
   { name: 'plates', page: 'workout', run: async p => { await p.fill('#plGoal', '101'); await p.evaluate(() => { const d = document.getElementById('plSetup'); if (d) d.open = true; }); return '#cardPlates'; } },
   { name: 'fold-strength', page: 'workout', run: async p => { await p.click('button[data-fold="str"]'); return '#cardStr'; } },
+  { name: 'routine-editor', page: 'workout', run: async p => { await p.click('#rtRows [data-rtedit]'); await p.click('#rtAddBtn'); return '#cardRoutines'; } },
+  { name: 'routine-pick', page: 'workout', run: async p => { await p.selectOption('#fDay', 'mon'); await p.click('#dayRtAdd'); return '#cardLog'; } },
 ];
 
 // Wait until short-lived things are over: the 'Saved'/'Imported' message (gone after 2.4 s) and two screen refreshes.
@@ -55,9 +58,6 @@ async function settle(page) {
   await page.evaluate(() => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))));
   await page.waitForTimeout(250);
 }
-// The rebuild adds things on purpose: the "Copy this day to…" row, the How to use button and the fold button on every card. It is hidden while comparing
-// with 8.1, and photographed on its own in the new-only runs below.
-async function hideNew(page) { await page.addStyleTag({ content: '.copyrow,.tourrow,.plsides,.liftday,.dayrt,#cardRoutines,.foldbtn.corner{display:none!important}.foldlbl{padding-right:0!important}' }); }
 async function showPage(page, pg) {
   await page.click(`#tabs button[data-pg="${pg}"]`);
   await page.waitForTimeout(150);
@@ -90,7 +90,6 @@ try {
     if (only && !run.name.includes(only)) continue;
     const dir = path.join(OUT, run.name);
     const { ctx, page, errors } = await openApp(browser, url, target, run);
-    if (target === 'new' && !run.newOnly) await hideNew(page);
     if (run.welcome) await snap(page, 'viewport', path.join(dir, 'welcome'), manifest);
     if (run.importFile) {   // paste a backup into Settings > Import and confirm, like a person would
       await showPage(page, 'settings');
@@ -122,7 +121,6 @@ try {
     await ctx.close();
     if (run.acts) for (const act of (run.actList === 'copy' ? COPY_ACTS : ACTS)) {
       const o = await openApp(browser, url, target, run);
-      if (target === 'new' && !run.newOnly) await hideNew(o.page);
       await showPage(o.page, act.page);
       const sel = await act.run(o.page);
       await o.page.waitForTimeout(150); await settle(o.page);

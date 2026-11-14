@@ -15,7 +15,7 @@ export function fixture(name) {
   return JSON.parse(fs.readFileSync(path.join(ROOT, 'tests/fixtures', name + '.json'), 'utf8'));
 }
 
-// Open one app ('old' or 'new') with the given stored data (key -> string).
+// Open one app ('base': the baseline version, or 'new': the current build) with the given stored data (key -> string).
 export async function openApp(browser, base, target, { store = {}, viewport = 'phone', scale = null, bypassCSP = false } = {}) {
   const ctx = await browser.newContext({ viewport: VIEWPORTS[viewport] || viewport, deviceScaleFactor: 1, bypassCSP,
     timezoneId: 'Asia/Bangkok', locale: 'en-GB', serviceWorkers: 'block', reducedMotion: 'reduce' });

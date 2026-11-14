@@ -1,43 +1,30 @@
-// Compares two recordings picture by picture and text by text.
-//   node tests/compare.mjs old new      (directories under tests/out/)
+// Compares the current build with the baseline version, picture by picture and text by text.
+//   node tests/compare.mjs            (tests/out/base/ against tests/out/new/)
 // Pictures count as the same when no pixel differs by more than NOISE brightness levels (out of 255)
 // apart from a few faint stray pixels (see STRAY_PIXELS): the browser's own rendering wobbles that much.
-// For every real difference a side-by-side picture (old | new | changed pixels in red) goes to tests/out/diff/.
-// Exit code 1 if anything differs.
+// A difference listed in tests/expected-changes.mjs is reported as on purpose; any other fails (exit code 1).
+// For every difference a side-by-side picture (baseline | now | changed pixels in red) goes to tests/out/diff/.
 import fs from 'node:fs';
 import path from 'node:path';
 import { PNG } from 'pngjs';
 import { ROOT } from './harness.mjs';
+import { BASE_DIR, baseline, versionOf } from './baseline.mjs';
+import { expected } from './expected-changes.mjs';
 
 const NOISE = 4;
 // Where a dimmed overlay or soft shadow is blended, the browser can also be off by a few levels on a
 // couple of pixels from run to run. Up to STRAY_PIXELS such pixels, none off by more than STRAY_LEVELS,
 // count as noise. A real change (a 1-pixel border shift, one changed letter) touches far more pixels.
 const STRAY_PIXELS = 32, STRAY_LEVELS = 60;
-const [a, b] = [process.argv[2] || 'old', process.argv[3] || 'new'];
-const A = path.join(ROOT, 'tests/out', a), B = path.join(ROOT, 'tests/out', b), D = path.join(ROOT, 'tests/out/diff');
+const A = path.join(ROOT, 'tests/out/base'), B = path.join(ROOT, 'tests/out/new'), D = path.join(ROOT, 'tests/out/diff');
 const ma = JSON.parse(fs.readFileSync(path.join(A, 'manifest.json'), 'utf8'));
 const mb = JSON.parse(fs.readFileSync(path.join(B, 'manifest.json'), 'utf8'));
 fs.rmSync(D, { recursive: true, force: true });
 
-// Known, intended differences go here.
-// 9.1: the maintenance estimate (calorie card), its method text, and the Weekly Review line that quotes it.
-const ALLOW = [/\/body\/06-card$/, /\/settings\/\d+-cardMethods$/, /\/history\/\d+-cardReview$/];
-// Cards right below a card that changed height can sit a fraction of a pixel lower, which shifts the edge
-// smoothing of their text: for these the wording must still match exactly, but the picture is not compared.
-const SHIFTED = [/\/body\/07-cardProfile$/, /\/settings\/\d+-cardAbout$/];
-// The Version & Updates card says which version you have: there only, '8.1' may read as the rebuild's version.
-// Every other word on the card must still match, and the picture is then not compared.
-const VERSION_CARD = /\/settings\/\d+-cardUpdate$/, OLD_V = '8.1', NEW_V = '9.4';
-// 9.4 routines: where 8.1 tagged a planned movement, stretch or cardio 'PINNED', the tag now names the routine it
-// comes from (made from the old pins, so named after its weekdays, or 'Every day'). On these cards every other
-// word must still match; the picture is not compared, as the tag is wider. The 'Pin to …' buttons are gone from
-// the movement picker (a picture with no text: covered by tests/routines.mjs instead).
-const ROUTINE_TAG = [/\/workout\/\d+-card(Log|Mob|Cardio)$/, /\/acts\/session-mon$/];
-const TAG = /PINNED|(SUNDAY|MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|EVERY DAY|(SUN|MON|TUE|WED|THU|FRI|SAT)( \+ (SUN|MON|TUE|WED|THU|FRI|SAT))+)\b/g;
-ALLOW.push(/\/acts\/add-movement$/);
-// A wider tag can wrap the stretch list onto one more line, nudging the cards below by a pixel.
-SHIFTED.push(/^old-shapes-phone\/workout\//);
+// The Version & Updates card says which version you have: there only, the baseline's number may read as the
+// current one. Every other word on the card must still match, and the picture is then not compared.
+const VERSION_CARD = /\/settings\/\d+-cardUpdate$/;
+const OLD_V = versionOf(path.join(BASE_DIR, 'index.html')), NEW_V = versionOf(path.join(ROOT, 'dist/index.html'));
 
 function pixelDiff(k) {
   const pa = PNG.sync.read(fs.readFileSync(path.join(A, k + '.png'))), pb = PNG.sync.read(fs.readFileSync(path.join(B, k + '.png')));
@@ -62,32 +49,29 @@ function sideBySide(k, pa, pb, mask) {
   const f = path.join(D, k + '.png'); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, PNG.sync.write(out));
 }
 
-// Pictures of what the rebuild adds on purpose have nothing to compare with in 8.1.
-const NEW_ONLY = k => k.startsWith('new-only');
-const fresh = Object.keys(mb).filter(NEW_ONLY);
-const keys = [...new Set([...Object.keys(ma), ...Object.keys(mb)])].filter(k => !NEW_ONLY(k)).sort();
-let same = 0; const bad = [];
+const keys = [...new Set([...Object.keys(ma), ...Object.keys(mb)])].sort();
+let same = 0; const bad = [], meant = [];
 for (const k of keys) {
-  if (ALLOW.some(r => r.test(k))) { same++; continue; }
-  const x = ma[k], y = mb[k];
-  if (!x || !y) { bad.push(`${k}: only in ${x ? a : b}`); continue; }
-  const notes = [];
-  if (VERSION_CARD.test(k)) {
-    const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split(OLD_V).join(NEW_V), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8');
-    if (ta === tb) { same++; continue; }
+  const x = ma[k], y = mb[k], notes = [];
+  if (!x || !y) notes.push(`only in ${x ? 'the baseline' : 'the current build'}`);
+  else if (x.png === 'missing' || y.png === 'missing') notes.push(`could not photograph in ${x.png === 'missing' ? 'the baseline' : 'the current build'}: ${(x.error || y.error || '').slice(0, 100)}`);
+  else {
+    if (VERSION_CARD.test(k) && OLD_V !== NEW_V) {
+      const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split(OLD_V).join(NEW_V), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8');
+      if (ta === tb) { same++; continue; }
+    }
+    if (x.png !== y.png) { const p = pixelDiff(k); if (p) notes.push(p); }
+    if (x.txt !== y.txt) {
+      const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split('\n'), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8').split('\n');
+      const i = ta.findIndex((l, j) => l !== tb[j]);
+      notes.push(`text differs at line ${i + 1}: "${(ta[i] || '').slice(0, 80)}" vs "${(tb[i] || '').slice(0, 80)}"`);
+    }
   }
-  if (ROUTINE_TAG.some(r => r.test(k)) && x.png !== 'missing' && y.png !== 'missing') {
-    const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').replace(TAG, '<tag>'), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8').replace(TAG, '<tag>');
-    if (ta === tb) { same++; continue; }
-  }
-  if (x.png === 'missing' || y.png === 'missing') { bad.push(`${k}: could not photograph in ${x.png === 'missing' ? a : b}: ${(x.error || y.error || '').slice(0, 100)}`); continue; }
-  if (x.png !== y.png && !SHIFTED.some(r => r.test(k))) { const p = pixelDiff(k); if (p) notes.push(p); }
-  if (x.txt !== y.txt) {
-    const ta = fs.readFileSync(path.join(A, k + '.txt'), 'utf8').split('\n'), tb = fs.readFileSync(path.join(B, k + '.txt'), 'utf8').split('\n');
-    const i = ta.findIndex((l, j) => l !== tb[j]);
-    notes.push(`text differs at line ${i + 1}: "${(ta[i] || '').slice(0, 80)}" vs "${(tb[i] || '').slice(0, 80)}"`);
-  }
-  if (notes.length) bad.push(`${k}: ${notes.join(', ')}`); else same++;
+  if (!notes.length) { same++; continue; }
+  const e = expected(k);
+  (e ? meant : bad).push(`${k}: ${notes.join(', ')}${e ? ` [on purpose: ${e.why}]` : ''}`);
 }
-console.log(`${same} of ${keys.length} the same` + (fresh.length ? ` (plus ${fresh.length} pictures of the new copy-a-day feature, not compared)` : ''));
-if (bad.length) { console.log(bad.join('\n') + `\nSide-by-side pictures: tests/out/diff/`); process.exitCode = 1; }
+const b = baseline();
+console.log(`${same} of ${keys.length} the same as the baseline (${b.version}, ${b.ref.slice(0, 7)})` + (meant.length ? `, ${meant.length} changed on purpose` : ''));
+if (meant.length) console.log('Changed on purpose:\n  ' + meant.join('\n  '));
+if (bad.length) { console.log('NOT EXPECTED:\n  ' + bad.join('\n  ') + `\nSide-by-side pictures: tests/out/diff/`); process.exitCode = 1; }
