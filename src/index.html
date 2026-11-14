@@ -609,6 +609,10 @@
             <div class="field"><label for="shStep" data-i18n="sh.coach.step">Step · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shStep"></div>
           </div>
           <div class="sxnote" id="shCoachNote"></div>
+          <div class="coachapply"><button type="button" class="ghostbtn" id="shApplyBtn" aria-expanded="false">Apply this coaching to other movements…</button>
+            <div id="shApplyBox" style="display:none"><div class="sxnote" data-i18n="ca.note">Only movements loaded the same way are listed. When you save, the ones you tick get this same range and step (or Off).</div>
+              <div class="cabtns"><button type="button" class="ghostbtn" id="shApplyAll" data-i18n="ca.all">Select all</button><button type="button" class="ghostbtn" id="shApplyNone" data-i18n="ca.none">None</button></div>
+              <div class="muschips" id="shApplyList"></div></div></div>
         </div>
         <div class="field"><label for="shNote" data-i18n="sh.note">Note · shown under the name</label><input type="text" id="shNote" data-i18n-ph="sh.ph.note" placeholder="12–20 · per arm" autocomplete="off"></div>
       </div>

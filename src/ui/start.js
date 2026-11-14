@@ -32,6 +32,7 @@ import { shClose, shCoachSync, shCreate, shDelete, shEdit, shGoalPick, shLibPick
 import { initCopyDay, cpClose } from './copyday';
 import { initTour } from './tour';
 import { initFold } from './fold';
+import { initCoachApply } from './coachapply';
 
 (async function(){
  try{
@@ -159,6 +160,7 @@ import { initFold } from './fold';
   $("kpX").onclick=kpClose; $("kpNew").onclick=kpNew;
   initCopyDay();
   initTour();
+  initCoachApply();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;

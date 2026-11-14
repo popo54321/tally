@@ -10,7 +10,7 @@ import { kcalOf } from '../core/nutrition';
 import { t, tf } from '../i18n/index';
 import { trendWeights } from '../core/trend';
 import { foldDraw, foldToggle } from './fold';
-import { $, esc } from './dom';
+import { $, esc, flash } from './dom';
 import { LINE_COLORS, MAX_SERIES, byName, cdName, cdSetsOf, dayShort, fmtSets, lastNumOf, liftsOf, measName, mobSetsOf, persistSettings, planKeys, sxIsReps, sxName, trained } from './shared';
 import { render } from './nav';
 
@@ -238,9 +238,9 @@ export function buildAbsSeries(key){
   return {ex, unit:m.unit, lbl:m.lbl,
     series:{name:ex.short, points:sess.map(s=>({date:s.date, val:sessionMetric(ex,s.sets,s.bw).val}))}};
 }
+const lastAt=k=>{ for(let i=S.entries.length-1;i>=0;i--) if(liftsOf(S.entries[i],k).length) return S.entries[i].date; return ''; };
 export function chartCandidates(){
   const plan=planKeys();
-  const lastAt=k=>{ for(let i=S.entries.length-1;i>=0;i--) if(liftsOf(S.entries[i],k).length) return S.entries[i].date; return ''; };
   return S.catalogue.filter(ex=>S.entries.some(e=>inChartWin(e.date) && liftsOf(e,ex.key).length)).sort((a,b)=>{
     const pa=plan.indexOf(a.key), pb=plan.indexOf(b.key);
     if(pa>=0 && pb>=0) return pa-pb;
@@ -256,13 +256,16 @@ export function chartSelection(){
   return saved.filter(k=>avail.indexOf(k)>=0).slice(0,MAX_SERIES);
 }
 export async function toggleChartEx(key){
-  const avail=chartCandidates().map(e=>e.key);
-  const all=S.settings.chartEx==null ? chartSelection().slice() : S.settings.chartEx.slice(), i=all.indexOf(key);
+  const sel=chartSelection();
+  const all=S.settings.chartEx==null ? sel.slice() : S.settings.chartEx.slice(), i=all.indexOf(key);
   if(i>=0) all.splice(i,1);
-  else{
-    if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $("strNote").textContent=t('chart.max'); return; }
-    all.push(key);
+  else if(sel.length>=MAX_SERIES){
+    // Full: the selected movement trained longest ago makes way, and the new one takes its place (and colour).
+    const out=sel.reduce((a,b)=>lastAt(b)<lastAt(a) ? b : a);
+    all[all.indexOf(out)]=key;
+    const ex=exByKey(out); if(ex) flash(tf('chart.swap',{name:ex.name}));
   }
+  else all.push(key);
   S.settings.chartEx=all; await persistSettings(); drawStrength();
 }
 export function absSummary(a){
@@ -314,12 +317,16 @@ export function logSelection(setting, avail){
   return (saved==null ? avail : saved.filter(k=>avail.indexOf(k)>=0)).slice(0,MAX_SERIES);
 }
 export async function toggleLogChip(setting, key, avail, redraw, noteId){
+  const sel=logSelection(setting, avail);
   const all=S.settings[setting]==null ? avail.slice(0,MAX_SERIES) : S.settings[setting].slice(), i=all.indexOf(key);
   if(i>=0) all.splice(i,1);
-  else{
-    if(all.filter(k=>avail.indexOf(k)>=0).length>=MAX_SERIES){ $(noteId).textContent=t('chart.max'); return; }
-    all.push(key);
+  else if(sel.length>=MAX_SERIES){
+    // avail is newest first, so the selected one furthest down was done longest ago
+    const out=sel.reduce((a,b)=>avail.indexOf(b)>avail.indexOf(a) ? b : a);
+    all[all.indexOf(out)]=key;
+    flash(tf('chart.swap',{name:(setting==='chartSx' ? sxName : cdName)(out)}));
   }
+  else all.push(key);
   S.settings[setting]=all; await persistSettings(); redraw();
 }
 export function drawLogTrend(o){

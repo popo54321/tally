@@ -50,6 +50,12 @@ jobs:
       - name: Plate calculator, both sides or one side
         run: node tests/plates.mjs
 
+      - name: Apply coaching to many movements
+        run: node tests/coachapply.mjs
+
+      - name: Full strength chart swaps out the oldest movement
+        run: node tests/chartpick.mjs
+
       - name: Photograph 8.1 and the rebuild, then compare
         run: |
           node tests/record.mjs old

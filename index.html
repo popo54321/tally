@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-ezy+9qZMAqtlu1qH8uEPxl0a4u6ec4XL7Z/ajBNS5iU='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-k+KMFDZaEnaGxm8Nmf0dQ6DaU8xf62Y3aIy7tfcPjjE='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -440,6 +440,10 @@
   .card.folded .foldhead .lbl{margin-bottom:0}
   .foldlbl{padding-right:50px;cursor:pointer}
   .plsides{margin:-2px 0 14px}
+  .coachapply{margin-top:10px}
+  .coachapply #shApplyBox{margin-top:10px}
+  .cabtns{display:flex;gap:8px;margin:8px 0 10px}
+  .cabtns .ghostbtn{padding:6px 12px}
   .foldbtn.corner{position:absolute;top:13px;right:13px}
   .card.hasfold.folded > :not(.foldlbl):not(.foldbtn){display:none}
   .card.hasfold.folded > .foldlbl{margin-bottom:0}
@@ -1185,6 +1189,10 @@
             <div class="field"><label for="shStep" data-i18n="sh.coach.step">Step · kg</label><input type="number" min="0" step="0.5" inputmode="decimal" id="shStep"></div>
           </div>
           <div class="sxnote" id="shCoachNote"></div>
+          <div class="coachapply"><button type="button" class="ghostbtn" id="shApplyBtn" aria-expanded="false">Apply this coaching to other movements…</button>
+            <div id="shApplyBox" style="display:none"><div class="sxnote" data-i18n="ca.note">Only movements loaded the same way are listed. When you save, the ones you tick get this same range and step (or Off).</div>
+              <div class="cabtns"><button type="button" class="ghostbtn" id="shApplyAll" data-i18n="ca.all">Select all</button><button type="button" class="ghostbtn" id="shApplyNone" data-i18n="ca.none">None</button></div>
+              <div class="muschips" id="shApplyList"></div></div></div>
         </div>
         <div class="field"><label for="shNote" data-i18n="sh.note">Note · shown under the name</label><input type="text" id="shNote" data-i18n-ph="sh.ph.note" placeholder="12–20 · per arm" autocomplete="off"></div>
       </div>
@@ -3787,6 +3795,7 @@
     "chart.fold": "Hide this chart",
     "chart.indexed": "<b>Indexed</b> · each movement starts at 100 on its own first logged session, so movements with very different loads share one axis. The baseline ignores the window, so every window agrees. Select one movement on its own for absolute kg, reps or seconds.",
     "chart.max": "Eight at once is the limit — untap one first.",
+    "chart.swap": "Eight at once is the limit, so {name} made way.",
     "chart.nosel": "Nothing selected.",
     "chart.pickday": "Pick a date",
     "chart.size": 'Body Size Trend <span class="sub-note">· indexed to first log = 100 · latest cm in legend · press and drag on the chart to pick a day</span>',
@@ -5207,6 +5216,15 @@
     "pl.onenone": "One side",
     "pl.tot1": "Total {tot} ({other}) = bar {bar} + {side} on one side",
     "pl.totnobar1": "Total {tot} ({other}), all on one side",
+    "ca.btn": "Apply this coaching to other movements…",
+    "ca.btnn": "Apply to {n} more movements · change",
+    "ca.btnn.1": "Apply to 1 more movement · change",
+    "ca.note": "Only movements loaded the same way are listed. When you save, the ones you tick get this same range and step (or Off).",
+    "ca.all": "Select all",
+    "ca.none": "None",
+    "ca.empty": "No other movements are loaded this way yet.",
+    "ca.done": " · coaching also set on {n} more movements",
+    "ca.done.1": " · coaching also set on 1 more movement",
     "copy.btn": "Copy this day to…",
     "copy.title": "Copy {day}",
     "copy.what": "{day}: {list}. Planned set counts come too.",
@@ -6515,6 +6533,73 @@
     return x.key;
   }
 
+  // src/ui/coachapply.ts
+  var picked = /* @__PURE__ */ new Set();
+  var open = false;
+  var sameLoading = (ex, mode2) => mode2 === "sec" ? ex.unit === "sec" : mode2 === "bw" ? !!ex.added && ex.unit !== "sec" : !ex.added && ex.unit !== "sec";
+  function candidates() {
+    const mode2 = shModeGet();
+    return S.catalogue.filter((x) => !x.retired && x.key !== editingKey() && sameLoading(x, mode2)).sort((a, b) => byName(a.name, b.name));
+  }
+  var editingKey = () => V.shEditing;
+  function coachApplyReset() {
+    picked = /* @__PURE__ */ new Set();
+    open = false;
+    coachApplyDraw();
+  }
+  function coachApplyDraw() {
+    const box = $("shApplyBox"), btn = $("shApplyBtn");
+    if (!box || !btn) return;
+    const list = candidates(), keys = new Set(list.map((x) => x.key));
+    picked.forEach((k) => {
+      if (!keys.has(k)) picked.delete(k);
+    });
+    btn.textContent = picked.size ? tn("ca.btnn", picked.size) : t("ca.btn");
+    btn.setAttribute("aria-expanded", String(open));
+    box.style.display = open ? "" : "none";
+    if (!open) return;
+    $("shApplyList").innerHTML = list.length ? list.map((x) => `<button type="button" class="mchip${picked.has(x.key) ? " on" : ""}" data-k="${esc(x.key)}" aria-pressed="${picked.has(x.key)}">${esc(x.name)}</button>`).join("") : `<div class="sxnote">${esc(t("ca.empty"))}</div>`;
+    $("shApplyList").querySelectorAll("button").forEach((b) => b.onclick = () => {
+      const k = b.dataset.k;
+      if (picked.has(k)) picked.delete(k);
+      else picked.add(k);
+      coachApplyDraw();
+    });
+    $("shApplyAll").style.display = $("shApplyNone").style.display = list.length ? "" : "none";
+  }
+  function initCoachApply() {
+    $("shApplyBtn").onclick = () => {
+      open = !open;
+      coachApplyDraw();
+    };
+    $("shApplyAll").onclick = () => {
+      candidates().forEach((x) => picked.add(x.key));
+      coachApplyDraw();
+    };
+    $("shApplyNone").onclick = () => {
+      picked.clear();
+      coachApplyDraw();
+    };
+  }
+  async function coachApplySave(coach) {
+    let n = 0;
+    for (const k of picked) {
+      const own = S.customEx.find((x) => x.key === k);
+      if (!own) continue;
+      const chk = normCustomEx(Object.assign({}, own, coach));
+      if (!chk) continue;
+      own.repMin = chk.repMin;
+      own.repMax = chk.repMax;
+      own.step = chk.step;
+      n++;
+    }
+    if (n) await persistCatalogue();
+    picked = /* @__PURE__ */ new Set();
+    open = false;
+    return n;
+  }
+  var coachApplyMsg = (n) => n ? tn("ca.done", n) : "";
+
   // src/ui/movements.js
   function loadDesc(ex) {
     if (ex.unit === "sec") return t("load.seconds");
@@ -6746,6 +6831,7 @@
     else if (!(st > 0)) note = tf("sh.coach.repsonly", { min: mn, max: mx, unit, n: CLEAN_TO_STEP });
     else note = tf("sh.coach.on", { min: mn, max: mx, unit, step: st, n: CLEAN_TO_STEP });
     $("shCoachNote").textContent = note;
+    coachApplyDraw();
   }
   function shCoachFill(ex) {
     const has = !!ex && ex.repMin != null && ex.repMax != null;
@@ -6772,6 +6858,7 @@
     document.querySelectorAll("#shMode button").forEach((b) => b.classList.toggle("on", b.dataset.m === "kg"));
     shCoachFill(null);
     shMusDraw([], []);
+    coachApplyReset();
     $("shDelete").style.display = "none";
     $("shCreate").textContent = t(V.shAddToDay ? "sh.createadd" : "sh.addcoll");
     shMsg("");
@@ -6792,6 +6879,7 @@
     document.querySelectorAll("#shMode button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode2));
     shCoachFill(ex);
     shMusDraw(ex.prim || [], ex.sec || []);
+    coachApplyReset();
     $("shDelete").style.display = "";
     $("shCreate").textContent = t("btn.saveshort");
     shMsg("");
@@ -6837,10 +6925,11 @@
         await persistCatalogue();
       }
       await persistExEdits();
+      const also2 = await coachApplySave(coach);
       shClose();
       fillForm($("fDate").value);
       render();
-      flash(tf("msg.renamed", { name }));
+      flash(tf("msg.renamed", { name }) + coachApplyMsg(also2));
       return;
     }
     const lower = name.toLowerCase();
@@ -6883,10 +6972,11 @@
       shMsg(t("msg.savefail.ex"), true);
       return;
     }
+    const also = await coachApplySave(coach);
     if (V.shAddToDay) addMovementToForm(def.key);
     shClose();
     render();
-    flash(V.shAddToDay ? tf("msg.created", { name: def.name }) : tf("msg.createdcoll", { name: def.name }));
+    flash((V.shAddToDay ? tf("msg.created", { name: def.name }) : tf("msg.createdcoll", { name: def.name })) + coachApplyMsg(also));
   }
 
   // src/ui/guide.js
@@ -7686,12 +7776,12 @@
       series: { name: ex.short, points: sess.map((s) => ({ date: s.date, val: sessionMetric(ex, s.sets, s.bw).val })) }
     };
   }
+  var lastAt = (k) => {
+    for (let i = S.entries.length - 1; i >= 0; i--) if (liftsOf(S.entries[i], k).length) return S.entries[i].date;
+    return "";
+  };
   function chartCandidates() {
     const plan = planKeys();
-    const lastAt = (k) => {
-      for (let i = S.entries.length - 1; i >= 0; i--) if (liftsOf(S.entries[i], k).length) return S.entries[i].date;
-      return "";
-    };
     return S.catalogue.filter((ex) => S.entries.some((e) => inChartWin(e.date) && liftsOf(e, ex.key).length)).sort((a, b) => {
       const pa = plan.indexOf(a.key), pb = plan.indexOf(b.key);
       if (pa >= 0 && pb >= 0) return pa - pb;
@@ -7707,16 +7797,15 @@
     return saved.filter((k) => avail.indexOf(k) >= 0).slice(0, MAX_SERIES);
   }
   async function toggleChartEx(key) {
-    const avail = chartCandidates().map((e) => e.key);
-    const all = S.settings.chartEx == null ? chartSelection().slice() : S.settings.chartEx.slice(), i = all.indexOf(key);
+    const sel = chartSelection();
+    const all = S.settings.chartEx == null ? sel.slice() : S.settings.chartEx.slice(), i = all.indexOf(key);
     if (i >= 0) all.splice(i, 1);
-    else {
-      if (all.filter((k) => avail.indexOf(k) >= 0).length >= MAX_SERIES) {
-        $("strNote").textContent = t("chart.max");
-        return;
-      }
-      all.push(key);
-    }
+    else if (sel.length >= MAX_SERIES) {
+      const out = sel.reduce((a, b) => lastAt(b) < lastAt(a) ? b : a);
+      all[all.indexOf(out)] = key;
+      const ex = exByKey(out);
+      if (ex) flash(tf("chart.swap", { name: ex.name }));
+    } else all.push(key);
     S.settings.chartEx = all;
     await persistSettings();
     drawStrength();
@@ -7785,15 +7874,14 @@
     return (saved == null ? avail : saved.filter((k) => avail.indexOf(k) >= 0)).slice(0, MAX_SERIES);
   }
   async function toggleLogChip(setting, key, avail, redraw, noteId) {
+    const sel = logSelection(setting, avail);
     const all = S.settings[setting] == null ? avail.slice(0, MAX_SERIES) : S.settings[setting].slice(), i = all.indexOf(key);
     if (i >= 0) all.splice(i, 1);
-    else {
-      if (all.filter((k) => avail.indexOf(k) >= 0).length >= MAX_SERIES) {
-        $(noteId).textContent = t("chart.max");
-        return;
-      }
-      all.push(key);
-    }
+    else if (sel.length >= MAX_SERIES) {
+      const out = sel.reduce((a, b) => avail.indexOf(b) > avail.indexOf(a) ? b : a);
+      all[all.indexOf(out)] = key;
+      flash(tf("chart.swap", { name: (setting === "chartSx" ? sxName : cdName)(out) }));
+    } else all.push(key);
     S.settings[setting] = all;
     await persistSettings();
     redraw();
@@ -9541,7 +9629,7 @@
 
   // src/ui/copyday.ts
   var from = "mon";
-  var picked = /* @__PURE__ */ new Set();
+  var picked2 = /* @__PURE__ */ new Set();
   var mode = "add";
   var undo = null;
   var el = (id) => $(id);
@@ -9553,11 +9641,11 @@
     const empty = dayPlanEmpty(from), p = dayPlan(from);
     el("cpTitle").textContent = tf("copy.title", { day: dayName(from) });
     el("cpWhat").textContent = empty ? tf("copy.empty", { day: dayName(from) }) : tf("copy.what", { day: dayName(from), list: andList([[p.lifts.length, "copy.lifts"], [p.sx.length, "copy.sx"], [p.cd.length, "copy.cd"]].filter(([n]) => n > 0).map(([n, k]) => tn(k, n))) });
-    el("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked.has(d)}">${esc(dayShort(d))}</button>`).join("");
+    el("cpDays").innerHTML = DAY_KEYS.filter((d) => d !== from).map((d) => `<button type="button" class="mchip${picked2.has(d) ? " on" : ""}" data-d="${d}" aria-pressed="${picked2.has(d)}">${esc(dayShort(d))}</button>`).join("");
     el("cpDays").querySelectorAll("button").forEach((b) => b.onclick = () => {
       const d = b.dataset.d;
-      if (picked.has(d)) picked.delete(d);
-      else picked.add(d);
+      if (picked2.has(d)) picked2.delete(d);
+      else picked2.add(d);
       draw();
     });
     el("cpMode").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.m === mode));
@@ -9567,7 +9655,7 @@
   }
   function cpOpen() {
     from = el("fDay").value || "mon";
-    picked = /* @__PURE__ */ new Set();
+    picked2 = /* @__PURE__ */ new Set();
     mode = "add";
     undo = null;
     msg("");
@@ -9580,14 +9668,14 @@
   }
   async function go2() {
     if (dayPlanEmpty(from)) return;
-    if (!picked.size) {
+    if (!picked2.size) {
       msg(t("copy.pick"));
       return;
     }
-    const to = DAY_KEYS.filter((d) => picked.has(d));
+    const to = DAY_KEYS.filter((d) => picked2.has(d));
     undo = await copyDay(from, to, mode);
     msg(tf("copy.done", { day: dayName(from), days: to.map((d) => dayShort(d)).join(", ") }));
-    picked = /* @__PURE__ */ new Set();
+    picked2 = /* @__PURE__ */ new Set();
     draw();
     render();
   }
@@ -9933,6 +10021,7 @@
       $("kpNew").onclick = kpNew;
       initCopyDay();
       initTour();
+      initCoachApply();
       $("kpWrap").onclick = (ev) => {
         if (ev.target === $("kpWrap")) kpClose();
       };
@@ -10026,12 +10115,12 @@
       endTour();
       return true;
     }
-    const open = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose]].find(([id]) => {
+    const open2 = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose]].find(([id]) => {
       const el2 = $(id);
       return el2 && el2.classList.contains("show");
     });
-    if (!open) return false;
-    open[1]();
+    if (!open2) return false;
+    open2[1]();
     return true;
   }
   window.tallyBack = tallyBack;

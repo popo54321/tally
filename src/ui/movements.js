@@ -14,6 +14,7 @@ import { dlgClose, dlgOpen } from './dialog';
 import { fillForm } from './body';
 import { libToCollection } from './guide';
 import { render } from './nav';
+import { coachApplyDraw, coachApplyReset, coachApplySave, coachApplyMsg } from './coachapply';
 
 export function loadDesc(ex){
   if(ex.unit==='sec') return t('load.seconds');
@@ -191,6 +192,7 @@ export function shCoachSync(){
   else if(!(st>0)) note=tf('sh.coach.repsonly',{min:mn, max:mx, unit:unit, n:CLEAN_TO_STEP});
   else note=tf('sh.coach.on',{min:mn, max:mx, unit:unit, step:st, n:CLEAN_TO_STEP});
   $("shCoachNote").textContent=note;
+  coachApplyDraw();
 }
 export function shCoachFill(ex){
   const has = !!ex && ex.repMin!=null && ex.repMax!=null;
@@ -211,7 +213,7 @@ export function shNew(){
   $("shName").value=''; $("shShort").value=''; $("shNote").value=''; $("shDef").value='';
   shGroupSet('other');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m==='kg'));
-  shCoachFill(null); shMusDraw([],[]);
+  shCoachFill(null); shMusDraw([],[]); coachApplyReset();
   $("shDelete").style.display='none';
   $("shCreate").textContent=t(V.shAddToDay?'sh.createadd':'sh.addcoll');
   shMsg(''); shShow('form');
@@ -225,7 +227,7 @@ export function shEdit(key){
   shGroupSet(groupOf(ex));
   const mode = ex.unit==='sec' ? 'sec' : (ex.added ? 'bw' : 'kg');
   document.querySelectorAll('#shMode button').forEach(b=>b.classList.toggle('on', b.dataset.m===mode));
-  shCoachFill(ex); shMusDraw(ex.prim||[], ex.sec||[]);
+  shCoachFill(ex); shMusDraw(ex.prim||[], ex.sec||[]); coachApplyReset();
   $("shDelete").style.display='';
   $("shCreate").textContent=t('btn.saveshort');
   shMsg(''); shShow('form');
@@ -254,8 +256,9 @@ export async function shCreate(){
       await persistCatalogue();
     }
     await persistExEdits();
+    const also=await coachApplySave(coach);
     shClose(); fillForm($("fDate").value); render();
-    flash(tf('msg.renamed',{name:name}));
+    flash(tf('msg.renamed',{name:name})+coachApplyMsg(also));
     return;
   }
 
@@ -278,9 +281,10 @@ export async function shCreate(){
   S.customEx.push(def);
   const ok=await persistCatalogue();
   if(!ok){ S.customEx.pop(); rebuildCatalogue(); shMsg(t('msg.savefail.ex'),true); return; }
+  const also=await coachApplySave(coach);
   if(V.shAddToDay) addMovementToForm(def.key);
   shClose();
   render();
-  flash(V.shAddToDay ? tf('msg.created',{name:def.name})
-                   : tf('msg.createdcoll',{name:def.name}));
+  flash((V.shAddToDay ? tf('msg.created',{name:def.name})
+                   : tf('msg.createdcoll',{name:def.name}))+coachApplyMsg(also));
 }

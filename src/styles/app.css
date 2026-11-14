@@ -410,6 +410,10 @@
   .card.folded .foldhead .lbl{margin-bottom:0}
   .foldlbl{padding-right:50px;cursor:pointer}
   .plsides{margin:-2px 0 14px}
+  .coachapply{margin-top:10px}
+  .coachapply #shApplyBox{margin-top:10px}
+  .cabtns{display:flex;gap:8px;margin:8px 0 10px}
+  .cabtns .ghostbtn{padding:6px 12px}
   .foldbtn.corner{position:absolute;top:13px;right:13px}
   .card.hasfold.folded > :not(.foldlbl):not(.foldbtn){display:none}
   .card.hasfold.folded > .foldlbl{margin-bottom:0}
