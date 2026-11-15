@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-t8tbu93dbq9Znk8kq0BrXZ6apC542Z3xyvZPo7Ch7ko='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-geVriWoVIJXFMgaXp6RSGoLYrzPr3rZpFQACximhnv4='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -5320,7 +5320,7 @@
     "upd.install": "Update to {v}",
     "upd.down": "Downloading… {n}%",
     "upd.installing": "Installing. Android may ask you to confirm, then closes Tally to update it.",
-    "upd.confirm": "Tap Update in Android’s prompt. Tally closes to update, and a notification opens it again.",
+    "upd.confirm": "Tap Update on Android’s install screen. Tally closes to update, and a notification opens it again.",
     "upd.cancelled": "Update cancelled. Tap Update to try again.",
     "upd.allow": "Android needs your OK once: allow “Install unknown apps” for Tally, come back, then tap Update again.",
     "upd.allowbtn": "Allow updates",
@@ -5329,6 +5329,7 @@
     "upd.err.verify": "The download did not check out as a genuine Tally update, so it was not installed.",
     "upd.err.notnewer": "You already have this version or a newer one.",
     "upd.err.install": "Android could not install the update. You can get it from the download page instead.",
+    "upd.detail": "(Android says: {d})",
     "upd.err.other": "Could not check right now. Try again later.",
     "upd.auto.on": "Automatic check: on",
     "upd.auto.off": "Automatic check: off",
@@ -5957,7 +5958,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.7.1";
+  var APP_VERSION = "9.7.2";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -9859,6 +9860,7 @@
   var phase = "idle";
   var pct = 0;
   var why = "";
+  var detail = "";
   var manual = false;
   var found = null;
   var get = (k) => {
@@ -9900,6 +9902,7 @@
     }
   }
   function handle(ev) {
+    detail = "";
     switch (ev.type) {
       case "check":
         if (!ev.ok) {
@@ -9932,6 +9935,7 @@
         else {
           phase = "error";
           why = ev.why || "install";
+          detail = String(ev.detail || "").slice(0, 80);
         }
         break;
       case "resume":
@@ -9946,7 +9950,7 @@
     if (!hasUpdater()) return;
     const msg3 = el2("updMsg"), go3 = el2("updInstall"), allow = el2("updAllow"), getBtn = el2("updGet"), auto = el2("updAuto"), row = el2("updAutoRow");
     const busy = phase === "checking" || phase === "downloading" || phase === "installing";
-    if (msg3) msg3.textContent = phase === "checking" ? t("upd.checking") : phase === "latest" ? t("upd.latest") : phase === "found" ? tf("upd.avail", { v: found.version }) : phase === "downloading" ? tf("upd.down", { n: pct }) : phase === "installing" ? t("upd.installing") : phase === "confirm" ? t("upd.confirm") : phase === "cancelled" ? t("upd.cancelled") : phase === "allow" ? t("upd.allow") : phase === "error" ? t("upd.err." + why) : "";
+    if (msg3) msg3.textContent = phase === "checking" ? t("upd.checking") : phase === "latest" ? t("upd.latest") : phase === "found" ? tf("upd.avail", { v: found.version }) : phase === "downloading" ? tf("upd.down", { n: pct }) : phase === "installing" ? t("upd.installing") : phase === "confirm" ? t("upd.confirm") : phase === "cancelled" ? t("upd.cancelled") : phase === "allow" ? t("upd.allow") : phase === "error" ? t("upd.err." + why) + (detail ? " " + tf("upd.detail", { d: detail }) : "") : "";
     if (go3) {
       go3.style.display = found && (phase === "found" || phase === "cancelled" || phase === "allow" || phase === "error" && why !== "offline") ? "" : "none";
       if (found) go3.textContent = tf("upd.install", { v: found.version });

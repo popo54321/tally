@@ -106,5 +106,5 @@ jobs:
           VN=$(grep -o "APP_VERSION = [\"'][0-9][0-9.]*" ../index.html | head -1 | grep -o "[0-9][0-9.]*$")
           PAGE=../index.html bash build.sh 1 "$VN"
           "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump permissions "build/tally-$VN.apk"
-          "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump xmltree --file AndroidManifest.xml "build/tally-$VN.apk" | grep -E "UpdateReceiver|MY_PACKAGE_REPLACED"
+          "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump xmltree --file AndroidManifest.xml "build/tally-$VN.apk" | grep -E "UpdateReceiver|MY_PACKAGE_REPLACED|UpdateFiles|pro.updates"
 

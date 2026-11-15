@@ -61,7 +61,7 @@ try {
   ok(/^Downloading… \d+%$/.test(await text(p, 'updMsg') || ''), 'Update downloads inside the app (' + await text(p, 'updMsg') + ')');
   await p.waitForTimeout(250);
   ok(await p.evaluate(() => window.__upd.installed[0]) === URL_APK, 'the release file from GitHub is what gets installed');
-  ok(/Tap Update in Android’s prompt/.test(await text(p, 'updMsg') || ''), 'then Android’s own prompt takes over');
+  ok(/Tap Update on Android’s install screen/.test(await text(p, 'updMsg') || ''), 'then Android’s own install screen takes over');
   ok(o.errors.length === 0, 'no page errors (' + o.errors.join(' | ') + ')');
   await o.ctx.close();
 
@@ -97,6 +97,11 @@ try {
   o = await open({ latest: '99.0', installs: 'fail' }); p = o.page;
   await p.click('#tabs button[data-pg="settings"]'); await p.click('#updInstall'); await p.waitForTimeout(250);
   ok(/did not check out as a genuine Tally update/.test(await text(p, 'updMsg') || '') && await text(p, 'updGet') !== null, 'a download that is not genuine Tally is refused, with the download page offered');
+  await o.ctx.close();
+  o = await open({ latest: '99.0' }); p = o.page;
+  await p.evaluate(() => window.tallyUpdateEvent({ type: 'error', why: 'install', detail: 'code -110' })); await p.waitForTimeout(50);
+  await p.click('#tabs button[data-pg="settings"]');
+  ok(/could not install the update.*\(Android says: code -110\)/.test(await text(p, 'updMsg') || ''), 'a failed install shows Android’s own reason (' + await text(p, 'updMsg') + ')');
   await o.ctx.close();
   o = await open({ net: false }); p = o.page;
   ok(await text(p, 'updNudge') === null, 'offline at start: the automatic check stays quiet');

@@ -31,6 +31,10 @@
         </activity>
 
         <receiver android:name="com.bodyandiron.traininglog.AlarmReceiver" android:exported="false" />
+        <!-- the downloaded update, readable by Android's installer only through a one-off grant -->
+        <provider android:name="com.bodyandiron.traininglog.UpdateFiles"
+            android:authorities="com.bodyandiron.traininglog.pro.updates"
+            android:exported="false" android:grantUriPermissions="true" />
         <receiver android:name="com.bodyandiron.traininglog.UpdateReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />

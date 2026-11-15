@@ -11,7 +11,7 @@ export const AUTO_KEY = 'tally:updAuto', LAST_KEY = 'tally:updLast', SKIP_KEY = 
 /** At most one automatic check in this long. */
 export const AUTO_EVERY = 20 * 3600 * 1000;
 
-let phase: Phase = 'idle', pct = 0, why = '', manual = false;
+let phase: Phase = 'idle', pct = 0, why = '', detail = '', manual = false;
 let found: { version: string; url: string } | null = null;
 const get = (k: string) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const put = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch (e) { /* private mode: fine */ } };
@@ -31,7 +31,8 @@ function install(): void {
   if (updaterInstall(found.url)) { phase = 'downloading'; pct = 0; draw(); }
 }
 
-function handle(ev: { type?: string; ok?: boolean; version?: string; url?: string; pct?: number; why?: string }): void {
+function handle(ev: { type?: string; ok?: boolean; version?: string; url?: string; pct?: number; why?: string; detail?: string }): void {
+  detail = '';
   switch (ev.type) {
     case 'check':
       if (!ev.ok) { if (manual) { phase = 'error'; why = 'offline'; } else phase = found ? 'found' : 'idle'; break; }
@@ -42,7 +43,7 @@ function handle(ev: { type?: string; ok?: boolean; version?: string; url?: strin
     case 'installing': phase = 'installing'; break;
     case 'confirm': phase = 'confirm'; break;
     case 'cancelled': phase = 'cancelled'; break;
-    case 'error': if (ev.why === 'allow') phase = 'allow'; else { phase = 'error'; why = ev.why || 'install'; } break;
+    case 'error': if (ev.why === 'allow') phase = 'allow'; else { phase = 'error'; why = ev.why || 'install'; detail = String(ev.detail || '').slice(0, 80); } break;
     case 'resume': break;   // back from Android's settings or installer: just redraw
     default: return;
   }
@@ -62,7 +63,7 @@ export function draw(): void {
     : phase === 'confirm' ? t('upd.confirm')
     : phase === 'cancelled' ? t('upd.cancelled')
     : phase === 'allow' ? t('upd.allow')
-    : phase === 'error' ? t('upd.err.' + why) : '';
+    : phase === 'error' ? t('upd.err.' + why) + (detail ? ' ' + tf('upd.detail', { d: detail }) : '') : '';
   if (go) { go.style.display = found && (phase === 'found' || phase === 'cancelled' || phase === 'allow' || (phase === 'error' && why !== 'offline')) ? '' : 'none'; if (found) go.textContent = tf('upd.install', { v: found.version }); }
   if (allow) allow.style.display = phase === 'allow' ? '' : 'none';
   if (getBtn) getBtn.style.display = phase === 'error' && (why === 'install' || why === 'verify' || why === 'net') ? '' : 'none';

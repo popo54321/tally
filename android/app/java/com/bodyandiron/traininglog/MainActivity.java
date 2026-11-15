@@ -18,6 +18,7 @@ public class MainActivity extends Activity {
     static final String START = "https://" + HOST + "/index.html";
     private static final int REQ_PICK = 4711;
     private static final int REQ_NOTIF = 4712;
+    private static final int REQ_INSTALL = 4713;
 
     static volatile boolean inForeground = false;
     /** The running activity, so update progress can reach the page. */
@@ -112,9 +113,40 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** Opens Android's install screen for the downloaded update (see Updater, UpdateFiles). */
+    @SuppressWarnings("deprecation")
+    void openInstaller() {
+        android.net.Uri u = UpdateFiles.uri(this);
+        Intent i = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        i.setDataAndType(u, UpdateFiles.TYPE);
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        i.putExtra(Intent.EXTRA_RETURN_RESULT, true);
+        i.putExtra(Intent.EXTRA_INSTALLER_PACKAGE_NAME, getPackageName());
+        try { startActivityForResult(i, REQ_INSTALL); event("{\"type\":\"confirm\"}"); return; }
+        catch (Exception e) { }
+        try {
+            Intent v = new Intent(Intent.ACTION_VIEW);
+            v.setDataAndType(u, UpdateFiles.TYPE);
+            v.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(v);
+            event("{\"type\":\"confirm\"}");
+        } catch (Exception e) {
+            event("{\"type\":\"error\",\"why\":\"install\",\"detail\":\"no installer\"}");
+        }
+    }
+
     @Override
     protected void onActivityResult(int req, int res, Intent data) {
         super.onActivityResult(req, res, data);
+        if (req == REQ_INSTALL) {
+            // A successful update closes Tally, so only a cancel or a failure comes back here.
+            if (res == RESULT_CANCELED) event("{\"type\":\"cancelled\"}");
+            else if (res != RESULT_OK) {
+                int code = data == null ? 0 : data.getIntExtra("android.intent.extra.INSTALL_RESULT", 0);
+                event("{\"type\":\"error\",\"why\":\"install\",\"detail\":\"code " + code + "\"}");
+            }
+            return;
+        }
         if (req != REQ_PICK || pendingPick == null) return;
         Uri[] out = null;
         if (res == RESULT_OK && data != null && data.getData() != null) {
