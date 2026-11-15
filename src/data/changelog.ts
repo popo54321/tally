@@ -3,6 +3,7 @@
 export interface Release { v: string; date: string; notes: string[] }
 
 export const CHANGELOG: Release[] = [
+  { v: '9.8.1', date: '2026-11-15', notes: ['A test release for updating the app files without an install. Nothing else changed.'] },
   { v: '9.8', date: '2026-11-15', notes: [
     'Android: most updates now just replace the app’s files: no install, so Samsung’s Auto Blocker can stay on. Every download is checked against the same key that signs the app, and if a new version ever fails to start, Tally goes back to the one it had.',
     'Only an update that changes the Android app itself still needs Android’s installer, and Tally says so.',

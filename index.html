@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-NbH1b3ZSHjbnG16MsQK4FldjmeiOezx2u39mx9Y22l8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-9HM1f+SFo0i7N99JhYhmJ76BZWKv4lh2t6+/97/4dUA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -5996,7 +5996,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.8";
+  var APP_VERSION = "9.8.1";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -10765,6 +10765,7 @@
 
   // src/data/changelog.ts
   var CHANGELOG = [
+    { v: "9.8.1", date: "2026-11-15", notes: ["A test release for updating the app files without an install. Nothing else changed."] },
     { v: "9.8", date: "2026-11-15", notes: [
       "Android: most updates now just replace the app’s files: no install, so Samsung’s Auto Blocker can stay on. Every download is checked against the same key that signs the app, and if a new version ever fails to start, Tally goes back to the one it had.",
       "Only an update that changes the Android app itself still needs Android’s installer, and Tally says so.",
