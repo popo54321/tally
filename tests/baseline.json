@@ -1,5 +1,5 @@
 {
   "about": "The last reviewed version of Tally. tests/calc.mjs (calculations and wording) compares the current code with this commit, and so does npm run pictures (screens, run by hand only). Move it forward after reviewing a change, and always at a publish; then empty tests/expected-changes.mjs.",
-  "ref": "cb096e264c76f95990b438fc90f9f7a407e84046",
-  "version": "9.8"
+  "ref": "e7d8f89e8f1cf5d341638b400a8be999d3ab5a65",
+  "version": "9.8.1"
 }
