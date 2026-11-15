@@ -9,7 +9,7 @@ const browser = await chromium.launch();
 let fails = 0;
 const ok = (c, w) => { console.log((c ? 'ok   ' : 'FAIL ') + w); if (!c) fails++; };
 const URL_APK = 'https://github.com/popo54321/tally/releases/download/v99.0/tally-99.0.apk';
-const SEEN = { 'tally:aboutSeen:v1': '1', 'tally:tourSeen:v1': '1' };
+const SEEN = { 'tally:aboutSeen:v1': '1', 'tally:tourSeen:v1': '1', 'tally:seenVersion:v1': '9999' };
 
 // A stand-in for window.AndroidUpdate. latest: the version GitHub reports; allowed: the install setting.
 const fakeNative = ({ latest = '99.0', allowed = true, net = true, installs = 'confirm' } = {}) => {
@@ -111,7 +111,7 @@ try {
   o = await open({ latest: '99.0', installs: 'cancelled' }); p = o.page;
   await p.click('#updNudgeGo'); await p.waitForTimeout(300);
   await p.click('#tabs button[data-pg="settings"]');
-  ok(await text(p, 'updMsg') === 'Update cancelled. Tap Update to try again.' && await text(p, 'updInstall') === 'Update to 99.0', 'cancelled in Android’s prompt: can try again');
+  ok(/^Update cancelled\. Tap Update to try again\. On a Samsung phone, “Unknown app blocked” means Auto Blocker is on/.test(await text(p, 'updMsg') || '') && await text(p, 'updInstall') === 'Update to 99.0', 'cancelled: can try again, with the Samsung Auto Blocker hint');
   await o.ctx.close();
 
   // 6. the automatic check can be switched off

@@ -69,6 +69,9 @@ jobs:
       - name: Android self-update screens (with a stand-in for the native updater)
         run: node tests/selfupdate.mjs
 
+      - name: Release notes (What’s new after an update, Update log, notes kept up to date)
+        run: node tests/changelog.mjs
+
 
   # The Android app built and signed with a throwaway key, so native code (Updater.java and friends) is
   # compiled and packaged on every push, not first at release time. Nothing is published.

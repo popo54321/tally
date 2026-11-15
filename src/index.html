@@ -400,6 +400,7 @@
       <div class="donrow">
         <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
         <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <button type="button" class="ghostbtn" id="clBtn" data-i18n="cl.btn">Update log</button>
         <button type="button" class="ghostbtn" id="updInstall" style="display:none">Update</button>
         <button type="button" class="ghostbtn" id="updAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
         <span class="donsub" id="updMsg"></span>
@@ -655,6 +656,20 @@
       </div>
     </div>
     <div class="sh-msg" id="shMsg"></div>
+  </div>
+</div>
+
+<div class="shwrap" id="clWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="clTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="clTitle">Update log</div>
+      <button type="button" class="sh-x" id="clX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list cllist" id="clBody"></div>
+    <div class="sh-foot">
+      <button type="button" id="clAll" data-i18n="cl.all">All updates</button>
+      <button type="button" class="prim" id="clOk" data-i18n="cl.ok">Got it</button>
+    </div>
   </div>
 </div>
 

@@ -169,6 +169,14 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .updnudge{border-color:var(--brass)}
+  .cllist{padding-top:4px}
+  .clrel{padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .clrel:last-child{border-bottom:none}
+  .clhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .clhead b{font-size:14px;color:var(--ink)}
+  .clhead span{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint)}
+  .clrel ul{margin:6px 0 0;padding-left:18px}
+  .clrel li{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:3px 0}
   .instnudge{border-color:var(--brass)}
   .sizerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 4px}
   .sizebtn{min-width:52px;font-size:14px;font-weight:700}

@@ -8,10 +8,11 @@ import { shClose } from './movements';
 import { sxClose } from './mobility';
 import { cpClose } from './copyday';
 import { tourOpen, endTour } from './tour';
+import { clClose } from './changelog';
 
 export function tallyBack(){
   if(tourOpen()){ endTour(); return true; }
-  const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose],['cpWrap',cpClose]]
+  const open=[['abWrap',abClose],['kpWrap',kpClose],['shWrap',shClose],['sxWrap',sxClose],['cdWrapSheet',cdClose],['dpWrap',dpClose],['cpWrap',cpClose],['clWrap',clClose]]
     .find(([id])=>{ const el=$(id); return el && el.classList.contains('show'); });
   if(!open) return false;
   open[1](); return true;

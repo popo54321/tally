@@ -17,6 +17,8 @@ export function fixture(name) {
 
 // Open one app ('base': the baseline version, or 'new': the current build) with the given stored data (key -> string).
 export async function openApp(browser, base, target, { store = {}, viewport = 'phone', scale = null, bypassCSP = false } = {}) {
+  // "What's new" would open over the app at start: treat it as seen unless the test sets the key itself
+  if (!('tally:seenVersion:v1' in store)) store = { ...store, 'tally:seenVersion:v1': '9999' };
   const ctx = await browser.newContext({ viewport: VIEWPORTS[viewport] || viewport, deviceScaleFactor: 1, bypassCSP,
     timezoneId: 'Asia/Bangkok', locale: 'en-GB', serviceWorkers: 'block', reducedMotion: 'reduce' });
   await ctx.addInitScript(({ store, scale }) => {

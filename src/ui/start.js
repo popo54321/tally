@@ -36,6 +36,7 @@ import { initCoachApply } from './coachapply';
 import { drawDayRoutines, initRoutines, routineNameFor } from './routines';
 import { loadRoutines } from '../state/routines';
 import { initSelfUpdate } from './selfupdate';
+import { clClose, clMaybeShow, initChangelog } from './changelog';
 
 (async function(){
  try{
@@ -167,6 +168,7 @@ import { initSelfUpdate } from './selfupdate';
   initCoachApply();
   initRoutines();
   initSelfUpdate();
+  initChangelog();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;
@@ -187,7 +189,7 @@ import { initSelfUpdate } from './selfupdate';
   $("restMinus").onclick=()=>restNudge(-15);
   $("restPlus").onclick=()=>restNudge(30);
   document.addEventListener('visibilitychange',()=>{ if(document.hidden) return; if(V.restTimer) timerTick(); drawExactNotice(); });
-  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); cpClose(); } });
+  document.addEventListener('keydown',ev=>{ if(ev.key==='Escape'){ abClose(); kpClose(); shClose(); sxClose(); cdClose(); dpClose(); cpClose(); clClose(); } });
   await purgeOldNamespace();
   try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
   await loadTheme();
@@ -201,7 +203,7 @@ import { initSelfUpdate } from './selfupdate';
   fillForm(today); render();
   $("abCard").innerHTML=aboutHtml();
   if(S.loadFailed) flash(t('msg.loadfail.read'),true);
-  else abMaybeShow();
+  else { await abMaybeShow(); clMaybeShow(!S.entries.length); }
  }catch(err){
   console.error('init failed',err);
   const b=document.createElement('div');

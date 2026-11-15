@@ -7,6 +7,9 @@
 // Say why next to each one. When the baseline moves forward (after a review, and at every publish), empty this list.
 export const EXPECTED = [
   // { what: /\/workout\/\d+-cardLog$/, why: 'example: the workout card gets a new button' },
+  // 9.8: release notes (What’s new, Update log); a hint when Samsung’s Auto Blocker stops an update
+  { what: 'text:cl.*', why: '9.8: release notes' },
+  { what: 'text:upd.cancelled', why: '9.8: Auto Blocker hint' },
 ];
 
 /** The entry that allows this difference, if any. */

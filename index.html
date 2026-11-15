@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-MTTBOB0ibgyqJm5SOaJT/fFY5lvRZRr+ZYTvMbYKU5I='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-k1KpBTIrb1rYYgDCgOI6YGK/oCTXYMPWUZqPhJgnISM='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -199,6 +199,14 @@
     padding:10px 12px;margin:0 0 14px;font-size:14px;color:var(--ink)}
   .baknudge span{flex:1 1 200px}
   .updnudge{border-color:var(--brass)}
+  .cllist{padding-top:4px}
+  .clrel{padding:10px 0;border-bottom:1px solid var(--line-soft)}
+  .clrel:last-child{border-bottom:none}
+  .clhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .clhead b{font-size:14px;color:var(--ink)}
+  .clhead span{font-family:var(--font-mono);font-size:10.5px;color:var(--txt-faint)}
+  .clrel ul{margin:6px 0 0;padding-left:18px}
+  .clrel li{font-size:13px;line-height:1.45;color:var(--ink-dim);margin:3px 0}
   .instnudge{border-color:var(--brass)}
   .sizerow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 4px}
   .sizebtn{min-width:52px;font-size:14px;font-weight:700}
@@ -1025,6 +1033,7 @@
       <div class="donrow">
         <a class="ghostbtn donbtn" id="updGet" href="https://github.com/popo54321/tally/releases/latest" target="_blank" rel="noopener" data-i18n="upd.get">Get the latest version</a>
         <button type="button" class="ghostbtn" id="updCheck" data-i18n="upd.check">Check for update</button>
+        <button type="button" class="ghostbtn" id="clBtn" data-i18n="cl.btn">Update log</button>
         <button type="button" class="ghostbtn" id="updInstall" style="display:none">Update</button>
         <button type="button" class="ghostbtn" id="updAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
         <span class="donsub" id="updMsg"></span>
@@ -1280,6 +1289,20 @@
       </div>
     </div>
     <div class="sh-msg" id="shMsg"></div>
+  </div>
+</div>
+
+<div class="shwrap" id="clWrap">
+  <div class="sh" role="dialog" aria-modal="true" aria-labelledby="clTitle" tabindex="-1">
+    <div class="sh-head">
+      <div class="sh-title" id="clTitle">Update log</div>
+      <button type="button" class="sh-x" id="clX" data-i18n-title="btn.close" title="Close">✕</button>
+    </div>
+    <div class="sh-list cllist" id="clBody"></div>
+    <div class="sh-foot">
+      <button type="button" id="clAll" data-i18n="cl.all">All updates</button>
+      <button type="button" class="prim" id="clOk" data-i18n="cl.ok">Got it</button>
+    </div>
   </div>
 </div>
 
@@ -5321,7 +5344,7 @@
     "upd.down": "Downloading… {n}%",
     "upd.installing": "Installing. Android may ask you to confirm, then closes Tally to update it.",
     "upd.confirm": "Tap Update on Android’s install screen. Tally closes to update, and a notification opens it again.",
-    "upd.cancelled": "Update cancelled. Tap Update to try again.",
+    "upd.cancelled": "Update cancelled. Tap Update to try again. On a Samsung phone, “Unknown app blocked” means Auto Blocker is on: it allows only store installs (Settings → Security and privacy → Auto Blocker).",
     "upd.allow": "Android needs your OK once: allow “Install unknown apps” for Tally, come back, then tap Update again.",
     "upd.allowbtn": "Allow updates",
     "upd.err.offline": "Could not check. Are you online?",
@@ -5330,6 +5353,14 @@
     "upd.err.notnewer": "You already have this version or a newer one.",
     "upd.err.install": "Android could not install the update. You can get it from the download page instead.",
     "upd.detail": "(Android says: {d})",
+    "cl.btn": "Update log",
+    "cl.title": "Update log",
+    "cl.new": "What’s new in Tally {v}",
+    "cl.since": "What’s new since Tally {from}",
+    "cl.ver": "Tally {v}",
+    "cl.first": "First release",
+    "cl.all": "All updates",
+    "cl.ok": "Got it",
     "upd.err.other": "Could not check right now. Try again later.",
     "upd.auto.on": "Automatic check: on",
     "upd.auto.off": "Automatic check: off",
@@ -5611,15 +5642,15 @@
     });
     return iB >= 0 && iB < wp.length - 1 ? Math.round((trs[trs.length - 1] - trs[iB]) * 100) / 100 : null;
   }
-  function lastNumOf(days, get2) {
+  function lastNumOf(days, get3) {
     for (let i = days.length - 1; i >= 0; i--) {
-      const v = get2(days[i]);
+      const v = get3(days[i]);
       if (v != null) return v;
     }
     return null;
   }
-  function deltaOf(days, get2, n) {
-    const arr = days.filter((e) => get2(e) != null);
+  function deltaOf(days, get3, n) {
+    const arr = days.filter((e) => get3(e) != null);
     if (arr.length < 2) return null;
     const latest = arr[arr.length - 1], target2 = dnum(latest.date) - n;
     const cand = arr.slice(0, -1);
@@ -5631,7 +5662,7 @@
         best = e;
       }
     });
-    return { delta: get2(latest) - get2(best) };
+    return { delta: get3(latest) - get3(best) };
   }
   function entriesInWindow(days, period) {
     if (!days.length) return [];
@@ -5958,7 +5989,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.7.3";
+  var APP_VERSION = "9.8";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -6112,7 +6143,7 @@
   var sessionTarget = () => DAYS2.filter((d) => sessionEx(d.key).length > 0).length;
   var activeGroups = () => GROUPS.filter((g) => groupTarget(g.key) > 0);
   var trained = (e) => !!(e.lifts && Object.keys(e.lifts).length);
-  var lastNumOf2 = (get2) => lastNumOf(S.entries, get2);
+  var lastNumOf2 = (get3) => lastNumOf(S.entries, get3);
   function lastSessionOf(key, dayKey) {
     if (dayKey) {
       for (let i = S.entries.length - 1; i >= 0; i--) {
@@ -6129,7 +6160,7 @@
     }
     return null;
   }
-  var deltaOf2 = (get2, days) => deltaOf(S.entries, get2, days);
+  var deltaOf2 = (get3, days) => deltaOf(S.entries, get3, days);
   var sessionsBefore = (key, date) => S.entries.filter((e) => e.date < date).map((e) => liftsOf(e, key)).filter((s) => s.length);
   function fmtLoad(ex, kg) {
     if (ex.added) return kg > 0 ? "BW+" + kg : "BW";
@@ -7452,8 +7483,8 @@
   function drawCdLib() {
     const wrap = $("cdLibWrap");
     if (!wrap) return;
-    const show2 = (l) => V.guideAll || libUsable(l);
-    const list = CD_LIB.slice().sort((a, b) => (show2(b) ? 1 : 0) - (show2(a) ? 1 : 0) || byName(t("cdlib." + a.key), t("cdlib." + b.key)));
+    const show3 = (l) => V.guideAll || libUsable(l);
+    const list = CD_LIB.slice().sort((a, b) => (show3(b) ? 1 : 0) - (show3(a) ? 1 : 0) || byName(t("cdlib." + a.key), t("cdlib." + b.key)));
     wrap.innerHTML = list.map((l) => {
       const ok = libUsable(l), have = cdOwned(l), eq = l.eq.length ? l.eq.map((q) => t("eq." + q)).join(", ") : t("guide.noeq");
       const act = have && !have.retired ? `<span class="libin">${esc(t("guide.in.sx"))}</span>` : `<button type="button" class="collbtn" data-cdadd="${l.key}">${esc(t("guide.add"))}</button>`;
@@ -7532,10 +7563,10 @@
     }).join("") + (low.length > focus.length ? `<div class="sxnote">${esc(tf("guide.rec.more", { n: low.length - focus.length }))}</div>` : "");
     if (!V.guideMus || MUSCLE_KEYS.indexOf(V.guideMus) < 0) V.guideMus = low.length ? low[0].key : "chest";
     $("browseMus").innerHTML = MUSCLES.map((m) => `<button type="button" class="mchip${m.key === V.guideMus ? " on" : ""}" data-pick="${m.key}">${esc(t("mus." + m.key))}</button>`).join("");
-    const show2 = (l) => V.guideAll || libUsable(l);
+    const show3 = (l) => V.guideAll || libUsable(l);
     const eqHit = (l) => !V.guideEq || (V.guideEq === "none" ? !l.eq.length : l.eq.indexOf(V.guideEq) >= 0);
-    const prim = LIB.filter((l) => l.p.indexOf(V.guideMus) >= 0 && show2(l)), sec = LIB.filter((l) => l.s.indexOf(V.guideMus) >= 0 && show2(l));
-    const sxs = SX_LIB.filter((l) => l.mus.indexOf(V.guideMus) >= 0 && show2(l));
+    const prim = LIB.filter((l) => l.p.indexOf(V.guideMus) >= 0 && show3(l)), sec = LIB.filter((l) => l.s.indexOf(V.guideMus) >= 0 && show3(l));
+    const sxs = SX_LIB.filter((l) => l.mus.indexOf(V.guideMus) >= 0 && show3(l));
     const pools = { p: prim, s: sec, x: sxs }, pool2 = pools[V.guideMode] || prim;
     const list = pool2.filter(eqHit).sort(V.guideMode === "x" ? (a, b) => a.lv - b.lv || byName(t("sxlib." + a.key), t("sxlib." + b.key)) : libOrder);
     $("browseMode").innerHTML = ["p", "s", "x"].map((m) => `<button type="button" class="${m === V.guideMode ? "on" : ""}" data-mode="${m}">${esc(tf("guide.mode." + m, { n: pools[m].filter(eqHit).length }))}</button>`).join("");
@@ -7797,9 +7828,9 @@
     if (line) line.textContent = age == null ? t("bak.never") : age === 0 ? t("bak.today") : age === 1 ? t("bak.yesterday") : tf("bak.ago", { n: age });
     const bar = $("bakNudge");
     if (!bar) return;
-    const show2 = backupDue() && !V.bakSnoozed;
-    bar.style.display = show2 ? "" : "none";
-    if (show2) $("bakNudgeText").textContent = age == null ? t("bak.nudge.never") : tf("bak.nudge.ago", { n: age });
+    const show3 = backupDue() && !V.bakSnoozed;
+    bar.style.display = show3 ? "" : "none";
+    if (show3) $("bakNudgeText").textContent = age == null ? t("bak.nudge.never") : tf("bak.nudge.ago", { n: age });
   }
   function bakFromNudge() {
     saveBackupFile();
@@ -8156,10 +8187,10 @@
     });
   }
   var entryOn = (d) => S.entries.find((e) => e.date === d);
-  function prevWith(d, get2) {
+  function prevWith(d, get3) {
     for (let i = S.entries.length - 1; i >= 0; i--) {
       const e = S.entries[i];
-      if (e.date < d && get2(e) != null) return e;
+      if (e.date < d && get3(e) != null) return e;
     }
     return null;
   }
@@ -9472,8 +9503,8 @@
       $("bfDelta").innerHTML = fmtDelta(t("stat.d7"), deltaOf2((e) => e.bf, 7), "%") + fmtDelta(t("stat.d30"), deltaOf2((e) => e.bf, 30), "%");
     }
     const wk7 = S.entries.filter((e) => within7(e.date));
-    const avg7 = (get2) => {
-      const v = wk7.map(get2).filter((x) => x != null);
+    const avg7 = (get3) => {
+      const v = wk7.map(get3).filter((x) => x != null);
       return { avg: v.length ? Math.round(v.reduce((a, x) => a + x, 0) / v.length) : null, logged: v.length };
     };
     const k7 = avg7(kcalOf), p7 = avg7(protOf), kcalAvg = k7.avg, protAvg = p7.avg;
@@ -9969,9 +10000,9 @@
     }
     const bar = el2("updNudge");
     if (bar) {
-      const show2 = !!found && get(SKIP_KEY) !== found.version && (phase === "found" || phase === "downloading" || phase === "installing" || phase === "confirm" || phase === "allow");
-      bar.style.display = show2 ? "" : "none";
-      if (show2) {
+      const show3 = !!found && get(SKIP_KEY) !== found.version && (phase === "found" || phase === "downloading" || phase === "installing" || phase === "confirm" || phase === "allow");
+      bar.style.display = show3 ? "" : "none";
+      if (show3) {
         const txt = el2("updNudgeText");
         if (txt) txt.textContent = phase === "found" ? tf("upd.nudge", { v: found.version }) : msg3 ? msg3.textContent : "";
         const g = el2("updNudgeGo");
@@ -10204,26 +10235,26 @@
       const sess = S.entries.filter((e) => liftsOf(e, ex.key).length).map((e) => ({ date: e.date, sets: e.lifts[ex.key] }));
       const col = document.createElement("div");
       col.className = "pcol";
-      let html = `<div class="pname">${esc(ex.name)}</div><div class="ptarget">${esc(exNote(ex))}</div>`;
+      let html2 = `<div class="pname">${esc(ex.name)}</div><div class="ptarget">${esc(exNote(ex))}</div>`;
       const cn = coachNext(ex, sess.map((s) => s.sets));
       const next = cn ? `<div class="pnext">${coachLine(ex, cn)}</div>` : "";
       if (!sess.length) {
-        html += `<div class="plast" style="color:var(--ink-faint)">—<span class="pd">${esc(t("prog.notlogged"))}</span></div>` + next;
-        col.innerHTML = html;
+        html2 += `<div class="plast" style="color:var(--ink-faint)">—<span class="pd">${esc(t("prog.notlogged"))}</span></div>` + next;
+        col.innerHTML = html2;
         wrap.appendChild(col);
         return;
       }
       const last = sess[sess.length - 1];
-      html += `<div class="plast">${fmtSets(ex.key, last.sets)}<span class="pd">${esc(t("prog.last"))} · ${fmtDM(last.date)}</span></div>`;
+      html2 += `<div class="plast">${fmtSets(ex.key, last.sets)}<span class="pd">${esc(t("prog.last"))} · ${fmtDM(last.date)}</span></div>`;
       const recs = recordsLine(ex, recordsOf(ex, sess));
-      if (recs) html += `<div class="prec">${recs}</div>`;
-      html += next;
+      if (recs) html2 += `<div class="prec">${recs}</div>`;
+      html2 += next;
       const prior = sess.slice(0, -1).reverse().slice(0, 3);
-      if (prior.length) html += `<div class="phist">` + prior.map((s) => `<div><span class="pdate">${fmtDM(s.date)}</span>${fmtSets(ex.key, s.sets)}</div>`).join("") + `</div>`;
+      if (prior.length) html2 += `<div class="phist">` + prior.map((s) => `<div><span class="pdate">${fmtDM(s.date)}</span>${fmtSets(ex.key, s.sets)}</div>`).join("") + `</div>`;
       const sumOf = (f) => wk.reduce((a, e) => a + liftsOf(e, ex.key).reduce((b, x) => b + f(x), 0), 0);
       const p7 = ex.unit === "sec" ? tf("prog.7time", { n: sumOf((x) => x.reps) }) : ex.added ? tf("prog.7reps", { n: sumOf((x) => x.reps) }) : tf("prog.7vol", { n: sumOf((x) => (x.kg || 0) * x.reps).toLocaleString() });
-      html += `<div class="p7">${p7}</div>`;
-      col.innerHTML = html;
+      html2 += `<div class="p7">${p7}</div>`;
+      col.innerHTML = html2;
       wrap.appendChild(col);
     });
   }
@@ -10656,6 +10687,168 @@
     });
   }
 
+  // src/data/changelog.ts
+  var CHANGELOG = [
+    { v: "9.8", date: "2026-11-15", notes: [
+      "After an update, Tally shows what is new, once.",
+      "Settings → Version & Updates → Update log lists every version, back to the first release."
+    ] },
+    { v: "9.7.3", date: "2026-11-15", notes: ["A test release for updating from inside the app. Nothing else changed."] },
+    { v: "9.7.2", date: "2026-11-15", notes: [
+      "Android: updates open Android’s standard install screen, which works on every phone.",
+      "If Android stops an install, Tally shows Android’s own reason."
+    ] },
+    { v: "9.7.1", date: "2026-11-15", notes: ["A test release for updating from inside the app. Nothing else changed."] },
+    { v: "9.7", date: "2026-11-14", notes: [
+      "The Android app checks for a new version once a day and updates itself when you tap Update. The daily check can be switched off.",
+      "Your data is 100% offline: only the update check goes online, and it sends nothing about you."
+    ] },
+    { v: "9.6", date: "2026-11-14", notes: [
+      "A wording pass: no full stop after a version number, “1 day logged” instead of “1 days”, one apostrophe style, and every card title in the same style."
+    ] },
+    { v: "9.5", date: "2026-11-14", notes: [
+      "Stretch routines set their own hold time (or reps) and sets; cardio routines set minutes and sets. The day’s log uses them."
+    ] },
+    { v: "9.4", date: "2026-11-14", notes: [
+      "Routines replace weekday pins: named workout, stretch and cardio routines, put on the weekdays you choose, as many on one day as you like.",
+      "Link movements into a superset: → goes to the next one, and the rest comes after the round.",
+      "Your pins became routines by themselves; identical days share one."
+    ] },
+    { v: "9.3", date: "2026-11-14", notes: [
+      "Fold any card on the Body, Workout, Guide and My Gym pages.",
+      "Plate calculator: plates on both sides, or all on one side.",
+      "Apply one movement’s coaching to many movements at once.",
+      "Coaching headroom: after a weight step that was too heavy, go back and build reps above the range before trying again.",
+      "“Lifted today” under Strength Trend.",
+      "With eight movements on the strength chart, tapping another swaps out the one trained longest ago."
+    ] },
+    { v: "9.2", date: "2026-11-12", notes: ["A How to use tour for new users, and any time from Settings."] },
+    { v: "9.1", date: "2026-11-10", notes: [
+      "A steadier maintenance estimate: odd days no longer throw it, it shows a ± range, and it leans on the formula from your profile while data is thin."
+    ] },
+    { v: "9.0", date: "2026-11-10", notes: [
+      "Tally rebuilt from the ground up, with the same screens and numbers.",
+      "Copy this day to other weekdays, with Undo.",
+      "Older days are packed into six-month bundles, so storage stays small."
+    ] },
+    { v: "8.1", date: "2026-11-07", notes: ["Your target and what is left, under Energy and Protein."] },
+    { v: "8.0", date: "2026-11-04", notes: ["Plate calculator: which plates to load for a weight."] },
+    { v: "7.9", date: "2026-11-01", notes: [
+      "A coloured dot for your calorie average: green near the target, yellow below it, red far over it or under the safe minimum."
+    ] },
+    { v: "7.8", date: "2026-10-31", notes: ["Chart labels are readable on phones and follow the text size."] },
+    { v: "7.7", date: "2026-10-31", notes: ["Text size in Settings → Appearance, from 90% to 150%."] },
+    { v: "7.6", date: "2026-10-31", notes: ["Stretches and cardio with several sets tick off one set per tap."] },
+    { v: "7.5", date: "2026-10-31", notes: [
+      "A Fasting day button logs 0 kcal and 0 g in one tap.",
+      "The 7-day averages count an empty day as 0."
+    ] },
+    { v: "7.4", date: "2026-10-31", notes: ["Stretches have sets."] },
+    { v: "7.3", date: "2026-10-31", notes: ["Charts open on 28 days. Press and drag on a chart to pick a day."] },
+    { v: "7.2", date: "2026-10-31", notes: ["The Android app is called Tally (it was Tally Pro). Updates keep your data."] },
+    { v: "7.1", date: "2026-10-31", notes: ["Tally is free and stays free: new wording for Support Tally."] },
+    { v: "7.0", date: "2026-10-31", notes: [
+      "Trend charts reworked: 14, 28 and 91 days or All, details for any day, new Mobility and Cardio charts, and charts that fold.",
+      "37 more stretches, 103 in all.",
+      "Why cardio has no calorie counts: the calorie target already includes it."
+    ] },
+    { v: "6.9", date: "2026-10-30", notes: ["You don’t have to log perfectly: the estimate needs consistent logging, not exact logging."] },
+    { v: "6.8", date: "2026-10-30", notes: [
+      "Welcome to Tally on first launch, also kept in About Tally.",
+      "The weekly review respects your own calorie target."
+    ] },
+    { v: "6.7", date: "2026-10-30", notes: ["A Version & Updates card in Settings."] },
+    { v: "6.6", date: "2026-10-30", notes: ["Clearer wording: maintenance is an estimate, not a measurement. Copy for your AI to analyse."] },
+    { v: "6.5", date: "2026-10-29", notes: ["Importing a hand-edited backup can no longer reset settings by accident."] },
+    { v: "6.4", date: "2026-10-29", notes: ["The number of sets you plan for a movement always wins."] },
+    { v: "6.3", date: "2026-10-29", notes: ["A note that the automatic protein number is a general guide."] },
+    { v: "6.2", date: "2026-10-29", notes: ["Support Tally moves to the top of Settings."] },
+    { v: "6.1", date: "2026-10-29", notes: ["An install prompt for the web app, and proper icons everywhere."] },
+    { v: "6.0", date: "2026-10-29", notes: [
+      "The calorie estimate shows as soon as it can be worked out, with a warning while it is early.",
+      "Browse by Muscle splits into Main target and Also works, with an equipment filter."
+    ] },
+    { v: "5.8", date: "2026-10-29", notes: ["One daily protein target: 100 g for women, 140 g for men, 120 g until set. Three quarters of it counts as fine."] },
+    { v: "5.7", date: "2026-10-28", notes: [
+      "Planned movements remember how many sets you plan.",
+      "The Guide shows Starting out, Building and Maintaining ranges."
+    ] },
+    { v: "5.6", date: "2026-10-28", notes: ["The Android app, built and published here with every release."] },
+    { v: "5.5", date: "2026-10-14", notes: [
+      "Sets per muscle each week, and recommended muscles, in the Guide.",
+      "A Stop button on the timer, and a note when exact alarms are off on Android."
+    ] },
+    { v: "5.4", date: "2026-10-13", notes: [
+      "Cardio targets.",
+      "Remove a movement, stretch or cardio along with its logged days; delete a day in History."
+    ] },
+    { v: "", date: "2026-08-21", notes: [
+      "The first release: Tally as an installable web app, in English and Thai. Your data stays on your device."
+    ] }
+  ];
+
+  // src/ui/changelog.ts
+  var SEEN_KEY = "tally:seenVersion:v1";
+  var get2 = () => {
+    try {
+      return localStorage.getItem(SEEN_KEY);
+    } catch (e) {
+      return null;
+    }
+  };
+  var put2 = (v) => {
+    try {
+      localStorage.setItem(SEEN_KEY, v);
+    } catch (e) {
+    }
+  };
+  var when = (d) => {
+    const x = /* @__PURE__ */ new Date(d + "T12:00:00");
+    return isNaN(+x) ? d : x.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+  };
+  function html(list) {
+    return list.map((r) => `<div class="clrel"><div class="clhead"><b>${esc(r.v ? tf("cl.ver", { v: r.v }) : t("cl.first"))}</b><span>${esc(when(r.date))}</span></div><ul>${r.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul></div>`).join("");
+  }
+  function show2(title, list, more) {
+    $("clTitle").textContent = title;
+    $("clBody").innerHTML = html(list);
+    $("clAll").style.display = more ? "" : "none";
+    dlgOpen("clWrap");
+    $("clBody").scrollTop = 0;
+  }
+  var notesSince = (seen) => CHANGELOG.filter((r) => r.v && (!seen || newerVersion(r.v, seen)) && !newerVersion(r.v, APP_VERSION));
+  function clMaybeShow(newUser) {
+    const seen = get2();
+    put2(APP_VERSION);
+    if (newUser && !seen || seen === APP_VERSION || seen && !newerVersion(APP_VERSION, seen)) return;
+    const list = seen ? notesSince(seen) : CHANGELOG.filter((r) => r.v === APP_VERSION);
+    if (!list.length) return;
+    const go3 = () => show2(list.length > 1 ? tf("cl.since", { v: APP_VERSION, from: seen }) : tf("cl.new", { v: APP_VERSION }), list, true);
+    const ab = $("abWrap");
+    if (ab && ab.classList.contains("show")) {
+      const mo = new MutationObserver(() => {
+        if (!ab.classList.contains("show")) {
+          mo.disconnect();
+          setTimeout(() => {
+            if (!tourOpen()) go3();
+          }, 400);
+        }
+      });
+      mo.observe(ab, { attributes: true, attributeFilter: ["class"] });
+    } else go3();
+  }
+  var clOpenLog = () => show2(t("cl.title"), CHANGELOG, false);
+  var clClose = () => dlgClose("clWrap");
+  function initChangelog() {
+    $("clBtn").onclick = clOpenLog;
+    $("clX").onclick = clClose;
+    $("clOk").onclick = clClose;
+    $("clAll").onclick = clOpenLog;
+    $("clWrap").onclick = (ev) => {
+      if (ev.target === $("clWrap")) clClose();
+    };
+  }
+
   // src/ui/start.js
   (async function() {
     try {
@@ -10977,6 +11170,7 @@
       initCoachApply();
       initRoutines();
       initSelfUpdate();
+      initChangelog();
       $("kpWrap").onclick = (ev) => {
         if (ev.target === $("kpWrap")) kpClose();
       };
@@ -11021,6 +11215,7 @@
           cdClose();
           dpClose();
           cpClose();
+          clClose();
         }
       });
       await purgeOldNamespace();
@@ -11052,7 +11247,10 @@
       render();
       $("abCard").innerHTML = aboutHtml();
       if (S.loadFailed) flash(t("msg.loadfail.read"), true);
-      else abMaybeShow();
+      else {
+        await abMaybeShow();
+        clMaybeShow(!S.entries.length);
+      }
     } catch (err) {
       console.error("init failed", err);
       const b = document.createElement("div");
@@ -11068,7 +11266,7 @@
       endTour();
       return true;
     }
-    const open2 = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose]].find(([id]) => {
+    const open2 = [["abWrap", abClose], ["kpWrap", kpClose], ["shWrap", shClose], ["sxWrap", sxClose], ["cdWrapSheet", cdClose], ["dpWrap", dpClose], ["cpWrap", cpClose], ["clWrap", clClose]].find(([id]) => {
       const el4 = $(id);
       return el4 && el4.classList.contains("show");
     });
