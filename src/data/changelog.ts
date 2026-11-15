@@ -9,7 +9,7 @@ export const CHANGELOG: Release[] = [
   ] },
   { v: '9.7.3', date: '2026-11-15', notes: ['A test release for updating from inside the app. Nothing else changed.'] },
   { v: '9.7.2', date: '2026-11-15', notes: [
-    'Android: updates open Android’s standard install screen, which works on every phone.',
+    'Android: updates open Android’s standard install screen instead of the earlier method, which some phones stopped.',
     'If Android stops an install, Tally shows Android’s own reason.',
   ] },
   { v: '9.7.1', date: '2026-11-15', notes: ['A test release for updating from inside the app. Nothing else changed.'] },
