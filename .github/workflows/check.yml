@@ -97,5 +97,9 @@ jobs:
           VN=$(grep -o "APP_VERSION = [\"'][0-9][0-9.]*" ../index.html | head -1 | grep -o "[0-9][0-9.]*$")
           PAGE=../index.html bash build.sh 1 "$VN"
           "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump permissions "build/tally-$VN.apk"
+          ls build/tally-page-"$VN"-shell*.jar
+          jarsigner -verify build/tally-page-"$VN"-shell*.jar | grep "jar verified"
           "$ANDROID_HOME/build-tools/34.0.0/aapt2" dump xmltree --file AndroidManifest.xml "build/tally-$VN.apk" | grep -E "UpdateReceiver|MY_PACKAGE_REPLACED|UpdateFiles|pro.updates"
 
+      - name: App-files bundle check (genuine, wrong key, unsigned, tampered, sneaky paths, shell, version)
+        run: bash tests/android/pagecheck.sh

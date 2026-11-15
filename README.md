@@ -25,7 +25,8 @@ full screen with no browser bars, works with no signal, and behaves like any oth
 There is also a native Android app: download the `.apk` from the
 [latest release](https://github.com/popo54321/tally/releases/latest) and install it over any
 earlier version. Your data stays. From 9.7 on, it checks for new versions and updates itself
-(Settings → Version & Updates).
+(Settings → Version & Updates); from 9.8 on, most updates only replace the app's files, checked
+against the app's own signing key, so no install is needed (and Samsung's Auto Blocker can stay on).
 
 ## Your data
 

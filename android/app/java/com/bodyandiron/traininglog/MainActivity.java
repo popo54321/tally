@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
         setContentView(web, new ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
+        PageStore.atStart(this);
         if (state == null || web.restoreState(state) == null) web.loadUrl(START);
 
         if (Build.VERSION.SDK_INT >= 33
@@ -111,6 +112,12 @@ public class MainActivity extends Activity {
             pendingPick = null;
             return false;
         }
+    }
+
+    /** Starts the page again, from the newest app files (after a bundle was downloaded). */
+    void restartPage() {
+        PageStore.atStart(this);
+        web.loadUrl(START);
     }
 
     /** Opens Android's install screen for the downloaded update (see Updater, UpdateFiles). */

@@ -12,15 +12,20 @@ const URL_APK = 'https://github.com/popo54321/tally/releases/download/v99.0/tall
 const SEEN = { 'tally:aboutSeen:v1': '1', 'tally:tourSeen:v1': '1', 'tally:seenVersion:v1': '9999' };
 
 // A stand-in for window.AndroidUpdate. latest: the version GitHub reports; allowed: the install setting.
-const fakeNative = ({ latest = '99.0', allowed = true, net = true, installs = 'confirm' } = {}) => {
-  const st = { latest, allowed, net, installs, checks: 0, installed: [] };
+const fakeNative = ({ latest = '99.0', allowed = true, net = true, installs = 'confirm', shell = 0, pageShell = 0, pageResult = 'ready' } = {}) => {
+  const st = { latest, allowed, net, installs, checks: 0, installed: [], pages: [], restarts: 0, started: 0 };
   window.__upd = st;
   window.AndroidFile = { save() { return true; } };   // looks like the Android app
   const fire = ev => setTimeout(() => window.tallyUpdateEvent && window.tallyUpdateEvent(ev), 30);
   window.AndroidUpdate = {
     current: () => '9.7',
-    check() { st.checks++; fire(st.net ? { type: 'check', ok: true, version: st.latest, url: st.latest ? 'https://github.com/popo54321/tally/releases/download/v' + st.latest + '/tally-' + st.latest + '.apk' : '' } : { type: 'check', ok: false, why: 'net' }); return true; },
+    check() { st.checks++; const base = 'https://github.com/popo54321/tally/releases/download/v' + st.latest + '/';
+      fire(st.net ? Object.assign({ type: 'check', ok: true, version: st.latest, url: st.latest ? base + 'tally-' + st.latest + '.apk' : '' }, pageShell ? { page: base + 'tally-page-' + st.latest + '-shell' + pageShell + '.jar', pageShell } : {}) : { type: 'check', ok: false, why: 'net' }); return true; },
+    started() { st.started++; },
+    restart() { st.restarts++; },
     canInstall: () => st.allowed,
+    ...(shell ? { shell: () => shell, installPage(u) { st.pages.push(u); fire({ type: 'progress', pct: 50 });
+      setTimeout(() => window.tallyUpdateEvent(pageResult === 'ready' ? { type: 'pageReady', version: st.latest } : { type: 'error', why: pageResult }), 90); return true; } } : {}),
     allowInstalls() { st.askedAllow = true; },
     install(u) {
       st.installed.push(u);
@@ -123,7 +128,36 @@ try {
   ok(await text(p, 'updAuto') === 'Automatic check: on' && await p.evaluate(() => localStorage.getItem('tally:updAuto')) === '1', 'and turns back on');
   await o.ctx.close();
 
-  // 7. the web app: no updater, nothing of this shows
+  // 7. new app files without an install (shell 2): no Auto Blocker, no Android installer
+  o = await open({ latest: '99.0', shell: 2, pageShell: 2 }); p = o.page;
+  ok(await p.evaluate(() => window.__upd.started) === 1, 'the page tells the shell it started properly (so new files are kept)');
+  ok(await p.evaluate(() => window.__upd.pages[0]) === 'https://github.com/popo54321/tally/releases/download/v99.0/tally-page-99.0-shell2.jar', 'the daily check fetches the new app files by itself');
+  ok(await text(p, 'updNudgeText') === 'Tally 99.0 is ready' && await text(p, 'updNudgeRestart') === 'Restart now', 'then the bar offers Restart now');
+  ok(await p.evaluate(() => window.__upd.installed.length) === 0, 'no Android installer involved');
+  await p.click('#tabs button[data-pg="settings"]');
+  ok(/Tally 99\.0 is ready\. It starts next time you open Tally, or restart now\./.test(await text(p, 'updMsg') || '') && await text(p, 'updRestart') === 'Restart now', 'the card says it starts next time, or restart now');
+  await p.click('#updRestart');
+  ok(await p.evaluate(() => window.__upd.restarts) === 1, 'Restart now restarts into the new version');
+  await o.ctx.close();
+  o = await open({ latest: '99.0', shell: 2, pageShell: 2 }, { 'tally:updAuto': '0' }); p = o.page;
+  await p.click('#tabs button[data-pg="settings"]'); await p.click('#updCheck'); await p.waitForTimeout(150);
+  ok(await p.evaluate(() => window.__upd.pages.length) === 0 && await text(p, 'updInstall') === 'Update to 99.0' && !/Android has to install/.test(await text(p, 'updMsg')), 'checked by hand: Update, with no install note');
+  await p.click('#updInstall'); await p.waitForTimeout(250);
+  ok(await p.evaluate(() => window.__upd.pages.length) === 1 && await p.evaluate(() => window.__upd.restarts) === 1, 'Update by hand downloads and restarts straight away');
+  await o.ctx.close();
+  o = await open({ latest: '99.0', shell: 2, pageShell: 3 }); p = o.page;
+  await p.click('#tabs button[data-pg="settings"]');
+  ok(await p.evaluate(() => window.__upd.pages.length) === 0 && /This one changes the Android app itself, so Android has to install it\./.test(await text(p, 'updMsg') || ''), 'a release needing a newer shell: the full install, and it says why');
+  await o.ctx.close();
+  o = await open({ latest: '99.0', shell: 2, pageShell: 2, pageResult: 'verify' }, { 'tally:updAuto': '0' }); p = o.page;
+  await p.click('#tabs button[data-pg="settings"]'); await p.click('#updCheck'); await p.waitForTimeout(150); await p.click('#updInstall'); await p.waitForTimeout(250);
+  ok(/did not check out as a genuine Tally update/.test(await text(p, 'updMsg') || '') && await p.evaluate(() => window.__upd.restarts) === 0, 'app files that fail the signature check are refused, no restart');
+  await o.ctx.close();
+  o = await open({ latest: '99.0', shell: 2, pageShell: 2, pageResult: 'net' }); p = o.page;
+  ok(await text(p, 'updNudgeText') === 'Tally 99.0 is ready' && await text(p, 'updNudgeGo') === 'Update', 'a quiet download that failed just offers Update');
+  await o.ctx.close();
+
+  // 8. the web app: no updater, nothing of this shows
   {
     const w = await openApp(browser, url, 'new', { store: { ...fixture('full-male'), ...SEEN } });
     await w.page.click('#tabs button[data-pg="settings"]');

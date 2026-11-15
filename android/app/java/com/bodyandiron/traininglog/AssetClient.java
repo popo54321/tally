@@ -35,7 +35,15 @@ final class AssetClient extends WebViewClient {
         if (asset.contains("..")) return notFound();
 
         try {
-            InputStream in = assets.open(asset);
+            // a newer downloaded bundle (PageStore) comes first; anything it lacks comes from the app itself
+            InputStream in = null;
+            java.io.File dir = PageStore.current;
+            if (dir != null) {
+                java.io.File f = new java.io.File(dir, asset);
+                if (f.getCanonicalPath().startsWith(dir.getCanonicalPath() + java.io.File.separator) && f.isFile())
+                    in = new java.io.FileInputStream(f);
+            }
+            if (in == null) in = assets.open(asset);
             Map<String, String> headers = new HashMap<String, String>();
             headers.put("Cache-Control", "no-store");
             return new WebResourceResponse(mimeOf(asset), encodingOf(asset), 200, "OK", headers, in);

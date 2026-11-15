@@ -40,3 +40,14 @@ OUT="build/tally-$VN.apk"
   --out "$OUT" build/aligned.apk
 "$APKSIGNER" verify "$OUT"
 echo "built $OUT (code $VC)"
+
+# The app files on their own, signed with the same key: the app updates itself from this without an install
+# (see Updater.java, PageCheck.java). Its name says which app shell it needs.
+SH=$(tr -d '[:space:]' < app/shell-version)
+printf '{"version":"%s","shell":%s}\n' "$VN" "$SH" > build/stage/assets/page.json
+PJ="build/tally-page-$VN-shell$SH.jar"
+rm -f "$PJ"
+(cd build/stage/assets && jar --create --file ../../../"$PJ" .)
+jarsigner -keystore "$KEYSTORE" -storepass:env KEYSTORE_PASS -keypass:env KEY_PASS "$PJ" bodyandiron > /dev/null
+jarsigner -verify "$PJ" | grep -q "jar verified" || { echo "the app-files bundle did not verify" >&2; exit 1; }
+echo "built $PJ"

@@ -37,6 +37,7 @@ import { drawDayRoutines, initRoutines, routineNameFor } from './routines';
 import { loadRoutines } from '../state/routines';
 import { initSelfUpdate } from './selfupdate';
 import { clClose, clMaybeShow, initChangelog } from './changelog';
+import { updaterStarted } from '../platform/update';
 
 (async function(){
  try{
@@ -204,6 +205,7 @@ import { clClose, clMaybeShow, initChangelog } from './changelog';
   $("abCard").innerHTML=aboutHtml();
   if(S.loadFailed) flash(t('msg.loadfail.read'),true);
   else { await abMaybeShow(); clMaybeShow(!S.entries.length); }
+  updaterStarted();   // the app started properly: the Android shell keeps newly downloaded app files
  }catch(err){
   console.error('init failed',err);
   const b=document.createElement('div');

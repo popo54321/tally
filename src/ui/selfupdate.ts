@@ -1,18 +1,22 @@
-// Android: Tally checks for a newer version and updates itself (Settings → Version & Updates, and a bar at the
+// Android: Tally checks for a newer version and updates itself. Usually only the app files change: they are
+// downloaded, checked against the app's signing key, and run from the next start (no install, so Samsung's
+// Auto Blocker is not involved). When the Android shell itself changed, Android's installer is needed. (Settings → Version & Updates, and a bar at the
 // top when one is found). The checking and installing happen in the native app (platform/update.js); the page
 // only shows where things are. Your data never leaves the phone: the check only asks GitHub for the latest release.
 import { t, tf } from '../i18n/index';
 import { $ } from './dom';
 import { APP_VERSION } from './shared';
-import { hasUpdater, newerVersion, onUpdateEvent, updaterAllow, updaterCanInstall, updaterCheck, updaterInstall } from '../platform/update';
+import { hasUpdater, newerVersion, onUpdateEvent, updaterAllow, updaterCanInstall, updaterCheck, updaterInstall, updaterInstallPage, updaterRestart, updaterShell } from '../platform/update';
 
-type Phase = 'idle' | 'checking' | 'latest' | 'found' | 'downloading' | 'installing' | 'confirm' | 'cancelled' | 'allow' | 'error';
+type Phase = 'idle' | 'checking' | 'latest' | 'found' | 'downloading' | 'installing' | 'confirm' | 'cancelled' | 'allow' | 'error' | 'ready';
 export const AUTO_KEY = 'tally:updAuto', LAST_KEY = 'tally:updLast', SKIP_KEY = 'tally:updSkip';
 /** At most one automatic check in this long. */
 export const AUTO_EVERY = 20 * 3600 * 1000;
 
-let phase: Phase = 'idle', pct = 0, why = '', detail = '', manual = false;
-let found: { version: string; url: string } | null = null;
+let phase: Phase = 'idle', pct = 0, why = '', detail = '', manual = false, quiet = false, restartWhenReady = false;
+let found: { version: string; url: string; page: string; pageShell: number } | null = null;
+/** An app-files update (no install) when the release has one this shell can run. */
+const filesOnly = () => !!found && !!found.page && found.pageShell <= updaterShell();
 const get = (k: string) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const put = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch (e) { /* private mode: fine */ } };
 const el = (id: string) => $(id) as HTMLElement | null;
@@ -27,23 +31,38 @@ function check(byHand: boolean): void {
 }
 function install(): void {
   if (!found) return;
+  if (filesOnly()) { if (updaterInstallPage(found.page)) { quiet = false; restartWhenReady = true; phase = 'downloading'; pct = 0; draw(); } return; }
   if (!updaterCanInstall()) { phase = 'allow'; draw(); return; }
   if (updaterInstall(found.url)) { phase = 'downloading'; pct = 0; draw(); }
 }
 
-function handle(ev: { type?: string; ok?: boolean; version?: string; url?: string; pct?: number; why?: string; detail?: string }): void {
+function handle(ev: { type?: string; ok?: boolean; version?: string; url?: string; page?: string; pageShell?: number; pct?: number; why?: string; detail?: string }): void {
   detail = '';
   switch (ev.type) {
     case 'check':
       if (!ev.ok) { if (manual) { phase = 'error'; why = 'offline'; } else phase = found ? 'found' : 'idle'; break; }
-      if (ev.url && newerVersion(ev.version, APP_VERSION)) { found = { version: String(ev.version), url: ev.url }; phase = 'found'; }
+      if ((ev.url || ev.page) && newerVersion(ev.version, APP_VERSION)) {
+        found = { version: String(ev.version), url: ev.url || '', page: ev.page || '', pageShell: ev.pageShell || 99 };
+        phase = 'found';
+        // found by the daily check: fetch the new app files quietly, then offer a restart
+        if (!manual && filesOnly() && autoOn() && updaterInstallPage(found.page)) { quiet = true; restartWhenReady = false; phase = 'downloading'; pct = 0; }
+      }
       else phase = manual ? 'latest' : 'idle';
       break;
     case 'progress': phase = 'downloading'; pct = Math.max(0, Math.min(100, ev.pct || 0)); break;
     case 'installing': phase = 'installing'; break;
     case 'confirm': phase = 'confirm'; break;
     case 'cancelled': phase = 'cancelled'; break;
-    case 'error': if (ev.why === 'allow') phase = 'allow'; else { phase = 'error'; why = ev.why || 'install'; detail = String(ev.detail || '').slice(0, 80); } break;
+    case 'pageReady':
+      phase = 'ready';
+      if (restartWhenReady) { restartWhenReady = false; updaterRestart(); return; }
+      break;
+    case 'error':
+      if (ev.why === 'allow') phase = 'allow';
+      else if (ev.why === 'shell' && found) { found.page = ''; phase = 'found'; }   // needs the full install after all
+      else if (quiet) { quiet = false; phase = 'found'; }   // a quiet download failed: just offer Update
+      else { phase = 'error'; why = ev.why || 'install'; detail = String(ev.detail || '').slice(0, 80); }
+      break;
     case 'resume': break;   // back from Android's settings or installer: just redraw
     default: return;
   }
@@ -57,7 +76,8 @@ export function draw(): void {
   const busy = phase === 'checking' || phase === 'downloading' || phase === 'installing';
   if (msg) msg.textContent = phase === 'checking' ? t('upd.checking')
     : phase === 'latest' ? t('upd.latest')
-    : phase === 'found' ? tf('upd.avail', { v: found!.version })
+    : phase === 'found' ? tf('upd.avail', { v: found!.version }) + (!filesOnly() && updaterShell() >= 2 ? ' ' + t('upd.apknote') : '')
+    : phase === 'ready' ? tf('upd.ready', { v: found ? found.version : '' })
     : phase === 'downloading' ? tf('upd.down', { n: pct })
     : phase === 'installing' ? t('upd.installing')
     : phase === 'confirm' ? t('upd.confirm')
@@ -66,18 +86,20 @@ export function draw(): void {
     : phase === 'error' ? t('upd.err.' + why) + (detail ? ' ' + tf('upd.detail', { d: detail }) : '') : '';
   if (go) { go.style.display = found && (phase === 'found' || phase === 'cancelled' || phase === 'allow' || (phase === 'error' && why !== 'offline')) ? '' : 'none'; if (found) go.textContent = tf('upd.install', { v: found.version }); }
   if (allow) allow.style.display = phase === 'allow' ? '' : 'none';
+  const rs = el('updRestart'); if (rs) rs.style.display = phase === 'ready' ? '' : 'none';
   if (getBtn) getBtn.style.display = phase === 'error' && (why === 'install' || why === 'verify' || why === 'net') ? '' : 'none';
   const chk = el('updCheck'); if (chk) { chk.style.display = ''; (chk as HTMLButtonElement).disabled = busy; }
   if (row) row.style.display = '';
   if (auto) { auto.textContent = t(autoOn() ? 'upd.auto.on' : 'upd.auto.off'); auto.setAttribute('aria-pressed', String(autoOn())); }
   const bar = el('updNudge');
   if (bar) {
-    const show = !!found && get(SKIP_KEY) !== found.version && (phase === 'found' || phase === 'downloading' || phase === 'installing' || phase === 'confirm' || phase === 'allow');
+    const show = !!found && get(SKIP_KEY) !== found.version && (phase === 'found' || phase === 'ready' || (!quiet && (phase === 'downloading' || phase === 'installing' || phase === 'confirm' || phase === 'allow')));
     bar.style.display = show ? '' : 'none';
     if (show) {
-      const txt = el('updNudgeText'); if (txt) txt.textContent = phase === 'found' ? tf('upd.nudge', { v: found!.version }) : (msg ? msg.textContent : '');
+      const txt = el('updNudgeText'); if (txt) txt.textContent = phase === 'found' || phase === 'ready' ? tf('upd.nudge', { v: found!.version }) : (msg ? msg.textContent : '');
       const g = el('updNudgeGo'); if (g) g.style.display = phase === 'found' ? '' : 'none';
       const a = el('updNudgeAllow'); if (a) a.style.display = phase === 'allow' ? '' : 'none';
+      const r = el('updNudgeRestart'); if (r) r.style.display = phase === 'ready' ? '' : 'none';
     }
   }
 }
@@ -90,6 +112,8 @@ export function initSelfUpdate(): void {
   on('updNudgeGo', install);
   on('updAllow', updaterAllow);
   on('updNudgeAllow', updaterAllow);
+  on('updRestart', updaterRestart);
+  on('updNudgeRestart', updaterRestart);
   on('updNudgeLater', () => { if (found) put(SKIP_KEY, found.version); draw(); });
   on('updAuto', () => { put(AUTO_KEY, autoOn() ? '0' : '1'); draw(); });
   draw();

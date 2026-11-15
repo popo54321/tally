@@ -78,9 +78,10 @@ jobs:
           VN: ${{ steps.v.outputs.name }}
         run: |
           APK="android/build/tally-$VN.apk"
+          PAGE=$(ls android/build/tally-page-"$VN"-shell*.jar)
           if gh release view "v$VN" > /dev/null 2>&1; then
-            gh release upload "v$VN" "$APK" --clobber
+            gh release upload "v$VN" "$APK" "$PAGE" --clobber
           else
-            gh release create "v$VN" "$APK" --title "Tally $VN" --target "$GITHUB_SHA" \
+            gh release create "v$VN" "$APK" "$PAGE" --title "Tally $VN" --target "$GITHUB_SHA" \
               --notes "Tally $VN for Android, signed with the same key as every earlier build. Install it over the Tally you have (named Tally Pro before 7.2): your data stays. From 9.7 on, Tally updates itself: Settings → Version & Updates. Your data is 100% offline."
           fi

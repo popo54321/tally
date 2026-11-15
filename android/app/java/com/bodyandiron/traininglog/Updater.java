@@ -34,6 +34,13 @@ public final class Updater {
     static final String LATEST = "https://api.github.com/repos/popo54321/tally/releases/latest";
     static final String FROM = "https://github.com/popo54321/tally/releases/download/";
     private static final long MAX_APK = 100L * 1024 * 1024;
+    /**
+     * What this app shell offers the page (its native bridges). A release's app-files bundle says which shell
+     * it needs (tally-page-VERSION-shellN.jar); a newer shell means a full install. Kept equal to
+     * android/app/shell-version (checked by build/check-shell.mjs).
+     */
+    static final int SHELL = 2;
+    private static final java.util.regex.Pattern PAGE_ASSET = java.util.regex.Pattern.compile("^tally-page-[0-9.]+-shell([0-9]+)\\.jar$");
 
     private final MainActivity act;
     private volatile boolean busy = false;
@@ -58,6 +65,31 @@ public final class Updater {
         if (busy) return false;
         busy = true;
         new Thread(new Runnable() { public void run() { try { doCheck(); } finally { busy = false; } } }).start();
+        return true;
+    }
+
+    /** What this shell offers; pages from before 9.8 do not ask. */
+    @JavascriptInterface
+    public int shell() { return SHELL; }
+
+    /** The version of the app files running now (a downloaded bundle, or the app's own). */
+    @JavascriptInterface
+    public String running() { return PageStore.running(act); }
+
+    /** The page started properly: keep the new app files (see PageStore). */
+    @JavascriptInterface
+    public void started() { PageStore.started(act); }
+
+    /** Starts the page again from the newest app files. */
+    @JavascriptInterface
+    public void restart() { act.runOnUiThread(new Runnable() { public void run() { act.restartPage(); } }); }
+
+    /** Downloads and checks a release's app-files bundle; it runs from the next start (or restart()). */
+    @JavascriptInterface
+    public boolean installPage(final String url) {
+        if (busy || url == null || !url.startsWith(FROM) || !url.endsWith(".jar")) return false;
+        busy = true;
+        new Thread(new Runnable() { public void run() { try { doInstallPage(url); } finally { busy = false; } } }).start();
         return true;
     }
 
@@ -110,21 +142,23 @@ public final class Updater {
             in.close();
             JSONObject o = new JSONObject(buf.toString("UTF-8"));
             String tag = o.optString("tag_name", "");
-            String url = "";
+            String url = "", page = "";
             long size = 0;
+            int pageShell = 0;
             JSONArray as = o.optJSONArray("assets");
             if (as != null) for (int i = 0; i < as.length(); i++) {
                 JSONObject a = as.optJSONObject(i);
-                if (a != null && a.optString("name", "").endsWith(".apk")) {
-                    url = a.optString("browser_download_url", "");
-                    size = a.optLong("size", 0);
-                    break;
-                }
+                if (a == null) continue;
+                String name = a.optString("name", ""), dl = a.optString("browser_download_url", "");
+                java.util.regex.Matcher m = PAGE_ASSET.matcher(name);
+                if (name.endsWith(".apk") && url.isEmpty()) { url = dl; size = a.optLong("size", 0); }
+                else if (m.matches() && page.isEmpty()) { page = dl; pageShell = Integer.parseInt(m.group(1)); }
             }
             r.put("ok", true);
             r.put("version", tag.startsWith("v") ? tag.substring(1) : tag);
             r.put("url", url.startsWith(FROM) ? url : "");
             r.put("size", size);
+            if (page.startsWith(FROM)) { r.put("page", page); r.put("pageShell", pageShell); }
         } catch (Exception e) {
             try { r.put("ok", false); r.put("why", (e instanceof IOException) ? "net" : "other"); } catch (Exception e2) { }
         }
@@ -189,6 +223,58 @@ public final class Updater {
             MainActivity.event(r.toString());
         } catch (Exception e) { }
         act.runOnUiThread(new Runnable() { public void run() { act.openInstaller(); } });
+    }
+
+    private void doInstallPage(String url) {
+        File jar = new File(new File(act.getCacheDir(), "update"), "page.jar");
+        jar.getParentFile().mkdirs();
+        try {
+            HttpURLConnection c = open(url, "application/octet-stream");
+            if (c.getResponseCode() != 200) { fail("net"); return; }
+            long total = c.getContentLengthLong();
+            InputStream in = c.getInputStream();
+            OutputStream out = new FileOutputStream(jar);
+            byte[] b = new byte[65536];
+            long got = 0;
+            int last = -1, n;
+            try {
+                while ((n = in.read(b)) > 0) {
+                    out.write(b, 0, n);
+                    got += n;
+                    if (got > PageCheck.MAX_TOTAL) { fail("verify"); return; }
+                    int pct = total > 0 ? (int) (got * 100 / total) : -1;
+                    if (pct >= 0 && pct / 10 != last) { last = pct / 10; progress(pct); }
+                }
+            } finally { out.close(); in.close(); }
+        } catch (Exception e) { jar.delete(); fail("net"); return; }
+        try {
+            byte[] cert = null;
+            PackageInfo mine = act.getPackageManager().getPackageInfo(act.getPackageName(), PackageManager.GET_SIGNING_CERTIFICATES);
+            if (mine.signingInfo != null && mine.signingInfo.getApkContentsSigners().length > 0) cert = mine.signingInfo.getApkContentsSigners()[0].toByteArray();
+            String running = PageStore.running(act);
+            String version;
+            try {
+                PageStore.root(act).mkdirs();
+                // the version is only known once page.json is read: check and unpack into "incoming", then rename
+                File tmpOut = new File(PageStore.root(act), "incoming");
+                PageCheck.deleteTree(tmpOut);
+                version = PageCheck.unpack(jar, cert, SHELL, running, tmpOut);
+                if (PageStore.isBad(act, version)) { PageCheck.deleteTree(tmpOut); fail("bad"); return; }
+                File dest = new File(PageStore.root(act), version);
+                PageCheck.deleteTree(dest);
+                if (!tmpOut.renameTo(dest)) { PageCheck.deleteTree(tmpOut); fail("install"); return; }
+            } catch (PageCheck.Refused r) {
+                String why = r.getMessage();
+                fail("notnewer".equals(why) ? "notnewer" : "shell".equals(why) ? "shell" : "verify");
+                return;
+            }
+            PageStore.activate(act, version);
+            JSONObject r = new JSONObject();
+            r.put("type", "pageReady");
+            r.put("version", version);
+            MainActivity.event(r.toString());
+        } catch (Exception e) { fail("install"); }
+        finally { jar.delete(); }
     }
 
     private static boolean sameSigners(Signature[] a, Signature[] b) {

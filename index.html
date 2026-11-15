@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-XXPaHP0uyb++jf4wObc8iOMo1v4oGzMcnhnk4KIT5gA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-NbH1b3ZSHjbnG16MsQK4FldjmeiOezx2u39mx9Y22l8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -677,6 +677,7 @@
     <span id="updNudgeText"></span>
     <button type="button" class="ghostbtn" id="updNudgeGo" data-i18n="upd.go">Update</button>
     <button type="button" class="ghostbtn" id="updNudgeAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
+    <button type="button" class="ghostbtn" id="updNudgeRestart" style="display:none" data-i18n="upd.restart">Restart now</button>
     <button type="button" class="bakskip" id="updNudgeLater" data-i18n="upd.later">Later</button>
   </div>
 
@@ -1036,6 +1037,7 @@
         <button type="button" class="ghostbtn" id="clBtn" data-i18n="cl.btn">Update log</button>
         <button type="button" class="ghostbtn" id="updInstall" style="display:none">Update</button>
         <button type="button" class="ghostbtn" id="updAllow" style="display:none" data-i18n="upd.allowbtn">Allow updates</button>
+        <button type="button" class="ghostbtn" id="updRestart" style="display:none" data-i18n="upd.restart">Restart now</button>
         <span class="donsub" id="updMsg"></span>
       </div>
       <div class="donrow" id="updAutoRow" style="display:none"><button type="button" class="ghostbtn" id="updAuto" aria-pressed="true">Automatic check: On</button></div>
@@ -5361,6 +5363,11 @@
     "cl.first": "First release",
     "cl.all": "All updates",
     "cl.ok": "Got it",
+    "upd.ready": "Tally {v} is ready. It starts next time you open Tally, or restart now. Your data stays.",
+    "upd.restart": "Restart now",
+    "upd.apknote": "This one changes the Android app itself, so Android has to install it.",
+    "upd.err.bad": "That version did not start properly before, so Tally keeps the one you have.",
+    "upd.err.shell": "This update needs a full install from Android.",
     "upd.err.other": "Could not check right now. Try again later.",
     "upd.auto.on": "Automatic check: on",
     "upd.auto.off": "Automatic check: off",
@@ -9866,6 +9873,36 @@
       return false;
     }
   };
+  var updaterShell = () => {
+    const n = native();
+    try {
+      return n && typeof n.shell === "function" ? n.shell() : 1;
+    } catch (e) {
+      return 1;
+    }
+  };
+  var updaterInstallPage = (url) => {
+    const n = native();
+    try {
+      return !!(n && typeof n.installPage === "function" && n.installPage(url));
+    } catch (e) {
+      return false;
+    }
+  };
+  var updaterRestart = () => {
+    const n = native();
+    try {
+      if (n && n.restart) n.restart();
+    } catch (e) {
+    }
+  };
+  var updaterStarted = () => {
+    const n = native();
+    try {
+      if (n && n.started) n.started();
+    } catch (e) {
+    }
+  };
   var updaterAllow = () => {
     const n = native();
     try {
@@ -9893,7 +9930,10 @@
   var why = "";
   var detail = "";
   var manual = false;
+  var quiet = false;
+  var restartWhenReady = false;
   var found = null;
+  var filesOnly = () => !!found && !!found.page && found.pageShell <= updaterShell();
   var get = (k) => {
     try {
       return localStorage.getItem(k);
@@ -9921,6 +9961,16 @@
   }
   function install() {
     if (!found) return;
+    if (filesOnly()) {
+      if (updaterInstallPage(found.page)) {
+        quiet = false;
+        restartWhenReady = true;
+        phase = "downloading";
+        pct = 0;
+        draw();
+      }
+      return;
+    }
     if (!updaterCanInstall()) {
       phase = "allow";
       draw();
@@ -9943,9 +9993,15 @@
           } else phase = found ? "found" : "idle";
           break;
         }
-        if (ev.url && newerVersion(ev.version, APP_VERSION)) {
-          found = { version: String(ev.version), url: ev.url };
+        if ((ev.url || ev.page) && newerVersion(ev.version, APP_VERSION)) {
+          found = { version: String(ev.version), url: ev.url || "", page: ev.page || "", pageShell: ev.pageShell || 99 };
           phase = "found";
+          if (!manual && filesOnly() && autoOn() && updaterInstallPage(found.page)) {
+            quiet = true;
+            restartWhenReady = false;
+            phase = "downloading";
+            pct = 0;
+          }
         } else phase = manual ? "latest" : "idle";
         break;
       case "progress":
@@ -9961,9 +10017,23 @@
       case "cancelled":
         phase = "cancelled";
         break;
+      case "pageReady":
+        phase = "ready";
+        if (restartWhenReady) {
+          restartWhenReady = false;
+          updaterRestart();
+          return;
+        }
+        break;
       case "error":
         if (ev.why === "allow") phase = "allow";
-        else {
+        else if (ev.why === "shell" && found) {
+          found.page = "";
+          phase = "found";
+        } else if (quiet) {
+          quiet = false;
+          phase = "found";
+        } else {
           phase = "error";
           why = ev.why || "install";
           detail = String(ev.detail || "").slice(0, 80);
@@ -9981,12 +10051,14 @@
     if (!hasUpdater()) return;
     const msg3 = el2("updMsg"), go3 = el2("updInstall"), allow = el2("updAllow"), getBtn = el2("updGet"), auto = el2("updAuto"), row = el2("updAutoRow");
     const busy = phase === "checking" || phase === "downloading" || phase === "installing";
-    if (msg3) msg3.textContent = phase === "checking" ? t("upd.checking") : phase === "latest" ? t("upd.latest") : phase === "found" ? tf("upd.avail", { v: found.version }) : phase === "downloading" ? tf("upd.down", { n: pct }) : phase === "installing" ? t("upd.installing") : phase === "confirm" ? t("upd.confirm") : phase === "cancelled" ? t("upd.cancelled") : phase === "allow" ? t("upd.allow") : phase === "error" ? t("upd.err." + why) + (detail ? " " + tf("upd.detail", { d: detail }) : "") : "";
+    if (msg3) msg3.textContent = phase === "checking" ? t("upd.checking") : phase === "latest" ? t("upd.latest") : phase === "found" ? tf("upd.avail", { v: found.version }) + (!filesOnly() && updaterShell() >= 2 ? " " + t("upd.apknote") : "") : phase === "ready" ? tf("upd.ready", { v: found ? found.version : "" }) : phase === "downloading" ? tf("upd.down", { n: pct }) : phase === "installing" ? t("upd.installing") : phase === "confirm" ? t("upd.confirm") : phase === "cancelled" ? t("upd.cancelled") : phase === "allow" ? t("upd.allow") : phase === "error" ? t("upd.err." + why) + (detail ? " " + tf("upd.detail", { d: detail }) : "") : "";
     if (go3) {
       go3.style.display = found && (phase === "found" || phase === "cancelled" || phase === "allow" || phase === "error" && why !== "offline") ? "" : "none";
       if (found) go3.textContent = tf("upd.install", { v: found.version });
     }
     if (allow) allow.style.display = phase === "allow" ? "" : "none";
+    const rs = el2("updRestart");
+    if (rs) rs.style.display = phase === "ready" ? "" : "none";
     if (getBtn) getBtn.style.display = phase === "error" && (why === "install" || why === "verify" || why === "net") ? "" : "none";
     const chk = el2("updCheck");
     if (chk) {
@@ -10000,15 +10072,17 @@
     }
     const bar = el2("updNudge");
     if (bar) {
-      const show3 = !!found && get(SKIP_KEY) !== found.version && (phase === "found" || phase === "downloading" || phase === "installing" || phase === "confirm" || phase === "allow");
+      const show3 = !!found && get(SKIP_KEY) !== found.version && (phase === "found" || phase === "ready" || !quiet && (phase === "downloading" || phase === "installing" || phase === "confirm" || phase === "allow"));
       bar.style.display = show3 ? "" : "none";
       if (show3) {
         const txt = el2("updNudgeText");
-        if (txt) txt.textContent = phase === "found" ? tf("upd.nudge", { v: found.version }) : msg3 ? msg3.textContent : "";
+        if (txt) txt.textContent = phase === "found" || phase === "ready" ? tf("upd.nudge", { v: found.version }) : msg3 ? msg3.textContent : "";
         const g = el2("updNudgeGo");
         if (g) g.style.display = phase === "found" ? "" : "none";
         const a = el2("updNudgeAllow");
         if (a) a.style.display = phase === "allow" ? "" : "none";
+        const r = el2("updNudgeRestart");
+        if (r) r.style.display = phase === "ready" ? "" : "none";
       }
     }
   }
@@ -10023,6 +10097,8 @@
     on("updNudgeGo", install);
     on("updAllow", updaterAllow);
     on("updNudgeAllow", updaterAllow);
+    on("updRestart", updaterRestart);
+    on("updNudgeRestart", updaterRestart);
     on("updNudgeLater", () => {
       if (found) put(SKIP_KEY, found.version);
       draw();
@@ -10690,6 +10766,8 @@
   // src/data/changelog.ts
   var CHANGELOG = [
     { v: "9.8", date: "2026-11-15", notes: [
+      "Android: most updates now just replace the app’s files: no install, so Samsung’s Auto Blocker can stay on. Every download is checked against the same key that signs the app, and if a new version ever fails to start, Tally goes back to the one it had.",
+      "Only an update that changes the Android app itself still needs Android’s installer, and Tally says so.",
       "After an update, Tally shows what is new, once.",
       "Settings → Version & Updates → Update log lists every version, back to the first release."
     ] },
@@ -11251,6 +11329,7 @@
         await abMaybeShow();
         clMaybeShow(!S.entries.length);
       }
+      updaterStarted();
     } catch (err) {
       console.error("init failed", err);
       const b = document.createElement("div");
