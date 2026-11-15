@@ -1,6 +1,7 @@
 # Tests
 
-`npm test` runs everything below; CI runs the same on every push to a `tally-*` branch.
+`npm test` runs everything below except the screen pictures; CI runs the same on every push to a
+`tally-*` branch. The picture comparison took too long to run every time: `npm run pictures` runs it by hand.
 
 ## Compared with the last reviewed version
 

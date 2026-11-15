@@ -7,9 +7,6 @@
 // Say why next to each one. When the baseline moves forward (after a review, and at every publish), empty this list.
 export const EXPECTED = [
   // { what: /\/workout\/\d+-cardLog$/, why: 'example: the workout card gets a new button' },
-  // 9.7.2: updates go through Android's standard install screen; a failure shows Android's own reason
-  { what: 'text:upd.confirm', why: '9.7.2: install screen instead of prompt' },
-  { what: 'text:upd.detail', why: '9.7.2: Android’s own reason after a failed install' },
 ];
 
 /** The entry that allows this difference, if any. */

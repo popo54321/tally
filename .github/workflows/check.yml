@@ -1,8 +1,9 @@
 name: Check
 
-# On every push to a tally-* branch: type-check, layer rules, build, feature tests, then compare every
-# calculation and every screen with the baseline version (tests/baseline.json). Differences fail unless
-# tests/expected-changes.mjs lists them.
+# On every push to a tally-* branch: type-check, layer rules, build, feature tests, and every calculation
+# and piece of wording compared with the baseline version (tests/baseline.json); differences fail unless
+# tests/expected-changes.mjs lists them. The screen-picture comparison is not run (it took too long):
+# npm run pictures runs it by hand.
 on:
   push:
     branches: [rebuild, 'tally-*']
@@ -68,19 +69,6 @@ jobs:
       - name: Android self-update screens (with a stand-in for the native updater)
         run: node tests/selfupdate.mjs
 
-      - name: Photograph the baseline version and the current build, then compare
-        run: |
-          node tests/record.mjs base
-          node tests/record.mjs new
-          node tests/compare.mjs
-
-      - name: Keep the differences for a look
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: picture-differences
-          path: tests/out/diff/
-          if-no-files-found: ignore
 
   # The Android app built and signed with a throwaway key, so native code (Updater.java and friends) is
   # compiled and packaged on every push, not first at release time. Nothing is published.
