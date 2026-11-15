@@ -14,7 +14,7 @@ import { t, tf } from '../i18n/index';
 import { $, esc, flash } from './dom';
 import { dayRoutines, planItem, saveRoutines } from '../state/routines';
 
-export const APP_VERSION = '9.7.2';
+export const APP_VERSION = '9.7.3';
 export const kcalFloor = () => core.kcalFloor(S.settings.sex);
 export const kcalBand = target => core.kcalBand(target, S.settings.sex);
 export const kcalState = (avg, target) => core.kcalState(avg, target, S.settings.sex);
