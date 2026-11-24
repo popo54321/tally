@@ -3,6 +3,10 @@
 export interface Release { v: string; date: string; notes: string[] }
 
 export const CHANGELOG: Release[] = [
+  { v: '9.9', date: '2026-11-24', notes: [
+    'Above Save entry on the Workout Sets card: how much you have lifted today, adding up as you type each set, with something it weighs about as much as (a hippo, a few small cars…).',
+    'The message after Save entry says it too.',
+  ] },
   { v: '9.8.1', date: '2026-11-15', notes: ['A test release for updating the app files without an install. Nothing else changed.'] },
   { v: '9.8', date: '2026-11-15', notes: [
     'Android: most updates now just replace the app’s files: no install, so Samsung’s Auto Blocker can stay on. Every download is checked against the same key that signs the app, and if a new version ever fails to start, Tally goes back to the one it had.',

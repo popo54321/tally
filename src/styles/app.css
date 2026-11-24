@@ -463,6 +463,9 @@
   .sslbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--brass-bright);margin:6px 0 2px}
   .liftday{font-size:.82em;opacity:.8;margin:-4px 0 10px}
   .liftday:empty{display:none}
+  .liftnow{font-size:13.5px;color:var(--ink-dim);text-align:center;margin:14px 0 2px;line-height:1.5}
+  .liftnow b{color:var(--ink)}
+  .liftnow:empty{display:none}
   .coachapply #shApplyBox{margin-top:10px}
   .cabtns{display:flex;gap:8px;margin:8px 0 10px}
   .cabtns .ghostbtn{padding:6px 12px}

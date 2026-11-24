@@ -17,6 +17,7 @@ import { drawMob } from './mobility';
 import { drawSched, render } from './nav';
 import { exportPayload } from './sync';
 import { setDateDisplay } from './datepicker';
+import { liftedMsg } from './liftnow';
 
 export function calcHint(id){
   const el=$(id), out=$(id+'Sum'); if(!el||!out) return;
@@ -315,7 +316,8 @@ export async function saveEntry(){
   if(ok){
     const rec=recordsNewOn(date);
     const pn = fprot==null ? '' : ' · '+tf(entry.prot>=protTarget() ? 'msg.prot.hit' : entry.prot>=protOk() ? 'msg.prot.ok' : 'msg.prot.low', {g:entry.prot});
-    flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):'')))+pn);
+    const lifted=liftedMsg(entry.lifts, date);
+    flash(t('msg.saved')+' · '+(rec || (fmtDMY(date)+(entry.bf!=null?(' · BF '+entry.bf.toFixed(1)+'%'):'')))+(lifted ? ' · '+lifted : '')+pn);
   }
   fillBody(date);
   if($("exportBox").classList.contains('show')) $("exportBox").value=exportPayload();

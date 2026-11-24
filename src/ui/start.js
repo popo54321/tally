@@ -38,6 +38,7 @@ import { loadRoutines } from '../state/routines';
 import { initSelfUpdate } from './selfupdate';
 import { clClose, clMaybeShow, initChangelog } from './changelog';
 import { updaterStarted } from '../platform/update';
+import { initLiftNow } from './liftnow';
 
 (async function(){
  try{
@@ -170,6 +171,7 @@ import { updaterStarted } from '../platform/update';
   initRoutines();
   initSelfUpdate();
   initChangelog();
+  initLiftNow();
   $("kpWrap").onclick=ev=>{ if(ev.target===$("kpWrap")) kpClose(); };
   $("kpSearch").oninput=kpRender;
   $("kpList").onclick=ev=>{ const b=ev.target.closest('button'); if(!b) return; const d=b.dataset;

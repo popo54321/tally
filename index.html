@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-9HM1f+SFo0i7N99JhYhmJ76BZWKv4lh2t6+/97/4dUA='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-m1NJptQr6l1aTjXu3C+In+mLPnmeHCw4bpg/IPYPRNI=' 'sha256-urB0A6qTOJPCwJbRmwCik8lzRkHvC6n6XHAB/+8TSd8='; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data:; connect-src 'none'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#dde6da">
 <meta name="mobile-web-app-capable" content="yes">
@@ -493,6 +493,9 @@
   .sslbl{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--brass-bright);margin:6px 0 2px}
   .liftday{font-size:.82em;opacity:.8;margin:-4px 0 10px}
   .liftday:empty{display:none}
+  .liftnow{font-size:13.5px;color:var(--ink-dim);text-align:center;margin:14px 0 2px;line-height:1.5}
+  .liftnow b{color:var(--ink)}
+  .liftnow:empty{display:none}
   .coachapply #shApplyBox{margin-top:10px}
   .cabtns{display:flex;gap:8px;margin:8px 0 10px}
   .cabtns .ghostbtn{padding:6px 12px}
@@ -854,6 +857,7 @@
       <div class="restwarn" id="restExact" style="display:none"><span data-i18n="rest.exact">In another app, the timer’s alert can arrive minutes late: exact alarms are off for Tally.</span><button type="button" class="ghostbtn" id="restExactBtn" data-i18n="rest.exact.btn">Allow exact alarms</button></div>
       <div id="exWrap"></div>
       <button type="button" class="addmove" id="addMoveBtn" data-i18n="log.addmove">+ Add movement</button>
+      <div class="liftnow" id="liftNow" aria-live="polite"></div>
       <button class="save" id="saveBtn2" data-i18n="btn.save">Save entry</button>
       <div class="saved" id="savedMsg2" data-i18n="msg.saved">Saved</div>
     </div>
@@ -5355,6 +5359,31 @@
     "upd.err.notnewer": "You already have this version or a newer one.",
     "upd.err.install": "Android could not install the update. You can get it from the download page instead.",
     "upd.detail": "(Android says: {d})",
+    "lift.now.today": "Today so far: <b>{kg} kg</b> lifted · {n} sets",
+    "lift.now.today.1": "Today so far: <b>{kg} kg</b> lifted · 1 set",
+    "lift.now.day": "This day: <b>{kg} kg</b> lifted · {n} sets",
+    "lift.now.day.1": "This day: <b>{kg} kg</b> lifted · 1 set",
+    "lift.saved": "{kg} kg lifted",
+    "lift.obj.cement": "≈ {n} bags of cement",
+    "lift.obj.cement.1": "≈ a bag of cement",
+    "lift.obj.fridge": "≈ {n} fridges",
+    "lift.obj.fridge.1": "≈ a fridge",
+    "lift.obj.motorbike": "≈ {n} motorbikes",
+    "lift.obj.motorbike.1": "≈ a motorbike",
+    "lift.obj.piano": "≈ {n} grand pianos",
+    "lift.obj.piano.1": "≈ a grand piano",
+    "lift.obj.car": "≈ {n} small cars",
+    "lift.obj.car.1": "≈ a small car",
+    "lift.obj.hippo": "≈ {n} hippos",
+    "lift.obj.hippo.1": "≈ a hippo",
+    "lift.obj.elephant": "≈ {n} elephants",
+    "lift.obj.elephant.1": "≈ an elephant",
+    "lift.obj.bus": "≈ {n} city buses",
+    "lift.obj.bus.1": "≈ a city bus",
+    "lift.obj.lorry": "≈ {n} loaded lorries",
+    "lift.obj.lorry.1": "≈ a loaded lorry",
+    "lift.obj.whale": "≈ {n} blue whales",
+    "lift.obj.whale.1": "≈ a blue whale",
     "cl.btn": "Update log",
     "cl.title": "Update log",
     "cl.new": "What’s new in Tally {v}",
@@ -5996,7 +6025,7 @@
   }
 
   // src/ui/shared.js
-  var APP_VERSION = "9.8.1";
+  var APP_VERSION = "9.9";
   var kcalFloor2 = () => kcalFloor(S.settings.sex);
   var kcalBand2 = (target2) => kcalBand(target2, S.settings.sex);
   var kcalState2 = (avg, target2) => kcalState(avg, target2, S.settings.sex);
@@ -9303,6 +9332,72 @@
     $("dpGrid").innerHTML = h;
   }
 
+  // src/ui/liftnow.js
+  var THINGS = [
+    ["whale", 15e4],
+    ["lorry", 4e4],
+    ["bus", 12e3],
+    ["elephant", 6e3],
+    ["hippo", 2500],
+    ["car", 1200],
+    ["piano", 450],
+    ["motorbike", 200],
+    ["fridge", 70],
+    ["cement", 25]
+  ];
+  function compareTo(kg) {
+    const hit = THINGS.find(([, w]) => kg >= w);
+    if (!hit) return "";
+    const x = kg / hit[1], n = x < 10 ? Math.round(x * 2) / 2 : Math.round(x);
+    return tn("lift.obj." + hit[0], n, { n: n.toLocaleString() });
+  }
+  function liftedOf(lifts, bw) {
+    let kg = 0, n = 0;
+    Object.keys(lifts || {}).forEach((k) => {
+      const ex = exByKey(k), sets = (lifts[k] || []).filter((s) => s && s.reps > 0);
+      if (!ex || !sets.length) return;
+      n += sets.length;
+      if (ex.unit !== "sec") kg += exVolume(ex, sets, bw);
+    });
+    return { kg: Math.round(kg), n };
+  }
+  var dayWeight = (date) => {
+    const typed = num(($("fWeight") || {}).value), e = S.entries.find((x) => x.date === date);
+    return typed || e && e.weight || lastNumOf2((x) => x.weight) || BW_FALLBACK;
+  };
+  function drawLiftNow() {
+    const box = $("liftNow");
+    if (!box) return;
+    const date = $("fDate").value, { kg, n } = liftedOf(readExForm(), dayWeight(date));
+    if (!n) {
+      box.innerHTML = "";
+      return;
+    }
+    const cmp = compareTo(kg);
+    box.innerHTML = tn(date === localDate() ? "lift.now.today" : "lift.now.day", n, { kg: kg.toLocaleString() }) + (cmp ? " · " + esc(cmp) : "");
+  }
+  function liftedMsg(lifts, date) {
+    const { kg } = liftedOf(lifts, dayWeight(date));
+    return kg > 0 ? t("lift.saved").replace("{kg}", kg.toLocaleString()) : "";
+  }
+  function initLiftNow() {
+    const wrap = $("exWrap");
+    if (!wrap) return;
+    let queued = false;
+    const later = () => {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        drawLiftNow();
+      });
+    };
+    wrap.addEventListener("input", later);
+    new MutationObserver(later).observe(wrap, { childList: true, subtree: true });
+    const w = $("fWeight");
+    if (w) w.addEventListener("input", later);
+  }
+
   // src/ui/body.js
   function calcHint(id) {
     const el4 = $(id), out = $(id + "Sum");
@@ -9687,7 +9782,8 @@
     if (ok) {
       const rec = recordsNewOn(date);
       const pn = fprot == null ? "" : " · " + tf(entry.prot >= protTarget2() ? "msg.prot.hit" : entry.prot >= protOk2() ? "msg.prot.ok" : "msg.prot.low", { g: entry.prot });
-      flash(t("msg.saved") + " · " + (rec || fmtDMY(date) + (entry.bf != null ? " · BF " + entry.bf.toFixed(1) + "%" : "")) + pn);
+      const lifted = liftedMsg(entry.lifts, date);
+      flash(t("msg.saved") + " · " + (rec || fmtDMY(date) + (entry.bf != null ? " · BF " + entry.bf.toFixed(1) + "%" : "")) + (lifted ? " · " + lifted : "") + pn);
     }
     fillBody(date);
     if ($("exportBox").classList.contains("show")) $("exportBox").value = exportPayload();
@@ -10765,6 +10861,10 @@
 
   // src/data/changelog.ts
   var CHANGELOG = [
+    { v: "9.9", date: "2026-11-24", notes: [
+      "Above Save entry on the Workout Sets card: how much you have lifted today, adding up as you type each set, with something it weighs about as much as (a hippo, a few small cars…).",
+      "The message after Save entry says it too."
+    ] },
     { v: "9.8.1", date: "2026-11-15", notes: ["A test release for updating the app files without an install. Nothing else changed."] },
     { v: "9.8", date: "2026-11-15", notes: [
       "Android: most updates now just replace the app’s files: no install, so Samsung’s Auto Blocker can stay on. Every download is checked against the same key that signs the app, and if a new version ever fails to start, Tally goes back to the one it had.",
@@ -11250,6 +11350,7 @@
       initRoutines();
       initSelfUpdate();
       initChangelog();
+      initLiftNow();
       $("kpWrap").onclick = (ev) => {
         if (ev.target === $("kpWrap")) kpClose();
       };

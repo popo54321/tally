@@ -72,6 +72,9 @@ jobs:
       - name: Release notes (What’s new after an update, Update log, notes kept up to date)
         run: node tests/changelog.mjs
 
+      - name: Lifted today above Save entry
+        run: node tests/liftnow.mjs
+
 
   # The Android app built and signed with a throwaway key, so native code (Updater.java and friends) is
   # compiled and packaged on every push, not first at release time. Nothing is published.
