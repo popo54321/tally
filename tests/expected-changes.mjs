@@ -7,7 +7,6 @@
 // Say why next to each one. When the baseline moves forward (after a review, and at every publish), empty this list.
 export const EXPECTED = [
   // { what: /\/workout\/\d+-cardLog$/, why: 'example: the workout card gets a new button' },
-  { what: 'text:lift.*', why: '9.9: lifted today above Save entry, with a comparison' },
 ];
 
 /** The entry that allows this difference, if any. */
